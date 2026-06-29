@@ -18,7 +18,7 @@ RUN ./mvnw clean package -DskipTests -B -q
 FROM eclipse-temurin:21-jdk-alpine AS extractor
 WORKDIR /extracted
 COPY --from=builder /build/target/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
+RUN java -Djarmode=tools -jar app.jar extract
 
 
 # =========================
