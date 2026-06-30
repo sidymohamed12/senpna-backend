@@ -63,8 +63,10 @@ public class SecurityConfig {
                     // Routes d'authentification publiques
                     auth.requestMatchers(HttpMethod.POST,
                             "/api/auth/login",
+                            "/api/auth/forgot-password",
                             "/api/auth/verify",
                             "/api/auth/resend-otp",
+                            "/api/auth/reset-password",
                             "/api/auth/refresh")
                             .permitAll();
 
