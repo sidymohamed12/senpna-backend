@@ -1,0 +1,81 @@
+# ═══════════════════════════════════════════════════════════════════
+# SEN PharmaFlow — Profil TEST
+# Aucune infrastructure externe requise : H2 + adapters in-memory.
+# ═══════════════════════════════════════════════════════════════════
+
+spring:
+  application:
+    name: senpna-test
+
+  # ── Jackson ──────────────────────────────────────────────────────
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: UTC
+
+  # ── Base de données H2 in-memory ─────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:senpna_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=USER
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # ── JPA ──────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # H2 : schéma recréé à chaque run de tests
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+
+  # ── Flyway désactivé — DDL géré par Hibernate create-drop ────────
+  flyway:
+    enabled: false
+
+  # ── Redis désactivé — InMemoryCacheAdapter actif via @Profile ────
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+# ── Serveur ────────────────────────────────────────────────────────
+server:
+  port: 0 # Port aléatoire — tests parallèles safe
+
+# ── Logging — silencieux sauf erreurs ─────────────────────────────
+logging:
+  level:
+    root: ERROR
+    ministere.sante.senpna: WARN
+
+# ── Springdoc — désactivé en test ────────────────────────────────
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# ── Configuration applicative ──────────────────────────────────────
+app:
+  jwt:
+    secret: "test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-test!!"
+    access-token-ttl: PT15M
+    refresh-token-ttl: P7D
+  security:
+    cors-allowed-origins:
+      - "http://localhost:3000"
+  otp:
+    length: 6
+    ttl: PT10M
+    cooldown: PT2M
+    max-attempts: 3
+  rate-limit:
+    auth-limit: 1000 # Limite très haute en test — pas de blocage parasite
+    auth-window-ms: 60000
+    api-limit: 10000
+    api-window-ms: 60000
