@@ -86,6 +86,11 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+
 		<!--
 		  ✅ AJOUTÉ : commons-pool2 requis par LettucePoolingClientConfiguration dans RedisConfig.
 		  Sans cette dépendance, le pool Lettuce ne se configure pas et l'app refuse de démarrer.
