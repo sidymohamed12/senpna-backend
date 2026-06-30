@@ -80,7 +80,7 @@
 			<version>2.4.0</version>
 		</dependency>
 
-		<!-- Redis — cache distribué + blacklist JWT (ADR-008) -->
+		<!-- Redis — cache distribué + blacklist JWT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
