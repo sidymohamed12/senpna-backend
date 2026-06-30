@@ -1,7 +1,6 @@
 package ministere.sante.senpna.shared.domain.port.out;
 
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
-import ministere.sante.senpna.shared.infrastructure.persistence.entity.RoleJpaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +10,9 @@ public interface RoleQueryPort {
 
     List<RoleProjection> findAll();
 
-    Optional<RoleJpaEntity> findByCode(String code);
+    Optional<RoleProjection> findByCode(String code);
 
-    Optional<RoleJpaEntity> findById(UUID id);
+    Optional<RoleProjection> findById(UUID id);
 
     boolean existsById(UUID roleId);
 

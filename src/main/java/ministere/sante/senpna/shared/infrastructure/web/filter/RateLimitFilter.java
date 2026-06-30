@@ -83,8 +83,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
      */
     private static final Set<String> AUTH_PATHS = Set.of(
             "/api/auth/login",
+            "/api/auth/forgot-password",
             "/api/auth/verify",
             "/api/auth/resend-otp",
+            "/api/auth/reset-password",
+            "/api/auth/refresh",
             "/api/auth/google");
 
     private final RateLimitPort rateLimitPort;
