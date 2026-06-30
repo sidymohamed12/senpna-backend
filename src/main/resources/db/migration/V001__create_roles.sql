@@ -14,6 +14,9 @@ CREATE TABLE roles (
     id   UUID        NOT NULL DEFAULT uuid_generate_v4(),
     code VARCHAR(50)  NOT NULL,
     nom  VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now()
+
 
     CONSTRAINT pk_roles       PRIMARY KEY (id),
     CONSTRAINT uq_roles_code  UNIQUE (code)
