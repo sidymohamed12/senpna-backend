@@ -1,4 +1,4 @@
-package ministere.sante.senpna.auth.domain.port.out;
+package ministere.sante.senpna.shared.domain.port.out;
 
 public interface PasswordEncoderPort {
 

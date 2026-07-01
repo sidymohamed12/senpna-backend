@@ -1,14 +1,14 @@
 package ministere.sante.senpna.auth.application.service;
 
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
-import ministere.sante.senpna.auth.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.config.AppProperties;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
 import ministere.sante.senpna.shared.infrastructure.cache.RoleCache;
-import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

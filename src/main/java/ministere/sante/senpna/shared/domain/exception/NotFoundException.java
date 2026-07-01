@@ -1,4 +1,4 @@
-package ministere.sante.senpna.shared.infrastructure.exception;
+package ministere.sante.senpna.shared.domain.exception;
 
 public class NotFoundException extends SenPnaException {
 

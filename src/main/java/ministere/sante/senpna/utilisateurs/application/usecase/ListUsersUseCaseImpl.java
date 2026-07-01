@@ -1,13 +1,13 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.ListUsersQuery;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserPage;
-import ministere.sante.senpna.utilisateurs.domain.criteria.UserSearchCriteria;
+import ministere.sante.senpna.shared.domain.criteria.UserSearchCriteria;
 import ministere.sante.senpna.utilisateurs.domain.port.in.ListUsersUseCase;
 
 import org.springframework.stereotype.Service;

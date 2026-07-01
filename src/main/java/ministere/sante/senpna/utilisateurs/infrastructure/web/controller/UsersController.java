@@ -1,7 +1,7 @@
 package ministere.sante.senpna.utilisateurs.infrastructure.web.controller;
 
 import jakarta.validation.Valid;
-import ministere.sante.senpna.auth.infrastructure.security.AuthUserPrincipal;
+import ministere.sante.senpna.shared.infrastructure.security.CurrentUser;
 import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 import ministere.sante.senpna.utilisateurs.application.facade.UserManagementFacade;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.ActivateUserCommand;
@@ -168,8 +168,8 @@ public class UsersController {
 
         private UUID currentUserId() {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                AuthUserPrincipal principal = (AuthUserPrincipal) authentication.getPrincipal();
-                return principal.getUser().getId().getValue();
+                CurrentUser principal = (CurrentUser) authentication.getPrincipal();
+                return principal.getUserId();
         }
 
         private UserResponse toResponse(UserDetail detail) {

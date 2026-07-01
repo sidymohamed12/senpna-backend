@@ -1,8 +1,8 @@
 package ministere.sante.senpna.auth.application.service;
 
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 
 import org.springframework.stereotype.Component;
 

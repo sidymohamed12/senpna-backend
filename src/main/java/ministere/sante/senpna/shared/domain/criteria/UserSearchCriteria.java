@@ -1,4 +1,4 @@
-package ministere.sante.senpna.utilisateurs.domain.criteria;
+package ministere.sante.senpna.shared.domain.criteria;
 
 import java.util.UUID;
 

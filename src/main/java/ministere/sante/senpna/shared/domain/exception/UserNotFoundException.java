@@ -1,6 +1,4 @@
-package ministere.sante.senpna.utilisateurs.domain.exception;
-
-import ministere.sante.senpna.shared.infrastructure.exception.NotFoundException;
+package ministere.sante.senpna.shared.domain.exception;
 
 public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException() {

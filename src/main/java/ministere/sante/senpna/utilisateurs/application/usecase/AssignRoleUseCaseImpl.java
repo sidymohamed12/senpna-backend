@@ -1,7 +1,7 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
@@ -9,7 +9,7 @@ import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.AssignRol
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.utilisateurs.domain.exception.RoleDejaAssigneException;
 import ministere.sante.senpna.utilisateurs.domain.exception.RoleIntrouvableException;
-import ministere.sante.senpna.utilisateurs.domain.exception.UserNotFoundException;
+import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.utilisateurs.domain.port.in.AssignRoleUseCase;
 
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package ministere.sante.senpna.utilisateurs.domain.exception;
 
-import ministere.sante.senpna.shared.infrastructure.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.NotFoundException;
 
 public class RoleIntrouvableException extends NotFoundException {
     public RoleIntrouvableException() {

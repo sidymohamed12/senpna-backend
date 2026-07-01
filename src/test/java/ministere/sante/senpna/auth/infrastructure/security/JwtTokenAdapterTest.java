@@ -1,9 +1,9 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
 import io.jsonwebtoken.JwtException;
-import ministere.sante.senpna.auth.domain.model.User;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.config.JwtService;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.CachePort;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +34,10 @@ import static org.mockito.Mockito.*;
 @DisplayName("JwtTokenAdapter")
 class JwtTokenAdapterTest {
 
-    @Mock private JwtService jwtService;
-    @Mock private CachePort cachePort;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private CachePort cachePort;
 
     @InjectMocks
     private JwtTokenAdapter sut;
@@ -103,8 +105,8 @@ class JwtTokenAdapterTest {
 
             sut.invalider(token);
 
-            ArgumentCaptor<String> keyCaptor      = ArgumentCaptor.forClass(String.class);
-            ArgumentCaptor<Duration> ttlCaptor    = ArgumentCaptor.forClass(Duration.class);
+            ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
             verify(cachePort).put(keyCaptor.capture(), eq("1"), ttlCaptor.capture());
 
             String expectedKey = "auth:revoked:" + sha256(token);

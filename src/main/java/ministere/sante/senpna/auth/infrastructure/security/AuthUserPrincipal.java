@@ -1,6 +1,7 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.infrastructure.security.CurrentUser;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,15 +9,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Adapte {@link User} (domaine) au contrat {@link UserDetails} attendu par
- * Spring Security. Les autorités sont préfixées {@code ROLE_} par
- * convention Spring Security, à partir des codes de rôle résolus via
- * {@code RoleCache} (jamais une requête SQL par connexion).
+ * Adapte {@link User} (domaine, partagé via {@code shared}) au contrat
+ * {@link UserDetails} attendu par Spring Security. Les autorités sont
+ * préfixées {@code ROLE_} par convention Spring Security, à partir des
+ * codes de rôle résolus via {@code RoleCache} (jamais une requête SQL par
+ * connexion).
+ *
+ * <p>
+ * Implémente également {@link CurrentUser} afin que d'autres features
+ * (ex. {@code utilisateurs}) puissent récupérer l'identité de l'acteur
+ * courant sans jamais dépendre directement de cette classe, spécifique à
+ * {@code auth}.
+ * </p>
  */
-public class AuthUserPrincipal implements UserDetails {
+public class AuthUserPrincipal implements UserDetails, CurrentUser {
 
     private final User user;
     private final Set<String> roleCodes;
@@ -28,6 +38,11 @@ public class AuthUserPrincipal implements UserDetails {
 
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public UUID getUserId() {
+        return user.getId().getValue();
     }
 
     public Set<String> getRoleCodes() {

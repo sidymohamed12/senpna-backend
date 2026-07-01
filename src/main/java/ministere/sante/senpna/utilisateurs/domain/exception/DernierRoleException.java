@@ -1,6 +1,6 @@
 package ministere.sante.senpna.utilisateurs.domain.exception;
 
-import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 
 public class DernierRoleException extends BusinessRuleException {
     public DernierRoleException() {

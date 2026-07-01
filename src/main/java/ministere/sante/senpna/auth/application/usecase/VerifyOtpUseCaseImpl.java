@@ -3,12 +3,12 @@ package ministere.sante.senpna.auth.application.usecase;
 import ministere.sante.senpna.auth.application.service.OtpService;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpResult;
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.in.VerifyOtpUseCase;
 import ministere.sante.senpna.auth.domain.port.out.ResetTokenPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
-import ministere.sante.senpna.utilisateurs.domain.exception.UserNotFoundException;
+import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

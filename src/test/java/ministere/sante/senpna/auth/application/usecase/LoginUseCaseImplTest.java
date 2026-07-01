@@ -8,10 +8,10 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginResult;
 import ministere.sante.senpna.auth.domain.exception.CompteInactifException;
 import ministere.sante.senpna.auth.domain.exception.CompteVerrouilleException;
 import ministere.sante.senpna.auth.domain.exception.InvalidCredentialsException;
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

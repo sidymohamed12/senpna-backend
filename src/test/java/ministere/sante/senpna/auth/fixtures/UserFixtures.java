@@ -1,12 +1,12 @@
 package ministere.sante.senpna.auth.fixtures;
 
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Phone;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 
 import java.time.Instant;
 import java.util.Set;
@@ -27,14 +27,14 @@ public final class UserFixtures {
     // ── Identifiants fixes ────────────────────────────────────────────────
     public static final UUID USER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     public static final UUID ROLE_GESTIONNAIRE_PNA_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-    public static final UUID ROLE_PHARMACIEN_PRA_ID  = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    public static final UUID ROLE_PHARMACIEN_PRA_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
-    public static final String EMAIL          = "mamadou.diallo@sante.gouv.sn";
-    public static final String NOM            = "Diallo";
-    public static final String PRENOM         = "Mamadou";
-    public static final String TELEPHONE      = "+221771234567";
-    public static final String PASSWORD_HASH  = "$2a$12$hashedpasswordfortest000000000000000000000000000000000";
-    public static final String PASSWORD_BRUT  = "MotDePasse@2024";
+    public static final String EMAIL = "mamadou.diallo@sante.gouv.sn";
+    public static final String NOM = "Diallo";
+    public static final String PRENOM = "Mamadou";
+    public static final String TELEPHONE = "+221771234567";
+    public static final String PASSWORD_HASH = "$2a$12$hashedpasswordfortest000000000000000000000000000000000";
+    public static final String PASSWORD_BRUT = "MotDePasse@2024";
 
     private UserFixtures() {
     }

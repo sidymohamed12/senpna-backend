@@ -1,8 +1,9 @@
 package ministere.sante.senpna.shared.infrastructure.cache;
 
+import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
-import ministere.sante.senpna.shared.infrastructure.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 @Component
 @Order(0)
-public class RoleCache implements ApplicationRunner {
+public class RoleCache implements ApplicationRunner, RoleCachePort {
 
     private static final Logger log = LoggerFactory.getLogger(RoleCache.class);
 
@@ -92,6 +93,7 @@ public class RoleCache implements ApplicationRunner {
      * rôle a pu être retiré du référentiel sans que l'utilisateur ait
      * encore été mis à jour).
      */
+    @Override
     public Set<RoleProjection> findAllById(Set<UUID> ids) {
         Set<RoleProjection> result = new HashSet<>();
         for (UUID id : ids) {

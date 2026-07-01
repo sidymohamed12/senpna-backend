@@ -12,13 +12,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ministere.sante.senpna.shared.infrastructure.persistence.entity.BaseJpaEntity;
 
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import ministere.sante.senpna.shared.infrastructure.persistence.entity.BaseJpaEntity;
 
 @Entity
 @Table(name = "users")

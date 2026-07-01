@@ -1,6 +1,6 @@
 package ministere.sante.senpna.auth.domain.port.out;
 
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.TokenRevocationPort;
 
 import java.util.Set;

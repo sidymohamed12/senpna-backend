@@ -1,6 +1,6 @@
 package ministere.sante.senpna.utilisateurs.application.service;
 
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 
 import org.springframework.stereotype.Component;

@@ -9,10 +9,10 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.UserSummary;
 import ministere.sante.senpna.auth.domain.exception.CompteInactifException;
 import ministere.sante.senpna.auth.domain.exception.CompteVerrouilleException;
 import ministere.sante.senpna.auth.domain.exception.InvalidCredentialsException;
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.in.LoginUseCase;
-import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 
 import org.springframework.stereotype.Service;

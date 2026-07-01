@@ -1,6 +1,6 @@
 package ministere.sante.senpna.auth.domain.exception;
 
-import ministere.sante.senpna.shared.infrastructure.exception.UnauthorizedException;
+import ministere.sante.senpna.shared.domain.exception.UnauthorizedException;
 
 public class OtpInvalideException extends UnauthorizedException {
     public OtpInvalideException() {

@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
+
 import static org.assertj.core.api.Assertions.*;
 
 @DisplayName("Value Objects — auth domain")
@@ -67,10 +73,10 @@ class ValueObjectsTest {
 
         @ParameterizedTest(name = "{0}")
         @ValueSource(strings = {
-                "+221771234567",   // Sénégal mobile
-                "+221338207000",   // Sénégal fixe
-                "+33612345678",    // France
-                "+12015551234",    // USA
+                "+221771234567", // Sénégal mobile
+                "+221338207000", // Sénégal fixe
+                "+33612345678", // France
+                "+12015551234", // USA
         })
         @DisplayName("accepte les formats internationaux valides")
         void of_formatsValides(String numero) {
@@ -80,10 +86,10 @@ class ValueObjectsTest {
 
         @ParameterizedTest(name = "{0}")
         @ValueSource(strings = {
-                "0771234567",        // sans préfixe +
-                "+0771234567",       // + suivi de 0
-                "221771234567",      // sans +
-                "+221",              // trop court
+                "0771234567", // sans préfixe +
+                "+0771234567", // + suivi de 0
+                "221771234567", // sans +
+                "+221", // trop court
                 "+221771234567890123", // trop long
                 "",
                 "abc",
@@ -104,7 +110,7 @@ class ValueObjectsTest {
         @DisplayName("trim les espaces avant validation — le numéro est accepté et la valeur est normalisée")
         void of_trimmeAvantValidation() {
             // Phone trimme value avant la validation du pattern :
-            // "  +221771234567  " → "+221771234567" (valide)
+            // " +221771234567 " → "+221771234567" (valide)
             Phone phone = Phone.of("  +221771234567  ");
             assertThat(phone.value()).isEqualTo("+221771234567");
         }

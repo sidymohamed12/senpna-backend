@@ -2,7 +2,7 @@ package ministere.sante.senpna.auth.infrastructure.otp;
 
 import ministere.sante.senpna.auth.domain.port.out.OtpSenderPort;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 
 import org.springframework.stereotype.Component;
 

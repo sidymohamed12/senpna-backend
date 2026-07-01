@@ -1,6 +1,6 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
-import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

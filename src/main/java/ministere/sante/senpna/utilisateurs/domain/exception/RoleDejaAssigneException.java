@@ -1,6 +1,6 @@
 package ministere.sante.senpna.utilisateurs.domain.exception;
 
-import ministere.sante.senpna.shared.infrastructure.exception.ConflictException;
+import ministere.sante.senpna.shared.domain.exception.ConflictException;
 
 public class RoleDejaAssigneException extends ConflictException {
     public RoleDejaAssigneException() {

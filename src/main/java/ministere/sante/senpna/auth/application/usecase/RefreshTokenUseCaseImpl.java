@@ -6,7 +6,7 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.RefreshTokenCommand;
 import ministere.sante.senpna.auth.domain.exception.CompteInactifException;
 import ministere.sante.senpna.auth.domain.exception.InvalidRefreshTokenException;
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.in.RefreshTokenUseCase;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;

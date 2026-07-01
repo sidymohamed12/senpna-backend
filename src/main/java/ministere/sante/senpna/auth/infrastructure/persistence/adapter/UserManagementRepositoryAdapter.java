@@ -2,15 +2,15 @@ package ministere.sante.senpna.auth.infrastructure.persistence.adapter;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
+import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity;
 import ministere.sante.senpna.auth.infrastructure.persistence.mapper.UserMapper;
 import ministere.sante.senpna.auth.infrastructure.persistence.repository.UserJpaRepository;
 import ministere.sante.senpna.auth.infrastructure.persistence.specification.UserSpecifications;
-import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
-import ministere.sante.senpna.shared.domain.valueobject.PageResult;
-import ministere.sante.senpna.utilisateurs.domain.criteria.UserSearchCriteria;
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
+import ministere.sante.senpna.shared.domain.criteria.UserSearchCriteria;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

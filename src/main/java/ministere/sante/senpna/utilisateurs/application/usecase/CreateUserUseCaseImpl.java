@@ -1,15 +1,15 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
-import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Phone;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
-import ministere.sante.senpna.shared.infrastructure.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.CreateUserCommand;

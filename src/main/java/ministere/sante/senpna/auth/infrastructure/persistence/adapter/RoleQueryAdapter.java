@@ -4,7 +4,7 @@ import ministere.sante.senpna.auth.infrastructure.persistence.entity.RoleJpaEnti
 import ministere.sante.senpna.auth.infrastructure.persistence.repository.RoleJpaRepository;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
-import ministere.sante.senpna.shared.infrastructure.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.NotFoundException;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

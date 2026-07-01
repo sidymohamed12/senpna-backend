@@ -1,15 +1,15 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Phone;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UpdateUserCommand;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
-import ministere.sante.senpna.utilisateurs.domain.exception.UserNotFoundException;
+import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.utilisateurs.domain.port.in.UpdateUserUseCase;
 
 import org.springframework.stereotype.Service;

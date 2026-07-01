@@ -1,4 +1,4 @@
-package ministere.sante.senpna.shared.infrastructure.exception;
+package ministere.sante.senpna.shared.domain.exception;
 
 // 422 (Unprocessable Entity)
 public class BusinessRuleException extends SenPnaException {

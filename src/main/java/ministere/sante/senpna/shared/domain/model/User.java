@@ -1,11 +1,10 @@
-package ministere.sante.senpna.auth.domain.model;
+package ministere.sante.senpna.shared.domain.model;
 
-import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Phone;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
-import ministere.sante.senpna.shared.domain.model.AggregateRoot;
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 
 import java.time.Instant;

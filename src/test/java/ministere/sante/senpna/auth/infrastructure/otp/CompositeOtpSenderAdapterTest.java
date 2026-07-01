@@ -1,7 +1,7 @@
 package ministere.sante.senpna.auth.infrastructure.otp;
 
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +19,10 @@ import static org.mockito.Mockito.*;
 @DisplayName("CompositeOtpSenderAdapter")
 class CompositeOtpSenderAdapterTest {
 
-    @Mock private ChannelOtpSender emailSender;
-    @Mock private ChannelOtpSender smsSender;
+    @Mock
+    private ChannelOtpSender emailSender;
+    @Mock
+    private ChannelOtpSender smsSender;
 
     private CompositeOtpSenderAdapter sut;
 
@@ -55,7 +57,8 @@ class CompositeOtpSenderAdapterTest {
     @Test
     @DisplayName("canal non supporté → BusinessRuleException avec code OTP_CHANNEL_NOT_SUPPORTED")
     void send_canal_non_supporte_leve_exception() {
-        // On crée un composite qui ne connaît aucun sender pour simuler un canal inconnu
+        // On crée un composite qui ne connaît aucun sender pour simuler un canal
+        // inconnu
         CompositeOtpSenderAdapter sutSansEmail = new CompositeOtpSenderAdapter(List.of(smsSender));
 
         assertThatThrownBy(() -> sutSansEmail.send(OtpChannel.EMAIL, "dest", "code"))

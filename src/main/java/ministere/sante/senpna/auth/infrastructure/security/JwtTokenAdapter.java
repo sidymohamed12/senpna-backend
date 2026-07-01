@@ -1,7 +1,7 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
 import io.jsonwebtoken.JwtException;
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.config.JwtService;
 import ministere.sante.senpna.shared.domain.port.out.CachePort;
@@ -31,7 +31,8 @@ import java.util.Set;
  * </p>
  * <ol>
  * <li>À la révocation, on calcule le <strong>SHA-256 du token</strong> et on
- * le stocke en Redis avec un TTL égal à la durée de vie résiduelle du token.</li>
+ * le stocke en Redis avec un TTL égal à la durée de vie résiduelle du
+ * token.</li>
  * <li>À chaque requête, {@code JwtAuthenticationFilter} appelle
  * {@link #estInvalide(String)} avant d'authentifier l'utilisateur.</li>
  * <li>Quand le token expire naturellement, Redis supprime l'entrée
@@ -110,7 +111,8 @@ public class JwtTokenAdapter implements TokenPort {
             return cachePort.get(REVOCATION_PREFIX + fingerprint).isPresent();
         } catch (Exception e) {
             // En cas d'erreur Redis, on échoue de manière permissive (fail-open) pour
-            // ne pas bloquer tous les utilisateurs. À ajuster selon le niveau de sécurité requis.
+            // ne pas bloquer tous les utilisateurs. À ajuster selon le niveau de sécurité
+            // requis.
             log.error("[TokenRevocation] Impossible de vérifier la révocation, fail-open : {}", e.getMessage());
             return false;
         }

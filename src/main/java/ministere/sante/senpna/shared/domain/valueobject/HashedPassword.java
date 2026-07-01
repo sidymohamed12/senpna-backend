@@ -1,4 +1,4 @@
-package ministere.sante.senpna.auth.domain.valueobject;
+package ministere.sante.senpna.shared.domain.valueobject;
 
 import java.util.Objects;
 

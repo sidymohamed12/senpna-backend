@@ -1,7 +1,7 @@
 package ministere.sante.senpna.auth.application.service;
 
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
-import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.config.AppProperties;
 

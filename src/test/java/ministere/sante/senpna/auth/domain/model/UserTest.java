@@ -1,11 +1,12 @@
 package ministere.sante.senpna.auth.domain.model;
 
-import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,8 +53,8 @@ class UserTest {
             assertThatNullPointerException()
                     .isThrownBy(() -> User.reconstruct(
                             UserId.of(UUID.randomUUID()),
-                            null,                  // nom null
-                            Prenom.of("Bi"),       // valide (≥ 2 chars)
+                            null, // nom null
+                            Prenom.of("Bi"), // valide (≥ 2 chars)
                             Email.of("a@b.sn"),
                             null,
                             HashedPassword.of("hash1"),
@@ -67,8 +68,8 @@ class UserTest {
             assertThatNullPointerException()
                     .isThrownBy(() -> User.reconstruct(
                             UserId.of(UUID.randomUUID()),
-                            Nom.of("Ba"),          // valide (≥ 2 chars)
-                            null,                  // prenom null
+                            Nom.of("Ba"), // valide (≥ 2 chars)
+                            null, // prenom null
                             Email.of("a@b.sn"),
                             null,
                             HashedPassword.of("hash1"),
@@ -84,7 +85,7 @@ class UserTest {
                             UserId.of(UUID.randomUUID()),
                             Nom.of("Ba"),
                             Prenom.of("Bi"),
-                            null,                  // email null
+                            null, // email null
                             null,
                             HashedPassword.of("hash1"),
                             true, Set.of(), 0, null, Instant.now(), Instant.now()))
@@ -101,7 +102,7 @@ class UserTest {
                             Prenom.of("Bi"),
                             Email.of("a@b.sn"),
                             null,
-                            null,                  // password null
+                            null, // password null
                             true, Set.of(), 0, null, Instant.now(), Instant.now()))
                     .withMessageContaining("mot de passe");
         }
@@ -112,7 +113,7 @@ class UserTest {
             Set<UUID> roleIds = new java.util.HashSet<>(Set.of(UUID.randomUUID()));
             User user = User.reconstruct(
                     UserId.of(UUID.randomUUID()),
-                    Nom.of("Ba"),    // valide
+                    Nom.of("Ba"), // valide
                     Prenom.of("Bi"), // valide
                     Email.of("a@b.sn"),
                     null,

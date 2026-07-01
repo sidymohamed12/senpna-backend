@@ -1,8 +1,9 @@
 package ministere.sante.senpna.auth.infrastructure.persistence.repository;
 
-import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity;
 
 import java.util.Optional;
 import java.util.UUID;

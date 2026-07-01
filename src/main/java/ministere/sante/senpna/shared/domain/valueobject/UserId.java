@@ -1,6 +1,5 @@
-package ministere.sante.senpna.auth.domain.valueobject;
+package ministere.sante.senpna.shared.domain.valueobject;
 
-import ministere.sante.senpna.shared.domain.valueobject.EntityId;
 
 import java.util.UUID;
 

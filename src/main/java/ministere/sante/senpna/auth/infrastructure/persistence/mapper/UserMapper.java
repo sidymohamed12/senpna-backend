@@ -1,12 +1,12 @@
 package ministere.sante.senpna.auth.infrastructure.persistence.mapper;
 
-import ministere.sante.senpna.auth.domain.model.User;
-import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.auth.domain.valueobject.Nom;
-import ministere.sante.senpna.auth.domain.valueobject.Phone;
-import ministere.sante.senpna.auth.domain.valueobject.Prenom;
-import ministere.sante.senpna.auth.domain.valueobject.UserId;
 import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity;
+import ministere.sante.senpna.shared.domain.model.User;
+import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
+import ministere.sante.senpna.shared.domain.valueobject.Nom;
+import ministere.sante.senpna.shared.domain.valueobject.Phone;
+import ministere.sante.senpna.shared.domain.valueobject.Prenom;
+import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 
 import org.springframework.stereotype.Component;

@@ -1,6 +1,12 @@
 package ministere.sante.senpna.shared.infrastructure.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.ConflictException;
+import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.UnauthorizedException;
+import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
-import ministere.sante.senpna.auth.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
+import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 import ministere.sante.senpna.shared.infrastructure.cache.RoleCache;
 
