@@ -1,4 +1,4 @@
-package ministere.sante.senpna.auth.infrastructure.web;
+package ministere.sante.senpna.auth.infrastructure.web.controller;
 
 import jakarta.validation.Valid;
 import ministere.sante.senpna.auth.application.facade.AuthFacade;
