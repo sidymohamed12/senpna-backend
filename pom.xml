@@ -342,6 +342,11 @@
 							<classifier>jakarta</classifier>
 						</path>
 						<path>
+							<groupId>org.hibernate.orm</groupId>
+							<artifactId>hibernate-jpamodelgen</artifactId>
+							<version>6.6.0.Final</version>
+						</path>
+						<path>
 							<groupId>jakarta.persistence</groupId>
 							<artifactId>jakarta.persistence-api</artifactId>
 							<version>3.1.0</version>
