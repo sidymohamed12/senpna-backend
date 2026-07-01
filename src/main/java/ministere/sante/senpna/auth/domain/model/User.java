@@ -49,6 +49,13 @@ public class User extends AggregateRoot {
                 tentativesEchecConnexion, verrouilleJusqua, createdAt, updatedAt);
     }
 
+    public static User creer(Nom nom, Prenom prenom, Email email, Phone telephone, HashedPassword hashedPassword,
+            Set<UUID> roleIds) {
+        Instant maintenant = Instant.now();
+        return new User(UserId.generate(), nom, prenom, email, telephone, hashedPassword, true, roleIds, 0, null,
+                maintenant, maintenant);
+    }
+
     // ── Comportements métier ────────────────────────────────────────────
 
     public void changerMotDePasse(HashedPassword nouveauMotDePasse) {
@@ -61,6 +68,27 @@ public class User extends AggregateRoot {
     public void renommer(Nom nouveauNom, Prenom nouveauPrenom) {
         this.nom = Objects.requireNonNull(nouveauNom);
         this.prenom = Objects.requireNonNull(nouveauPrenom);
+        markUpdated();
+    }
+
+    public void modifierTelephone(Phone nouveauTelephone) {
+        this.telephone = nouveauTelephone;
+        markUpdated();
+    }
+
+    public void activer() {
+        if (this.actif) {
+            return;
+        }
+        this.actif = true;
+        markUpdated();
+    }
+
+    public void desactiver() {
+        if (!this.actif) {
+            return;
+        }
+        this.actif = false;
         markUpdated();
     }
 
