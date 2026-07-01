@@ -1,7 +1,6 @@
 package ministere.sante.senpna.auth.application.usecase;
 
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ResetPasswordCommand;
-import ministere.sante.senpna.auth.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.auth.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.in.ResetPasswordUseCase;
 import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
@@ -9,6 +8,7 @@ import ministere.sante.senpna.auth.domain.port.out.ResetTokenPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
 import ministere.sante.senpna.auth.domain.valueobject.UserId;
+import ministere.sante.senpna.utilisateurs.domain.exception.UserNotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

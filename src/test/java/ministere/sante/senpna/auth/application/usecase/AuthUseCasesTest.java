@@ -14,7 +14,7 @@ import ministere.sante.senpna.auth.domain.valueobject.UserId;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 import ministere.sante.senpna.shared.infrastructure.exception.BusinessRuleException;
-
+import ministere.sante.senpna.utilisateurs.domain.exception.UserNotFoundException;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,10 +45,14 @@ class AuthUseCasesTest {
     @DisplayName("ForgotPasswordUseCaseImpl")
     class ForgotPasswordTest {
 
-        @Mock UserRepositoryPort userRepositoryPort;
-        @Mock OtpService otpService;
-        @Mock OtpDestinationResolver otpDestinationResolver;
-        @InjectMocks ForgotPasswordUseCaseImpl sut;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @Mock
+        OtpService otpService;
+        @Mock
+        OtpDestinationResolver otpDestinationResolver;
+        @InjectMocks
+        ForgotPasswordUseCaseImpl sut;
 
         @Test
         @DisplayName("canal EMAIL — récupère l'email comme destination et envoie l'OTP")
@@ -113,10 +117,14 @@ class AuthUseCasesTest {
     @DisplayName("ResendOtpUseCaseImpl")
     class ResendOtpTest {
 
-        @Mock UserRepositoryPort userRepositoryPort;
-        @Mock OtpService otpService;
-        @Mock OtpDestinationResolver otpDestinationResolver;
-        @InjectMocks ResendOtpUseCaseImpl sut;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @Mock
+        OtpService otpService;
+        @Mock
+        OtpDestinationResolver otpDestinationResolver;
+        @InjectMocks
+        ResendOtpUseCaseImpl sut;
 
         @Test
         @DisplayName("redirige vers OtpService avec la bonne destination")
@@ -153,10 +161,14 @@ class AuthUseCasesTest {
     @DisplayName("VerifyOtpUseCaseImpl")
     class VerifyOtpTest {
 
-        @Mock OtpService otpService;
-        @Mock ResetTokenPort resetTokenPort;
-        @Mock UserRepositoryPort userRepositoryPort;
-        @InjectMocks VerifyOtpUseCaseImpl sut;
+        @Mock
+        OtpService otpService;
+        @Mock
+        ResetTokenPort resetTokenPort;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @InjectMocks
+        VerifyOtpUseCaseImpl sut;
 
         @Test
         @DisplayName("succès — valide OTP, génère un reset token et le retourne")
@@ -214,10 +226,14 @@ class AuthUseCasesTest {
     @DisplayName("ResetPasswordUseCaseImpl")
     class ResetPasswordTest {
 
-        @Mock UserRepositoryPort userRepositoryPort;
-        @Mock ResetTokenPort resetTokenPort;
-        @Mock PasswordEncoderPort passwordEncoderPort;
-        @InjectMocks ResetPasswordUseCaseImpl sut;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @Mock
+        ResetTokenPort resetTokenPort;
+        @Mock
+        PasswordEncoderPort passwordEncoderPort;
+        @InjectMocks
+        ResetPasswordUseCaseImpl sut;
 
         @Test
         @DisplayName("succès — consomme le reset token, encode le mdp et sauvegarde")
@@ -290,11 +306,16 @@ class AuthUseCasesTest {
     @DisplayName("RefreshTokenUseCaseImpl")
     class RefreshTokenTest {
 
-        @Mock TokenPort tokenPort;
-        @Mock UserRepositoryPort userRepositoryPort;
-        @Mock AuthTokenFactory authTokenFactory;
-        @Mock UserRoleResolver userRoleResolver;
-        @InjectMocks RefreshTokenUseCaseImpl sut;
+        @Mock
+        TokenPort tokenPort;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @Mock
+        AuthTokenFactory authTokenFactory;
+        @Mock
+        UserRoleResolver userRoleResolver;
+        @InjectMocks
+        RefreshTokenUseCaseImpl sut;
 
         private static final String OLD_REFRESH = "old.refresh.token";
 
@@ -402,9 +423,12 @@ class AuthUseCasesTest {
     @DisplayName("MeUseCaseImpl")
     class MeTest {
 
-        @Mock UserRepositoryPort userRepositoryPort;
-        @Mock UserRoleResolver userRoleResolver;
-        @InjectMocks MeUseCaseImpl sut;
+        @Mock
+        UserRepositoryPort userRepositoryPort;
+        @Mock
+        UserRoleResolver userRoleResolver;
+        @InjectMocks
+        MeUseCaseImpl sut;
 
         @Test
         @DisplayName("retourne le UserSummary complet de l'utilisateur connecté")
