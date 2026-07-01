@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ministere.sante.senpna.shared.domain.port.out.TokenRevocationPort;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -26,10 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenRevocationPort tokenRevocationPort;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService,
+            TokenRevocationPort tokenRevocationPort) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.tokenRevocationPort = tokenRevocationPort;
     }
 
     @Override
@@ -48,6 +53,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(BEARER_PREFIX.length());
 
         try {
+            // ── Vérification révocation (liste noire Redis) ──────────────
+            if (tokenRevocationPort.estInvalide(token)) {
+                log.debug("[JWT] Token révoqué, accès refusé.");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // ── Validation signature + expiration + UserDetails ───────────
             String username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -1,41 +1,53 @@
 package ministere.sante.senpna.auth.application.usecase;
 
-import ministere.sante.senpna.auth.domain.port.in.ResetPasswordUseCase;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ResetPasswordCommand;
-import ministere.sante.senpna.auth.application.service.OtpService;
 import ministere.sante.senpna.auth.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.auth.domain.model.User;
+import ministere.sante.senpna.auth.domain.port.in.ResetPasswordUseCase;
+import ministere.sante.senpna.auth.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.auth.domain.port.out.ResetTokenPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.auth.domain.valueobject.HashedPassword;
-import ministere.sante.senpna.shared.domain.valueobject.Email;
+import ministere.sante.senpna.auth.domain.valueobject.UserId;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
+/**
+ * Finalise le changement de mot de passe.
+ *
+ * <p>
+ * Le jeton de réinitialisation est consommé (usage unique) via
+ * {@link ResetTokenPort} — ce qui fournit directement l'UUID de
+ * l'utilisateur, évitant une requête DB supplémentaire par email.
+ * </p>
+ */
 @Service
 public class ResetPasswordUseCaseImpl implements ResetPasswordUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
-    private final OtpService otpService;
-    private final PasswordEncoder passwordEncoder;
+    private final ResetTokenPort resetTokenPort;
+    private final PasswordEncoderPort passwordEncoderPort;
 
-    public ResetPasswordUseCaseImpl(UserRepositoryPort userRepositoryPort, OtpService otpService,
-            PasswordEncoder passwordEncoder) {
+    public ResetPasswordUseCaseImpl(UserRepositoryPort userRepositoryPort, ResetTokenPort resetTokenPort,
+            PasswordEncoderPort passwordEncoderPort) {
         this.userRepositoryPort = userRepositoryPort;
-        this.otpService = otpService;
-        this.passwordEncoder = passwordEncoder;
+        this.resetTokenPort = resetTokenPort;
+        this.passwordEncoderPort = passwordEncoderPort;
     }
 
     @Override
     @Transactional
     public void reinitialiser(ResetPasswordCommand command) {
-        String email = otpService.consommerJetonReinitialisation(command.resetToken());
+        // Consomme le jeton (usage unique) → renvoie l'UUID de l'utilisateur
+        UUID userId = resetTokenPort.validerEtExtraireUserId(command.resetToken());
 
-        User user = userRepositoryPort.findByEmail(Email.of(email))
+        User user = userRepositoryPort.findById(UserId.of(userId))
                 .orElseThrow(UserNotFoundException::new);
 
-        String hash = passwordEncoder.encode(command.nouveauMotDePasse());
+        String hash = passwordEncoderPort.encoder(command.nouveauMotDePasse());
         user.changerMotDePasse(HashedPassword.of(hash));
         userRepositoryPort.save(user);
     }

@@ -10,19 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-/**
- * Handler dédié à la feature {@code auth}.
- *
- * <p>
- * La majorité des exceptions du domaine {@code auth} héritent directement
- * des exceptions génériques de {@code shared} ({@code UnauthorizedException},
- * {@code ForbiddenException}, {@code NotFoundException},
- * {@code BusinessRuleException})
- * et sont donc déjà gérées par {@code GlobalExceptionHandler}. Seul
- * {@link OtpCooldownException} nécessite un header HTTP spécifique
- * ({@code Retry-After}), d'où ce handler dédié.
- * </p>
- */
 @RestControllerAdvice
 public class AuthExceptionHandler {
 

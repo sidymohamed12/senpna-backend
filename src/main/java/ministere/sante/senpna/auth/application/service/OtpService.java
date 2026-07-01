@@ -4,7 +4,6 @@ import ministere.sante.senpna.auth.domain.exception.OtpCooldownException;
 import ministere.sante.senpna.auth.domain.exception.OtpExpireException;
 import ministere.sante.senpna.auth.domain.exception.OtpInvalideException;
 import ministere.sante.senpna.auth.domain.exception.OtpTentativesEpuiseesException;
-import ministere.sante.senpna.auth.domain.exception.ResetTokenInvalideException;
 import ministere.sante.senpna.auth.domain.port.out.OtpSenderPort;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
 import ministere.sante.senpna.config.AppProperties;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Service applicatif — cycle de vie complet d'un code OTP (génération,
@@ -33,10 +31,13 @@ import java.util.UUID;
  * <li>{@code otp:attempts:&lt;email&gt;} — compteur de tentatives de
  * saisie</li>
  * <li>{@code otp:cooldown:&lt;email&gt;} — anti-spam entre deux envois</li>
- * <li>{@code otp:reset:&lt;token&gt;} — jeton de réinitialisation court-lived,
- * délivré après validation OTP réussie, consommé par le changement de mot
- * de passe</li>
  * </ul>
+ * <p>
+ * La gestion du jeton de réinitialisation après validation OTP est
+ * déléguée à {@code ResetTokenPort} ({@code RedisResetTokenAdapter}) —
+ * séparation des responsabilités, préfixe Redis distinct
+ * ({@code auth:reset:*}).
+ * </p>
  */
 @Service
 public class OtpService {
@@ -44,8 +45,6 @@ public class OtpService {
     private static final String PREFIX_CODE = "otp:code:";
     private static final String PREFIX_ATTEMPTS = "otp:attempts:";
     private static final String PREFIX_COOLDOWN = "otp:cooldown:";
-    private static final String PREFIX_RESET = "otp:reset:";
-    private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(5);
 
     private final CachePort cachePort;
     private final OtpSenderPort otpSenderPort;
@@ -81,13 +80,12 @@ public class OtpService {
     }
 
     /**
-     * Valide le code soumis. En cas de succès, consomme le code (usage
-     * unique) et délivre un jeton de réinitialisation court-lived.
+     * Valide le code soumis. En cas de succès, consomme le code (usage unique).
+     * La génération du jeton de réinitialisation est déléguée à l'appelant
+     * ({@code VerifyOtpUseCaseImpl}) via {@code ResetTokenPort}.
      *
-     * @return jeton de réinitialisation à transmettre à
-     *         {@link #consommerJetonReinitialisation(String)}
      */
-    public String valider(String email, String codeSoumis) {
+    public void valider(String email, String codeSoumis) {
         String codeAttendu = cachePort.get(PREFIX_CODE + email)
                 .orElseThrow(OtpExpireException::new);
 
@@ -105,21 +103,6 @@ public class OtpService {
         }
 
         evincerCode(email);
-
-        String resetToken = UUID.randomUUID().toString();
-        cachePort.put(PREFIX_RESET + resetToken, email, RESET_TOKEN_TTL);
-        return resetToken;
-    }
-
-    /**
-     * Consomme (usage unique) un jeton de réinitialisation et retourne
-     * l'email associé.
-     */
-    public String consommerJetonReinitialisation(String resetToken) {
-        String email = cachePort.get(PREFIX_RESET + resetToken)
-                .orElseThrow(ResetTokenInvalideException::new);
-        cachePort.evict(PREFIX_RESET + resetToken);
-        return email;
     }
 
     // ── Helpers privés ───────────────────────────────────────────────────
