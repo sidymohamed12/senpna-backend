@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class Region extends AggregateRoot<RegionId> {
 
-    private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z0-9\\-]{2,20}$");
+    private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z0-9_-]{2,20}$");
     private static final int NOM_MAX_LENGTH = 100;
 
     private String code;
@@ -18,7 +18,8 @@ public class Region extends AggregateRoot<RegionId> {
 
     private Region(RegionId id, String code, String nom, boolean actif, Instant createdAt, Instant updatedAt) {
         super(id, createdAt, updatedAt);
-        this.code = validerCode(code);
+        Objects.requireNonNull(code, "Le code de la région ne peut pas être null");
+        this.code = code.trim().toUpperCase();
         this.nom = validerNom(nom);
         this.actif = actif;
     }
@@ -29,8 +30,9 @@ public class Region extends AggregateRoot<RegionId> {
     }
 
     public static Region creer(String code, String nom) {
+        String normalise = validerCode(code);
         Instant maintenant = Instant.now();
-        return new Region(RegionId.generate(), code, nom, true, maintenant, maintenant);
+        return new Region(RegionId.generate(), normalise, nom, true, maintenant, maintenant);
     }
 
     // ── Comportements métier ────────────────────────────────────────────
