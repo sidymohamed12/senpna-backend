@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern;
 
 import ministere.sante.senpna.organisation.domain.valueobject.TypeStructureSanitaire;
 
+import java.util.UUID;
+
 public record CreateStructureSanitaireRequest(
 
         @NotBlank(message = "Le code de la structure sanitaire est obligatoire")
@@ -18,6 +20,9 @@ public record CreateStructureSanitaireRequest(
 
         @NotNull(message = "Le type de structure sanitaire est obligatoire")
         TypeStructureSanitaire type,
+
+        @NotNull(message = "La région de rattachement est obligatoire")
+        UUID regionId,
 
         String district,
 

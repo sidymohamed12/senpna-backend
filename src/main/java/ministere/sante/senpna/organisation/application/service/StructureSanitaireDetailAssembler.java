@@ -2,32 +2,34 @@ package ministere.sante.senpna.organisation.application.service;
 
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.StructureSanitaireDetail;
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
-import ministere.sante.senpna.organisation.domain.model.Region;
 import ministere.sante.senpna.organisation.domain.model.StructureSanitaire;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.RegionRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.RegionCachePort;
+import ministere.sante.senpna.shared.domain.projection.RegionProjection;
 
 import org.springframework.stereotype.Component;
 
 /**
  * Assemble la représentation de sortie {@link StructureSanitaireDetail} —
- * résout les noms de la région et de la PRA de rattachement.
+ * résout le nom de la région via {@link RegionCachePort} (mémoire) et le
+ * nom de la PRA de rattachement.
  */
 @Component
 public class StructureSanitaireDetailAssembler {
 
-    private final RegionRepositoryPort regionRepositoryPort;
+    private final RegionCachePort regionCachePort;
     private final EntrepotRepositoryPort entrepotRepositoryPort;
 
-    public StructureSanitaireDetailAssembler(RegionRepositoryPort regionRepositoryPort,
+    public StructureSanitaireDetailAssembler(RegionCachePort regionCachePort,
             EntrepotRepositoryPort entrepotRepositoryPort) {
-        this.regionRepositoryPort = regionRepositoryPort;
+        this.regionCachePort = regionCachePort;
         this.entrepotRepositoryPort = entrepotRepositoryPort;
     }
 
     public StructureSanitaireDetail assembler(StructureSanitaire structure) {
         String regionNom = structure.getRegionId() != null
-                ? regionRepositoryPort.findById(structure.getRegionId()).map(Region::getNom).orElse(null)
+                ? regionCachePort.findById(structure.getRegionId().getValue()).map(RegionProjection::nom)
+                        .orElse(null)
                 : null;
 
         String praNom = structure.getPraId() != null

@@ -4,9 +4,12 @@ import ministere.sante.senpna.organisation.infrastructure.persistence.entity.Reg
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RegionJpaRepository extends JpaRepository<RegionJpaEntity, UUID> {
 
     boolean existsByCode(String code);
+
+    Optional<RegionJpaEntity> findByCode(String code);
 }

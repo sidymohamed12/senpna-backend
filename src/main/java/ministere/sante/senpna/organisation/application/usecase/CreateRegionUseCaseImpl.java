@@ -7,6 +7,7 @@ import ministere.sante.senpna.organisation.domain.exception.CodeRegionDejaUtilis
 import ministere.sante.senpna.organisation.domain.model.Region;
 import ministere.sante.senpna.organisation.domain.port.in.CreateRegionUseCase;
 import ministere.sante.senpna.organisation.domain.port.out.RegionRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.RegionCachePort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateRegionUseCaseImpl implements CreateRegionUseCase {
 
     private final RegionRepositoryPort regionRepositoryPort;
+    private final RegionCachePort regionCachePort;
     private final RegionDetailAssembler regionDetailAssembler;
 
-    public CreateRegionUseCaseImpl(RegionRepositoryPort regionRepositoryPort,
+    public CreateRegionUseCaseImpl(RegionRepositoryPort regionRepositoryPort, RegionCachePort regionCachePort,
             RegionDetailAssembler regionDetailAssembler) {
         this.regionRepositoryPort = regionRepositoryPort;
+        this.regionCachePort = regionCachePort;
         this.regionDetailAssembler = regionDetailAssembler;
     }
 
@@ -33,6 +36,12 @@ public class CreateRegionUseCaseImpl implements CreateRegionUseCase {
 
         Region region = Region.creer(command.code(), command.nom());
         Region saved = regionRepositoryPort.save(region);
+
+        // Recharge le cache immédiatement : la nouvelle région doit être
+        // utilisable sans délai par les autres features (ex: création
+        // d'une PRA dans la foulée), sans attendre un redémarrage.
+        regionCachePort.reload();
+
         return regionDetailAssembler.assembler(saved);
     }
 }

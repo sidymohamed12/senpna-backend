@@ -30,13 +30,14 @@ public final class OrganisationCommands {
     public record CreatePraCommand(String code, String nom, UUID regionId, String adresse, String telephone) {
     }
 
-    public record UpdatePraCommand(UUID entrepotId, String nom, String adresse, String telephone, UUID regionId) {
+    public record UpdatePraCommand(UUID entrepotId, UUID acteurId, String nom, String adresse, String telephone,
+            UUID regionId) {
     }
 
-    public record DeactivatePraCommand(UUID entrepotId) {
+    public record DeactivatePraCommand(UUID entrepotId, UUID acteurId) {
     }
 
-    public record ActivatePraCommand(UUID entrepotId) {
+    public record ActivatePraCommand(UUID entrepotId, UUID acteurId) {
     }
 
     public record GetEntrepotQuery(UUID entrepotId) {
@@ -58,7 +59,7 @@ public final class OrganisationCommands {
     // ── Structure sanitaire ─────────────────────────────────────────────
 
     public record CreateStructureSanitaireCommand(String code, String nom, TypeStructureSanitaire type,
-            String district, String adresse, String telephone, String email, String responsable) {
+            UUID regionId, String district, String adresse, String telephone, String email, String responsable) {
     }
 
     public record UpdateStructureSanitaireCommand(UUID structureId, String nom, String district, String adresse,

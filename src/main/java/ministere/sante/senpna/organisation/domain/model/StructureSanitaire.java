@@ -31,11 +31,18 @@ import java.util.regex.Pattern;
  * </pre>
  *
  * <p>
+ * La région est obligatoirement renseignée dès la création de la demande
+ * d'adhésion (l'établissement sait toujours de quelle région il dépend).
+ * Le rattachement à une PRA précise ({@link Entrepot}), en revanche, n'est
+ * réalisé que via {@link #affecterPra(EntrepotId)} — typiquement au moment
+ * de la validation de l'adhésion, une fois la PRA responsable désignée.
+ * La région peut être corrigée a posteriori via
+ * {@link #affecterRegion(RegionId)} si nécessaire.
+ * </p>
+ *
+ * <p>
  * Une structure ne peut être (ré)activée que si son adhésion a été validée
- * — cf. {@link #activer()}. Le rattachement à une {@link Region} et à une
- * PRA ({@link Entrepot}) est réalisé séparément via
- * {@link #affecterRegion(RegionId)} et {@link #affecterPra(EntrepotId)},
- * typiquement au moment de la validation de l'adhésion.
+ * — cf. {@link #activer()}.
  * </p>
  */
 public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
@@ -86,14 +93,16 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
     }
 
     /**
-     * Enregistre une nouvelle demande d'adhésion. La structure n'est ni
-     * rattachée à une région/PRA, ni active tant que la demande n'a pas été
-     * validée (cf. {@link #validerAdhesion()}).
+     * Enregistre une nouvelle demande d'adhésion, rattachée dès sa
+     * création à une région. La structure n'est ni rattachée à une PRA
+     * précise, ni active tant que la demande n'a pas été validée
+     * (cf. {@link #validerAdhesion()}).
      */
-    public static StructureSanitaire creer(String code, String nom, TypeStructureSanitaire type, String district,
-            String adresse, String telephone, String email, String responsable) {
+    public static StructureSanitaire creer(String code, String nom, TypeStructureSanitaire type, RegionId regionId,
+            String district, String adresse, String telephone, String email, String responsable) {
+        Objects.requireNonNull(regionId, "La région est obligatoire pour une demande d'adhésion");
         Instant maintenant = Instant.now();
-        return new StructureSanitaire(StructureSanitaireId.generate(), code, nom, type, null, null, district,
+        return new StructureSanitaire(StructureSanitaireId.generate(), code, nom, type, regionId, null, district,
                 adresse, telephone, email, responsable, StatutAdhesion.EN_ATTENTE_VALIDATION, null, false,
                 maintenant, maintenant);
     }

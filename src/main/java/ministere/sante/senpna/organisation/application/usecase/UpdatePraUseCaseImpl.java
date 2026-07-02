@@ -1,6 +1,7 @@
 package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.EntrepotDetailAssembler;
+import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UpdatePraCommand;
 import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableException;
@@ -23,12 +24,15 @@ public class UpdatePraUseCaseImpl implements UpdatePraUseCase {
 
     private final EntrepotRepositoryPort entrepotRepositoryPort;
     private final RegionRepositoryPort regionRepositoryPort;
+    private final RegionScopeResolver regionScopeResolver;
     private final EntrepotDetailAssembler entrepotDetailAssembler;
 
     public UpdatePraUseCaseImpl(EntrepotRepositoryPort entrepotRepositoryPort,
-            RegionRepositoryPort regionRepositoryPort, EntrepotDetailAssembler entrepotDetailAssembler) {
+            RegionRepositoryPort regionRepositoryPort, RegionScopeResolver regionScopeResolver,
+            EntrepotDetailAssembler entrepotDetailAssembler) {
         this.entrepotRepositoryPort = entrepotRepositoryPort;
         this.regionRepositoryPort = regionRepositoryPort;
+        this.regionScopeResolver = regionScopeResolver;
         this.entrepotDetailAssembler = entrepotDetailAssembler;
     }
 
@@ -41,6 +45,12 @@ public class UpdatePraUseCaseImpl implements UpdatePraUseCase {
         if (!pra.estPra()) {
             throw new TypeEntrepotInvalideException();
         }
+
+        // Un utilisateur rattaché à une région ne peut gérer que les
+        // entrepôts de cette région — évite qu'il modifie la PRA d'une
+        // autre région. Les rôles nationaux (non rattachés) conservent un
+        // accès à toutes les régions.
+        regionScopeResolver.verifierAccesRegion(command.acteurId(), pra.getRegionId());
 
         RegionId regionId = pra.getRegionId();
         if (command.regionId() != null) {

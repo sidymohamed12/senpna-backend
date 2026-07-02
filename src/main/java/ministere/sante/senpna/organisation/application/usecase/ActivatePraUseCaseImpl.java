@@ -1,6 +1,7 @@
 package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.EntrepotDetailAssembler;
+import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
 import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableException;
@@ -17,11 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ActivatePraUseCaseImpl implements ActivatePraUseCase {
 
     private final EntrepotRepositoryPort entrepotRepositoryPort;
+    private final RegionScopeResolver regionScopeResolver;
     private final EntrepotDetailAssembler entrepotDetailAssembler;
 
     public ActivatePraUseCaseImpl(EntrepotRepositoryPort entrepotRepositoryPort,
-            EntrepotDetailAssembler entrepotDetailAssembler) {
+            RegionScopeResolver regionScopeResolver, EntrepotDetailAssembler entrepotDetailAssembler) {
         this.entrepotRepositoryPort = entrepotRepositoryPort;
+        this.regionScopeResolver = regionScopeResolver;
         this.entrepotDetailAssembler = entrepotDetailAssembler;
     }
 
@@ -34,6 +37,8 @@ public class ActivatePraUseCaseImpl implements ActivatePraUseCase {
         if (!pra.estPra()) {
             throw new TypeEntrepotInvalideException();
         }
+
+        regionScopeResolver.verifierAccesRegion(command.acteurId(), pra.getRegionId());
 
         pra.activer();
 
