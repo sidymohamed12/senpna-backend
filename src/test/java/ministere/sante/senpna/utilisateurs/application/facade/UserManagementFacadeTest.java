@@ -50,13 +50,13 @@ class UserManagementFacadeTest {
     private static final UUID USER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID ROLE_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UserDetail DETAIL = new UserDetail(USER_ID, "Diallo", "Mamadou",
-            "mamadou.diallo@sante.gouv.sn", null, true, Set.of(), Instant.now(), Instant.now());
+            "mamadou.diallo@sante.gouv.sn", null, true, Set.of(), null, null, Instant.now(), Instant.now());
 
     @Test
     @DisplayName("creer() délègue à CreateUserUseCase")
     void creer_delegue() {
         CreateUserCommand command = new CreateUserCommand(UUID.randomUUID(), "Diallo", "Mamadou",
-                "mamadou.diallo@sante.gouv.sn", null, Set.of(ROLE_ID));
+                "mamadou.diallo@sante.gouv.sn", null, Set.of(ROLE_ID), null);
         CreatedUser createdUser = new CreatedUser(DETAIL, "TempPass1!");
         when(createUserUseCase.creer(command)).thenReturn(createdUser);
 

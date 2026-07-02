@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,99 +42,135 @@ import static org.mockito.Mockito.when;
 @DisplayName("UserHierarchyGuard — hiérarchie PNA/PRA de gestion des comptes")
 class UserHierarchyGuardTest {
 
-    @Mock
-    UserManagementRepositoryPort userManagementRepositoryPort;
-    @Mock
-    RoleCachePort roleCachePort;
+        @Mock
+        UserManagementRepositoryPort userManagementRepositoryPort;
+        @Mock
+        RoleCachePort roleCachePort;
 
-    UserHierarchyGuard sut;
+        UserHierarchyGuard sut;
 
-    private static final UUID ACTEUR_ID = UUID.randomUUID();
-    private static final UUID ROLE_ADMIN_PNA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000001");
-    private static final UUID ROLE_ADMIN_PRA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000002");
-    private static final UUID ROLE_GESTIONNAIRE_PRA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000003");
+        private static final UUID ACTEUR_ID = UUID.randomUUID();
+        private static final UUID ROLE_ADMIN_PNA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000001");
+        private static final UUID ROLE_ADMIN_PRA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000002");
+        private static final UUID ROLE_GESTIONNAIRE_PRA_ID = UUID.fromString("d0000000-0000-0000-0000-000000000003");
 
-    @BeforeEach
-    void setUp() {
-        sut = new UserHierarchyGuard(userManagementRepositoryPort, roleCachePort);
-    }
+        @BeforeEach
+        void setUp() {
+                sut = new UserHierarchyGuard(userManagementRepositoryPort, roleCachePort);
+        }
 
-    private User acteurAvecRoles(Set<UUID> roleIds) {
-        return User.reconstruct(
-                UserId.of(ACTEUR_ID),
-                Nom.of(UserFixtures.NOM),
-                Prenom.of(UserFixtures.PRENOM),
-                Email.of(UserFixtures.EMAIL),
-                null,
-                HashedPassword.of(UserFixtures.PASSWORD_HASH),
-                true,
-                roleIds,
-                0,
-                null,
-                Instant.now(),
-                Instant.now());
-    }
+        private User acteurAvecRoles(Set<UUID> roleIds) {
+                return User.reconstruct(
+                                UserId.of(ACTEUR_ID),
+                                Nom.of(UserFixtures.NOM),
+                                Prenom.of(UserFixtures.PRENOM),
+                                Email.of(UserFixtures.EMAIL),
+                                null,
+                                HashedPassword.of(UserFixtures.PASSWORD_HASH),
+                                true,
+                                roleIds,
+                                0,
+                                null,
+                                Instant.now(),
+                                Instant.now());
+        }
 
-    @Test
-    @DisplayName("acteur ADMIN_PNA : aucune restriction, même envers un compte ADMIN_PNA")
-    void acteurAdminPna_toujoursAutorise() {
-        when(userManagementRepositoryPort.findById(any()))
-                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
-        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
-                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA", "Administrateur PNA")));
+        @Test
+        @DisplayName("acteur ADMIN_PNA : aucune restriction, même envers un compte ADMIN_PNA")
+        void acteurAdminPna_toujoursAutorise() {
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
+                                                "Administrateur PNA")));
 
-        assertThatCode(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PNA_ID)))
-                .doesNotThrowAnyException();
-    }
+                assertThatCode(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PNA_ID)))
+                                .doesNotThrowAnyException();
+        }
 
-    @Test
-    @DisplayName("acteur ADMIN_PRA gérant une cible ADMIN_PNA → refusé")
-    void acteurAdminPra_cibleAdminPna_refuse() {
-        when(userManagementRepositoryPort.findById(any()))
-                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
-        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
-                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA", "Administrateur PNA")));
+        @Test
+        @DisplayName("acteur ADMIN_PRA gérant une cible ADMIN_PNA → refusé")
+        void acteurAdminPra_cibleAdminPna_refuse() {
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA",
+                                                "Administrateur PRA")));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
+                                                "Administrateur PNA")));
 
-        assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PNA_ID)))
-                .isInstanceOf(GestionUtilisateurInterditeException.class)
-                .isInstanceOf(ForbiddenException.class);
-    }
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PNA_ID)))
+                                .isInstanceOf(GestionUtilisateurInterditeException.class)
+                                .isInstanceOf(ForbiddenException.class);
+        }
 
-    @Test
-    @DisplayName("acteur ADMIN_PRA gérant un autre ADMIN_PRA → refusé, même région ou pas")
-    void acteurAdminPra_ciblePairAdminPra_refuse() {
-        when(userManagementRepositoryPort.findById(any()))
-                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
+        @Test
+        @DisplayName("acteur ADMIN_PRA gérant un autre ADMIN_PRA → refusé, même région ou pas")
+        void acteurAdminPra_ciblePairAdminPra_refuse() {
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA",
+                                                "Administrateur PRA")));
 
-        assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PRA_ID)))
-                .isInstanceOf(GestionUtilisateurInterditeException.class);
-    }
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PRA_ID)))
+                                .isInstanceOf(GestionUtilisateurInterditeException.class);
+        }
 
-    @Test
-    @DisplayName("acteur ADMIN_PRA gérant un GESTIONNAIRE_PRA (rôle subalterne) → autorisé")
-    void acteurAdminPra_cibleSubalterne_autorise() {
-        when(userManagementRepositoryPort.findById(any()))
-                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
-        when(roleCachePort.findAllById(Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
-                .thenReturn(Set.of(
-                        new RoleProjection(ROLE_GESTIONNAIRE_PRA_ID, "GESTIONNAIRE_PRA", "Gestionnaire PRA")));
+        @Test
+        @DisplayName("acteur ADMIN_PRA gérant un GESTIONNAIRE_PRA (rôle subalterne) → autorisé")
+        void acteurAdminPra_cibleSubalterne_autorise() {
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA",
+                                                "Administrateur PRA")));
+                when(roleCachePort.findAllById(Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
+                                .thenReturn(Set.of(
+                                                new RoleProjection(ROLE_GESTIONNAIRE_PRA_ID, "GESTIONNAIRE_PRA",
+                                                                "Gestionnaire PRA")));
 
-        assertThatCode(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
-                .doesNotThrowAnyException();
-    }
+                assertThatCode(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
+                                .doesNotThrowAnyException();
+        }
 
-    @Test
-    @DisplayName("acteur introuvable → UserNotFoundException")
-    void acteurIntrouvable_leveException() {
-        when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
+        @Test
+        @DisplayName("acteur ADMIN_PRA gérant un GESTIONNAIRE_STRUCTURE → refusé (ce sont des clientes, pas du personnel PRA)")
+        void acteurAdminPra_cibleGestionnaireStructure_refuse() {
+                UUID roleGestionnaireStructureId = UUID.fromString("d0000000-0000-0000-0000-000000000004");
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA",
+                                                "Administrateur PRA")));
+                when(roleCachePort.findAllById(Set.of(roleGestionnaireStructureId)))
+                                .thenReturn(Set.of(new RoleProjection(roleGestionnaireStructureId,
+                                                "GESTIONNAIRE_STRUCTURE",
+                                                "Gestionnaire Structure")));
 
-        assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
-                .isInstanceOf(UserNotFoundException.class);
-    }
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(roleGestionnaireStructureId)))
+                                .isInstanceOf(GestionUtilisateurInterditeException.class);
+        }
+
+        @Test
+        @DisplayName("estActeurNational() : true pour un rôle PNA, false pour un rôle PRA")
+        void estActeurNational_reponseCorrecte() {
+                when(userManagementRepositoryPort.findById(any()))
+                                .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
+                when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
+                                .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
+                                                "Administrateur PNA")));
+
+                assertThat(sut.estActeurNational(ACTEUR_ID)).isTrue();
+        }
+
+        @Test
+        @DisplayName("acteur introuvable → UserNotFoundException")
+        void acteurIntrouvable_leveException() {
+                when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
+                                .isInstanceOf(UserNotFoundException.class);
+        }
 }

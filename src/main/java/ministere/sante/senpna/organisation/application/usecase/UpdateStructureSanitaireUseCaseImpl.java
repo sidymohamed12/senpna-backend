@@ -32,7 +32,7 @@ public class UpdateStructureSanitaireUseCaseImpl implements UpdateStructureSanit
                 .orElseThrow(StructureSanitaireIntrouvableException::new);
 
         structure.modifierInformations(command.nom(), command.district(), command.adresse(), command.telephone(),
-                command.email(), command.responsable());
+                command.email(), command.responsableNom(), command.responsablePrenom());
 
         StructureSanitaire saved = structureSanitaireRepositoryPort.save(structure);
         return structureSanitaireDetailAssembler.assembler(saved);

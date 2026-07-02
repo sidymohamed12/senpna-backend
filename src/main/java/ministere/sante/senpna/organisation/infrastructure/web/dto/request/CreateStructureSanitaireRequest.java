@@ -34,5 +34,9 @@ public record CreateStructureSanitaireRequest(
         @Email(message = "L'email doit être valide")
         String email,
 
-        String responsable) {
+        @NotBlank(message = "Le nom du responsable est obligatoire")
+        String responsableNom,
+
+        @NotBlank(message = "Le prénom du responsable est obligatoire")
+        String responsablePrenom) {
 }

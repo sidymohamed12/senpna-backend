@@ -18,5 +18,7 @@ public record CreateUserRequest(
 
                 @Pattern(regexp = "^\\+[1-9]\\d{7,14}$", message = "Le téléphone doit être au format international, ex: +221771234567") String telephone,
 
-                @NotEmpty(message = "Au moins un rôle doit être attribué") Set<UUID> roleIds) {
+                @NotEmpty(message = "Au moins un rôle doit être attribué") Set<UUID> roleIds,
+
+                UUID entrepotId) {
 }

@@ -19,5 +19,7 @@ public record UpdateStructureSanitaireRequest(
         @Email(message = "L'email doit être valide")
         String email,
 
-        String responsable) {
+        String responsableNom,
+
+        String responsablePrenom) {
 }

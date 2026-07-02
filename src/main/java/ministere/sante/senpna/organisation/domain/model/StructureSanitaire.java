@@ -7,6 +7,7 @@ import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
 import ministere.sante.senpna.organisation.domain.valueobject.StatutAdhesion;
 import ministere.sante.senpna.organisation.domain.valueobject.StructureSanitaireId;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeStructureSanitaire;
+import ministere.sante.senpna.shared.domain.events.AdhesionValideeEvent;
 import ministere.sante.senpna.shared.domain.model.AggregateRoot;
 
 import java.time.Instant;
@@ -39,11 +40,6 @@ import java.util.regex.Pattern;
  * La région peut être corrigée a posteriori via
  * {@link #affecterRegion(RegionId)} si nécessaire.
  * </p>
- *
- * <p>
- * Une structure ne peut être (ré)activée que si son adhésion a été validée
- * — cf. {@link #activer()}.
- * </p>
  */
 public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
 
@@ -59,15 +55,16 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
     private String adresse;
     private String telephone;
     private String email;
-    private String responsable;
+    private String responsableNom;
+    private String responsablePrenom;
     private StatutAdhesion statutAdhesion;
     private String motifRejet;
     private boolean actif;
 
     private StructureSanitaire(StructureSanitaireId id, String code, String nom, TypeStructureSanitaire type,
             RegionId regionId, EntrepotId praId, String district, String adresse, String telephone, String email,
-            String responsable, StatutAdhesion statutAdhesion, String motifRejet, boolean actif, Instant createdAt,
-            Instant updatedAt) {
+            String responsableNom, String responsablePrenom, StatutAdhesion statutAdhesion, String motifRejet,
+            boolean actif, Instant createdAt, Instant updatedAt) {
         super(id, createdAt, updatedAt);
         this.code = validerCode(code);
         this.nom = validerNom(nom);
@@ -78,7 +75,8 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
         this.adresse = adresse;
         this.telephone = telephone;
         this.email = email;
-        this.responsable = responsable;
+        this.responsableNom = responsableNom;
+        this.responsablePrenom = responsablePrenom;
         this.statutAdhesion = Objects.requireNonNull(statutAdhesion, "Le statut d'adhésion ne peut pas être null");
         this.motifRejet = motifRejet;
         this.actif = actif;
@@ -86,10 +84,10 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
 
     public static StructureSanitaire reconstruct(StructureSanitaireId id, String code, String nom,
             TypeStructureSanitaire type, RegionId regionId, EntrepotId praId, String district, String adresse,
-            String telephone, String email, String responsable, StatutAdhesion statutAdhesion, String motifRejet,
-            boolean actif, Instant createdAt, Instant updatedAt) {
+            String telephone, String email, String responsableNom, String responsablePrenom,
+            StatutAdhesion statutAdhesion, String motifRejet, boolean actif, Instant createdAt, Instant updatedAt) {
         return new StructureSanitaire(id, code, nom, type, regionId, praId, district, adresse, telephone, email,
-                responsable, statutAdhesion, motifRejet, actif, createdAt, updatedAt);
+                responsableNom, responsablePrenom, statutAdhesion, motifRejet, actif, createdAt, updatedAt);
     }
 
     /**
@@ -99,12 +97,15 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
      * (cf. {@link #validerAdhesion()}).
      */
     public static StructureSanitaire creer(String code, String nom, TypeStructureSanitaire type, RegionId regionId,
-            String district, String adresse, String telephone, String email, String responsable) {
+            String district, String adresse, String telephone, String email, String responsableNom,
+            String responsablePrenom) {
         Objects.requireNonNull(regionId, "La région est obligatoire pour une demande d'adhésion");
+        Objects.requireNonNull(responsableNom, "Le nom du responsable est obligatoire");
+        Objects.requireNonNull(responsablePrenom, "Le prénom du responsable est obligatoire");
         Instant maintenant = Instant.now();
         return new StructureSanitaire(StructureSanitaireId.generate(), code, nom, type, regionId, null, district,
-                adresse, telephone, email, responsable, StatutAdhesion.EN_ATTENTE_VALIDATION, null, false,
-                maintenant, maintenant);
+                adresse, telephone, email, responsableNom, responsablePrenom, StatutAdhesion.EN_ATTENTE_VALIDATION,
+                null, false, maintenant, maintenant);
     }
 
     // ── Cycle de vie de l'adhésion ──────────────────────────────────────
@@ -115,6 +116,8 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
         this.motifRejet = null;
         this.actif = true;
         markUpdated();
+        registerEvent(new AdhesionValideeEvent(
+                getId().getValue(), nom, responsableNom, responsablePrenom, email, Instant.now()));
     }
 
     public void rejeterAdhesion(String motif) {
@@ -146,13 +149,14 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
     // ── Informations générales ──────────────────────────────────────────
 
     public void modifierInformations(String nom, String district, String adresse, String telephone, String email,
-            String responsable) {
+            String responsableNom, String responsablePrenom) {
         this.nom = validerNom(nom);
         this.district = district;
         this.adresse = adresse;
         this.telephone = telephone;
         this.email = email;
-        this.responsable = responsable;
+        this.responsableNom = responsableNom;
+        this.responsablePrenom = responsablePrenom;
         markUpdated();
     }
 
@@ -238,8 +242,12 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
         return email;
     }
 
-    public String getResponsable() {
-        return responsable;
+    public String getResponsableNom() {
+        return responsableNom;
+    }
+
+    public String getResponsablePrenom() {
+        return responsablePrenom;
     }
 
     public StatutAdhesion getStatutAdhesion() {

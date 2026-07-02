@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
  * <li>Un acteur n'ayant que des rôles régionaux (ex: {@code ADMIN_PRA})
  * ne peut gérer <strong>ni</strong> un compte possédant un rôle national,
  * <strong>ni</strong> un compte {@code ADMIN_PRA} — y compris d'une autre
- * région. Il ne peut gérer que les comptes de rôles subalternes
+ * région — <strong>ni</strong> un compte {@code GESTIONNAIRE_STRUCTURE}
+ * (les structures sanitaires sont des clientes du réseau, pas du
+ * personnel PRA). Il ne peut gérer que les comptes de rôles subalternes
  * ({@code GESTIONNAIRE_PRA}, {@code PHARMACIEN_PRA},
- * {@code MAGASINIER_PRA}, {@code GESTIONNAIRE_STRUCTURE}...).</li>
+ * {@code MAGASINIER_PRA}).</li>
  * </ul>
  *
  * <p>
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 public class UserHierarchyGuard {
 
     private static final String ROLE_ADMIN_PRA = "ADMIN_PRA";
+    private static final String ROLE_GESTIONNAIRE_STRUCTURE = "GESTIONNAIRE_STRUCTURE";
 
     private final UserManagementRepositoryPort userManagementRepositoryPort;
     private final RoleCachePort roleCachePort;
@@ -50,6 +53,17 @@ public class UserHierarchyGuard {
     }
 
     /**
+     * @return {@code true} si l'acteur possède au moins un rôle national
+     *         — portée illimitée, aucune restriction hiérarchique ni
+     *         régionale ne s'applique à lui.
+     */
+    public boolean estActeurNational(UUID acteurId) {
+        User acteur = userManagementRepositoryPort.findById(UserId.of(acteurId))
+                .orElseThrow(UserNotFoundException::new);
+        return RolesNationaux.contientRoleNational(codes(acteur.getRoleIds()));
+    }
+
+    /**
      * Vérifie que {@code acteurId} est autorisé à gérer un compte dont
      * l'ensemble de rôles (existant, ou résultant de l'opération en cours :
      * création, attribution de rôle...) est {@code roleIdsCible}.
@@ -57,19 +71,19 @@ public class UserHierarchyGuard {
      * @throws GestionUtilisateurInterditeException si l'acteur n'a que des
      *                                                rôles régionaux et que
      *                                                la cible possède un
-     *                                                rôle national ou
-     *                                                {@code ADMIN_PRA}
+     *                                                rôle national,
+     *                                                {@code ADMIN_PRA} ou
+     *                                                {@code GESTIONNAIRE_STRUCTURE}
      */
     public void verifierGestionAutorisee(UUID acteurId, Set<UUID> roleIdsCible) {
-        User acteur = userManagementRepositoryPort.findById(UserId.of(acteurId))
-                .orElseThrow(UserNotFoundException::new);
-
-        if (RolesNationaux.contientRoleNational(codes(acteur.getRoleIds()))) {
+        if (estActeurNational(acteurId)) {
             return; // rôle national : aucune restriction hiérarchique
         }
 
         Set<String> codesCible = codes(roleIdsCible);
-        if (RolesNationaux.contientRoleNational(codesCible) || codesCible.contains(ROLE_ADMIN_PRA)) {
+        if (RolesNationaux.contientRoleNational(codesCible)
+                || codesCible.contains(ROLE_ADMIN_PRA)
+                || codesCible.contains(ROLE_GESTIONNAIRE_STRUCTURE)) {
             throw new GestionUtilisateurInterditeException();
         }
     }

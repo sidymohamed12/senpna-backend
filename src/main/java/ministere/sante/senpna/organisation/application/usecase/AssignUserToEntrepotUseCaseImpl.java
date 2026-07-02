@@ -7,7 +7,7 @@ import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableE
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.in.AssignUserToEntrepotUseCase;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Affecte un utilisateur à un entrepôt (PNA centrale ou PRA) — cf. doc.
- * métier §2 : "Affectation d'un utilisateur à : une PNA ; une PRA ; une
+ * Affecte un utilisateur à un entrepôt (PNA centrale ou PRA).
+ * métier : "Affectation d'un utilisateur à : une PNA ; une PRA ; une
  * structure sanitaire". Un utilisateur n'est rattaché qu'à une seule unité
  * organisationnelle à la fois : toute affectation à un entrepôt efface une
  * éventuelle affectation préalable à une structure sanitaire.

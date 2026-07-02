@@ -7,9 +7,11 @@ import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
+import ministere.sante.senpna.utilisateurs.application.service.EntrepotAffectationResolver;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
 import ministere.sante.senpna.utilisateurs.application.service.UserHierarchyGuard;
@@ -57,7 +59,7 @@ class UserManagementUseCasesTest {
 
     private static final UserDetail DETAIL_FICTIF = new UserDetail(
             USER_ID, UserFixtures.NOM, UserFixtures.PRENOM, UserFixtures.EMAIL, UserFixtures.TELEPHONE,
-            true, Set.of(), Instant.now(), Instant.now());
+            true, Set.of(), null, null, Instant.now(), Instant.now());
 
     // ══════════════════════════════════════════════════════════════════════
     // CreateUserUseCaseImpl
@@ -79,20 +81,25 @@ class UserManagementUseCasesTest {
         @Mock
         UserHierarchyGuard userHierarchyGuard;
         @Mock
+        EntrepotAffectationResolver entrepotAffectationResolver;
+        @Mock
+        UserAffectationRepositoryPort userAffectationRepositoryPort;
+        @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
         CreateUserUseCaseImpl sut;
 
         private CreateUserCommand commandeValide() {
             return new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM, UserFixtures.EMAIL,
-                    UserFixtures.TELEPHONE, Set.of(ROLE_ID));
+                    UserFixtures.TELEPHONE, Set.of(ROLE_ID), null);
         }
 
         @Test
         @DisplayName("crée l'utilisateur, hash un mot de passe temporaire et retourne le détail assemblé")
         void creer_succes_retourne_created_user() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            when(roleQueryPort.existsById(ROLE_ID)).thenReturn(true);
+            when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.of(RoleFixtures.gestionnairePna()));
+            when(entrepotAffectationResolver.resoudre(eq(ACTEUR_ID), any(), any())).thenReturn(null);
             when(temporaryPasswordGenerator.generer()).thenReturn("TempPass1!23");
             when(passwordEncoderPort.encoder("TempPass1!23")).thenReturn("hash-du-mdp-temp");
             when(userManagementRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -102,13 +109,15 @@ class UserManagementUseCasesTest {
 
             assertThat(result.motDePasseTemporaire()).isEqualTo("TempPass1!23");
             assertThat(result.user()).isEqualTo(DETAIL_FICTIF);
+            verifyNoInteractions(userAffectationRepositoryPort); // aucun entrepôt requis ici
         }
 
         @Test
         @DisplayName("sauvegarde un utilisateur actif avec le mot de passe haché et les rôles fournis")
         void creer_succes_sauvegarde_champs_corrects() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            when(roleQueryPort.existsById(ROLE_ID)).thenReturn(true);
+            when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.of(RoleFixtures.gestionnairePna()));
+            when(entrepotAffectationResolver.resoudre(eq(ACTEUR_ID), any(), any())).thenReturn(null);
             when(temporaryPasswordGenerator.generer()).thenReturn("TempPass1!23");
             when(passwordEncoderPort.encoder("TempPass1!23")).thenReturn("hash-du-mdp-temp");
             when(userManagementRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -130,10 +139,28 @@ class UserManagementUseCasesTest {
         }
 
         @Test
+        @DisplayName("rôle exigeant un entrepôt → affectation atomique après sauvegarde")
+        void creer_succes_affecteEntrepotAtomiquement() {
+            UUID entrepotId = UUID.randomUUID();
+            when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
+            when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.of(RoleFixtures.gestionnairePna()));
+            when(entrepotAffectationResolver.resoudre(eq(ACTEUR_ID), any(), any())).thenReturn(entrepotId);
+            when(temporaryPasswordGenerator.generer()).thenReturn("TempPass1!23");
+            when(passwordEncoderPort.encoder(any())).thenReturn("hash");
+            when(userManagementRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(userDetailAssembler.assembler(any())).thenReturn(DETAIL_FICTIF);
+
+            sut.creer(commandeValide());
+
+            verify(userAffectationRepositoryPort).affecterEntrepot(any(), eq(entrepotId));
+        }
+
+        @Test
         @DisplayName("sans téléphone (vide) → l'utilisateur est créé sans téléphone")
         void creer_sansTelephone_telephoneNull() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            when(roleQueryPort.existsById(ROLE_ID)).thenReturn(true);
+            when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.of(RoleFixtures.gestionnairePna()));
+            when(entrepotAffectationResolver.resoudre(eq(ACTEUR_ID), any(), any())).thenReturn(null);
             when(temporaryPasswordGenerator.generer()).thenReturn("TempPass1!23");
             when(passwordEncoderPort.encoder(any())).thenReturn("hash");
             when(userManagementRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -141,7 +168,7 @@ class UserManagementUseCasesTest {
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
             CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
-                    UserFixtures.EMAIL, "  ", Set.of(ROLE_ID));
+                    UserFixtures.EMAIL, "  ", Set.of(ROLE_ID), null);
 
             sut.creer(command);
 
@@ -157,7 +184,8 @@ class UserManagementUseCasesTest {
             assertThatThrownBy(() -> sut.creer(commandeValide()))
                     .isInstanceOf(EmailDejaUtiliseException.class);
 
-            verifyNoInteractions(roleQueryPort, passwordEncoderPort, temporaryPasswordGenerator, userDetailAssembler);
+            verifyNoInteractions(roleQueryPort, passwordEncoderPort, temporaryPasswordGenerator, userDetailAssembler,
+                    entrepotAffectationResolver, userAffectationRepositoryPort);
             verify(userManagementRepositoryPort, never()).save(any());
         }
 
@@ -166,7 +194,7 @@ class UserManagementUseCasesTest {
         void creer_roleIdsNull_leve_validation_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
             CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
-                    UserFixtures.EMAIL, null, null);
+                    UserFixtures.EMAIL, null, null, null);
 
             assertThatThrownBy(() -> sut.creer(command))
                     .isInstanceOf(ValidationException.class)
@@ -181,7 +209,7 @@ class UserManagementUseCasesTest {
         void creer_roleIdsVide_leve_validation_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
             CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
-                    UserFixtures.EMAIL, null, Set.of());
+                    UserFixtures.EMAIL, null, Set.of(), null);
 
             assertThatThrownBy(() -> sut.creer(command))
                     .isInstanceOf(ValidationException.class);
@@ -193,12 +221,31 @@ class UserManagementUseCasesTest {
         @DisplayName("rôle introuvable → RoleIntrouvableException, aucune sauvegarde")
         void creer_roleIntrouvable_leve_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            when(roleQueryPort.existsById(ROLE_ID)).thenReturn(false);
+            when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> sut.creer(commandeValide()))
                     .isInstanceOf(RoleIntrouvableException.class);
 
             verifyNoInteractions(passwordEncoderPort, temporaryPasswordGenerator, userDetailAssembler);
+            verify(userManagementRepositoryPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("rôle GESTIONNAIRE_STRUCTURE demandé → CreationRoleReserveeException, création manuelle interdite")
+        void creer_gestionnaireStructure_leve_exception() {
+            UUID roleGestionnaireStructureId = UUID.randomUUID();
+            when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
+            when(roleQueryPort.findById(roleGestionnaireStructureId)).thenReturn(Optional.of(
+                    new ministere.sante.senpna.shared.domain.projection.RoleProjection(
+                            roleGestionnaireStructureId, "GESTIONNAIRE_STRUCTURE", "Gestionnaire Structure")));
+            CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
+                    UserFixtures.EMAIL, null, Set.of(roleGestionnaireStructureId), null);
+
+            assertThatThrownBy(() -> sut.creer(command))
+                    .isInstanceOf(CreationRoleReserveeException.class);
+
+            verifyNoInteractions(userHierarchyGuard, entrepotAffectationResolver, passwordEncoderPort,
+                    userDetailAssembler);
             verify(userManagementRepositoryPort, never()).save(any());
         }
     }

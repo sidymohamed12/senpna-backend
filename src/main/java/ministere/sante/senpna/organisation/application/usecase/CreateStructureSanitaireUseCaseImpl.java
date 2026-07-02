@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Enregistre une demande d'adhésion d'une structure sanitaire au réseau.
  * La structure est créée à l'état {@code EN_ATTENTE_VALIDATION} et
- * inactive — elle ne pourra recevoir de commandes qu'après validation par
- * la PNA/PRA (cf. {@link ValidateAdhesionUseCaseImpl}). La région de
- * rattachement est obligatoire dès la création (cf. {@link StructureSanitaire#creer}).
+ * inactive.
  */
 @Service
 public class CreateStructureSanitaireUseCaseImpl implements CreateStructureSanitaireUseCase {
@@ -60,7 +58,7 @@ public class CreateStructureSanitaireUseCaseImpl implements CreateStructureSanit
 
         StructureSanitaire structure = StructureSanitaire.creer(command.code(), command.nom(), command.type(),
                 region.getId(), command.district(), command.adresse(), command.telephone(), command.email(),
-                command.responsable());
+                command.responsableNom(), command.responsablePrenom());
 
         StructureSanitaire saved = structureSanitaireRepositoryPort.save(structure);
         return structureSanitaireDetailAssembler.assembler(saved);

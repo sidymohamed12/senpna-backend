@@ -52,8 +52,11 @@ public class StructureSanitaireJpaEntity extends BaseJpaEntity {
     @Column(name = "email", length = 180)
     private String email;
 
-    @Column(name = "responsable", length = 150)
-    private String responsable;
+    @Column(name = "responsable_nom", length = 100)
+    private String responsableNom;
+
+    @Column(name = "responsable_prenom", length = 100)
+    private String responsablePrenom;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut_adhesion", nullable = false, length = 30)
@@ -66,8 +69,8 @@ public class StructureSanitaireJpaEntity extends BaseJpaEntity {
     private boolean actif;
 
     public StructureSanitaireJpaEntity(UUID id, String code, String nom, TypeStructureSanitaire type, UUID regionId,
-            UUID praId, String district, String adresse, String telephone, String email, String responsable,
-            StatutAdhesion statutAdhesion, String motifRejet, boolean actif) {
+            UUID praId, String district, String adresse, String telephone, String email, String responsableNom,
+            String responsablePrenom, StatutAdhesion statutAdhesion, String motifRejet, boolean actif) {
         super(id);
         this.code = code;
         this.nom = nom;
@@ -78,7 +81,8 @@ public class StructureSanitaireJpaEntity extends BaseJpaEntity {
         this.adresse = adresse;
         this.telephone = telephone;
         this.email = email;
-        this.responsable = responsable;
+        this.responsableNom = responsableNom;
+        this.responsablePrenom = responsablePrenom;
         this.statutAdhesion = statutAdhesion;
         this.motifRejet = motifRejet;
         this.actif = actif;

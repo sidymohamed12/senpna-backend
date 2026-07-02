@@ -3,7 +3,9 @@ package ministere.sante.senpna.utilisateurs.application.service;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.RoleSummary;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.utilisateurs.fixtures.RoleFixtures;
@@ -16,7 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,16 +45,21 @@ class UserManagementServicesTest {
 
         @Mock
         UserRoleSummaryResolver roleSummaryResolver;
+        @Mock
+        UserAffectationRepositoryPort userAffectationRepositoryPort;
         @InjectMocks
         UserDetailAssembler sut;
 
         @Test
-        @DisplayName("assemble un UserDetail complet à partir de l'agrégat User")
+        @DisplayName("assemble un UserDetail complet à partir de l'agrégat User, avec son affectation")
         void assembler_construit_userDetail_complet() {
             User user = UserFixtures.actifAvecTelephone();
             Set<RoleSummary> roles = Set.of(new RoleSummary(RoleFixtures.ROLE_GESTIONNAIRE_PNA_ID,
                     "GESTIONNAIRE_PNA", "Gestionnaire PNA"));
             when(roleSummaryResolver.resoudre(user.getRoleIds())).thenReturn(roles);
+            UUID entrepotId = UUID.randomUUID();
+            when(userAffectationRepositoryPort.findAffectation(user.getId().getValue()))
+                    .thenReturn(Optional.of(new UserAffectationView(user.getId().getValue(), entrepotId, null)));
 
             UserDetail detail = sut.assembler(user);
 
@@ -61,19 +70,24 @@ class UserManagementServicesTest {
             assertThat(detail.telephone()).isEqualTo(UserFixtures.TELEPHONE);
             assertThat(detail.actif()).isTrue();
             assertThat(detail.roles()).isEqualTo(roles);
+            assertThat(detail.entrepotId()).isEqualTo(entrepotId);
+            assertThat(detail.structureSanitaireId()).isNull();
             assertThat(detail.createdAt()).isEqualTo(user.getCreatedAt());
             assertThat(detail.updatedAt()).isEqualTo(user.getUpdatedAt());
         }
 
         @Test
-        @DisplayName("utilisateur sans téléphone → le champ telephone du détail est null")
-        void assembler_sansTelephone_champNull() {
+        @DisplayName("utilisateur sans téléphone ni affectation → champs correspondants à null")
+        void assembler_sansTelephoneNiAffectation_champsNull() {
             User user = UserFixtures.actif();
             when(roleSummaryResolver.resoudre(any())).thenReturn(Set.of());
+            when(userAffectationRepositoryPort.findAffectation(any())).thenReturn(Optional.empty());
 
             UserDetail detail = sut.assembler(user);
 
             assertThat(detail.telephone()).isNull();
+            assertThat(detail.entrepotId()).isNull();
+            assertThat(detail.structureSanitaireId()).isNull();
         }
     }
 

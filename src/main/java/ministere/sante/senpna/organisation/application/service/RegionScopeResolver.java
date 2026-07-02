@@ -5,8 +5,8 @@ import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.model.StructureSanitaire;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.port.out.StructureSanitaireRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationView;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
 import ministere.sante.senpna.organisation.domain.valueobject.StructureSanitaireId;
@@ -70,11 +70,6 @@ public class RegionScopeResolver {
         this.structureSanitaireRepositoryPort = structureSanitaireRepositoryPort;
     }
 
-    /**
-     * @return {@code true} si l'acteur possède au moins un rôle national
-     *         (cf. {@link RolesNationaux}) — accès illimité à toutes les
-     *         régions.
-     */
     public boolean estActeurNational(UUID acteurId) {
         User acteur = userManagementRepositoryPort.findById(UserId.of(acteurId))
                 .orElseThrow(UserNotFoundException::new);
@@ -122,9 +117,9 @@ public class RegionScopeResolver {
      * soit son affectation.
      *
      * @throws AccesRegionRefuseException si l'acteur n'a pas de rôle
-     *                                     national et est rattaché à une
-     *                                     région différente de la région
-     *                                     ciblée
+     *                                    national et est rattaché à une
+     *                                    région différente de la région
+     *                                    ciblée
      */
     public void verifierAccesRegion(UUID acteurId, RegionId regionCible) {
         if (estActeurNational(acteurId)) {

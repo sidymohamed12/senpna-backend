@@ -1,4 +1,4 @@
-package ministere.sante.senpna.organisation.infrastructure.persistence.entity;
+package ministere.sante.senpna.shared.infrastructure.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,12 +19,13 @@ import java.util.UUID;
  * <p>
  * L'agrégat {@code User} complet (identité, authentification, rôles) est
  * la propriété exclusive des modules {@code auth}/{@code utilisateurs}.
- * Le module {@code organisation} n'a pas besoin — et ne doit pas avoir —
- * connaissance du reste de cet agrégat : il agit uniquement sur ces deux
- * colonnes via des requêtes ciblées ({@code UPDATE ... SET ...}), jamais
- * via un {@code INSERT} (cette entité n'est donc jamais instanciée ni
- * persistée directement, seulement lue/mise à jour pour un utilisateur
- * déjà existant).
+ * Cette entité — volontairement placée dans {@code shared} car utilisée
+ * aussi bien par {@code utilisateurs} (affectation atomique à la
+ * création) que par {@code organisation} (affectation ultérieure) — agit
+ * uniquement sur ces deux colonnes via des requêtes ciblées
+ * ({@code UPDATE ... SET ...}), jamais via un {@code INSERT} (elle n'est
+ * donc jamais instanciée ni persistée directement, seulement lue/mise à
+ * jour pour un utilisateur déjà existant).
  * </p>
  */
 @Entity

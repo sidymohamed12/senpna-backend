@@ -7,7 +7,7 @@ import ministere.sante.senpna.organisation.domain.exception.StructureSanitaireNo
 import ministere.sante.senpna.organisation.domain.model.StructureSanitaire;
 import ministere.sante.senpna.organisation.domain.port.in.AssignUserToStructureUseCase;
 import ministere.sante.senpna.organisation.domain.port.out.StructureSanitaireRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.StatutAdhesion;
 import ministere.sante.senpna.organisation.domain.valueobject.StructureSanitaireId;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;

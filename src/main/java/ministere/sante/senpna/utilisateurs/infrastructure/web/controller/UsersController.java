@@ -91,7 +91,7 @@ public class UsersController {
         public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateUserRequest request) {
                 CreatedUser result = userManagementFacade.creer(new CreateUserCommand(
                                 currentUserId(), request.nom(), request.prenom(), request.email(),
-                                request.telephone(), request.roleIds()));
+                                request.telephone(), request.roleIds(), request.entrepotId()));
 
                 CreatedUserResponse body = new CreatedUserResponse(toResponse(result.user()),
                                 result.motDePasseTemporaire());
@@ -188,7 +188,8 @@ public class UsersController {
                                 .map(this::toResponse)
                                 .collect(Collectors.toUnmodifiableSet());
                 return new UserResponse(detail.id(), detail.nom(), detail.prenom(), detail.email(), detail.telephone(),
-                                detail.actif(), roles, detail.createdAt(), detail.updatedAt());
+                                detail.actif(), roles, detail.entrepotId(), detail.structureSanitaireId(),
+                                detail.createdAt(), detail.updatedAt());
         }
 
         private RoleSummaryResponse toResponse(RoleSummary summary) {

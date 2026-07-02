@@ -1,9 +1,9 @@
-package ministere.sante.senpna.organisation.infrastructure.persistence.adapter;
+package ministere.sante.senpna.shared.infrastructure.persistence.adapter;
 
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationRepositoryPort;
-import ministere.sante.senpna.organisation.domain.port.out.UserAffectationView;
-import ministere.sante.senpna.organisation.infrastructure.persistence.entity.UserAffectationJpaEntity;
-import ministere.sante.senpna.organisation.infrastructure.persistence.repository.UserAffectationJpaRepository;
+import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
+import ministere.sante.senpna.shared.infrastructure.persistence.entity.UserAffectationJpaEntity;
+import ministere.sante.senpna.shared.infrastructure.persistence.repository.UserAffectationJpaRepository;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

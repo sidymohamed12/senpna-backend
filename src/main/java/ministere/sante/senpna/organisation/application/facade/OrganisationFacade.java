@@ -1,32 +1,6 @@
 package ministere.sante.senpna.organisation.application.facade;
 
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivateStructureSanitaireCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignStructureToPraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignStructureToRegionCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignUserToEntrepotCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignUserToStructureCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreateRegionCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreateStructureSanitaireCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.DeactivatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.DeactivateStructureSanitaireCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotPage;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetEntrepotQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetRegionQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetStructureSanitaireQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ListEntrepotsQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ListStructuresSanitairesQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RegionDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RejectAdhesionCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.StructureSanitaireDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.StructureSanitairePage;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UnassignUserCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UpdatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UpdateStructureSanitaireCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UserAffectationDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ValidateAdhesionCommand;
+import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.*;
 import ministere.sante.senpna.organisation.domain.port.in.ActivatePraUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.ActivateStructureSanitaireUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.AssignStructureToPraUseCase;
@@ -54,12 +28,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * Point d'entrée unique de l'application vers le module {@code organisation}.
- * Agrège l'ensemble des use cases de gestion des régions, des PRA
- * (entrepôts) et des structures sanitaires, ainsi que l'affectation des
- * utilisateurs à une unité organisationnelle.
- */
 @Component
 public class OrganisationFacade {
 

@@ -12,6 +12,8 @@ public record UserResponse(
                 String telephone,
                 boolean actif,
                 Set<RoleSummaryResponse> roles,
+                UUID entrepotId,
+                UUID structureSanitaireId,
                 Instant createdAt,
                 Instant updatedAt) {
 }
