@@ -1,4 +1,4 @@
-package ministere.sante.senpna.auth.domain.valueobject;
+package ministere.sante.senpna.shared.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,7 +14,7 @@ import ministere.sante.senpna.shared.domain.valueobject.UserId;
 
 import static org.assertj.core.api.Assertions.*;
 
-@DisplayName("Value Objects — auth domain")
+@DisplayName("Value Objects — shared domain")
 class ValueObjectsTest {
 
     // ══════════════════════════════════════════════════════════════════════

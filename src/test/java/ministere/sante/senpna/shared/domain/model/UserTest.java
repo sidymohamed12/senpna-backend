@@ -1,4 +1,4 @@
-package ministere.sante.senpna.auth.domain.model;
+package ministere.sante.senpna.shared.domain.model;
 
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.shared.domain.model.User;
