@@ -43,9 +43,12 @@ spring:
         default_batch_fetch_size: 100
 
   # ── Flyway ───────────────────────────────────────────────────────
+  # db/migration-dev contient les données de démonstration (mock data,
+  # V011) : chargé uniquement ici, jamais en prod (cf. application-prod.yml
+  # qui ne pointe que sur classpath:db/migration).
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/migration-dev
     baseline-on-migrate: true
     validate-on-migrate: true
 
