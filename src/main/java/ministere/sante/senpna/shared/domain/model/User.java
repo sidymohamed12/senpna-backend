@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class User extends AggregateRoot {
+public class User extends AggregateRoot<UserId> {
 
     private Nom nom;
     private Prenom prenom;

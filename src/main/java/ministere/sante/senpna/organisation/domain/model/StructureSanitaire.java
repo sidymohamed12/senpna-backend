@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * typiquement au moment de la validation de l'adhésion.
  * </p>
  */
-public class StructureSanitaire extends AggregateRoot {
+public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z0-9\\-]{2,30}$");
     private static final int NOM_MAX_LENGTH = 150;

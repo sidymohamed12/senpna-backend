@@ -22,15 +22,15 @@ import java.util.List;
  * une vue non modifiable.
  * </p>
  */
-public abstract class AggregateRoot extends BaseEntity {
+public abstract class AggregateRoot<I extends EntityId> extends BaseEntity<I> {
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
-    protected AggregateRoot(EntityId id) {
+    protected AggregateRoot(I id) {
         super(id);
     }
 
-    protected AggregateRoot(EntityId id, Instant createdAt, Instant updatedAt) {
+    protected AggregateRoot(I id, Instant createdAt, Instant updatedAt) {
         super(id, createdAt, updatedAt);
     }
 

@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class Region extends AggregateRoot {
+public class Region extends AggregateRoot<RegionId> {
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z0-9\\-]{2,20}$");
     private static final int NOM_MAX_LENGTH = 100;

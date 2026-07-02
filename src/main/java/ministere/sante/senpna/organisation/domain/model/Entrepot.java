@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * migration de données (donnée de référence unique, non gérée via API).
  * </p>
  */
-public class Entrepot extends AggregateRoot {
+public class Entrepot extends AggregateRoot<EntrepotId> {
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z0-9\\-]{2,30}$");
     private static final int NOM_MAX_LENGTH = 150;

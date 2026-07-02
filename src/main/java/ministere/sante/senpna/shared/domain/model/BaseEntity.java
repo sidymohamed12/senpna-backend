@@ -5,20 +5,20 @@ import ministere.sante.senpna.shared.domain.valueobject.EntityId;
 import java.time.Instant;
 import java.util.Objects;
 
-public abstract class BaseEntity {
+public abstract class BaseEntity<I extends EntityId> {
 
-    private final EntityId id;
+    private final I id;
     private final Instant createdAt;
     private Instant updatedAt;
 
-    protected BaseEntity(EntityId id) {
+    protected BaseEntity(I id) {
         Objects.requireNonNull(id, "L'identifiant ne peut pas être null");
         this.id = id;
         this.createdAt = Instant.now();
         this.updatedAt = this.createdAt;
     }
 
-    protected BaseEntity(EntityId id, Instant createdAt, Instant updatedAt) {
+    protected BaseEntity(I id, Instant createdAt, Instant updatedAt) {
         Objects.requireNonNull(id, "L'identifiant ne peut pas être null");
         Objects.requireNonNull(createdAt, "createdAt ne peut pas être null");
         Objects.requireNonNull(updatedAt, "updatedAt ne peut pas être null");
@@ -31,7 +31,7 @@ public abstract class BaseEntity {
         this.updatedAt = Instant.now();
     }
 
-    public EntityId getId() {
+    public I getId() {
         return id;
     }
 
@@ -51,7 +51,7 @@ public abstract class BaseEntity {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        BaseEntity that = (BaseEntity) o;
+        BaseEntity<I> that = (BaseEntity<I>) o;
         return Objects.equals(id, that.id);
     }
 
