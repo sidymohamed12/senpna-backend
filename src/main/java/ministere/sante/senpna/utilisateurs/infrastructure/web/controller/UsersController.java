@@ -169,8 +169,8 @@ public class UsersController {
 
         @DeleteMapping("/{id}/roles/{roleId}")
         public ResponseEntity<Map<String, Object>> retirerRole(@PathVariable UUID id, @PathVariable UUID roleId) {
-                UserDetail result = userManagementFacade
-                                .retirerRole(new RevokeRoleCommand(id, currentUserId(), roleId));
+                UserDetail result = userManagementFacade.retirerRole(
+                                new RevokeRoleCommand(id, currentUserId(), roleId));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ROLE_REVOKED",
                                 "Rôle retiré avec succès"));
         }

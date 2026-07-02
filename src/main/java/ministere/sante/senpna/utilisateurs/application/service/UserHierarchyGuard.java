@@ -5,6 +5,7 @@ import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
+import ministere.sante.senpna.shared.domain.valueobject.RolesNationaux;
 import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.utilisateurs.domain.exception.GestionUtilisateurInterditeException;
 
@@ -18,10 +19,8 @@ import java.util.stream.Collectors;
  * Fait respecter la hiérarchie de gestion des comptes utilisateurs :
  *
  * <ul>
- * <li>Un acteur possédant un rôle national ({@code ADMIN_PNA},
- * {@code GESTIONNAIRE_PNA}, {@code PHARMACIEN_PNA},
- * {@code MAGASINIER_PNA}) peut gérer n'importe quel compte, sans
- * restriction.</li>
+ * <li>Un acteur possédant un rôle national (cf. {@link RolesNationaux})
+ * peut gérer n'importe quel compte, sans restriction.</li>
  * <li>Un acteur n'ayant que des rôles régionaux (ex: {@code ADMIN_PRA})
  * ne peut gérer <strong>ni</strong> un compte possédant un rôle national,
  * <strong>ni</strong> un compte {@code ADMIN_PRA} — y compris d'une autre
@@ -39,8 +38,6 @@ import java.util.stream.Collectors;
 @Component
 public class UserHierarchyGuard {
 
-    private static final Set<String> ROLES_PNA = Set.of(
-            "ADMIN_PNA", "GESTIONNAIRE_PNA", "PHARMACIEN_PNA", "MAGASINIER_PNA");
     private static final String ROLE_ADMIN_PRA = "ADMIN_PRA";
 
     private final UserManagementRepositoryPort userManagementRepositoryPort;
@@ -67,18 +64,14 @@ public class UserHierarchyGuard {
         User acteur = userManagementRepositoryPort.findById(UserId.of(acteurId))
                 .orElseThrow(UserNotFoundException::new);
 
-        if (estDePorteeNationale(codes(acteur.getRoleIds()))) {
+        if (RolesNationaux.contientRoleNational(codes(acteur.getRoleIds()))) {
             return; // rôle national : aucune restriction hiérarchique
         }
 
         Set<String> codesCible = codes(roleIdsCible);
-        if (estDePorteeNationale(codesCible) || codesCible.contains(ROLE_ADMIN_PRA)) {
+        if (RolesNationaux.contientRoleNational(codesCible) || codesCible.contains(ROLE_ADMIN_PRA)) {
             throw new GestionUtilisateurInterditeException();
         }
-    }
-
-    private boolean estDePorteeNationale(Set<String> codesRole) {
-        return codesRole.stream().anyMatch(ROLES_PNA::contains);
     }
 
     private Set<String> codes(Set<UUID> roleIds) {

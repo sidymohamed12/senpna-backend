@@ -61,142 +61,135 @@ import java.util.UUID;
 @RequestMapping("/api/structures-sanitaires")
 public class StructuresSanitairesController {
 
-        private final OrganisationFacade organisationFacade;
+    private final OrganisationFacade organisationFacade;
 
-        public StructuresSanitairesController(OrganisationFacade organisationFacade) {
-                this.organisationFacade = organisationFacade;
-        }
+    public StructuresSanitairesController(OrganisationFacade organisationFacade) {
+        this.organisationFacade = organisationFacade;
+    }
 
-        @PostMapping
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateStructureSanitaireRequest request) {
-                StructureSanitaireDetail result = organisationFacade.creerStructureSanitaire(
-                                new CreateStructureSanitaireCommand(request.code(), request.nom(), request.type(),
-                                                request.regionId(), request.district(), request.adresse(),
-                                                request.telephone(),
-                                                request.email(), request.responsable()));
-                return ResponseEntity.status(HttpStatus.CREATED).body(
-                                RestResponse.response(HttpStatus.CREATED, toResponse(result),
-                                                "STRUCTURE_SANITAIRE_CREATED",
-                                                "Demande d'adhésion de la structure sanitaire enregistrée"));
-        }
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateStructureSanitaireRequest request) {
+        StructureSanitaireDetail result = organisationFacade.creerStructureSanitaire(
+                new CreateStructureSanitaireCommand(request.code(), request.nom(), request.type(),
+                        request.regionId(), request.district(), request.adresse(), request.telephone(),
+                        request.email(), request.responsable()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                RestResponse.response(HttpStatus.CREATED, toResponse(result), "STRUCTURE_SANITAIRE_CREATED",
+                        "Demande d'adhésion de la structure sanitaire enregistrée"));
+    }
 
-        @PutMapping("/{id}")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-                        @Valid @RequestBody UpdateStructureSanitaireRequest request) {
-                StructureSanitaireDetail result = organisationFacade.modifierStructureSanitaire(
-                                new UpdateStructureSanitaireCommand(id, request.nom(), request.district(),
-                                                request.adresse(),
-                                                request.telephone(), request.email(), request.responsable()));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_UPDATED", "Structure sanitaire modifiée avec succès"));
-        }
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
+            @Valid @RequestBody UpdateStructureSanitaireRequest request) {
+        StructureSanitaireDetail result = organisationFacade.modifierStructureSanitaire(
+                new UpdateStructureSanitaireCommand(id, request.nom(), request.district(), request.adresse(),
+                        request.telephone(), request.email(), request.responsable()));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_UPDATED", "Structure sanitaire modifiée avec succès"));
+    }
 
-        @PatchMapping("/{id}/valider-adhesion")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> validerAdhesion(@PathVariable UUID id) {
-                StructureSanitaireDetail result = organisationFacade.validerAdhesion(new ValidateAdhesionCommand(id));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ADHESION_VALIDATED",
-                                "Demande d'adhésion validée avec succès"));
-        }
+    @PatchMapping("/{id}/valider-adhesion")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> validerAdhesion(@PathVariable UUID id) {
+        StructureSanitaireDetail result = organisationFacade.validerAdhesion(new ValidateAdhesionCommand(id));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ADHESION_VALIDATED",
+                "Demande d'adhésion validée avec succès"));
+    }
 
-        @PatchMapping("/{id}/rejeter-adhesion")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> rejeterAdhesion(@PathVariable UUID id,
-                        @Valid @RequestBody RejectAdhesionRequest request) {
-                StructureSanitaireDetail result = organisationFacade
-                                .rejeterAdhesion(new RejectAdhesionCommand(id, request.motif()));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ADHESION_REJECTED",
-                                "Demande d'adhésion rejetée"));
-        }
+    @PatchMapping("/{id}/rejeter-adhesion")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> rejeterAdhesion(@PathVariable UUID id,
+            @Valid @RequestBody RejectAdhesionRequest request) {
+        StructureSanitaireDetail result = organisationFacade
+                .rejeterAdhesion(new RejectAdhesionCommand(id, request.motif()));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ADHESION_REJECTED",
+                "Demande d'adhésion rejetée"));
+    }
 
-        @PatchMapping("/{id}/activer")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> activer(@PathVariable UUID id) {
-                StructureSanitaireDetail result = organisationFacade
-                                .activerStructureSanitaire(new ActivateStructureSanitaireCommand(id));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_ACTIVATED", "Structure sanitaire activée avec succès"));
-        }
+    @PatchMapping("/{id}/activer")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> activer(@PathVariable UUID id) {
+        StructureSanitaireDetail result = organisationFacade
+                .activerStructureSanitaire(new ActivateStructureSanitaireCommand(id));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_ACTIVATED", "Structure sanitaire activée avec succès"));
+    }
 
-        @PatchMapping("/{id}/desactiver")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
-                StructureSanitaireDetail result = organisationFacade
-                                .desactiverStructureSanitaire(new DeactivateStructureSanitaireCommand(id));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_DEACTIVATED", "Structure sanitaire désactivée avec succès"));
-        }
+    @PatchMapping("/{id}/desactiver")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
+        StructureSanitaireDetail result = organisationFacade
+                .desactiverStructureSanitaire(new DeactivateStructureSanitaireCommand(id));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_DEACTIVATED", "Structure sanitaire désactivée avec succès"));
+    }
 
-        @PatchMapping("/{id}/region")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> affecterRegion(@PathVariable UUID id,
-                        @Valid @RequestBody AssignRegionRequest request) {
-                StructureSanitaireDetail result = organisationFacade
-                                .affecterStructureARegion(new AssignStructureToRegionCommand(id, request.regionId()));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_REGION_ASSIGNED",
-                                "Structure sanitaire rattachée à la région avec succès"));
-        }
+    @PatchMapping("/{id}/region")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+    public ResponseEntity<Map<String, Object>> affecterRegion(@PathVariable UUID id,
+            @Valid @RequestBody AssignRegionRequest request) {
+        StructureSanitaireDetail result = organisationFacade
+                .affecterStructureARegion(new AssignStructureToRegionCommand(id, request.regionId()));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_REGION_ASSIGNED", "Structure sanitaire rattachée à la région avec succès"));
+    }
 
-        @PatchMapping("/{id}/pra")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> affecterPra(@PathVariable UUID id,
-                        @Valid @RequestBody AssignPraRequest request) {
-                StructureSanitaireDetail result = organisationFacade
-                                .affecterStructureAPra(new AssignStructureToPraCommand(id, request.praId()));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_PRA_ASSIGNED",
-                                "Structure sanitaire rattachée à la PRA avec succès"));
-        }
+    @PatchMapping("/{id}/pra")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+    public ResponseEntity<Map<String, Object>> affecterPra(@PathVariable UUID id,
+            @Valid @RequestBody AssignPraRequest request) {
+        StructureSanitaireDetail result = organisationFacade
+                .affecterStructureAPra(new AssignStructureToPraCommand(id, request.praId()));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_PRA_ASSIGNED", "Structure sanitaire rattachée à la PRA avec succès"));
+    }
 
-        @GetMapping("/{id}")
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
-                StructureSanitaireDetail result = organisationFacade
-                                .obtenirStructureSanitaire(new GetStructureSanitaireQuery(id));
-                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
-                                "STRUCTURE_SANITAIRE_FOUND", "Structure sanitaire récupérée"));
-        }
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        StructureSanitaireDetail result = organisationFacade
+                .obtenirStructureSanitaire(new GetStructureSanitaireQuery(id));
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
+                "STRUCTURE_SANITAIRE_FOUND", "Structure sanitaire récupérée"));
+    }
 
-        @GetMapping
-        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
-        public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) TypeStructureSanitaire type,
-                        @RequestParam(required = false) UUID regionId,
-                        @RequestParam(required = false) UUID praId,
-                        @RequestParam(required = false) StatutAdhesion statutAdhesion,
-                        @RequestParam(required = false) Boolean actif,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
+    public ResponseEntity<Map<String, Object>> lister(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) TypeStructureSanitaire type,
+            @RequestParam(required = false) UUID regionId,
+            @RequestParam(required = false) UUID praId,
+            @RequestParam(required = false) StatutAdhesion statutAdhesion,
+            @RequestParam(required = false) Boolean actif,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size,
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
 
-                StructureSanitairePage result = organisationFacade.listerStructuresSanitaires(
-                                new ListStructuresSanitairesQuery(q, type, regionId, praId, statutAdhesion, actif, page,
-                                                size,
-                                                sortBy, sortDirection));
+        StructureSanitairePage result = organisationFacade.listerStructuresSanitaires(
+                new ListStructuresSanitairesQuery(q, type, regionId, praId, statutAdhesion, actif, page, size,
+                        sortBy, sortDirection));
 
-                return ResponseEntity.ok(RestResponse.responsePaginate(
-                                HttpStatus.OK,
-                                result.content().stream().map(this::toResponse).toList(),
-                                "STRUCTURES_SANITAIRES_LISTED",
-                                "Liste des structures sanitaires récupérée",
-                                result.page(),
-                                result.totalPages(),
-                                result.totalElements(),
-                                result.page() == 0,
-                                result.page() >= result.totalPages() - 1));
-        }
+        return ResponseEntity.ok(RestResponse.responsePaginate(
+                HttpStatus.OK,
+                result.content().stream().map(this::toResponse).toList(),
+                "STRUCTURES_SANITAIRES_LISTED",
+                "Liste des structures sanitaires récupérée",
+                result.page(),
+                result.totalPages(),
+                result.totalElements(),
+                result.page() == 0,
+                result.page() >= result.totalPages() - 1));
+    }
 
-        private StructureSanitaireResponse toResponse(StructureSanitaireDetail detail) {
-                return new StructureSanitaireResponse(detail.id(), detail.code(), detail.nom(), detail.type(),
-                                detail.regionId(), detail.regionNom(), detail.praId(), detail.praNom(),
-                                detail.district(),
-                                detail.adresse(), detail.telephone(), detail.email(), detail.responsable(),
-                                detail.statutAdhesion(), detail.motifRejet(), detail.actif(), detail.createdAt(),
-                                detail.updatedAt());
-        }
+    private StructureSanitaireResponse toResponse(StructureSanitaireDetail detail) {
+        return new StructureSanitaireResponse(detail.id(), detail.code(), detail.nom(), detail.type(),
+                detail.regionId(), detail.regionNom(), detail.praId(), detail.praNom(), detail.district(),
+                detail.adresse(), detail.telephone(), detail.email(), detail.responsable(),
+                detail.statutAdhesion(), detail.motifRejet(), detail.actif(), detail.createdAt(),
+                detail.updatedAt());
+    }
 }
