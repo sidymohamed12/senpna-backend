@@ -4,6 +4,7 @@ import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
+import ministere.sante.senpna.utilisateurs.application.service.UserHierarchyGuard;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.ActivateUserCommand;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
@@ -16,11 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ActivateUserUseCaseImpl implements ActivateUserUseCase {
 
     private final UserManagementRepositoryPort userManagementRepositoryPort;
+    private final UserHierarchyGuard userHierarchyGuard;
     private final UserDetailAssembler userDetailAssembler;
 
     public ActivateUserUseCaseImpl(UserManagementRepositoryPort userManagementRepositoryPort,
-            UserDetailAssembler userDetailAssembler) {
+            UserHierarchyGuard userHierarchyGuard, UserDetailAssembler userDetailAssembler) {
         this.userManagementRepositoryPort = userManagementRepositoryPort;
+        this.userHierarchyGuard = userHierarchyGuard;
         this.userDetailAssembler = userDetailAssembler;
     }
 
@@ -29,6 +32,8 @@ public class ActivateUserUseCaseImpl implements ActivateUserUseCase {
     public UserDetail activer(ActivateUserCommand command) {
         User user = userManagementRepositoryPort.findById(UserId.of(command.userId()))
                 .orElseThrow(UserNotFoundException::new);
+
+        userHierarchyGuard.verifierGestionAutorisee(command.acteurId(), user.getRoleIds());
 
         user.activer();
         // Un compte réactivé repart sur des bases saines : plus d'échecs

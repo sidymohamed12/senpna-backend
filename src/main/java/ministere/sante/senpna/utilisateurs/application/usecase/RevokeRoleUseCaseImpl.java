@@ -4,6 +4,7 @@ import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
+import ministere.sante.senpna.utilisateurs.application.service.UserHierarchyGuard;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.RevokeRoleCommand;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.utilisateurs.domain.exception.DernierRoleException;
@@ -18,11 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class RevokeRoleUseCaseImpl implements RevokeRoleUseCase {
 
     private final UserManagementRepositoryPort userManagementRepositoryPort;
+    private final UserHierarchyGuard userHierarchyGuard;
     private final UserDetailAssembler userDetailAssembler;
 
     public RevokeRoleUseCaseImpl(UserManagementRepositoryPort userManagementRepositoryPort,
-            UserDetailAssembler userDetailAssembler) {
+            UserHierarchyGuard userHierarchyGuard, UserDetailAssembler userDetailAssembler) {
         this.userManagementRepositoryPort = userManagementRepositoryPort;
+        this.userHierarchyGuard = userHierarchyGuard;
         this.userDetailAssembler = userDetailAssembler;
     }
 
@@ -39,6 +42,11 @@ public class RevokeRoleUseCaseImpl implements RevokeRoleUseCase {
         if (user.getRoleIds().size() == 1) {
             throw new DernierRoleException();
         }
+
+        // Vérifié sur les rôles actuels (avant retrait) : un ADMIN_PRA ne
+        // doit pas pouvoir toucher un compte national ou un autre
+        // ADMIN_PRA, y compris pour lui retirer un rôle.
+        userHierarchyGuard.verifierGestionAutorisee(command.acteurId(), user.getRoleIds());
 
         user.retirerRole(command.roleId());
 

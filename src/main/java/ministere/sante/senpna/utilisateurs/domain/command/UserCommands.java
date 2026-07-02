@@ -12,22 +12,23 @@ public final class UserCommands {
 
         // ── Commandes ───────────────────────────────────────────────────────
 
-        public record CreateUserCommand(String nom, String prenom, String email, String telephone, Set<UUID> roleIds) {
+        public record CreateUserCommand(UUID acteurId, String nom, String prenom, String email, String telephone,
+                        Set<UUID> roleIds) {
         }
 
-        public record UpdateUserCommand(UUID userId, String nom, String prenom, String telephone) {
+        public record UpdateUserCommand(UUID userId, UUID acteurId, String nom, String prenom, String telephone) {
         }
 
-        public record ActivateUserCommand(UUID userId) {
+        public record ActivateUserCommand(UUID userId, UUID acteurId) {
         }
 
         public record DeactivateUserCommand(UUID userId, UUID acteurId) {
         }
 
-        public record AssignRoleCommand(UUID userId, UUID roleId) {
+        public record AssignRoleCommand(UUID userId, UUID acteurId, UUID roleId) {
         }
 
-        public record RevokeRoleCommand(UUID userId, UUID roleId) {
+        public record RevokeRoleCommand(UUID userId, UUID acteurId, UUID roleId) {
         }
 
         // ── Queries ─────────────────────────────────────────────────────────

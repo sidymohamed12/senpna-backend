@@ -12,6 +12,7 @@ import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
+import ministere.sante.senpna.utilisateurs.application.service.UserHierarchyGuard;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.*;
 import ministere.sante.senpna.utilisateurs.domain.exception.*;
 import ministere.sante.senpna.utilisateurs.fixtures.RoleFixtures;
@@ -50,6 +51,7 @@ class UserManagementUseCasesTest {
 
     private static final UUID USER_ID = UserFixtures.USER_ID;
     private static final UUID AUTRE_USER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID ACTEUR_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
     private static final UUID ROLE_ID = RoleFixtures.ROLE_GESTIONNAIRE_PNA_ID;
     private static final UUID AUTRE_ROLE_ID = RoleFixtures.ROLE_PHARMACIEN_PRA_ID;
 
@@ -75,12 +77,14 @@ class UserManagementUseCasesTest {
         @Mock
         TemporaryPasswordGenerator temporaryPasswordGenerator;
         @Mock
+        UserHierarchyGuard userHierarchyGuard;
+        @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
         CreateUserUseCaseImpl sut;
 
         private CreateUserCommand commandeValide() {
-            return new CreateUserCommand(UserFixtures.NOM, UserFixtures.PRENOM, UserFixtures.EMAIL,
+            return new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM, UserFixtures.EMAIL,
                     UserFixtures.TELEPHONE, Set.of(ROLE_ID));
         }
 
@@ -136,7 +140,7 @@ class UserManagementUseCasesTest {
             when(userDetailAssembler.assembler(any())).thenReturn(DETAIL_FICTIF);
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            CreateUserCommand command = new CreateUserCommand(UserFixtures.NOM, UserFixtures.PRENOM,
+            CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
                     UserFixtures.EMAIL, "  ", Set.of(ROLE_ID));
 
             sut.creer(command);
@@ -161,7 +165,7 @@ class UserManagementUseCasesTest {
         @DisplayName("aucun rôle fourni (null) → ValidationException avec le code ROLE_REQUIRED")
         void creer_roleIdsNull_leve_validation_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            CreateUserCommand command = new CreateUserCommand(UserFixtures.NOM, UserFixtures.PRENOM,
+            CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
                     UserFixtures.EMAIL, null, null);
 
             assertThatThrownBy(() -> sut.creer(command))
@@ -176,7 +180,7 @@ class UserManagementUseCasesTest {
         @DisplayName("ensemble de rôles vide → ValidationException")
         void creer_roleIdsVide_leve_validation_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
-            CreateUserCommand command = new CreateUserCommand(UserFixtures.NOM, UserFixtures.PRENOM,
+            CreateUserCommand command = new CreateUserCommand(ACTEUR_ID, UserFixtures.NOM, UserFixtures.PRENOM,
                     UserFixtures.EMAIL, null, Set.of());
 
             assertThatThrownBy(() -> sut.creer(command))
@@ -314,6 +318,8 @@ class UserManagementUseCasesTest {
         @Mock
         UserManagementRepositoryPort userManagementRepositoryPort;
         @Mock
+        UserHierarchyGuard userHierarchyGuard;
+        @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
         UpdateUserUseCaseImpl sut;
@@ -326,7 +332,8 @@ class UserManagementUseCasesTest {
             when(userDetailAssembler.assembler(any())).thenReturn(DETAIL_FICTIF);
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            UpdateUserCommand command = new UpdateUserCommand(USER_ID, "Ndiaye", "Fatou", "+221709876543");
+            UpdateUserCommand command = new UpdateUserCommand(USER_ID, ACTEUR_ID, "Ndiaye", "Fatou",
+                    "+221709876543");
 
             UserDetail result = sut.modifier(command);
 
@@ -346,7 +353,8 @@ class UserManagementUseCasesTest {
             when(userDetailAssembler.assembler(any())).thenReturn(DETAIL_FICTIF);
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            UpdateUserCommand command = new UpdateUserCommand(USER_ID, UserFixtures.NOM, UserFixtures.PRENOM, " ");
+            UpdateUserCommand command = new UpdateUserCommand(USER_ID, ACTEUR_ID, UserFixtures.NOM,
+                    UserFixtures.PRENOM, " ");
 
             sut.modifier(command);
 
@@ -359,7 +367,7 @@ class UserManagementUseCasesTest {
         void modifier_introuvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            UpdateUserCommand command = new UpdateUserCommand(USER_ID, "Ndiaye", "Fatou", null);
+            UpdateUserCommand command = new UpdateUserCommand(USER_ID, ACTEUR_ID, "Ndiaye", "Fatou", null);
 
             assertThatThrownBy(() -> sut.modifier(command))
                     .isInstanceOf(UserNotFoundException.class);
@@ -379,6 +387,8 @@ class UserManagementUseCasesTest {
 
         @Mock
         UserManagementRepositoryPort userManagementRepositoryPort;
+        @Mock
+        UserHierarchyGuard userHierarchyGuard;
         @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
@@ -400,7 +410,7 @@ class UserManagementUseCasesTest {
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-            UserDetail result = sut.activer(new ActivateUserCommand(USER_ID));
+            UserDetail result = sut.activer(new ActivateUserCommand(USER_ID, ACTEUR_ID));
 
             assertThat(result).isEqualTo(DETAIL_FICTIF);
             verify(userManagementRepositoryPort).save(captor.capture());
@@ -414,7 +424,7 @@ class UserManagementUseCasesTest {
         void activer_introuvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.activer(new ActivateUserCommand(USER_ID)))
+            assertThatThrownBy(() -> sut.activer(new ActivateUserCommand(USER_ID, ACTEUR_ID)))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -432,6 +442,8 @@ class UserManagementUseCasesTest {
 
         @Mock
         UserManagementRepositoryPort userManagementRepositoryPort;
+        @Mock
+        UserHierarchyGuard userHierarchyGuard;
         @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
@@ -488,6 +500,8 @@ class UserManagementUseCasesTest {
         @Mock
         RoleQueryPort roleQueryPort;
         @Mock
+        UserHierarchyGuard userHierarchyGuard;
+        @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
         AssignRoleUseCaseImpl sut;
@@ -502,7 +516,7 @@ class UserManagementUseCasesTest {
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-            UserDetail result = sut.assigner(new AssignRoleCommand(USER_ID, AUTRE_ROLE_ID));
+            UserDetail result = sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID));
 
             assertThat(result).isEqualTo(DETAIL_FICTIF);
             verify(userManagementRepositoryPort).save(captor.capture());
@@ -514,7 +528,7 @@ class UserManagementUseCasesTest {
         void assigner_roleIntrouvable_leve_exception() {
             when(roleQueryPort.existsById(AUTRE_ROLE_ID)).thenReturn(false);
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, AUTRE_ROLE_ID)))
+            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
                     .isInstanceOf(RoleIntrouvableException.class);
 
             verifyNoInteractions(userManagementRepositoryPort, userDetailAssembler);
@@ -526,7 +540,7 @@ class UserManagementUseCasesTest {
             when(roleQueryPort.existsById(AUTRE_ROLE_ID)).thenReturn(true);
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, AUTRE_ROLE_ID)))
+            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -538,7 +552,7 @@ class UserManagementUseCasesTest {
             when(roleQueryPort.existsById(ROLE_ID)).thenReturn(true);
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ROLE_ID)))
+            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
                     .isInstanceOf(RoleDejaAssigneException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -557,6 +571,8 @@ class UserManagementUseCasesTest {
         @Mock
         UserManagementRepositoryPort userManagementRepositoryPort;
         @Mock
+        UserHierarchyGuard userHierarchyGuard;
+        @Mock
         UserDetailAssembler userDetailAssembler;
         @InjectMocks
         RevokeRoleUseCaseImpl sut;
@@ -570,7 +586,7 @@ class UserManagementUseCasesTest {
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-            UserDetail result = sut.retirer(new RevokeRoleCommand(USER_ID, AUTRE_ROLE_ID));
+            UserDetail result = sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID));
 
             assertThat(result).isEqualTo(DETAIL_FICTIF);
             verify(userManagementRepositoryPort).save(captor.capture());
@@ -582,7 +598,7 @@ class UserManagementUseCasesTest {
         void retirer_userIntrouvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ROLE_ID)))
+            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
                     .isInstanceOf(UserNotFoundException.class);
         }
 
@@ -591,7 +607,7 @@ class UserManagementUseCasesTest {
         void retirer_roleNonAssigne_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, AUTRE_ROLE_ID)))
+            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
                     .isInstanceOf(RoleNonAssigneException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -602,7 +618,7 @@ class UserManagementUseCasesTest {
         void retirer_dernierRole_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ROLE_ID)))
+            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
                     .isInstanceOf(DernierRoleException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());

@@ -55,8 +55,8 @@ class UserManagementFacadeTest {
     @Test
     @DisplayName("creer() délègue à CreateUserUseCase")
     void creer_delegue() {
-        CreateUserCommand command = new CreateUserCommand("Diallo", "Mamadou", "mamadou.diallo@sante.gouv.sn", null,
-                Set.of(ROLE_ID));
+        CreateUserCommand command = new CreateUserCommand(UUID.randomUUID(), "Diallo", "Mamadou",
+                "mamadou.diallo@sante.gouv.sn", null, Set.of(ROLE_ID));
         CreatedUser createdUser = new CreatedUser(DETAIL, "TempPass1!");
         when(createUserUseCase.creer(command)).thenReturn(createdUser);
 
@@ -94,7 +94,7 @@ class UserManagementFacadeTest {
     @Test
     @DisplayName("modifier() délègue à UpdateUserUseCase")
     void modifier_delegue() {
-        UpdateUserCommand command = new UpdateUserCommand(USER_ID, "Diallo", "Mamadou", null);
+        UpdateUserCommand command = new UpdateUserCommand(USER_ID, UUID.randomUUID(), "Diallo", "Mamadou", null);
         when(updateUserUseCase.modifier(command)).thenReturn(DETAIL);
 
         UserDetail result = sut.modifier(command);
@@ -106,7 +106,7 @@ class UserManagementFacadeTest {
     @Test
     @DisplayName("activer() délègue à ActivateUserUseCase")
     void activer_delegue() {
-        ActivateUserCommand command = new ActivateUserCommand(USER_ID);
+        ActivateUserCommand command = new ActivateUserCommand(USER_ID, UUID.randomUUID());
         when(activateUserUseCase.activer(command)).thenReturn(DETAIL);
 
         UserDetail result = sut.activer(command);
@@ -130,7 +130,7 @@ class UserManagementFacadeTest {
     @Test
     @DisplayName("assignerRole() délègue à AssignRoleUseCase")
     void assignerRole_delegue() {
-        AssignRoleCommand command = new AssignRoleCommand(USER_ID, ROLE_ID);
+        AssignRoleCommand command = new AssignRoleCommand(USER_ID, UUID.randomUUID(), ROLE_ID);
         when(assignRoleUseCase.assigner(command)).thenReturn(DETAIL);
 
         UserDetail result = sut.assignerRole(command);
@@ -142,7 +142,7 @@ class UserManagementFacadeTest {
     @Test
     @DisplayName("retirerRole() délègue à RevokeRoleUseCase")
     void retirerRole_delegue() {
-        RevokeRoleCommand command = new RevokeRoleCommand(USER_ID, ROLE_ID);
+        RevokeRoleCommand command = new RevokeRoleCommand(USER_ID, UUID.randomUUID(), ROLE_ID);
         when(revokeRoleUseCase.retirer(command)).thenReturn(DETAIL);
 
         UserDetail result = sut.retirerRole(command);

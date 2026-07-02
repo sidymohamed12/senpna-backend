@@ -55,6 +55,14 @@ import java.util.stream.Collectors;
  * comptes, gestion des rôles").
  * </p>
  *
+ * <p>
+ * <strong>Hiérarchie de gestion</strong> (cf. {@code UserHierarchyGuard}) :
+ * un {@code ADMIN_PRA} ne peut ni créer, modifier, activer, désactiver ou
+ * changer les rôles d'un compte possédant un rôle national (PNA), ni d'un
+ * autre compte {@code ADMIN_PRA} — y compris d'une région différente. Seul
+ * un rôle national (PNA) a une portée illimitée sur l'ensemble des comptes.
+ * </p>
+ *
  * <h3>Routes</h3>
  * 
  * <pre>
@@ -82,8 +90,8 @@ public class UsersController {
         @PostMapping
         public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateUserRequest request) {
                 CreatedUser result = userManagementFacade.creer(new CreateUserCommand(
-                                request.nom(), request.prenom(), request.email(), request.telephone(),
-                                request.roleIds()));
+                                currentUserId(), request.nom(), request.prenom(), request.email(),
+                                request.telephone(), request.roleIds()));
 
                 CreatedUserResponse body = new CreatedUserResponse(toResponse(result.user()),
                                 result.motDePasseTemporaire());
@@ -130,14 +138,15 @@ public class UsersController {
         public ResponseEntity<Map<String, Object>> modifier(
                         @PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
                 UserDetail result = userManagementFacade.modifier(
-                                new UpdateUserCommand(id, request.nom(), request.prenom(), request.telephone()));
+                                new UpdateUserCommand(id, currentUserId(), request.nom(), request.prenom(),
+                                                request.telephone()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "USER_UPDATED",
                                 "Utilisateur modifié avec succès"));
         }
 
         @PatchMapping("/{id}/activer")
         public ResponseEntity<Map<String, Object>> activer(@PathVariable UUID id) {
-                UserDetail result = userManagementFacade.activer(new ActivateUserCommand(id));
+                UserDetail result = userManagementFacade.activer(new ActivateUserCommand(id, currentUserId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "USER_ACTIVATED",
                                 "Utilisateur activé avec succès"));
         }
@@ -152,14 +161,16 @@ public class UsersController {
         @PostMapping("/{id}/roles")
         public ResponseEntity<Map<String, Object>> assignerRole(
                         @PathVariable UUID id, @Valid @RequestBody AssignRoleRequest request) {
-                UserDetail result = userManagementFacade.assignerRole(new AssignRoleCommand(id, request.roleId()));
+                UserDetail result = userManagementFacade.assignerRole(
+                                new AssignRoleCommand(id, currentUserId(), request.roleId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ROLE_ASSIGNED",
                                 "Rôle attribué avec succès"));
         }
 
         @DeleteMapping("/{id}/roles/{roleId}")
         public ResponseEntity<Map<String, Object>> retirerRole(@PathVariable UUID id, @PathVariable UUID roleId) {
-                UserDetail result = userManagementFacade.retirerRole(new RevokeRoleCommand(id, roleId));
+                UserDetail result = userManagementFacade
+                                .retirerRole(new RevokeRoleCommand(id, currentUserId(), roleId));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ROLE_REVOKED",
                                 "Rôle retiré avec succès"));
         }

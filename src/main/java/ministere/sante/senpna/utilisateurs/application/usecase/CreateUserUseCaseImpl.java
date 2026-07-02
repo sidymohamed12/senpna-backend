@@ -12,6 +12,7 @@ import ministere.sante.senpna.shared.domain.valueobject.Email;
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
+import ministere.sante.senpna.utilisateurs.application.service.UserHierarchyGuard;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.CreateUserCommand;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.CreatedUser;
 import ministere.sante.senpna.utilisateurs.domain.exception.EmailDejaUtiliseException;
@@ -31,15 +32,17 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
     private final RoleQueryPort roleQueryPort;
     private final PasswordEncoderPort passwordEncoderPort;
     private final TemporaryPasswordGenerator temporaryPasswordGenerator;
+    private final UserHierarchyGuard userHierarchyGuard;
     private final UserDetailAssembler userDetailAssembler;
 
     public CreateUserUseCaseImpl(UserManagementRepositoryPort userManagementRepositoryPort, RoleQueryPort roleQueryPort,
             PasswordEncoderPort passwordEncoderPort, TemporaryPasswordGenerator temporaryPasswordGenerator,
-            UserDetailAssembler userDetailAssembler) {
+            UserHierarchyGuard userHierarchyGuard, UserDetailAssembler userDetailAssembler) {
         this.userManagementRepositoryPort = userManagementRepositoryPort;
         this.roleQueryPort = roleQueryPort;
         this.passwordEncoderPort = passwordEncoderPort;
         this.temporaryPasswordGenerator = temporaryPasswordGenerator;
+        this.userHierarchyGuard = userHierarchyGuard;
         this.userDetailAssembler = userDetailAssembler;
     }
 
@@ -61,6 +64,10 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
                 throw new RoleIntrouvableException();
             }
         }
+
+        // Un administrateur régional (PRA) ne peut pas créer un compte
+        // national (PNA) ni un autre compte ADMIN_PRA.
+        userHierarchyGuard.verifierGestionAutorisee(command.acteurId(), roleIds);
 
         Phone telephone = (command.telephone() != null && !command.telephone().isBlank())
                 ? Phone.of(command.telephone())
