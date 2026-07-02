@@ -1,0 +1,106 @@
+### ══════════════════════════════════════════════════════════════════
+### EntrepotsController — /api/entrepots
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### (consultation seule — PNA centrale + PRA confondues ; pour la
+### gestion du cycle de vie d'une PRA, voir 03-pras.http)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@regionThiesId = 10000000-0000-0000-0000-000000000013
+@pnaCentraleId = 30000000-0000-0000-0000-000000000001
+@praThiesId = 30000000-0000-0000-0000-000000000002
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — ADMIN_PRA
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — GESTIONNAIRE_STRUCTURE (pour le test de rôle insuffisant)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. GET /api/entrepots/{id} — obtenir la PNA centrale
+GET {{baseUrl}}/api/entrepots/{{pnaCentraleId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 2. GET /api/entrepots/{id} — obtenir une PRA
+GET {{baseUrl}}/api/entrepots/{{praThiesId}}
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 3. GET /api/entrepots/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/entrepots/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 4. GET /api/entrepots — lister tous les entrepôts (PNA + PRA), pagination par défaut
+GET {{baseUrl}}/api/entrepots
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 5. GET /api/entrepots — filtré par type=PNA_CENTRAL
+GET {{baseUrl}}/api/entrepots?type=PNA_CENTRAL
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/entrepots — filtré par type=PRA et région
+GET {{baseUrl}}/api/entrepots?type=PRA&regionId={{regionThiesId}}
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/entrepots — filtré par actif=false (entrepôts désactivés)
+GET {{baseUrl}}/api/entrepots?actif=false
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 8. GET /api/entrepots — recherche texte + tri + pagination
+GET {{baseUrl}}/api/entrepots?q=PRA&page=0&size=10&sortBy=nom&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 9. GET /api/entrepots — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_STRUCTURE)
+GET {{baseUrl}}/api/entrepots
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 10. GET /api/entrepots — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/entrepots

@@ -1,0 +1,116 @@
+### ══════════════════════════════════════════════════════════════════
+### RegionsController — /api/regions
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@regionThiesId = 10000000-0000-0000-0000-000000000013
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — ADMIN_PRA (pour le test de rôle insuffisant)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/regions — créer une région (ADMIN_PNA / GESTIONNAIRE_PNA uniquement)
+POST {{baseUrl}}/api/regions
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "TEST-REG-{{$timestamp}}",
+  "nom": "Région de test HTTP"
+}
+
+
+### 2. POST /api/regions — cas d'erreur, code déjà existant (409/422 attendu)
+POST {{baseUrl}}/api/regions
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "THIES",
+  "nom": "Thiès (doublon)"
+}
+
+
+### 3. POST /api/regions — cas d'erreur, code invalide (caractères interdits, 400 attendu)
+POST {{baseUrl}}/api/regions
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "th!es",
+  "nom": "Thiès"
+}
+
+
+### 4. POST /api/regions — cas d'erreur, champs manquants (400 attendu)
+POST {{baseUrl}}/api/regions
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "",
+  "nom": ""
+}
+
+
+### 5. POST /api/regions — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA non autorisé)
+POST {{baseUrl}}/api/regions
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "TEST-FORBIDDEN",
+  "nom": "Ne devrait pas être créée"
+}
+
+
+### 6. GET /api/regions — lister toutes les régions (les 14 régions + celles créées)
+GET {{baseUrl}}/api/regions
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/regions/{id} — obtenir la région de Thiès
+GET {{baseUrl}}/api/regions/{{regionThiesId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 8. GET /api/regions/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/regions/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 9. GET /api/regions — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/regions

@@ -1,0 +1,162 @@
+### ══════════════════════════════════════════════════════════════════
+### AuthController — /api/auth
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+###
+### Comptes issus de la migration mock db/migration-dev/V011.
+### Mot de passe unique : Password123!
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@adminPnaEmail = cheikh.ba@sante.gouv.sn
+@pharmacienPnaEmail = aissatou.sow@sante.gouv.sn
+@password = Password123!
+
+
+### 1. Login — ADMIN_PNA
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "password": "{{password}}"
+}
+
+### Le token et le refreshToken de la requête ci-dessus sont réutilisés
+### plus bas via {{login.response.body.$.results.accessToken}}.
+
+
+### 2. Cas d'erreur — mot de passe invalide (401 attendu)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "password": "MauvaisMotDePasse!"
+}
+
+
+### 3. Cas d'erreur — compte désactivé (ibrahima.sy@sante.gouv.sn, cf. V011)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ibrahima.sy@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 4. Cas d'erreur — compte verrouillé (ndeye.thiam@sante.gouv.sn, cf. V011)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ndeye.thiam@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 5. GET /api/auth/me — profil de l'utilisateur courant (authentifié)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/auth/me — cas d'erreur, sans token (401 attendu)
+GET {{baseUrl}}/api/auth/me
+
+
+### 7. POST /api/auth/refresh — renouvelle l'access token
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{login.response.body.$.results.refreshToken}}"
+}
+
+
+### 8. POST /api/auth/refresh — cas d'erreur, refresh token invalide (401 attendu)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "token-invalide-ou-expire"
+}
+
+
+### ──────────────────────────────────────────────────────────────────
+### Flux "mot de passe oublié" — nécessite une intervention manuelle :
+### l'OTP est réellement envoyé par email en profil dev
+### (SmtpEmailOtpSenderAdapter), il n'est PAS loggé en console.
+### Récupère le code reçu et colle-le dans la requête "verify"
+### (étape 12) avant de l'exécuter.
+### ──────────────────────────────────────────────────────────────────
+
+### 9. POST /api/auth/forgot-password — déclenche l'envoi d'un OTP par email
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "channel": "EMAIL"
+}
+
+
+### 10. POST /api/auth/forgot-password — variante canal SMS (user avec téléphone)
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "{{pharmacienPnaEmail}}",
+  "channel": "SMS"
+}
+
+
+### 11. POST /api/auth/resend-otp — renvoie un nouveau code (soumis à cooldown)
+POST {{baseUrl}}/api/auth/resend-otp
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "channel": "EMAIL"
+}
+
+
+### 12. POST /api/auth/verify — ⚠️ remplace "000000" par le code reçu par email
+# @name verify
+POST {{baseUrl}}/api/auth/verify
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "code": "000000"
+}
+
+
+### 13. POST /api/auth/verify — cas d'erreur, code invalide (format incorrect, 400 attendu)
+POST {{baseUrl}}/api/auth/verify
+Content-Type: application/json
+
+{
+  "email": "{{adminPnaEmail}}",
+  "code": "abc"
+}
+
+
+### 14. POST /api/auth/reset-password — utilise le resetToken obtenu à l'étape 12
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "resetToken": "{{verify.response.body.$.results.resetToken}}",
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+
+
+### 15. POST /api/auth/reset-password — cas d'erreur, mot de passe trop court (400 attendu)
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "resetToken": "{{verify.response.body.$.results.resetToken}}",
+  "nouveauMotDePasse": "court"
+}

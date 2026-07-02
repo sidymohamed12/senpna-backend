@@ -1,0 +1,132 @@
+### ══════════════════════════════════════════════════════════════════
+### AffectationsController — /api/affectations/utilisateurs
+### SEN PharmaFlow — réservé à ADMIN_PNA / ADMIN_PRA
+### compatible VS Code "REST Client" (Huachao)
+###
+### Fichier autonome : crée son propre utilisateur de test (pas
+### d'affectation initiale) pour ne dépendre d'aucun autre fichier.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@praDakarId = 30000000-0000-0000-0000-000000000003
+@structureHopitalThiesId = 40000000-0000-0000-0000-000000000001
+@roleGestionnairePraId = 00000000-0000-0000-0000-000000000006
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA (pour le test de rôle insuffisant)
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Créer un utilisateur de test, sans affectation initiale
+# @name creerUser
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Affectation",
+  "prenom": "Test",
+  "email": "affectation.test.{{$timestamp}}@sante.gouv.sn",
+  "roleIds": ["{{roleGestionnairePraId}}"]
+}
+
+### L'id créé est réutilisé plus bas via
+### {{creerUser.response.body.$.results.user.id}}.
+
+
+### 1. POST /api/affectations/utilisateurs/{userId}/entrepot — affecter à une PRA
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/entrepot
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{praDakarId}}"
+}
+
+
+### 2. POST /api/affectations/utilisateurs/{userId}/entrepot — cas d'erreur, entrepotId manquant (400 attendu)
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/entrepot
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{}
+
+
+### 3. POST /api/affectations/utilisateurs/{userId}/entrepot — cas d'erreur, entrepôt inexistant (404 attendu)
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/entrepot
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "99999999-9999-9999-9999-999999999999"
+}
+
+
+### 4. POST /api/affectations/utilisateurs/{userId}/structure-sanitaire
+### Réaffecte le même utilisateur à une structure (remplace l'affectation
+### entrepôt précédente — un utilisateur n'a qu'une seule unité à la fois).
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/structure-sanitaire
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "structureSanitaireId": "{{structureHopitalThiesId}}"
+}
+
+
+### 5. POST /api/affectations/utilisateurs/{userId}/structure-sanitaire — cas d'erreur, structure inexistante (404)
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/structure-sanitaire
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "structureSanitaireId": "99999999-9999-9999-9999-999999999999"
+}
+
+
+### 6. DELETE /api/affectations/utilisateurs/{userId} — retire l'affectation en cours
+DELETE {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 7. DELETE /api/affectations/utilisateurs/{userId} — cas d'erreur, utilisateur inexistant (404 attendu)
+DELETE {{baseUrl}}/api/affectations/utilisateurs/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 8. POST /api/affectations/utilisateurs/{userId}/entrepot — cas d'erreur, rôle insuffisant (403 attendu)
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/entrepot
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{praDakarId}}"
+}
+
+
+### 9. POST /api/affectations/utilisateurs/{userId}/entrepot — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/affectations/utilisateurs/{{creerUser.response.body.$.results.user.id}}/entrepot
+Content-Type: application/json
+
+{
+  "entrepotId": "{{praDakarId}}"
+}

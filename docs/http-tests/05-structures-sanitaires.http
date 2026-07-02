@@ -1,0 +1,278 @@
+### ══════════════════════════════════════════════════════════════════
+### StructuresSanitairesController — /api/structures-sanitaires
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@regionThiesId = 10000000-0000-0000-0000-000000000013
+@regionDakarId = 10000000-0000-0000-0000-000000000001
+@praThiesId = 30000000-0000-0000-0000-000000000002
+@structureHopitalThiesId = 40000000-0000-0000-0000-000000000001
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — ADMIN_PRA (pour le test de rôle insuffisant)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/structures-sanitaires — nouvelle demande d'adhésion (statut EN_ATTENTE_VALIDATION)
+# @name creerStructure
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "CS-TEST-{{$timestamp}}",
+  "nom": "Centre de Santé de Test HTTP",
+  "type": "CENTRE_SANTE",
+  "regionId": "{{regionDakarId}}",
+  "district": "Dakar",
+  "adresse": "Rue de test, Dakar",
+  "telephone": "+221770000001",
+  "email": "test.http@structure.sn",
+  "responsableNom": "Ndoye",
+  "responsablePrenom": "Test"
+}
+
+### La réponse contient l'id réutilisé plus bas via
+### {{creerStructure.response.body.$.results.id}}.
+
+
+### 2. POST /api/structures-sanitaires — cas limite, chaque type de structure (HOPITAL)
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "HOP-TEST-{{$timestamp}}",
+  "nom": "Hôpital de Test",
+  "type": "HOPITAL",
+  "regionId": "{{regionDakarId}}",
+  "responsableNom": "Fall",
+  "responsablePrenom": "Test"
+}
+
+
+### 3. POST /api/structures-sanitaires — cas limite, type ONG
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "ONG-TEST-{{$timestamp}}",
+  "nom": "ONG de Test",
+  "type": "ONG",
+  "regionId": "{{regionDakarId}}",
+  "responsableNom": "Cissé",
+  "responsablePrenom": "Test"
+}
+
+
+### 4. POST /api/structures-sanitaires — cas d'erreur, regionId manquant (400 attendu)
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "CS-SANS-REGION",
+  "nom": "Structure invalide",
+  "type": "CENTRE_SANTE",
+  "responsableNom": "Ndoye",
+  "responsablePrenom": "Test"
+}
+
+
+### 5. POST /api/structures-sanitaires — cas d'erreur, type invalide (400 attendu)
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "CS-TYPE-INVALIDE",
+  "nom": "Structure invalide",
+  "type": "CLINIQUE_PRIVEE",
+  "regionId": "{{regionDakarId}}",
+  "responsableNom": "Ndoye",
+  "responsablePrenom": "Test"
+}
+
+
+### 6. POST /api/structures-sanitaires — cas d'erreur, email invalide (400 attendu)
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "CS-EMAIL-INVALIDE",
+  "nom": "Structure invalide",
+  "type": "CENTRE_SANTE",
+  "regionId": "{{regionDakarId}}",
+  "email": "pas-un-email",
+  "responsableNom": "Ndoye",
+  "responsablePrenom": "Test"
+}
+
+
+### 7. PUT /api/structures-sanitaires/{id} — modifier les informations générales
+PUT {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Centre de Santé de Test HTTP (modifié)",
+  "district": "Dakar",
+  "adresse": "Nouvelle adresse",
+  "telephone": "+221770000002",
+  "email": "modifie.http@structure.sn",
+  "responsableNom": "Ndoye",
+  "responsablePrenom": "Test Modifié"
+}
+
+
+### 8. PATCH /api/structures-sanitaires/{id}/valider-adhesion — passe le statut à VALIDEE, actif=true
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/valider-adhesion
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 9. PATCH /api/structures-sanitaires/{id}/valider-adhesion — cas d'erreur, déjà traitée (422/409 attendu)
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/valider-adhesion
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 10. PATCH /api/structures-sanitaires/{id}/region — rattacher/corriger la région
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/region
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "regionId": "{{regionThiesId}}"
+}
+
+
+### 11. PATCH /api/structures-sanitaires/{id}/pra — rattacher à une PRA
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/pra
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "praId": "{{praThiesId}}"
+}
+
+
+### 12. PATCH /api/structures-sanitaires/{id}/desactiver
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/desactiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 13. PATCH /api/structures-sanitaires/{id}/activer — nécessite adhésion VALIDEE
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/activer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 14. POST /api/structures-sanitaires — nouvelle demande, pour tester le rejet
+# @name creerStructurePourRejet
+POST {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "PS-REJET-{{$timestamp}}",
+  "nom": "Poste de Santé (à rejeter)",
+  "type": "POSTE_SANTE",
+  "regionId": "{{regionDakarId}}",
+  "responsableNom": "Diouf",
+  "responsablePrenom": "Test"
+}
+
+
+### 15. PATCH /api/structures-sanitaires/{id}/rejeter-adhesion — avec motif
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructurePourRejet.response.body.$.results.id}}/rejeter-adhesion
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": "Dossier incomplet — pièces justificatives manquantes"
+}
+
+
+### 16. PATCH /api/structures-sanitaires/{id}/rejeter-adhesion — cas d'erreur, motif vide (400 attendu)
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructurePourRejet.response.body.$.results.id}}/rejeter-adhesion
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": ""
+}
+
+
+### 17. PATCH /api/structures-sanitaires/{id}/region — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+PATCH {{baseUrl}}/api/structures-sanitaires/{{creerStructure.response.body.$.results.id}}/region
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "regionId": "{{regionDakarId}}"
+}
+
+
+### 18. GET /api/structures-sanitaires/{id} — structure hôpital de Thiès (mock V011)
+GET {{baseUrl}}/api/structures-sanitaires/{{structureHopitalThiesId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/structures-sanitaires/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/structures-sanitaires/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/structures-sanitaires — lister, pagination par défaut
+GET {{baseUrl}}/api/structures-sanitaires
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/structures-sanitaires — filtré par type=HOPITAL
+GET {{baseUrl}}/api/structures-sanitaires?type=HOPITAL
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/structures-sanitaires — filtré par statutAdhesion=EN_ATTENTE_VALIDATION
+GET {{baseUrl}}/api/structures-sanitaires?statutAdhesion=EN_ATTENTE_VALIDATION
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/structures-sanitaires — filtré par statutAdhesion=REJETEE
+GET {{baseUrl}}/api/structures-sanitaires?statutAdhesion=REJETEE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/structures-sanitaires — filtré par région + PRA + actif
+GET {{baseUrl}}/api/structures-sanitaires?regionId={{regionThiesId}}&praId={{praThiesId}}&actif=true
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/structures-sanitaires — recherche texte + tri + pagination
+GET {{baseUrl}}/api/structures-sanitaires?q=Thiès&page=0&size=5&sortBy=nom&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/structures-sanitaires — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/structures-sanitaires
