@@ -15,7 +15,7 @@ CREATE TABLE roles (
     code VARCHAR(50)  NOT NULL,
     nom  VARCHAR(100) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now()
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
 
 
     CONSTRAINT pk_roles       PRIMARY KEY (id),

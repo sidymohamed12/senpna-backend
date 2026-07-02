@@ -18,8 +18,8 @@ spring:
   # ── Base de données ──────────────────────────────────────────────
   datasource:
     url: jdbc:postgresql://localhost:5432/senpna
-    username: senpna
-    password: senpna_dev_password
+    username: postgres
+    password: SMS
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>3.5.6</version>
 		<relativePath />
 	</parent>
 
@@ -51,6 +51,13 @@
 		     SPRING BOOT STARTERS
 		══════════════════════════════════════ -->
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Web (REST controllers, multipart upload) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -84,11 +91,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-pool2</artifactId>
 		</dependency>
 
 		<!--
@@ -164,14 +166,13 @@
 
 		<!-- Flyway — migrations SQL versionnées -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-flyway</artifactId>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 
@@ -231,8 +232,8 @@
 		  Sans ça, @WithMockUser et MockMvc security peuvent ne pas fonctionner.
 		-->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security-test</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -344,12 +345,7 @@
 						<path>
 							<groupId>org.hibernate.orm</groupId>
 							<artifactId>hibernate-jpamodelgen</artifactId>
-							<version>6.6.0.Final</version>
-						</path>
-						<path>
-							<groupId>jakarta.persistence</groupId>
-							<artifactId>jakarta.persistence-api</artifactId>
-							<version>3.1.0</version>
+							<version>7.0.9.Final</version>
 						</path>
 					</annotationProcessorPaths>
 					<compilerArgs>
