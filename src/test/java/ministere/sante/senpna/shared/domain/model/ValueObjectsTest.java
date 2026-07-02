@@ -84,7 +84,7 @@ class ValueObjectsTest {
             assertThat(Phone.of(numero).value()).isEqualTo(numero);
         }
 
-        @ParameterizedTest(name = "{0}")
+        @ParameterizedTest(name = "[{index}] \"{0}\"")
         @ValueSource(strings = {
                 "0771234567", // sans préfixe +
                 "+0771234567", // + suivi de 0

@@ -10,7 +10,8 @@ public record AppProperties(
                 JwtProperties jwt,
                 SecurityProperties security,
                 OtpProperties otp,
-                RateLimitProperties rateLimit) {
+                RateLimitProperties rateLimit,
+                MailProperties mail) {
 
         // ── JWT ───────────────────────────────────────────────────────────────
 
@@ -50,5 +51,12 @@ public record AppProperties(
                         @DefaultValue("60000") long authWindowMs,
                         @DefaultValue("120") int apiLimit,
                         @DefaultValue("60000") long apiWindowMs) {
+        }
+
+        // ── Mail ──────────────────────────────────────────────────────────────
+
+        public record MailProperties(
+                        @DefaultValue("no-reply@senpharmaflow.gouv.sn") String from,
+                        @DefaultValue("SEN PharmaFlow") String fromName) {
         }
 }

@@ -57,6 +57,30 @@ spring:
       password:
       timeout: 5000
 
+  # ── Mail (SMTP) ──────────────────────────────────────────────────
+  # Valeurs par défaut pensées pour un relais SMTP de test (ex: Mailtrap,
+  # Gmail avec mot de passe d'application). Toujours surchargeables par
+  # variables d'environnement.
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mohamedsaizonou86@gmail.com
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+        debug: false
+
 # ── Serveur ────────────────────────────────────────────────────────
 server:
   port: 8080
@@ -117,6 +141,9 @@ app:
     auth-window-ms: 60000
     api-limit: 120
     api-window-ms: 60000
+  mail:
+    from: ${MAIL_FROM:no-reply@senpharmaflow.gouv.sn}
+    from-name: ${MAIL_FROM_NAME:SEN PharmaFlow}
 
 application:
   title: SEN PharmaFlow
