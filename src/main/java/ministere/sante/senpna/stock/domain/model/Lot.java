@@ -3,6 +3,7 @@ package ministere.sante.senpna.stock.domain.model;
 import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.shared.domain.model.AggregateRoot;
+import ministere.sante.senpna.stock.domain.exception.LotExpireException;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
 import ministere.sante.senpna.stock.domain.valueobject.StatutLot;
 
@@ -80,7 +81,8 @@ public class Lot extends AggregateRoot<LotId> {
 
     /**
      * Un lot ne peut être réservé ou expédié que s'il est {@code ACTIF} et
-     * non expiré. « Les lots expirés ne peuvent pas être expédiés / réservés »).
+     * non expiré (cf. modèle métier complémentaire §2 « Lots » : « Les lots
+     * expirés ne peuvent pas être expédiés / réservés »).
      */
     public boolean peutEtreReserveOuExpedie() {
         return statut == StatutLot.ACTIF && !estExpire();
@@ -101,7 +103,7 @@ public class Lot extends AggregateRoot<LotId> {
 
     public void bloquer() {
         if (statut == StatutLot.EXPIRE) {
-            throw new IllegalStateException("Un lot expiré ne peut pas être bloqué : il est déjà indisponible");
+            throw new LotExpireException(numeroLot);
         }
         if (statut == StatutLot.BLOQUE) {
             return;
@@ -112,7 +114,7 @@ public class Lot extends AggregateRoot<LotId> {
 
     public void debloquer() {
         if (statut == StatutLot.EXPIRE) {
-            throw new IllegalStateException("Un lot expiré ne peut pas être débloqué");
+            throw new LotExpireException(numeroLot);
         }
         if (statut == StatutLot.ACTIF) {
             return;

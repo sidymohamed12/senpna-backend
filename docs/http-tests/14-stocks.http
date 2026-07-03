@@ -1,0 +1,647 @@
+### ══════════════════════════════════════════════════════════════════
+### StocksController — /api/stocks
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011, V013, V018 et V022 (db/migration-dev) appliquées.
+###
+### ⚠️  Les requêtes d'entrée/sortie/réservation MODIFIENT réellement
+### les quantités des lignes de stock mock (comme le ferait n'importe
+### quelle opération métier). Si tu ré-exécutes ce fichier plusieurs
+### fois sans réinitialiser la base, certains montants (ex. les
+### quantités réservées) ne correspondront plus exactement aux valeurs
+### initiales décrites dans les commentaires — c'est attendu.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@entrepotPnaId = 30000000-0000-0000-0000-000000000001
+@entrepotPraThiesId = 30000000-0000-0000-0000-000000000002
+@entrepotPraDakarId = 30000000-0000-0000-0000-000000000003
+@entrepotPraKaolackId = 30000000-0000-0000-0000-000000000004
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+
+@lotParacetamolProcheId = 64000000-0000-0000-0000-000000000001
+@lotParacetamolLointainId = 64000000-0000-0000-0000-000000000002
+@lotCeftriaxoneId = 64000000-0000-0000-0000-000000000004
+@lotAmoxicillineBloqueId = 64000000-0000-0000-0000-000000000006
+
+@stockPnaCeftriaxoneId = 65000000-0000-0000-0000-000000000004
+@stockPnaQuinineId = 65000000-0000-0000-0000-000000000009
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA (habilité réservations, pas mouvements physiques)
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — MAGASINIER_PNA (habilité mouvements physiques, pas réservations)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — GESTIONNAIRE_STRUCTURE (pour les tests de rôle insuffisant)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### ── Entrées en stock ──────────────────────────────────────────────
+
+### 1. POST /api/stocks/entrees — nominal (réception d'un achat, complet)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolLointainId}}",
+  "quantite": 1000,
+  "typeMouvement": "ENTREE_ACHAT",
+  "referenceDocument": "BC-TEST-{{$timestamp}}",
+  "motif": "Réception complémentaire de test"
+}
+
+
+### 2. POST /api/stocks/entrees — cas limite, champs optionnels absents (commandeId, référence, motif)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolLointainId}}",
+  "quantite": 250,
+  "typeMouvement": "AJUSTEMENT"
+}
+
+
+### 3. POST /api/stocks/entrees — ouvre une nouvelle ligne de stock (couple entrepôt/lot inédit)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraKaolackId}}",
+  "lotId": "{{lotCeftriaxoneId}}",
+  "quantite": 100,
+  "typeMouvement": "ENTREE_TRANSFERT",
+  "referenceDocument": "TRF-TEST-{{$timestamp}}"
+}
+
+
+### 4. POST /api/stocks/entrees — cas d'erreur, quantité manquante (400 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### 5. POST /api/stocks/entrees — cas d'erreur, quantité nulle ou négative (400 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 0,
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### 6. POST /api/stocks/entrees — cas d'erreur, type de mouvement invalide (400 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 100,
+  "typeMouvement": "TYPE_INEXISTANT"
+}
+
+
+### 7. POST /api/stocks/entrees — cas d'erreur, lot introuvable (404 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "99999999-9999-9999-9999-999999999999",
+  "quantite": 100,
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### 8. POST /api/stocks/entrees — cas d'erreur, entrepôt introuvable (404 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "99999999-9999-9999-9999-999999999999",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 100,
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### 9. POST /api/stocks/entrees — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/stocks/entrees
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 100,
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### 10. POST /api/stocks/entrees — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_PNA)
+POST {{baseUrl}}/api/stocks/entrees
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 100,
+  "typeMouvement": "ENTREE_ACHAT"
+}
+
+
+### ── Sorties de stock ──────────────────────────────────────────────
+
+### 11. POST /api/stocks/sorties — nominal, perte physique (casse)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 10,
+  "typeMouvement": "CASSE",
+  "motif": "Cartons endommagés durant la manutention"
+}
+
+
+### 12. POST /api/stocks/sorties — cas limite, sortie consommant une réservation existante (depuisReservation=true)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotCeftriaxoneId}}",
+  "quantite": 50,
+  "typeMouvement": "SORTIE_STRUCTURE",
+  "depuisReservation": true,
+  "referenceDocument": "CMD-TEST-{{$timestamp}}"
+}
+
+
+### 13. POST /api/stocks/sorties — cas limite, transfert vers un autre entrepôt (entrepotDestinationId renseigné)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolLointainId}}",
+  "quantite": 200,
+  "typeMouvement": "SORTIE_TRANSFERT",
+  "entrepotDestinationId": "{{entrepotPraDakarId}}",
+  "referenceDocument": "TRF-TEST-{{$timestamp}}"
+}
+
+
+### 14. POST /api/stocks/sorties — cas d'erreur, type de mouvement manquant (400 attendu)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 5
+}
+
+
+### 15. POST /api/stocks/sorties — cas d'erreur, ligne de stock introuvable pour ce couple entrepôt/lot (404 attendu)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraDakarId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 5,
+  "typeMouvement": "CASSE"
+}
+
+
+### 16. POST /api/stocks/sorties — cas d'erreur métier, lot BLOQUE non expédiable (422 attendu)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraThiesId}}",
+  "lotId": "{{lotAmoxicillineBloqueId}}",
+  "quantite": 100,
+  "typeMouvement": "SORTIE_TRANSFERT",
+  "entrepotDestinationId": "{{entrepotPraDakarId}}"
+}
+
+
+### 17. POST /api/stocks/sorties — cas d'erreur métier, quantité supérieure au stock disponible (422 attendu)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 999999999,
+  "typeMouvement": "CASSE"
+}
+
+
+### 18. POST /api/stocks/sorties — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/stocks/sorties
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 5,
+  "typeMouvement": "CASSE"
+}
+
+
+### 19. POST /api/stocks/sorties — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_PNA)
+POST {{baseUrl}}/api/stocks/sorties
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 5,
+  "typeMouvement": "CASSE"
+}
+
+
+### ── Réservations manuelles ────────────────────────────────────────
+
+### 20. POST /api/stocks/reservations — nominal (réservation ciblée sur un lot déjà sélectionné)
+POST {{baseUrl}}/api/stocks/reservations
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolLointainId}}",
+  "quantite": 500
+}
+
+
+### 21. POST /api/stocks/reservations — cas d'erreur, ligne de stock introuvable (404 attendu)
+POST {{baseUrl}}/api/stocks/reservations
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraDakarId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 10
+}
+
+
+### 22. POST /api/stocks/reservations — cas d'erreur métier, lot BLOQUE non réservable (422 attendu)
+POST {{baseUrl}}/api/stocks/reservations
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraThiesId}}",
+  "lotId": "{{lotAmoxicillineBloqueId}}",
+  "quantite": 10
+}
+
+
+### 23. POST /api/stocks/reservations — cas d'erreur métier, quantité supérieure au disponible à la vente (422 attendu)
+POST {{baseUrl}}/api/stocks/reservations
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 999999999
+}
+
+
+### 24. POST /api/stocks/reservations — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/stocks/reservations
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 10
+}
+
+
+### 25. POST /api/stocks/reservations — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/stocks/reservations
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 10
+}
+
+
+### ── Réservation automatique FEFO ──────────────────────────────────
+
+### 26. POST /api/stocks/reservations/fefo — nominal, un seul lot suffit
+###     (FEFO consomme d'abord le lot qui expire le plus tôt — Paracétamol "proche péremption" — largement suffisant ici)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "quantiteDemandee": 1000
+}
+
+
+### 27. POST /api/stocks/reservations/fefo — cas limite, quantité importante nécessitant plusieurs lots
+###     (épuise le solde du lot "proche péremption" puis pioche le complément dans le lot "lointain" — démonstration FEFO multi-lots)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "quantiteDemandee": 50000
+}
+
+
+### 28. POST /api/stocks/reservations/fefo — cas d'erreur métier, quantité insuffisante sur l'ensemble des lots (422 attendu)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "quantiteDemandee": 99999999
+}
+
+
+### 29. POST /api/stocks/reservations/fefo — cas d'erreur, aucun lot disponible pour ce médicament dans cet entrepôt (422 attendu)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraKaolackId}}",
+  "medicamentId": "{{medicamentAmoxicillineId}}",
+  "quantiteDemandee": 10
+}
+
+
+### 30. POST /api/stocks/reservations/fefo — cas d'erreur, entrepôt introuvable (404 attendu)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "99999999-9999-9999-9999-999999999999",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "quantiteDemandee": 10
+}
+
+
+### 31. POST /api/stocks/reservations/fefo — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/stocks/reservations/fefo
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "quantiteDemandee": 10
+}
+
+
+### ── Libération de réservation ─────────────────────────────────────
+
+### 32. POST /api/stocks/reservations/liberer — nominal (libère une partie de la réservation en cours)
+POST {{baseUrl}}/api/stocks/reservations/liberer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotCeftriaxoneId}}",
+  "quantite": 50,
+  "motif": "Commande partiellement annulée"
+}
+
+
+### 33. POST /api/stocks/reservations/liberer — cas d'erreur métier, quantité supérieure à la réservation (422 attendu)
+POST {{baseUrl}}/api/stocks/reservations/liberer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotCeftriaxoneId}}",
+  "quantite": 999999
+}
+
+
+### 34. POST /api/stocks/reservations/liberer — cas d'erreur, ligne de stock introuvable (404 attendu)
+POST {{baseUrl}}/api/stocks/reservations/liberer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPraDakarId}}",
+  "lotId": "{{lotParacetamolProcheId}}",
+  "quantite": 10
+}
+
+
+### 35. POST /api/stocks/reservations/liberer — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/stocks/reservations/liberer
+Content-Type: application/json
+
+{
+  "entrepotId": "{{entrepotPnaId}}",
+  "lotId": "{{lotCeftriaxoneId}}",
+  "quantite": 10
+}
+
+
+### ── Seuil d'alerte ─────────────────────────────────────────────────
+
+### 36. PATCH /api/stocks/{id}/seuil-alerte — nominal (définit un seuil sur une ligne qui n'en a pas)
+PATCH {{baseUrl}}/api/stocks/{{stockPnaQuinineId}}/seuil-alerte
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "seuilAlerte": 50
+}
+
+
+### 37. PATCH /api/stocks/{id}/seuil-alerte — cas limite, seuilAlerte=null (retire le suivi de seuil)
+PATCH {{baseUrl}}/api/stocks/{{stockPnaQuinineId}}/seuil-alerte
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "seuilAlerte": null
+}
+
+
+### 38. PATCH /api/stocks/{id}/seuil-alerte — cas d'erreur, seuil négatif (400 attendu)
+PATCH {{baseUrl}}/api/stocks/{{stockPnaCeftriaxoneId}}/seuil-alerte
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "seuilAlerte": -10
+}
+
+
+### 39. PATCH /api/stocks/{id}/seuil-alerte — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/stocks/99999999-9999-9999-9999-999999999999/seuil-alerte
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "seuilAlerte": 100
+}
+
+
+### 40. PATCH /api/stocks/{id}/seuil-alerte — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/stocks/{{stockPnaCeftriaxoneId}}/seuil-alerte
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "seuilAlerte": 100
+}
+
+
+### ── Consultation ───────────────────────────────────────────────────
+
+### 41. GET /api/stocks/{id} — obtenir une ligne de stock
+GET {{baseUrl}}/api/stocks/{{stockPnaCeftriaxoneId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 42. GET /api/stocks/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/stocks/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 43. GET /api/stocks — lister tous les stocks, pagination par défaut
+GET {{baseUrl}}/api/stocks
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 44. GET /api/stocks — filtré par entrepôt (PNA)
+GET {{baseUrl}}/api/stocks?entrepotId={{entrepotPnaId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 45. GET /api/stocks — filtré par médicament (Paracétamol, tous entrepôts confondus)
+GET {{baseUrl}}/api/stocks?medicamentId={{medicamentParacetamolId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 46. GET /api/stocks — filtré ruptureUniquement=true
+GET {{baseUrl}}/api/stocks?ruptureUniquement=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 47. GET /api/stocks — filtré seuilAtteintUniquement=true
+GET {{baseUrl}}/api/stocks?seuilAtteintUniquement=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 48. GET /api/stocks — combinaison de filtres + tri + pagination personnalisée
+GET {{baseUrl}}/api/stocks?entrepotId={{entrepotPnaId}}&page=0&size=5&sortBy=quantiteDisponible&sortDirection=DESC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 49. GET /api/stocks — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/stocks
+
+
+### 50. GET /api/stocks/alertes/rupture — nominal, toutes ruptures confondues
+GET {{baseUrl}}/api/stocks/alertes/rupture
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 51. GET /api/stocks/alertes/rupture — filtré par entrepôt
+GET {{baseUrl}}/api/stocks/alertes/rupture?entrepotId={{entrepotPnaId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 52. GET /api/stocks/alertes/rupture — variante seuil atteint (au lieu de rupture stricte)
+GET {{baseUrl}}/api/stocks/alertes/rupture?seuilAtteintUniquement=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 53. GET /api/stocks/alertes/rupture — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/stocks/alertes/rupture

@@ -2,6 +2,7 @@ package ministere.sante.senpna.stock.domain.model;
 
 import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
+import ministere.sante.senpna.stock.domain.exception.LotExpireException;
 import ministere.sante.senpna.stock.domain.valueobject.StatutLot;
 
 import org.junit.jupiter.api.DisplayName;
@@ -139,21 +140,21 @@ class LotTest {
         }
 
         @Test
-        @DisplayName("bloquer un lot déjà EXPIRE → IllegalStateException")
+        @DisplayName("bloquer un lot déjà EXPIRE → LotExpireException")
         void bloquer_lotExpire_leveException() {
             Lot lot = lotValide(LocalDate.now().minusDays(1));
             lot.marquerExpire();
 
-            assertThatThrownBy(lot::bloquer).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(lot::bloquer).isInstanceOf(LotExpireException.class);
         }
 
         @Test
-        @DisplayName("débloquer un lot EXPIRE → IllegalStateException")
+        @DisplayName("débloquer un lot EXPIRE → LotExpireException")
         void debloquer_lotExpire_leveException() {
             Lot lot = lotValide(LocalDate.now().minusDays(1));
             lot.marquerExpire();
 
-            assertThatThrownBy(lot::debloquer).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(lot::debloquer).isInstanceOf(LotExpireException.class);
         }
     }
 

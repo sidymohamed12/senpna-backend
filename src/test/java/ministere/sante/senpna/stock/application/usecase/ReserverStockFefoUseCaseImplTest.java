@@ -14,6 +14,7 @@ import ministere.sante.senpna.stock.domain.model.Stock;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
+import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,8 +66,8 @@ class ReserverStockFefoUseCaseImplTest {
         }
 
         private static Entrepot entrepotPra() {
-                return Entrepot.reconstruct(ENTREPOT_ID, "PRA-THIES", "PRA Thiès", TypeEntrepot.PRA, null, null, null,
-                                null,
+                return Entrepot.reconstruct(ENTREPOT_ID, "PRA-THIES", "PRA Thiès", TypeEntrepot.PRA,
+                                RegionId.generate(), null, null, null,
                                 true, Instant.now(), Instant.now());
         }
 

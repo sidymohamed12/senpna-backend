@@ -1,0 +1,382 @@
+### ══════════════════════════════════════════════════════════════════
+### LotsController — /api/lots
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011 (entrepôts + utilisateurs), V013 (fournisseurs),
+### V018 (médicaments) et V022 (lots/stocks/mouvements de démonstration
+### du module `stock`) — toutes dans db/migration-dev — doivent être
+### appliquées.
+###
+### ⚠️  Limite connue : la cohérence dateFabrication ≤ dateExpiration
+### n'est vérifiée qu'au niveau du modèle de domaine (IllegalArgumentException),
+### pas au niveau du DTO (@Valid) — un tel cas renvoie donc 500 au lieu
+### de 400 pour l'instant. Non couvert ci-dessous en tant que cas "erreur
+### attendue" pour cette raison.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@medicamentSiropId = 62000000-0000-0000-0000-000000000004
+
+@fournisseurPharmaSenegalId = 50000000-0000-0000-0000-000000000001
+@fournisseurMedSupplyId = 50000000-0000-0000-0000-000000000003
+
+@lotParacetamolProcheId = 64000000-0000-0000-0000-000000000001
+@lotParacetamolLointainId = 64000000-0000-0000-0000-000000000002
+@lotParacetamolExpireId = 64000000-0000-0000-0000-000000000005
+@lotAmoxicillineBloqueId = 64000000-0000-0000-0000-000000000006
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (habilité pharmacovigilance : bloquer/débloquer)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (réceptionne les lots)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — ADMIN_PRA (lecture/écriture ouvertes également à la PRA)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (pour les tests de rôle insuffisant)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/lots — créer un lot (nominal, complet) — MAGASINIER_PNA réceptionne un nouveau lot
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "PARA-TEST-{{$timestamp}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateFabrication": "2026-01-15",
+  "dateExpiration": "2027-06-30",
+  "prixAchat": 18.50,
+  "prixVente": 25.00
+}
+
+
+### 2. POST /api/lots — cas limite, champs optionnels absents (dateFabrication, prix)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "SIROP-TEST-{{$timestamp}}",
+  "medicamentId": "{{medicamentSiropId}}",
+  "fournisseurId": "{{fournisseurMedSupplyId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 3. POST /api/lots — cas d'erreur, dateExpiration manquante (400 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "LOT-SANS-EXPIRATION-{{$timestamp}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}"
+}
+
+
+### 4. POST /api/lots — cas d'erreur, numeroLot vide (400 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 5. POST /api/lots — cas d'erreur, medicamentId manquant (400 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "LOT-SANS-MEDICAMENT-{{$timestamp}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 6. POST /api/lots — cas d'erreur, medicamentId inexistant (404 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "LOT-MEDICAMENT-FANTOME-{{$timestamp}}",
+  "medicamentId": "99999999-9999-9999-9999-999999999999",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 7. POST /api/lots — cas d'erreur, fournisseurId inexistant (404 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "LOT-FOURNISSEUR-FANTOME-{{$timestamp}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "99999999-9999-9999-9999-999999999999",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 8. POST /api/lots — cas d'erreur, numéro de lot déjà utilisé pour ce médicament (409 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "PARA-2026-A001",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 9. POST /api/lots — cas d'erreur, numéro déjà utilisé, insensible à la casse (409 attendu)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "para-2026-a001",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 10. POST /api/lots — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/lots
+Content-Type: application/json
+
+{
+  "numeroLot": "LOT-SANS-AUTH-{{$timestamp}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 11. POST /api/lots — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_STRUCTURE)
+POST {{baseUrl}}/api/lots
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroLot": "NE-DEVRAIT-PAS-ETRE-CREE-{{$timestamp}}",
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "dateExpiration": "2027-01-01"
+}
+
+
+### 12. PATCH /api/lots/{id}/bloquer — nominal (PHARMACIEN_PNA met le lot en quarantaine)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolLointainId}}/bloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 13. PATCH /api/lots/{id}/debloquer — nominal (redébloque le lot précédent)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolLointainId}}/debloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 14. PATCH /api/lots/{id}/bloquer — cas idempotent, lot déjà BLOQUE (200 attendu)
+PATCH {{baseUrl}}/api/lots/{{lotAmoxicillineBloqueId}}/bloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 15. PATCH /api/lots/{id}/bloquer — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/lots/99999999-9999-9999-9999-999999999999/bloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 16. PATCH /api/lots/{id}/bloquer — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_PNA)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolLointainId}}/bloquer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/lots/{id}/bloquer — cas d'erreur métier, lot EXPIRE — statut terminal (422 attendu)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolExpireId}}/bloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 18. PATCH /api/lots/{id}/debloquer — cas d'erreur métier, lot EXPIRE — statut terminal (422 attendu)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolExpireId}}/debloquer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 19. PATCH /api/lots/{id}/prix — nominal (ADMIN_PNA révise les prix)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolProcheId}}/prix
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "prixAchat": 19.00,
+  "prixVente": 26.50
+}
+
+
+### 20. PATCH /api/lots/{id}/prix — cas limite, un seul champ renseigné (prixVente seul)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolProcheId}}/prix
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "prixVente": 27.00
+}
+
+
+### 21. PATCH /api/lots/{id}/prix — cas d'erreur, prix négatif (400 attendu)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolProcheId}}/prix
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "prixAchat": -5.00
+}
+
+
+### 22. PATCH /api/lots/{id}/prix — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/lots/99999999-9999-9999-9999-999999999999/prix
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "prixVente": 30.00
+}
+
+
+### 23. PATCH /api/lots/{id}/prix — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA, pas ROLES_PRIX)
+PATCH {{baseUrl}}/api/lots/{{lotParacetamolProcheId}}/prix
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "prixVente": 99.00
+}
+
+
+### 24. GET /api/lots/{id} — obtenir un lot
+GET {{baseUrl}}/api/lots/{{lotParacetamolProcheId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/lots/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/lots/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/lots — lister tous les lots, pagination par défaut (tri dateExpiration ASC)
+GET {{baseUrl}}/api/lots
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/lots — filtré par médicament (Paracétamol → 3 lots : proche, lointain, expiré)
+GET {{baseUrl}}/api/lots?medicamentId={{medicamentParacetamolId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/lots — filtré par statut=BLOQUE
+GET {{baseUrl}}/api/lots?statut=BLOQUE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 29. GET /api/lots — filtré par statut=EXPIRE
+GET {{baseUrl}}/api/lots?statut=EXPIRE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 30. GET /api/lots — recherche texte (numéro de lot) + tri + pagination personnalisée
+GET {{baseUrl}}/api/lots?q=PARA&page=0&size=5&sortBy=dateExpiration&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 31. GET /api/lots — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/lots
+
+
+### 32. GET /api/lots/alertes/peremption — horizon par défaut (365 jours) — remonte tous les lots ACTIF proches
+GET {{baseUrl}}/api/lots/alertes/peremption
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 33. GET /api/lots/alertes/peremption — palier "1 mois" (30 jours) — ne remonte que le Sirop et le Paracétamol proche
+GET {{baseUrl}}/api/lots/alertes/peremption?horizonJours=30
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 34. GET /api/lots/alertes/peremption — filtré par médicament + pagination
+GET {{baseUrl}}/api/lots/alertes/peremption?horizonJours=400&medicamentId={{medicamentParacetamolId}}&page=0&size=10
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 35. GET /api/lots/alertes/peremption — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/lots/alertes/peremption

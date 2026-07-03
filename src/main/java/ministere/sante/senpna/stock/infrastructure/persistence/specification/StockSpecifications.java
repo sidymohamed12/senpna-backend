@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.infrastructure.persistence.specification;
 
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.StockJpaEntity;
+import ministere.sante.senpna.stock.infrastructure.persistence.entity.StockJpaEntity_;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -16,21 +17,21 @@ public final class StockSpecifications {
         if (entrepotId == null) {
             return null;
         }
-        return (root, query, cb) -> cb.equal(root.get("entrepotId"), entrepotId);
+        return (root, query, cb) -> cb.equal(root.get(StockJpaEntity_.entrepotId), entrepotId);
     }
 
     public static Specification<StockJpaEntity> lotId(UUID lotId) {
         if (lotId == null) {
             return null;
         }
-        return (root, query, cb) -> cb.equal(root.get("lotId"), lotId);
+        return (root, query, cb) -> cb.equal(root.get(StockJpaEntity_.lotId), lotId);
     }
 
     public static Specification<StockJpaEntity> medicamentId(UUID medicamentId) {
         if (medicamentId == null) {
             return null;
         }
-        return (root, query, cb) -> cb.equal(root.get("medicamentId"), medicamentId);
+        return (root, query, cb) -> cb.equal(root.get(StockJpaEntity_.medicamentId), medicamentId);
     }
 
     /** Rupture : quantité disponible à la vente (disponible - réservée) ≤ 0. */
@@ -39,7 +40,8 @@ public final class StockSpecifications {
             return null;
         }
         return (root, query, cb) -> cb.lessThanOrEqualTo(
-                cb.diff(root.get("quantiteDisponible"), root.get("quantiteReservee")), BigDecimal.ZERO);
+                cb.diff(root.get(StockJpaEntity_.quantiteDisponible), root.get(StockJpaEntity_.quantiteReservee)),
+                BigDecimal.ZERO);
     }
 
     /** Seuil d'alerte atteint : quantité disponible à la vente ≤ seuil défini. */
@@ -48,10 +50,11 @@ public final class StockSpecifications {
             return null;
         }
         return (root, query, cb) -> cb.and(
-                cb.isNotNull(root.get("seuilAlerte")),
+                cb.isNotNull(root.get(StockJpaEntity_.seuilAlerte)),
                 cb.lessThanOrEqualTo(
-                        cb.diff(root.get("quantiteDisponible"), root.get("quantiteReservee")),
-                        root.get("seuilAlerte")));
+                        cb.diff(root.get(StockJpaEntity_.quantiteDisponible),
+                                root.get(StockJpaEntity_.quantiteReservee)),
+                        root.get(StockJpaEntity_.seuilAlerte)));
     }
 
     public static Specification<StockJpaEntity> combiner(UUID entrepotId, UUID lotId, UUID medicamentId,

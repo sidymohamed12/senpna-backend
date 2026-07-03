@@ -1,0 +1,149 @@
+### ══════════════════════════════════════════════════════════════════
+### MouvementsStockController — /api/mouvements-stock
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011, V013, V018 et V022 (db/migration-dev) appliquées.
+### Contrôleur en lecture seule — les mouvements sont créés exclusivement
+### en conséquence des opérations de 14-stocks.http, jamais directement.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@entrepotPnaId = 30000000-0000-0000-0000-000000000001
+@entrepotPraZiguinchorId = 30000000-0000-0000-0000-000000000005
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+
+@lotParacetamolProcheId = 64000000-0000-0000-0000-000000000001
+
+@mouvementEntreeAchatId = 66000000-0000-0000-0000-000000000001
+@mouvementPeremptionId = 66000000-0000-0000-0000-000000000015
+
+@utilisateurMagasinierPnaId = 20000000-0000-0000-0000-000000000004
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — MAGASINIER_PNA
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — GESTIONNAIRE_STRUCTURE (pour le test de rôle insuffisant)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. GET /api/mouvements-stock/{id} — obtenir un mouvement (ENTREE_ACHAT)
+GET {{baseUrl}}/api/mouvements-stock/{{mouvementEntreeAchatId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 2. GET /api/mouvements-stock/{id} — obtenir un mouvement (PEREMPTION, sans entrepôt destination)
+GET {{baseUrl}}/api/mouvements-stock/{{mouvementPeremptionId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 3. GET /api/mouvements-stock/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/mouvements-stock/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 4. GET /api/mouvements-stock/{id} — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/mouvements-stock/{{mouvementEntreeAchatId}}
+
+
+### 5. GET /api/mouvements-stock — lister tous les mouvements, pagination par défaut (tri dateMouvement DESC)
+GET {{baseUrl}}/api/mouvements-stock
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/mouvements-stock — filtré par lot (historique complet du Paracétamol "proche péremption")
+GET {{baseUrl}}/api/mouvements-stock?lotId={{lotParacetamolProcheId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/mouvements-stock — filtré par médicament (tous lots de Paracétamol confondus)
+GET {{baseUrl}}/api/mouvements-stock?medicamentId={{medicamentParacetamolId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 8. GET /api/mouvements-stock — filtré par entrepôt (source OU destination — ici la PNA)
+GET {{baseUrl}}/api/mouvements-stock?entrepotId={{entrepotPnaId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 9. GET /api/mouvements-stock — filtré par entrepôt PRA-Ziguinchor (uniquement destination/source de transferts)
+GET {{baseUrl}}/api/mouvements-stock?entrepotId={{entrepotPraZiguinchorId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 10. GET /api/mouvements-stock — filtré par type de mouvement (ENTREE_ACHAT)
+GET {{baseUrl}}/api/mouvements-stock?typeMouvement=ENTREE_ACHAT
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 11. GET /api/mouvements-stock — filtré par sens (SORTIE uniquement)
+GET {{baseUrl}}/api/mouvements-stock?sens=SORTIE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 12. GET /api/mouvements-stock — filtré par utilisateur responsable
+GET {{baseUrl}}/api/mouvements-stock?utilisateurId={{utilisateurMagasinierPnaId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 13. GET /api/mouvements-stock — filtré par plage de dates
+GET {{baseUrl}}/api/mouvements-stock?dateDebut=2026-06-01T00:00:00Z&dateFin=2026-07-31T23:59:59Z
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 14. GET /api/mouvements-stock — combinaison de filtres (entrepôt + type + sens) + pagination personnalisée
+GET {{baseUrl}}/api/mouvements-stock?entrepotId={{entrepotPnaId}}&typeMouvement=SORTIE_TRANSFERT&sens=SORTIE&page=0&size=5
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 15. GET /api/mouvements-stock — tri par date croissante (chronologique)
+GET {{baseUrl}}/api/mouvements-stock?sortBy=dateMouvement&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 16. GET /api/mouvements-stock — cas d'erreur, type de mouvement invalide (400 attendu)
+GET {{baseUrl}}/api/mouvements-stock?typeMouvement=TYPE_INEXISTANT
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 17. GET /api/mouvements-stock — cas d'erreur, sens invalide (400 attendu)
+GET {{baseUrl}}/api/mouvements-stock?sens=LATERAL
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 18. GET /api/mouvements-stock — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/mouvements-stock
+
+
+### 19. GET /api/mouvements-stock — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_STRUCTURE)
+GET {{baseUrl}}/api/mouvements-stock
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
