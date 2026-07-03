@@ -16,6 +16,10 @@ encore : Marketplace → cherche "REST Client" → Install.
 | `06-users.http`                 | `UsersController`                | créer / modifier / (dés)activer / gérer les rôles                       |
 | `07-affectations.http`          | `AffectationsController`         | affecter/retirer un utilisateur à un entrepôt ou une structure          |
 | `08-fournisseurs.http`          | `FournisseursController`         | créer / modifier / (dés)activer / lister / obtenir un fournisseur       |
+| `09-familles.http`              | `FamillesController`             | créer / modifier / (dés)archiver / lister / obtenir une famille         |
+| `10-formes.http`                | `FormesController`               | créer / modifier / (dés)archiver / lister / obtenir une forme           |
+| `11-medicaments.http`           | `MedicamentsController`          | créer / modifier / (dés)archiver / lister / obtenir un médicament       |
+| `12-conditionnements.http`      | `ConditionnementsController`     | créer / modifier / (dés)archiver / lister / obtenir un conditionnement  |
 
 **Chaque fichier est autonome** : il contient ses propres requêtes de
 login en haut (section `0a`, `0b`...) et réutilise leurs tokens pour le
@@ -34,6 +38,11 @@ d'environnement séparé à configurer.
    `V013__insert_mock_fournisseurs.sql` (`db/migration-dev`) doit aussi
    être appliquée — elle peuple la table `fournisseurs` avec les 5
    fournisseurs de démonstration référencés dans ce fichier.
+4. Pour `09-familles.http` à `12-conditionnements.http` : la migration
+   `V018__insert_mock_medicament_referentiel.sql` (`db/migration-dev`)
+   doit aussi être appliquée — elle peuple familles, formes,
+   médicaments (Paracétamol, Amoxicilline, Ceftriaxone, etc.) et leurs
+   conditionnements de démonstration référencés dans ces fichiers.
 
 ## Comment exécuter une requête
 
@@ -74,3 +83,11 @@ l'exécuter.
 - `{{$timestamp}}` est une variable dynamique intégrée à l'extension
   (timestamp Unix courant) — utilisée ici pour générer des codes/emails
   uniques à chaque exécution et éviter les doublons.
+- **Rôles d'écriture du module `medicament`** (`09-familles.http` à
+  `12-conditionnements.http`) : contrairement à `08-fournisseurs.http`
+  (écriture réservée à `ADMIN_PNA`/`GESTIONNAIRE_PNA`), le catalogue
+  médicament autorise aussi `PHARMACIEN_PNA` en écriture (validation
+  pharmaceutique du référentiel). La lecture, elle, est ouverte à tous
+  les rôles PNA et PRA ainsi qu'à `GESTIONNAIRE_STRUCTURE` — il n'existe
+  donc pas de cas 403 sur les endpoints `GET` de ce module, seulement du
+  401 sans authentification.

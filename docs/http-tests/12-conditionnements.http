@@ -1,0 +1,409 @@
+### ══════════════════════════════════════════════════════════════════
+### ConditionnementsController — /api/conditionnements
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V018__insert_mock_medicament_referentiel.sql (db/migration-dev)
+### doit être appliquée (médicaments + conditionnements de démonstration).
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentCeftriaxoneId = 62000000-0000-0000-0000-000000000003
+@medicamentSiropId = 62000000-0000-0000-0000-000000000004
+
+@conditionnementParaComprimeId = 63000000-0000-0000-0000-000000000001
+@conditionnementParaPlaquetteId = 63000000-0000-0000-0000-000000000002
+@conditionnementParaBoiteId = 63000000-0000-0000-0000-000000000003
+@conditionnementParaCartonId = 63000000-0000-0000-0000-000000000004
+@conditionnementAmoxComprimeId = 63000000-0000-0000-0000-000000000005
+@conditionnementAmoxBoiteId = 63000000-0000-0000-0000-000000000006
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (habilité en écriture pour ce module)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (lecture seule attendue)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — MAGASINIER_PRA (lecture autorisée, écriture refusée — catalogue géré par la PNA)
+# @name loginMagasinierPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "khady.diop@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (lecture autorisée, écriture refusée)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/conditionnements — créer un nouveau niveau pour le Sirop (unité de base, aucune existante)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentSiropId}}",
+  "nom": "Flacon",
+  "niveau": 1,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 2. POST /api/conditionnements — ajoute un niveau "Carton" au Sirop (créé par PHARMACIEN_PNA)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentSiropId}}",
+  "nom": "Carton",
+  "niveau": 2,
+  "quantiteUniteBase": 24,
+  "estUniteBase": false
+}
+
+
+### 3. POST /api/conditionnements — cas d'erreur, medicamentId manquant (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Sans médicament",
+  "niveau": 1,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 4. POST /api/conditionnements — cas d'erreur, niveau invalide < 1 (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Niveau invalide",
+  "niveau": 0,
+  "quantiteUniteBase": 1,
+  "estUniteBase": false
+}
+
+
+### 5. POST /api/conditionnements — cas d'erreur, quantité en unité de base nulle/négative (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Quantité invalide",
+  "niveau": 3,
+  "quantiteUniteBase": 0,
+  "estUniteBase": false
+}
+
+
+### 6. POST /api/conditionnements — cas d'erreur, médicament introuvable (404 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "99999999-9999-9999-9999-999999999999",
+  "nom": "Médicament fantôme",
+  "niveau": 1,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 7. POST /api/conditionnements — cas d'erreur, niveau déjà utilisé pour ce médicament (409 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "nom": "Autre nom",
+  "niveau": 1,
+  "quantiteUniteBase": 1,
+  "estUniteBase": false
+}
+
+
+### 8. POST /api/conditionnements — cas d'erreur, nom déjà utilisé pour ce médicament (409 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "nom": "Comprimé",
+  "niveau": 5,
+  "quantiteUniteBase": 50000,
+  "estUniteBase": false
+}
+
+
+### 9. POST /api/conditionnements — cas d'erreur, nom déjà utilisé insensible à la casse (409 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentParacetamolId}}",
+  "nom": "carton",
+  "niveau": 6,
+  "quantiteUniteBase": 20000,
+  "estUniteBase": false
+}
+
+
+### 10. POST /api/conditionnements — cas d'erreur, unité de base déjà définie pour ce médicament (422 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentAmoxicillineId}}",
+  "nom": "Gélule",
+  "niveau": 3,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 11. POST /api/conditionnements — cas d'erreur, unité de base avec quantité ≠ 1 (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Unité base invalide",
+  "niveau": 3,
+  "quantiteUniteBase": 5,
+  "estUniteBase": true
+}
+
+
+### 12. POST /api/conditionnements — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Ne devrait pas être créé",
+  "niveau": 3,
+  "quantiteUniteBase": 10,
+  "estUniteBase": false
+}
+
+
+### 13. POST /api/conditionnements — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PRA)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginMagasinierPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Ne devrait pas être créé non plus",
+  "niveau": 3,
+  "quantiteUniteBase": 10,
+  "estUniteBase": false
+}
+
+
+### 14. PUT /api/conditionnements/{id} — modifier un conditionnement existant (renommer + reconvertir)
+PUT {{baseUrl}}/api/conditionnements/{{conditionnementAmoxBoiteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Boîte de 30",
+  "niveau": 2,
+  "quantiteUniteBase": 30,
+  "estUniteBase": false
+}
+
+
+### 15. PUT /api/conditionnements/{id} — cas d'erreur, nom vide (400 attendu)
+PUT {{baseUrl}}/api/conditionnements/{{conditionnementAmoxBoiteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "",
+  "niveau": 2,
+  "quantiteUniteBase": 20,
+  "estUniteBase": false
+}
+
+
+### 16. PUT /api/conditionnements/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/conditionnements/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Conditionnement fantôme",
+  "niveau": 1,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 17. PUT /api/conditionnements/{id} — cas d'erreur, niveau déjà utilisé par un autre conditionnement du même médicament (409 attendu)
+PUT {{baseUrl}}/api/conditionnements/{{conditionnementParaBoiteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Boîte",
+  "niveau": 4,
+  "quantiteUniteBase": 100,
+  "estUniteBase": false
+}
+
+
+### 18. PUT /api/conditionnements/{id} — cas d'erreur, tentative de définir une 2e unité de base (422 attendu)
+PUT {{baseUrl}}/api/conditionnements/{{conditionnementParaPlaquetteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Plaquette",
+  "niveau": 2,
+  "quantiteUniteBase": 1,
+  "estUniteBase": true
+}
+
+
+### 19. PATCH /api/conditionnements/{id}/archiver — archive un conditionnement non-unité-de-base (Carton)
+PATCH {{baseUrl}}/api/conditionnements/{{conditionnementParaCartonId}}/archiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 20. PATCH /api/conditionnements/{id}/desarchiver — réactive le Carton
+PATCH {{baseUrl}}/api/conditionnements/{{conditionnementParaCartonId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 21. PATCH /api/conditionnements/{id}/desarchiver — cas idempotent (déjà actif, 200 attendu)
+PATCH {{baseUrl}}/api/conditionnements/{{conditionnementParaCartonId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 22. PATCH /api/conditionnements/{id}/archiver — cas d'erreur, dernière unité de base du médicament (422 attendu)
+### L'Amoxicilline n'a qu'une seule unité de base active (Comprimé) → archivage refusé.
+PATCH {{baseUrl}}/api/conditionnements/{{conditionnementAmoxComprimeId}}/archiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. PATCH /api/conditionnements/{id}/archiver — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/conditionnements/99999999-9999-9999-9999-999999999999/archiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. PATCH /api/conditionnements/{id}/archiver — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/conditionnements/{{conditionnementParaBoiteId}}/archiver
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/conditionnements/{id} — obtenir un conditionnement (lecture ouverte)
+GET {{baseUrl}}/api/conditionnements/{{conditionnementParaComprimeId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/conditionnements/{id} — lecture par GESTIONNAIRE_STRUCTURE
+GET {{baseUrl}}/api/conditionnements/{{conditionnementParaBoiteId}}
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/conditionnements/{id} — lecture par MAGASINIER_PRA
+GET {{baseUrl}}/api/conditionnements/{{conditionnementAmoxComprimeId}}
+Authorization: Bearer {{loginMagasinierPra.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/conditionnements/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/conditionnements/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 29. GET /api/conditionnements — lister tous les conditionnements, tri par défaut (niveau ASC)
+GET {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 30. GET /api/conditionnements — filtré par médicament (les 4 niveaux du Paracétamol)
+GET {{baseUrl}}/api/conditionnements?medicamentId={{medicamentParacetamolId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 31. GET /api/conditionnements — filtré par médicament + actif=true
+GET {{baseUrl}}/api/conditionnements?medicamentId={{medicamentParacetamolId}}&actif=true
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 32. GET /api/conditionnements — pagination personnalisée + tri par nom
+GET {{baseUrl}}/api/conditionnements?medicamentId={{medicamentParacetamolId}}&page=0&size=2&sortBy=nom&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 33. GET /api/conditionnements — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/conditionnements

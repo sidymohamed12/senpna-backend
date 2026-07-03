@@ -1,0 +1,479 @@
+### ══════════════════════════════════════════════════════════════════
+### MedicamentsController — /api/medicaments
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V018__insert_mock_medicament_referentiel.sql (db/migration-dev)
+### doit être appliquée (familles, formes, médicaments de démonstration).
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@familleAntalgiqueId = 60000000-0000-0000-0000-000000000001
+@familleAntibiotiqueId = 60000000-0000-0000-0000-000000000002
+@familleAntihistaminiqueId = 60000000-0000-0000-0000-000000000004
+
+@formeComprimeId = 61000000-0000-0000-0000-000000000001
+@formePommadeId = 61000000-0000-0000-0000-000000000004
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentCeftriaxoneId = 62000000-0000-0000-0000-000000000003
+@medicamentQuinineId = 62000000-0000-0000-0000-000000000005
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (habilité en écriture pour ce module)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (lecture seule attendue)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — GESTIONNAIRE_PRA (lecture autorisée, écriture refusée — catalogue géré par la PNA)
+# @name loginGestionnairePra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bineta.faye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (lecture autorisée, écriture refusée)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/medicaments — créer un médicament complet (ADMIN_PNA / GESTIONNAIRE_PNA / PHARMACIEN_PNA)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "IBU400-{{$timestamp}}",
+  "nomCommercial": "Ibuprofène Générique",
+  "dci": "Ibuprofène",
+  "dosage": "400 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "voieAdministration": "ORALE",
+  "temperatureConservation": "AMBIANTE",
+  "programmeSante": "PNDS Douleur",
+  "delaiApprovisionnementJours": 30,
+  "necessiteOrdonnance": false,
+  "fabricant": "Génériques Sénégal",
+  "stockMinimum": 5000,
+  "stockMaximum": 50000
+}
+
+
+### 2. POST /api/medicaments — créé par PHARMACIEN_PNA
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "PARACHK-{{$timestamp}}",
+  "nomCommercial": "Paracétamol Enfant",
+  "dci": "Paracétamol",
+  "dosage": "120 mg/5ml",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 3. POST /api/medicaments — cas limite, seuls les champs obligatoires sont renseignés
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "MINIMAL-{{$timestamp}}",
+  "nomCommercial": "Médicament minimal",
+  "dci": "DCI test",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 4. POST /api/medicaments — cas d'erreur, code manquant (400 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomCommercial": "Sans code",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 5. POST /api/medicaments — cas d'erreur, formeId manquant (400 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SANSFORME-{{$timestamp}}",
+  "nomCommercial": "Sans forme",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 6. POST /api/medicaments — cas d'erreur, familleId manquant (400 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SANSFAMILLE-{{$timestamp}}",
+  "nomCommercial": "Sans famille",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 7. POST /api/medicaments — cas d'erreur, délai d'approvisionnement négatif (400 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "DELAINEG-{{$timestamp}}",
+  "nomCommercial": "Délai négatif",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false,
+  "delaiApprovisionnementJours": -5
+}
+
+
+### 8. POST /api/medicaments — cas d'erreur, code déjà utilisé (409 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "PARA500",
+  "nomCommercial": "Doublon",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 9. POST /api/medicaments — cas d'erreur, famille introuvable (404 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "FAMILLEINCONNUE-{{$timestamp}}",
+  "nomCommercial": "Famille inconnue",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "99999999-9999-9999-9999-999999999999",
+  "necessiteOrdonnance": false
+}
+
+
+### 10. POST /api/medicaments — cas d'erreur, forme introuvable (404 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "FORMEINCONNUE-{{$timestamp}}",
+  "nomCommercial": "Forme inconnue",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "99999999-9999-9999-9999-999999999999",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 11. POST /api/medicaments — cas d'erreur, famille archivée (422 attendu — famille Antihistaminique désactivée)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "FAMILLEARCHIVEE-{{$timestamp}}",
+  "nomCommercial": "Famille archivée",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntihistaminiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 12. POST /api/medicaments — cas d'erreur, forme archivée (422 attendu — forme Pommade désactivée)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "FORMEARCHIVEE-{{$timestamp}}",
+  "nomCommercial": "Forme archivée",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formePommadeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 13. POST /api/medicaments — cas d'erreur, seuil minimum > seuil maximum (400 attendu)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SEUILSINVALIDES-{{$timestamp}}",
+  "nomCommercial": "Seuils invalides",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false,
+  "stockMinimum": 5000,
+  "stockMaximum": 100
+}
+
+
+### 14. POST /api/medicaments — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE",
+  "nomCommercial": "Ne devrait pas être créé",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 15. POST /api/medicaments — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_PRA)
+POST {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginGestionnairePra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE_2",
+  "nomCommercial": "Ne devrait pas être créé non plus",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 16. PUT /api/medicaments/{id} — modifier un médicament existant
+PUT {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomCommercial": "Quinine nouvelle formule",
+  "dci": "Quinine",
+  "dosage": "300 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "voieAdministration": "ORALE",
+  "temperatureConservation": "AMBIANTE",
+  "necessiteOrdonnance": true,
+  "fabricant": "Génériques Sénégal",
+  "stockMinimum": 2000,
+  "stockMaximum": 20000
+}
+
+
+### 17. PUT /api/medicaments/{id} — cas d'erreur, dci vide (400 attendu)
+PUT {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomCommercial": "Nom",
+  "dci": "",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 18. PUT /api/medicaments/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/medicaments/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomCommercial": "Médicament fantôme",
+  "dci": "DCI",
+  "dosage": "10 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntalgiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 19. PUT /api/medicaments/{id} — cas d'erreur, famille archivée (422 attendu)
+PUT {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomCommercial": "Quinine",
+  "dci": "Quinine",
+  "dosage": "300 mg",
+  "formeId": "{{formeComprimeId}}",
+  "familleId": "{{familleAntihistaminiqueId}}",
+  "necessiteOrdonnance": false
+}
+
+
+### 20. PATCH /api/medicaments/{id}/archiver
+PATCH {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}/archiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 21. PATCH /api/medicaments/{id}/desarchiver
+PATCH {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 22. PATCH /api/medicaments/{id}/desarchiver — cas idempotent (déjà actif, 200 attendu)
+PATCH {{baseUrl}}/api/medicaments/{{medicamentQuinineId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 23. PATCH /api/medicaments/{id}/archiver — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/medicaments/99999999-9999-9999-9999-999999999999/archiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. PATCH /api/medicaments/{id}/archiver — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/medicaments/{{medicamentParacetamolId}}/archiver
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/medicaments/{id} — obtenir un médicament (lecture ouverte, inclut formeLibelle/familleLibelle)
+GET {{baseUrl}}/api/medicaments/{{medicamentParacetamolId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/medicaments/{id} — lecture par GESTIONNAIRE_STRUCTURE
+GET {{baseUrl}}/api/medicaments/{{medicamentAmoxicillineId}}
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/medicaments/{id} — lecture par GESTIONNAIRE_PRA
+GET {{baseUrl}}/api/medicaments/{{medicamentCeftriaxoneId}}
+Authorization: Bearer {{loginGestionnairePra.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/medicaments/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/medicaments/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 29. GET /api/medicaments — lister tous les médicaments, pagination par défaut
+GET {{baseUrl}}/api/medicaments
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 30. GET /api/medicaments — filtré par actif=false (médicaments archivés)
+GET {{baseUrl}}/api/medicaments?actif=false
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 31. GET /api/medicaments — filtré par familleId
+GET {{baseUrl}}/api/medicaments?familleId={{familleAntibiotiqueId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 32. GET /api/medicaments — filtré par formeId
+GET {{baseUrl}}/api/medicaments?formeId={{formeComprimeId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 33. GET /api/medicaments — recherche texte (code, nom commercial ou DCI) + tri + pagination
+GET {{baseUrl}}/api/medicaments?q=parac&page=0&size=10&sortBy=nomCommercial&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 34. GET /api/medicaments — recherche + famille + actif combinés
+GET {{baseUrl}}/api/medicaments?q=amox&familleId={{familleAntibiotiqueId}}&actif=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 35. GET /api/medicaments — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/medicaments

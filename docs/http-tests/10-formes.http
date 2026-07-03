@@ -1,0 +1,286 @@
+### ══════════════════════════════════════════════════════════════════
+### FormesController — /api/formes
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@formeComprimeId = 61000000-0000-0000-0000-000000000001
+@formeSiropId = 61000000-0000-0000-0000-000000000003
+@formePommadeId = 61000000-0000-0000-0000-000000000004
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (habilité en écriture pour ce module)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (lecture seule attendue)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — PHARMACIEN_PRA (lecture autorisée, écriture refusée — référentiel géré par la PNA)
+# @name loginPharmacienPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "modou.gueye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (lecture autorisée, écriture refusée)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/formes — créer une forme (ADMIN_PNA / GESTIONNAIRE_PNA / PHARMACIEN_PNA)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SUPPOSITOIRE",
+  "libelle": "Suppositoire",
+  "description": "Forme rectale"
+}
+
+
+### 2. POST /api/formes — créée par PHARMACIEN_PNA
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "GEL-{{$timestamp}}",
+  "libelle": "Gel"
+}
+
+
+### 3. POST /api/formes — cas limite, description absente (champ optionnel)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "PATCH-{{$timestamp}}",
+  "libelle": "Patch transdermique"
+}
+
+
+### 4. POST /api/formes — cas d'erreur, code manquant (400 attendu)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Sans code"
+}
+
+
+### 5. POST /api/formes — cas d'erreur, code au mauvais format (400 attendu)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "co!de",
+  "libelle": "Code invalide"
+}
+
+
+### 6. POST /api/formes — cas d'erreur, libellé manquant (400 attendu)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SANSLIBELLE"
+}
+
+
+### 7. POST /api/formes — cas d'erreur, code déjà utilisé (409 attendu)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "COMPRIME",
+  "libelle": "Doublon"
+}
+
+
+### 8. POST /api/formes — cas d'erreur, code déjà utilisé insensible à la casse (409 attendu)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "comprime",
+  "libelle": "Doublon casse"
+}
+
+
+### 9. POST /api/formes — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE",
+  "libelle": "Ne devrait pas être créée"
+}
+
+
+### 10. POST /api/formes — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PRA)
+POST {{baseUrl}}/api/formes
+Authorization: Bearer {{loginPharmacienPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE_2",
+  "libelle": "Ne devrait pas être créée non plus"
+}
+
+
+### 11. PUT /api/formes/{id} — modifier une forme existante
+PUT {{baseUrl}}/api/formes/{{formePommadeId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Pommade dermique",
+  "description": "Application cutanée"
+}
+
+
+### 12. PUT /api/formes/{id} — cas d'erreur, libellé vide (400 attendu)
+PUT {{baseUrl}}/api/formes/{{formePommadeId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": ""
+}
+
+
+### 13. PUT /api/formes/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/formes/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Forme fantôme"
+}
+
+
+### 14. PATCH /api/formes/{id}/archiver
+PATCH {{baseUrl}}/api/formes/{{formePommadeId}}/archiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 15. PATCH /api/formes/{id}/desarchiver
+PATCH {{baseUrl}}/api/formes/{{formePommadeId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 16. PATCH /api/formes/{id}/desarchiver — cas idempotent (déjà active, 200 attendu)
+PATCH {{baseUrl}}/api/formes/{{formePommadeId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/formes/{id}/archiver — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/formes/99999999-9999-9999-9999-999999999999/archiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 18. PATCH /api/formes/{id}/archiver — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/formes/{{formeComprimeId}}/archiver
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/formes/{id} — obtenir une forme (lecture ouverte à tous les rôles PNA/PRA/Structure)
+GET {{baseUrl}}/api/formes/{{formeComprimeId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/formes/{id} — lecture par GESTIONNAIRE_STRUCTURE
+GET {{baseUrl}}/api/formes/{{formeSiropId}}
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/formes/{id} — lecture par PHARMACIEN_PRA
+GET {{baseUrl}}/api/formes/{{formeSiropId}}
+Authorization: Bearer {{loginPharmacienPra.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/formes/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/formes/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/formes — lister toutes les formes, tri par défaut (libellé ASC)
+GET {{baseUrl}}/api/formes
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/formes — filtré par actif=false (formes archivées)
+GET {{baseUrl}}/api/formes?actif=false
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/formes — recherche texte (code ou libellé) + tri + pagination
+GET {{baseUrl}}/api/formes?q=com&page=0&size=10&sortBy=code&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/formes — recherche + actif combinés
+GET {{baseUrl}}/api/formes?q=sirop&actif=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/formes — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/formes

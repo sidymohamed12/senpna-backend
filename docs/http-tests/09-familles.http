@@ -1,0 +1,286 @@
+### ══════════════════════════════════════════════════════════════════
+### FamillesController — /api/familles
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@familleAntalgiqueId = 60000000-0000-0000-0000-000000000001
+@familleAntibiotiqueId = 60000000-0000-0000-0000-000000000002
+@familleAntihistaminiqueId = 60000000-0000-0000-0000-000000000004
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (habilité en écriture pour ce module, contrôle qualité du référentiel)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (lecture seule attendue)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — ADMIN_PRA (lecture autorisée, écriture refusée — référentiel géré par la PNA)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (lecture autorisée, écriture refusée)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/familles — créer une famille (ADMIN_PNA / GESTIONNAIRE_PNA / PHARMACIEN_PNA)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "MUCOLYTIQUE",
+  "libelle": "Mucolytique",
+  "description": "Fluidifiants bronchiques"
+}
+
+
+### 2. POST /api/familles — créée par PHARMACIEN_PNA (habilité en écriture ici, contrairement à fournisseurs)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "ANTISEPTIQUE-{{$timestamp}}",
+  "libelle": "Antiseptique"
+}
+
+
+### 3. POST /api/familles — cas limite, description absente (champ optionnel)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "VITAMINE-{{$timestamp}}",
+  "libelle": "Vitamine"
+}
+
+
+### 4. POST /api/familles — cas d'erreur, code manquant (400 attendu)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Sans code"
+}
+
+
+### 5. POST /api/familles — cas d'erreur, code au mauvais format (400 attendu)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "code invalide !",
+  "libelle": "Code invalide"
+}
+
+
+### 6. POST /api/familles — cas d'erreur, libellé manquant (400 attendu)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "SANSLIBELLE"
+}
+
+
+### 7. POST /api/familles — cas d'erreur, code déjà utilisé (409 attendu)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "ANTALGIQUE",
+  "libelle": "Doublon"
+}
+
+
+### 8. POST /api/familles — cas d'erreur, code déjà utilisé insensible à la casse (409 attendu)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "antalgique",
+  "libelle": "Doublon casse"
+}
+
+
+### 9. POST /api/familles — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE",
+  "libelle": "Ne devrait pas être créée"
+}
+
+
+### 10. POST /api/familles — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+POST {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "NE_DOIT_PAS_ETRE_CREE_2",
+  "libelle": "Ne devrait pas être créée non plus"
+}
+
+
+### 11. PUT /api/familles/{id} — modifier une famille existante
+PUT {{baseUrl}}/api/familles/{{familleAntihistaminiqueId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Antihistaminique H1",
+  "description": "Traitement des allergies"
+}
+
+
+### 12. PUT /api/familles/{id} — cas d'erreur, libellé vide (400 attendu)
+PUT {{baseUrl}}/api/familles/{{familleAntihistaminiqueId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": ""
+}
+
+
+### 13. PUT /api/familles/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/familles/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "libelle": "Famille fantôme"
+}
+
+
+### 14. PATCH /api/familles/{id}/archiver
+PATCH {{baseUrl}}/api/familles/{{familleAntihistaminiqueId}}/archiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 15. PATCH /api/familles/{id}/desarchiver
+PATCH {{baseUrl}}/api/familles/{{familleAntihistaminiqueId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 16. PATCH /api/familles/{id}/desarchiver — cas idempotent (déjà active, 200 attendu)
+PATCH {{baseUrl}}/api/familles/{{familleAntihistaminiqueId}}/desarchiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/familles/{id}/archiver — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/familles/99999999-9999-9999-9999-999999999999/archiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 18. PATCH /api/familles/{id}/archiver — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/familles/{{familleAntalgiqueId}}/archiver
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/familles/{id} — obtenir une famille (lecture ouverte à tous les rôles PNA/PRA/Structure)
+GET {{baseUrl}}/api/familles/{{familleAntalgiqueId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/familles/{id} — lecture par GESTIONNAIRE_STRUCTURE
+GET {{baseUrl}}/api/familles/{{familleAntibiotiqueId}}
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/familles/{id} — lecture par ADMIN_PRA
+GET {{baseUrl}}/api/familles/{{familleAntibiotiqueId}}
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/familles/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/familles/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/familles — lister toutes les familles, tri par défaut (libellé ASC)
+GET {{baseUrl}}/api/familles
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/familles — filtré par actif=false (familles archivées)
+GET {{baseUrl}}/api/familles?actif=false
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/familles — recherche texte (code ou libellé) + tri + pagination
+GET {{baseUrl}}/api/familles?q=anti&page=0&size=10&sortBy=code&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/familles — recherche + actif combinés
+GET {{baseUrl}}/api/familles?q=antibio&actif=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/familles — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/familles
