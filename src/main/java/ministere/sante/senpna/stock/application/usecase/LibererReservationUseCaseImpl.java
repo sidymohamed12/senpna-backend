@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.LibererReservationCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
@@ -22,16 +23,20 @@ public class LibererReservationUseCaseImpl implements LibererReservationUseCase 
 
     private final StockRepositoryPort stockRepositoryPort;
     private final StockDetailAssembler stockDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public LibererReservationUseCaseImpl(StockRepositoryPort stockRepositoryPort,
-            StockDetailAssembler stockDetailAssembler) {
+            StockDetailAssembler stockDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.stockRepositoryPort = stockRepositoryPort;
         this.stockDetailAssembler = stockDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional
     public StockDetail liberer(LibererReservationCommand command) {
+        entrepotScopeGuard.verifierEcritureAutorisee(command.entrepotId());
+
         Stock stock = stockRepositoryPort
                 .findByEntrepotIdAndLotIdForUpdate(EntrepotId.of(command.entrepotId()), LotId.of(command.lotId()))
                 .orElseThrow(StockIntrouvableException::new);

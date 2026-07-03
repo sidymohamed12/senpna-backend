@@ -2,6 +2,7 @@ package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.LotCommands.AlertePeremptionQuery;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotPage;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Alertes de péremption (cf. doc. métier §17) — remonte les lots
@@ -25,11 +27,13 @@ public class ListerAlertesPeremptionUseCaseImpl implements ListerAlertesPerempti
 
     private final LotRepositoryPort lotRepositoryPort;
     private final LotDetailAssembler lotDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public ListerAlertesPeremptionUseCaseImpl(LotRepositoryPort lotRepositoryPort,
-            LotDetailAssembler lotDetailAssembler) {
+            LotDetailAssembler lotDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.lotRepositoryPort = lotRepositoryPort;
         this.lotDetailAssembler = lotDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
@@ -39,8 +43,10 @@ public class ListerAlertesPeremptionUseCaseImpl implements ListerAlertesPerempti
             throw new IllegalArgumentException("L'horizon en jours doit être strictement positif");
         }
 
+        UUID entrepotIdEffectif = entrepotScopeGuard.entrepotIdPourLecture(query.entrepotId());
         LocalDate dateLimite = LocalDate.now().plusDays(query.horizonJours());
-        AlertePeremptionCriteria criteria = new AlertePeremptionCriteria(dateLimite, query.medicamentId());
+        AlertePeremptionCriteria criteria = new AlertePeremptionCriteria(dateLimite, query.medicamentId(),
+                entrepotIdEffectif);
         PageRequest pageRequest = PageRequest.of(query.page(), query.size(), "dateExpiration", "ASC");
 
         PageResult<Lot> result = lotRepositoryPort.findExpirantAvant(criteria, pageRequest);

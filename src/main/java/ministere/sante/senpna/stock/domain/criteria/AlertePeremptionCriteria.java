@@ -8,5 +8,5 @@ import java.util.UUID;
  * remonte que les lots {@code ACTIF} dont la date d'expiration est
  * comprise entre aujourd'hui et {@code dateLimite}.
  */
-public record AlertePeremptionCriteria(LocalDate dateLimite, UUID medicamentId) {
+public record AlertePeremptionCriteria(LocalDate dateLimite, UUID medicamentId, UUID entrepotId) {
 }

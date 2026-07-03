@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
+import ministere.sante.senpna.stock.application.service.LotOwnershipGuard;
 import ministere.sante.senpna.stock.domain.command.LotCommands.BloquerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
 import ministere.sante.senpna.stock.domain.exception.LotIntrouvableException;
@@ -22,10 +23,13 @@ public class BloquerLotUseCaseImpl implements BloquerLotUseCase {
 
     private final LotRepositoryPort lotRepositoryPort;
     private final LotDetailAssembler lotDetailAssembler;
+    private final LotOwnershipGuard lotOwnershipGuard;
 
-    public BloquerLotUseCaseImpl(LotRepositoryPort lotRepositoryPort, LotDetailAssembler lotDetailAssembler) {
+    public BloquerLotUseCaseImpl(LotRepositoryPort lotRepositoryPort, LotDetailAssembler lotDetailAssembler,
+            LotOwnershipGuard lotOwnershipGuard) {
         this.lotRepositoryPort = lotRepositoryPort;
         this.lotDetailAssembler = lotDetailAssembler;
+        this.lotOwnershipGuard = lotOwnershipGuard;
     }
 
     @Override
@@ -33,6 +37,8 @@ public class BloquerLotUseCaseImpl implements BloquerLotUseCase {
     public LotDetail bloquer(BloquerLotCommand command) {
         Lot lot = lotRepositoryPort.findById(LotId.of(command.lotId()))
                 .orElseThrow(LotIntrouvableException::new);
+
+        lotOwnershipGuard.verifierAccesLot(lot.getId());
 
         lot.bloquer();
 

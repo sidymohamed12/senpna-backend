@@ -4,6 +4,7 @@ import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableException;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.domain.command.StockCommands.AllocationLot;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReservationFefoResult;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReserverStockFefoCommand;
@@ -41,12 +42,14 @@ public class ReserverStockFefoUseCaseImpl implements ReserverStockFefoUseCase {
     private final LotRepositoryPort lotRepositoryPort;
     private final StockRepositoryPort stockRepositoryPort;
     private final EntrepotRepositoryPort entrepotRepositoryPort;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public ReserverStockFefoUseCaseImpl(LotRepositoryPort lotRepositoryPort, StockRepositoryPort stockRepositoryPort,
-            EntrepotRepositoryPort entrepotRepositoryPort) {
+            EntrepotRepositoryPort entrepotRepositoryPort, EntrepotScopeGuard entrepotScopeGuard) {
         this.lotRepositoryPort = lotRepositoryPort;
         this.stockRepositoryPort = stockRepositoryPort;
         this.entrepotRepositoryPort = entrepotRepositoryPort;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
@@ -55,6 +58,8 @@ public class ReserverStockFefoUseCaseImpl implements ReserverStockFefoUseCase {
         if (command.quantiteDemandee() == null || command.quantiteDemandee().signum() <= 0) {
             throw new IllegalArgumentException("La quantité demandée doit être strictement positive");
         }
+
+        entrepotScopeGuard.verifierEcritureAutorisee(command.entrepotId());
 
         EntrepotId entrepotId = EntrepotId.of(command.entrepotId());
         entrepotRepositoryPort.findById(entrepotId).orElseThrow(EntrepotIntrouvableException::new);

@@ -5,6 +5,7 @@ import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.EntreeStockCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
@@ -38,20 +39,24 @@ public class EntreeStockUseCaseImpl implements EntreeStockUseCase {
     private final EntrepotRepositoryPort entrepotRepositoryPort;
     private final MouvementStockRepositoryPort mouvementStockRepositoryPort;
     private final StockDetailAssembler stockDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public EntreeStockUseCaseImpl(StockRepositoryPort stockRepositoryPort, LotRepositoryPort lotRepositoryPort,
             EntrepotRepositoryPort entrepotRepositoryPort, MouvementStockRepositoryPort mouvementStockRepositoryPort,
-            StockDetailAssembler stockDetailAssembler) {
+            StockDetailAssembler stockDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.stockRepositoryPort = stockRepositoryPort;
         this.lotRepositoryPort = lotRepositoryPort;
         this.entrepotRepositoryPort = entrepotRepositoryPort;
         this.mouvementStockRepositoryPort = mouvementStockRepositoryPort;
         this.stockDetailAssembler = stockDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional
     public StockDetail entrer(EntreeStockCommand command) {
+        entrepotScopeGuard.verifierEcritureAutorisee(command.entrepotId());
+
         Lot lot = lotRepositoryPort.findById(LotId.of(command.lotId())).orElseThrow(LotIntrouvableException::new);
 
         Entrepot entrepot = entrepotRepositoryPort.findById(EntrepotId.of(command.entrepotId()))

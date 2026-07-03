@@ -33,7 +33,7 @@ public final class LotCommands {
         }
 
         public record ListLotsQuery(String recherche, UUID medicamentId, UUID fournisseurId, String statut,
-                        Integer page, Integer size, String sortBy, String sortDirection) {
+                        UUID entrepotId, Integer page, Integer size, String sortBy, String sortDirection) {
         }
 
         /**
@@ -41,7 +41,8 @@ public final class LotCommands {
          * dont la date d'expiration se situe dans les {@code horizonJours} à
          * venir. Utilisée pour les paliers 12/6/3/1 mois.
          */
-        public record AlertePeremptionQuery(int horizonJours, UUID medicamentId, Integer page, Integer size) {
+        public record AlertePeremptionQuery(int horizonJours, UUID medicamentId, UUID entrepotId, Integer page,
+                        Integer size) {
         }
 
         // ── Résultats ────────────────────────────────────────────────────────

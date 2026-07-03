@@ -3,6 +3,7 @@ package ministere.sante.senpna.stock.application.usecase;
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.MouvementDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.ListMouvementsQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementPage;
@@ -16,6 +17,8 @@ import ministere.sante.senpna.stock.domain.valueobject.TypeMouvement;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * Historique des mouvements de stock (cf. doc. métier §13 et §18) —
  * consultation, filtrage et recherche, avec traçabilité complète
@@ -26,20 +29,26 @@ public class ListMouvementsUseCaseImpl implements ListMouvementsUseCase {
 
     private final MouvementStockRepositoryPort mouvementStockRepositoryPort;
     private final MouvementDetailAssembler mouvementDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public ListMouvementsUseCaseImpl(MouvementStockRepositoryPort mouvementStockRepositoryPort,
-            MouvementDetailAssembler mouvementDetailAssembler) {
+            MouvementDetailAssembler mouvementDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.mouvementStockRepositoryPort = mouvementStockRepositoryPort;
         this.mouvementDetailAssembler = mouvementDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional(readOnly = true)
     public MouvementPage lister(ListMouvementsQuery query) {
+        // PRA : toujours ramené à son propre entrepôt (source OU destination —
+        // cf. MouvementStockSpecifications.entrepotId). PNA : filtre libre.
+        UUID entrepotIdEffectif = entrepotScopeGuard.entrepotIdPourLecture(query.entrepotId());
+
         MouvementSearchCriteria criteria = new MouvementSearchCriteria(
                 query.lotId(),
                 query.medicamentId(),
-                query.entrepotId(),
+                entrepotIdEffectif,
                 parseType(query.typeMouvement()),
                 parseSens(query.sens()),
                 query.utilisateurId(),

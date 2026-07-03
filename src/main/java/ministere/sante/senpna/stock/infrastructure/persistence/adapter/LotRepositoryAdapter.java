@@ -61,7 +61,8 @@ public class LotRepositoryAdapter implements LotRepositoryPort {
     @Transactional(readOnly = true)
     public PageResult<Lot> search(LotSearchCriteria criteria, PageRequest pageRequest) {
         Specification<LotJpaEntity> specification = LotSpecifications.combiner(
-                criteria.recherche(), criteria.medicamentId(), criteria.fournisseurId(), criteria.statut());
+                criteria.recherche(), criteria.medicamentId(), criteria.fournisseurId(), criteria.statut(),
+                criteria.entrepotId());
 
         Pageable pageable = versPageable(pageRequest);
         Page<LotJpaEntity> page = lotJpaRepository.findAll(specification, pageable);
@@ -89,6 +90,10 @@ public class LotRepositoryAdapter implements LotRepositoryPort {
         specification = specification.and(LotSpecifications.expirantAvant(criteria.dateLimite()));
         if (criteria.medicamentId() != null) {
             specification = specification.and(LotSpecifications.medicamentId(criteria.medicamentId()));
+        }
+
+        if (criteria.entrepotId() != null) {
+            specification = specification.and(LotSpecifications.possedeStockDansEntrepot(criteria.entrepotId()));
         }
 
         Pageable pageable = versPageable(pageRequest);

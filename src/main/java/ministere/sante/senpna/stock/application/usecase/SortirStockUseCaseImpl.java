@@ -5,6 +5,7 @@ import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.SortieStockCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
@@ -54,20 +55,27 @@ public class SortirStockUseCaseImpl implements SortirStockUseCase {
     private final EntrepotRepositoryPort entrepotRepositoryPort;
     private final MouvementStockRepositoryPort mouvementStockRepositoryPort;
     private final StockDetailAssembler stockDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public SortirStockUseCaseImpl(StockRepositoryPort stockRepositoryPort, LotRepositoryPort lotRepositoryPort,
             EntrepotRepositoryPort entrepotRepositoryPort, MouvementStockRepositoryPort mouvementStockRepositoryPort,
-            StockDetailAssembler stockDetailAssembler) {
+            StockDetailAssembler stockDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.stockRepositoryPort = stockRepositoryPort;
         this.lotRepositoryPort = lotRepositoryPort;
         this.entrepotRepositoryPort = entrepotRepositoryPort;
         this.mouvementStockRepositoryPort = mouvementStockRepositoryPort;
         this.stockDetailAssembler = stockDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional
     public StockDetail sortir(SortieStockCommand command) {
+        // Seul l'entrepôt source (celui qui expédie/perd la marchandise) doit
+        // être le sien : l'entrepôt destination d'un transfert appartient à
+        // l'acteur qui traitera sa propre réception, de son côté.
+        entrepotScopeGuard.verifierEcritureAutorisee(command.entrepotId());
+
         Lot lot = lotRepositoryPort.findById(LotId.of(command.lotId())).orElseThrow(LotIntrouvableException::new);
 
         Entrepot entrepotSource = entrepotRepositoryPort.findById(EntrepotId.of(command.entrepotId()))

@@ -8,6 +8,7 @@ import ministere.sante.senpna.medicament.domain.exception.MedicamentIntrouvableE
 import ministere.sante.senpna.medicament.domain.model.Medicament;
 import ministere.sante.senpna.medicament.domain.port.out.MedicamentRepositoryPort;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.LotCommands.CreerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
@@ -32,18 +33,26 @@ public class CreerLotUseCaseImpl implements CreerLotUseCase {
     private final MedicamentRepositoryPort medicamentRepositoryPort;
     private final FournisseurRepositoryPort fournisseurRepositoryPort;
     private final LotDetailAssembler lotDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public CreerLotUseCaseImpl(LotRepositoryPort lotRepositoryPort, MedicamentRepositoryPort medicamentRepositoryPort,
-            FournisseurRepositoryPort fournisseurRepositoryPort, LotDetailAssembler lotDetailAssembler) {
+            FournisseurRepositoryPort fournisseurRepositoryPort, LotDetailAssembler lotDetailAssembler,
+            EntrepotScopeGuard entrepotScopeGuard) {
         this.lotRepositoryPort = lotRepositoryPort;
         this.medicamentRepositoryPort = medicamentRepositoryPort;
         this.fournisseurRepositoryPort = fournisseurRepositoryPort;
         this.lotDetailAssembler = lotDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional
     public LotDetail creer(CreerLotCommand command) {
+        // Seule la PNA achète auprès des fournisseurs (cf. modèle métier
+        // complémentaire §2 « Approvisionnements ») : une PRA ne crée jamais
+        // de nouveau lot, elle en reçoit par transfert (EntreeStockUseCase).
+        entrepotScopeGuard.verifierActeurNational();
+
         Medicament medicament = medicamentRepositoryPort.findById(MedicamentId.of(command.medicamentId()))
                 .orElseThrow(MedicamentIntrouvableException::new);
 

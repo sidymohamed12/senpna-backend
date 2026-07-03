@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
+import ministere.sante.senpna.stock.application.service.LotOwnershipGuard;
 import ministere.sante.senpna.stock.domain.command.LotCommands.DebloquerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
 import ministere.sante.senpna.stock.domain.exception.LotIntrouvableException;
@@ -17,16 +18,21 @@ public class DebloquerLotUseCaseImpl implements DebloquerLotUseCase {
 
     private final LotRepositoryPort lotRepositoryPort;
     private final LotDetailAssembler lotDetailAssembler;
+    private final LotOwnershipGuard lotOwnershipGuard;
 
-    public DebloquerLotUseCaseImpl(LotRepositoryPort lotRepositoryPort, LotDetailAssembler lotDetailAssembler) {
+    public DebloquerLotUseCaseImpl(LotRepositoryPort lotRepositoryPort, LotDetailAssembler lotDetailAssembler,
+            LotOwnershipGuard lotOwnershipGuard) {
         this.lotRepositoryPort = lotRepositoryPort;
         this.lotDetailAssembler = lotDetailAssembler;
+        this.lotOwnershipGuard = lotOwnershipGuard;
     }
 
     @Override
     @Transactional
     public LotDetail debloquer(DebloquerLotCommand command) {
         Lot lot = lotRepositoryPort.findById(LotId.of(command.lotId())).orElseThrow(LotIntrouvableException::new);
+
+        lotOwnershipGuard.verifierAccesLot(lot.getId());
 
         lot.debloquer();
 

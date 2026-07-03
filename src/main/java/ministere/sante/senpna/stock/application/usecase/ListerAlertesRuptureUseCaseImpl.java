@@ -2,6 +2,7 @@ package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
+import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ListStocksQuery;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockPage;
@@ -12,6 +13,8 @@ import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 /**
  * Alertes de rupture et de seuil minimum (cf. doc. métier §16 et §17) :
@@ -24,20 +27,23 @@ public class ListerAlertesRuptureUseCaseImpl implements ListerAlertesRuptureUseC
 
     private final StockRepositoryPort stockRepositoryPort;
     private final StockDetailAssembler stockDetailAssembler;
+    private final EntrepotScopeGuard entrepotScopeGuard;
 
     public ListerAlertesRuptureUseCaseImpl(StockRepositoryPort stockRepositoryPort,
-            StockDetailAssembler stockDetailAssembler) {
+            StockDetailAssembler stockDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.stockRepositoryPort = stockRepositoryPort;
         this.stockDetailAssembler = stockDetailAssembler;
+        this.entrepotScopeGuard = entrepotScopeGuard;
     }
 
     @Override
     @Transactional(readOnly = true)
     public StockPage lister(ListStocksQuery query) {
         boolean seuilAtteintUniquement = Boolean.TRUE.equals(query.seuilAtteintUniquement());
+        UUID entrepotIdEffectif = entrepotScopeGuard.entrepotIdPourLecture(query.entrepotId());
 
         StockSearchCriteria criteria = new StockSearchCriteria(
-                query.entrepotId(),
+                entrepotIdEffectif,
                 query.lotId(),
                 query.medicamentId(),
                 seuilAtteintUniquement ? null : Boolean.TRUE,

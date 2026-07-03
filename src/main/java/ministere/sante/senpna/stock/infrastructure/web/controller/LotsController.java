@@ -43,16 +43,22 @@ import java.util.UUID;
  * PATCH  /api/lots/{id}/debloquer
  * PATCH  /api/lots/{id}/prix               {prixAchat?, prixVente?}
  * GET    /api/lots/{id}
- * GET    /api/lots?q=&medicamentId=&fournisseurId=&statut=&page=&size=&sortBy=&sortDirection=
- * GET    /api/lots/alertes/peremption?horizonJours=&medicamentId=&page=&size=
+ * GET    /api/lots?q=&medicamentId=&fournisseurId=&statut=&entrepotId=&page=&size=&sortBy=&sortDirection=
+ * GET    /api/lots/alertes/peremption?horizonJours=&medicamentId=&entrepotId=&page=&size=
  * </pre>
  */
 @RestController
 @RequestMapping("/api/lots")
 public class LotsController {
 
-    private static final String ROLES_ECRITURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA','ADMIN_PRA','GESTIONNAIRE_PRA','PHARMACIEN_PRA','MAGASINIER_PRA')";
-    private static final String ROLES_LECTURE = ROLES_ECRITURE;
+    // La création d'un lot est réservée aux rôles PNA (cf. modèle métier
+    // complémentaire §2 « Approvisionnements » : « Les achats fournisseurs
+    // sont effectués uniquement par la PNA ») — une PRA ne crée jamais de
+    // lot, elle en reçoit par transfert. Doublé d'une vérification en
+    // couche application (EntrepotScopeGuard.verifierActeurNational())
+    // pour ne pas dépendre uniquement de cette annotation.
+    private static final String ROLES_CREATION = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA')";
+    private static final String ROLES_LECTURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA','ADMIN_PRA','GESTIONNAIRE_PRA','PHARMACIEN_PRA','MAGASINIER_PRA')";
     private static final String ROLES_PHARMACOVIGILANCE = "hasAnyRole('ADMIN_PNA','PHARMACIEN_PNA','ADMIN_PRA','PHARMACIEN_PRA')";
     private static final String ROLES_PRIX = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')";
 
@@ -63,7 +69,7 @@ public class LotsController {
     }
 
     @PostMapping
-    @PreAuthorize(ROLES_ECRITURE)
+    @PreAuthorize(ROLES_CREATION)
     public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreerLotRequest request) {
         LotDetail result = stockFacade.creerLot(new CreerLotCommand(
                 request.numeroLot(), request.medicamentId(), request.fournisseurId(), request.dateFabrication(),
@@ -115,13 +121,19 @@ public class LotsController {
             @RequestParam(required = false) UUID medicamentId,
             @RequestParam(required = false) UUID fournisseurId,
             @RequestParam(required = false) String statut,
+            @RequestParam(required = false) UUID entrepotId,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false, defaultValue = "dateExpiration") String sortBy,
             @RequestParam(required = false, defaultValue = "ASC") String sortDirection) {
 
+        // entrepotId : ignoré et forcé au sien pour un acteur PRA, libre pour
+        // un acteur PNA (cf. EntrepotScopeGuard.entrepotIdPourLecture()) —
+        // c'est ainsi qu'un acteur PNA peut lister/filtrer sur n'importe
+        // quelle PRA en lecture.
         LotPage result = stockFacade.listerLots(
-                new ListLotsQuery(q, medicamentId, fournisseurId, statut, page, size, sortBy, sortDirection));
+                new ListLotsQuery(q, medicamentId, fournisseurId, statut, entrepotId, page, size, sortBy,
+                        sortDirection));
 
         return ResponseEntity.ok(RestResponse.responsePaginate(
                 HttpStatus.OK,
@@ -140,11 +152,12 @@ public class LotsController {
     public ResponseEntity<Map<String, Object>> alertesPeremption(
             @RequestParam(required = false, defaultValue = "365") int horizonJours,
             @RequestParam(required = false) UUID medicamentId,
+            @RequestParam(required = false) UUID entrepotId,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer size) {
 
-        LotPage result = stockFacade
-                .listerAlertesPeremption(new AlertePeremptionQuery(horizonJours, medicamentId, page, size));
+        LotPage result = stockFacade.listerAlertesPeremption(
+                new AlertePeremptionQuery(horizonJours, medicamentId, entrepotId, page, size));
 
         return ResponseEntity.ok(RestResponse.responsePaginate(
                 HttpStatus.OK,
