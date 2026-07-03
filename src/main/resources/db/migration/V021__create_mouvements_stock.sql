@@ -1,12 +1,12 @@
 -- ═══════════════════════════════════════════════════════════════════
--- V020 — Mouvements de stock (journal append-only)
+-- V021 — Mouvements de stock (journal append-only)
 -- SEN PharmaFlow — Ministère de la Santé du Sénégal
 --
 -- Historise toute variation de stock (cf. doc. métier §13 et §18).
 -- Table strictement append-only : aucun UPDATE ni DELETE applicatif —
 -- seule la couche persistence utilise INSERT (cf.
 -- MouvementStockRepositoryAdapter.save()). Référence entrepots (V005),
--- lots (V018) et utilisateurs (V002) par identifiant — sans FK physique.
+-- lots (V019) et utilisateurs (V002) par identifiant — sans FK physique.
 -- commande_id référence une future table `commandes` (module `commande`
 -- non encore implémenté) — également sans FK physique, colonne nullable
 -- en attendant.

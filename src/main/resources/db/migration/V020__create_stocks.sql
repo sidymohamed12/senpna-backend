@@ -1,11 +1,11 @@
 -- ═══════════════════════════════════════════════════════════════════
--- V019 — Stocks (ligne de stock par couple entrepôt/lot)
+-- V020 — Stocks (ligne de stock par couple entrepôt/lot)
 -- SEN PharmaFlow — Ministère de la Santé du Sénégal
 --
 -- Chaque entrepôt (PNA centrale ou PRA, cf. V005) possède son propre
 -- stock, ventilé par lot pour permettre la traçabilité et la règle FEFO
 -- (cf. doc. métier §9 et modèle métier complémentaire §2 « Stocks »).
--- Référence entrepots (V005) et lots (V018) par identifiant — sans FK
+-- Référence entrepots (V005) et lots (V019) par identifiant — sans FK
 -- physique, conformément à la convention déjà en place dans le projet
 -- (aucune relation JPA/SQL directe entre agrégats distincts).
 --
@@ -17,7 +17,7 @@
 -- Aucune modification directe des quantités n'est autorisée par
 -- l'application (cf. modèle métier complémentaire §2 « Stocks ») : toute
 -- variation transite par Stock.entrer()/sortir()/reserver()/... et génère
--- un mouvement_stock (V020) dans la même transaction.
+-- un mouvement_stock (V021) dans la même transaction.
 -- ═══════════════════════════════════════════════════════════════════
 
 CREATE TABLE stocks (

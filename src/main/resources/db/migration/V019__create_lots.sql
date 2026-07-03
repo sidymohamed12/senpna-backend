@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- V018 — Lots de médicaments
+-- V019 — Lots de médicaments
 -- SEN PharmaFlow — Ministère de la Santé du Sénégal
 --
 -- Traçabilité complète des lots (cf. doc. métier §8 et modèle métier
