@@ -1,0 +1,296 @@
+### ══════════════════════════════════════════════════════════════════
+### FournisseursController — /api/fournisseurs
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+@fournisseurPharmaSenegalId = 50000000-0000-0000-0000-000000000001
+@fournisseurMedSupplyId = 50000000-0000-0000-0000-000000000003
+@fournisseurAncienId = 50000000-0000-0000-0000-000000000004
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (lecture seule attendue)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (lecture seule attendue)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — ADMIN_PRA (pour le test de rôle insuffisant : la PRA ne gère pas les fournisseurs)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0f. Login — GESTIONNAIRE_STRUCTURE (pour le test de rôle insuffisant)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/fournisseurs — créer un fournisseur (ADMIN_PNA / GESTIONNAIRE_PNA uniquement)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Fournisseur de test HTTP {{$timestamp}}",
+  "adresse": "Rue de test, Dakar",
+  "telephone": "+221770000000",
+  "email": "contact@fournisseur-test.sn",
+  "contactPrincipal": "Jean Test"
+}
+
+
+### 2. POST /api/fournisseurs — cas limite, seul le nom est renseigné (tous les autres champs optionnels)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Fournisseur minimal {{$timestamp}}"
+}
+
+
+### 3. POST /api/fournisseurs — cas d'erreur, nom manquant (400 attendu)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "adresse": "Sans nom"
+}
+
+
+### 4. POST /api/fournisseurs — cas d'erreur, téléphone au mauvais format (400 attendu)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Fournisseur téléphone invalide",
+  "telephone": "0770000000"
+}
+
+
+### 5. POST /api/fournisseurs — cas d'erreur, email au mauvais format (400 attendu)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Fournisseur email invalide",
+  "email": "pas-un-email"
+}
+
+
+### 6. POST /api/fournisseurs — cas d'erreur, nom déjà utilisé (409 attendu)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Laboratoire Pharma Sénégal"
+}
+
+
+### 7. POST /api/fournisseurs — cas d'erreur, nom déjà utilisé insensible à la casse (409 attendu)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "laboratoire pharma sénégal"
+}
+
+
+### 8. POST /api/fournisseurs — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA, lecture seule)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Ne devrait pas être créé"
+}
+
+
+### 9. POST /api/fournisseurs — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+POST {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Ne devrait pas être créé non plus"
+}
+
+
+### 10. PUT /api/fournisseurs/{id} — modifier un fournisseur existant
+PUT {{baseUrl}}/api/fournisseurs/{{fournisseurMedSupplyId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "MedSupply Afrique",
+  "adresse": "Nouvelle adresse, Dakar",
+  "telephone": "+221338604000",
+  "email": "nouveau-contact@medsupply-afrique.com",
+  "contactPrincipal": "Nouveau Contact"
+}
+
+
+### 11. PUT /api/fournisseurs/{id} — cas d'erreur, nom vide (400 attendu)
+PUT {{baseUrl}}/api/fournisseurs/{{fournisseurMedSupplyId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": ""
+}
+
+
+### 12. PUT /api/fournisseurs/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/fournisseurs/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Fournisseur fantôme"
+}
+
+
+### 13. PUT /api/fournisseurs/{id} — cas d'erreur, nom déjà utilisé par un autre fournisseur (409 attendu)
+PUT {{baseUrl}}/api/fournisseurs/{{fournisseurMedSupplyId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Laboratoire Pharma International"
+}
+
+
+### 14. PATCH /api/fournisseurs/{id}/desactiver
+PATCH {{baseUrl}}/api/fournisseurs/{{fournisseurPharmaSenegalId}}/desactiver
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 15. PATCH /api/fournisseurs/{id}/activer
+PATCH {{baseUrl}}/api/fournisseurs/{{fournisseurPharmaSenegalId}}/activer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 16. PATCH /api/fournisseurs/{id}/activer — cas idempotent (déjà actif, 200 attendu)
+PATCH {{baseUrl}}/api/fournisseurs/{{fournisseurPharmaSenegalId}}/activer
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/fournisseurs/{id}/desactiver — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/fournisseurs/99999999-9999-9999-9999-999999999999/desactiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 18. PATCH /api/fournisseurs/{id}/activer — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+PATCH {{baseUrl}}/api/fournisseurs/{{fournisseurAncienId}}/activer
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/fournisseurs/{id} — obtenir un fournisseur (lecture ouverte à tous les rôles PNA)
+GET {{baseUrl}}/api/fournisseurs/{{fournisseurPharmaSenegalId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/fournisseurs/{id} — lecture par MAGASINIER_PNA
+GET {{baseUrl}}/api/fournisseurs/{{fournisseurMedSupplyId}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/fournisseurs/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/fournisseurs/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/fournisseurs — lister tous les fournisseurs, pagination par défaut
+GET {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/fournisseurs — filtré par actif=false (fournisseurs désactivés)
+GET {{baseUrl}}/api/fournisseurs?actif=false
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/fournisseurs — recherche texte (nom) + tri + pagination
+GET {{baseUrl}}/api/fournisseurs?q=Pharma&page=0&size=10&sortBy=nom&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/fournisseurs — recherche texte (email) — teste le filtre multi-colonnes
+GET {{baseUrl}}/api/fournisseurs?q=medsupply-afrique
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/fournisseurs — recherche + actif combinés, pagination personnalisée
+GET {{baseUrl}}/api/fournisseurs?q=laboratoire&actif=true&page=0&size=5
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/fournisseurs — cas d'erreur, rôle insuffisant (403 attendu — GESTIONNAIRE_STRUCTURE)
+GET {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/fournisseurs — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+GET {{baseUrl}}/api/fournisseurs
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 29. GET /api/fournisseurs — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/fournisseurs

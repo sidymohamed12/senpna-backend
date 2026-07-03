@@ -15,6 +15,7 @@ encore : Marketplace → cherche "REST Client" → Install.
 | `05-structures-sanitaires.http` | `StructuresSanitairesController` | créer / modifier / cycle d'adhésion / rattachements / lister            |
 | `06-users.http`                 | `UsersController`                | créer / modifier / (dés)activer / gérer les rôles                       |
 | `07-affectations.http`          | `AffectationsController`         | affecter/retirer un utilisateur à un entrepôt ou une structure          |
+| `08-fournisseurs.http`          | `FournisseursController`         | créer / modifier / (dés)activer / lister / obtenir un fournisseur       |
 
 **Chaque fichier est autonome** : il contient ses propres requêtes de
 login en haut (section `0a`, `0b`...) et réutilise leurs tokens pour le
@@ -29,6 +30,10 @@ d'environnement séparé à configurer.
 2. La migration `V011__insert_mock_data.sql` (`db/migration-dev`) a bien
    été appliquée — les comptes de test utilisés ici en dépendent
    (mot de passe unique : `Password123!`).
+3. Pour `08-fournisseurs.http` : la migration
+   `V013__insert_mock_fournisseurs.sql` (`db/migration-dev`) doit aussi
+   être appliquée — elle peuple la table `fournisseurs` avec les 5
+   fournisseurs de démonstration référencés dans ce fichier.
 
 ## Comment exécuter une requête
 
