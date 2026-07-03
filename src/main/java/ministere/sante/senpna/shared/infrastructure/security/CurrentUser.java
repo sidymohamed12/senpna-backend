@@ -19,4 +19,8 @@ import java.util.UUID;
 public interface CurrentUser {
 
     UUID getUserId();
+
+    UUID getEntrepotId();
+
+    UUID getStructureSanitaireId();
 }

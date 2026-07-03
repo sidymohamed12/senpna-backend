@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ministere.sante.senpna.auth.infrastructure.security.AuthUserPrincipal;
 import ministere.sante.senpna.shared.domain.port.out.TokenRevocationPort;
 
 import org.slf4j.Logger;
@@ -67,6 +68,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.isTokenValid(token, userDetails)) {
+                    // ── Affectation organisationnelle portée par le JWT ───────
+                    // (cf. AuthTokenFactory) : évite une requête DB par requête
+                    // pour le scoping entrepôt du module stock.
+                    if (userDetails instanceof AuthUserPrincipal principal) {
+                        principal.setEntrepotId(jwtService.extractEntrepotId(token));
+                        principal.setStructureSanitaireId(jwtService.extractStructureSanitaireId(token));
+                    }
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
 

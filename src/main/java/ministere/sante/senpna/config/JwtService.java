@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -89,6 +90,19 @@ public class JwtService {
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public UUID extractEntrepotId(String token) {
+        return extractUuidClaim(token, "entrepotId");
+    }
+
+    public UUID extractStructureSanitaireId(String token) {
+        return extractUuidClaim(token, "structureSanitaireId");
+    }
+
+    private UUID extractUuidClaim(String token, String claimName) {
+        String value = extractClaim(token, claims -> claims.get(claimName, String.class));
+        return value != null ? UUID.fromString(value) : null;
     }
 
     /**
