@@ -8,6 +8,7 @@ import ministere.sante.senpna.config.AppProperties;
 import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.shared.infrastructure.cache.RoleCache;
 
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Services applicatifs — OtpDestinationResolver / AuthTokenFactory / UserRoleResolver")
@@ -80,6 +82,8 @@ class ApplicationServicesTest {
         TokenPort tokenPort;
         @Mock
         AppProperties appProperties;
+        @Mock
+        UserAffectationResolver userAffectationResolver;
         @InjectMocks
         AuthTokenFactory sut;
 
@@ -89,8 +93,10 @@ class ApplicationServicesTest {
             User user = UserFixtures.actif();
             Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
             AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
+            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), null, null);
 
-            when(tokenPort.genererAccess(user, roleCodes)).thenReturn("access.jwt");
+            when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
+            when(tokenPort.genererAccess(eq(user), eq(roleCodes), any(), any())).thenReturn("access.jwt");
             when(tokenPort.genererRefresh(user)).thenReturn("refresh.jwt");
             when(appProperties.jwt()).thenReturn(jwt);
             when(jwt.accessTokenTtl()).thenReturn(Duration.ofHours(1));
@@ -103,19 +109,23 @@ class ApplicationServicesTest {
         }
 
         @Test
-        @DisplayName("build() appelle genererAccess avec l'utilisateur et les rôles")
+        @DisplayName("build() appelle genererAccess avec l'utilisateur, les rôles et l'affectation résolue")
         void build_appelle_genererAccess_avec_bons_args() {
             User user = UserFixtures.actif();
             Set<String> roleCodes = Set.of("ADMIN_PNA");
             AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
-            when(tokenPort.genererAccess(any(), any())).thenReturn("tok");
+            UUID entrepotId = UUID.randomUUID();
+            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), entrepotId, null);
+
+            when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
+            when(tokenPort.genererAccess(any(), any(), any(), any())).thenReturn("tok");
             when(tokenPort.genererRefresh(any())).thenReturn("ref");
             when(appProperties.jwt()).thenReturn(jwt);
             when(jwt.accessTokenTtl()).thenReturn(Duration.ofMinutes(30));
 
             sut.build(user, roleCodes);
 
-            verify(tokenPort).genererAccess(user, roleCodes);
+            verify(tokenPort).genererAccess(user, roleCodes, entrepotId, null);
             verify(tokenPort).genererRefresh(user);
         }
     }

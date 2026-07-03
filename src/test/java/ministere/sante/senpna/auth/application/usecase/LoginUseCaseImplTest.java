@@ -1,6 +1,7 @@
 package ministere.sante.senpna.auth.application.usecase;
 
 import ministere.sante.senpna.auth.application.service.AuthTokenFactory;
+import ministere.sante.senpna.auth.application.service.UserAffectationResolver;
 import ministere.sante.senpna.auth.application.service.UserRoleResolver;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginCommand;
@@ -12,6 +13,7 @@ import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +46,8 @@ class LoginUseCaseImplTest {
     private AuthTokenFactory authTokenFactory;
     @Mock
     private UserRoleResolver userRoleResolver;
+    @Mock
+    private UserAffectationResolver userAffectationResolver;
 
     @InjectMocks
     private LoginUseCaseImpl sut;
@@ -61,6 +65,8 @@ class LoginUseCaseImplTest {
         // et Mockito strict les signalerait sinon.
         lenient().when(userRoleResolver.resoudreCodes(any())).thenReturn(ROLE_CODES);
         lenient().when(authTokenFactory.build(any(User.class), any())).thenReturn(TOKENS);
+        lenient().when(userAffectationResolver.resoudre(any()))
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null));
     }
 
     // ══════════════════════════════════════════════════════════════════════

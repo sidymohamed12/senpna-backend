@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -58,17 +59,51 @@ class JwtTokenAdapterTest {
     class GenererAccess {
 
         @Test
-        @DisplayName("délègue à JwtService avec l'email et le claim 'roles'")
-        void genererAccess_delegue_jwt_service() {
+        @DisplayName("délègue à JwtService avec l'email et le claim 'roles', sans affectation")
+        void genererAccess_sans_affectation_delegue_jwt_service() {
             Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA", "PHARMACIEN_PRA");
             when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
 
-            String token = sut.genererAccess(user, roleCodes);
+            String token = sut.genererAccess(user, roleCodes, null, null);
 
             assertThat(token).isEqualTo("access.jwt");
             verify(jwtService).generateAccessToken(
                     eq(UserFixtures.EMAIL),
-                    argThat(claims -> claims.containsKey("roles")));
+                    argThat(claims -> claims.containsKey("roles")
+                            && !claims.containsKey("entrepotId")
+                            && !claims.containsKey("structureSanitaireId")));
+        }
+
+        @Test
+        @DisplayName("inclut entrepotId et structureSanitaireId dans les claims quand fournis")
+        void genererAccess_avec_affectation_inclut_les_claims() {
+            Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
+            UUID entrepotId = UUID.randomUUID();
+            UUID structureSanitaireId = UUID.randomUUID();
+            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+
+            String token = sut.genererAccess(user, roleCodes, entrepotId, structureSanitaireId);
+
+            assertThat(token).isEqualTo("access.jwt");
+            verify(jwtService).generateAccessToken(
+                    eq(UserFixtures.EMAIL),
+                    argThat(claims -> entrepotId.toString().equals(claims.get("entrepotId"))
+                            && structureSanitaireId.toString().equals(claims.get("structureSanitaireId"))));
+        }
+
+        @Test
+        @DisplayName("entrepotId fourni seul → structureSanitaireId absent des claims")
+        void genererAccess_avec_entrepot_seul() {
+            Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
+            UUID entrepotId = UUID.randomUUID();
+            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+
+            sut.genererAccess(user, roleCodes, entrepotId, null);
+
+            verify(jwtService).generateAccessToken(
+                    eq(UserFixtures.EMAIL),
+                    argThat(claims -> entrepotId.toString().equals(claims.get("entrepotId"))
+                            && !claims.containsKey("structureSanitaireId")));
         }
     }
 

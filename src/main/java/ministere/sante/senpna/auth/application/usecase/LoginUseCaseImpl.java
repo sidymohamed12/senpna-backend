@@ -1,6 +1,7 @@
 package ministere.sante.senpna.auth.application.usecase;
 
 import ministere.sante.senpna.auth.application.service.AuthTokenFactory;
+import ministere.sante.senpna.auth.application.service.UserAffectationResolver;
 import ministere.sante.senpna.auth.application.service.UserRoleResolver;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginCommand;
@@ -13,6 +14,7 @@ import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.in.LoginUseCase;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 
 import org.springframework.stereotype.Service;
@@ -32,13 +34,16 @@ public class LoginUseCaseImpl implements LoginUseCase {
     private final PasswordEncoderPort passwordEncoderPort;
     private final AuthTokenFactory authTokenFactory;
     private final UserRoleResolver userRoleResolver;
+    private final UserAffectationResolver userAffectationResolver;
 
     public LoginUseCaseImpl(UserRepositoryPort userRepositoryPort, PasswordEncoderPort passwordEncoderPort,
-            AuthTokenFactory authTokenFactory, UserRoleResolver userRoleResolver) {
+            AuthTokenFactory authTokenFactory, UserRoleResolver userRoleResolver,
+            UserAffectationResolver userAffectationResolver) {
         this.userRepositoryPort = userRepositoryPort;
         this.passwordEncoderPort = passwordEncoderPort;
         this.authTokenFactory = authTokenFactory;
         this.userRoleResolver = userRoleResolver;
+        this.userAffectationResolver = userAffectationResolver;
     }
 
     @Override
@@ -69,13 +74,16 @@ public class LoginUseCaseImpl implements LoginUseCase {
 
         Set<String> roleCodes = userRoleResolver.resoudreCodes(user.getRoleIds());
         AuthTokens tokens = authTokenFactory.build(user, roleCodes);
+        UserAffectationView affectation = userAffectationResolver.resoudre(user.getId().getValue());
 
         return new LoginResult(tokens, new UserSummary(
                 user.getId().getValue(),
                 user.getNom().getValue(),
                 user.getPrenom().getValue(),
                 user.getEmail().value(),
-                roleCodes));
+                roleCodes,
+                affectation.entrepotId(),
+                affectation.structureSanitaireId()));
     }
 
 }

@@ -36,7 +36,8 @@ public final class AuthCommands {
     public record AuthTokens(String accessToken, String refreshToken, long expiresInSeconds) {
     }
 
-    public record UserSummary(UUID id, String nom, String prenom, String email, Set<String> roles) {
+    public record UserSummary(UUID id, String nom, String prenom, String email, Set<String> roles,
+            UUID entrepotId, UUID structureSanitaireId) {
     }
 
     public record LoginResult(AuthTokens tokens, UserSummary user) {

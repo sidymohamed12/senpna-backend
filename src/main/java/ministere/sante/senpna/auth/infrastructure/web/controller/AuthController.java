@@ -83,7 +83,8 @@ public class AuthController {
                 result.user().nom(),
                 result.user().prenom(),
                 result.user().email(),
-                result.user().roles());
+                result.user().roles(), result.user().entrepotId(),
+                result.user().structureSanitaireId());
 
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, body, "LOGIN_SUCCESS", "Connexion réussie"));
     }
@@ -131,7 +132,8 @@ public class AuthController {
         UserSummary summary = authFacade.me(new MeQuery(email));
 
         MeResponse body = new MeResponse(
-                summary.id(), summary.nom(), summary.prenom(), summary.email(), summary.roles());
+                summary.id(), summary.nom(), summary.prenom(), summary.email(), summary.roles(), summary.entrepotId(),
+                summary.structureSanitaireId());
 
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, body, "ME_SUCCESS", "Profil récupéré"));
     }

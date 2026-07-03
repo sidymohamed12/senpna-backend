@@ -3,6 +3,7 @@ package ministere.sante.senpna.auth.application.usecase;
 import ministere.sante.senpna.auth.application.service.AuthTokenFactory;
 import ministere.sante.senpna.auth.application.service.OtpDestinationResolver;
 import ministere.sante.senpna.auth.application.service.OtpService;
+import ministere.sante.senpna.auth.application.service.UserAffectationResolver;
 import ministere.sante.senpna.auth.application.service.UserRoleResolver;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.*;
 import ministere.sante.senpna.auth.domain.exception.*;
@@ -13,6 +14,7 @@ import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
+import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 import ministere.sante.senpna.shared.domain.valueobject.UserId;
 import io.jsonwebtoken.JwtException;
@@ -427,6 +429,8 @@ class AuthUseCasesTest {
         UserRepositoryPort userRepositoryPort;
         @Mock
         UserRoleResolver userRoleResolver;
+        @Mock
+        UserAffectationResolver userAffectationResolver;
         @InjectMocks
         MeUseCaseImpl sut;
 
@@ -434,9 +438,12 @@ class AuthUseCasesTest {
         @DisplayName("retourne le UserSummary complet de l'utilisateur connecté")
         void me_retourne_summary() {
             User user = UserFixtures.actif();
+            UUID entrepotId = UUID.randomUUID();
             when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL)))
                     .thenReturn(Optional.of(user));
             when(userRoleResolver.resoudreCodes(any())).thenReturn(Set.of("GESTIONNAIRE_PNA"));
+            when(userAffectationResolver.resoudre(user.getId().getValue()))
+                    .thenReturn(new UserAffectationView(user.getId().getValue(), entrepotId, null));
 
             UserSummary result = sut.me(new MeQuery(UserFixtures.EMAIL));
 
@@ -445,6 +452,7 @@ class AuthUseCasesTest {
             assertThat(result.prenom()).isEqualTo(UserFixtures.PRENOM);
             assertThat(result.email()).isEqualTo(UserFixtures.EMAIL);
             assertThat(result.roles()).containsExactly("GESTIONNAIRE_PNA");
+            assertThat(result.entrepotId()).isEqualTo(entrepotId);
         }
 
         @Test
@@ -454,6 +462,8 @@ class AuthUseCasesTest {
 
             assertThatThrownBy(() -> sut.me(new MeQuery(UserFixtures.EMAIL)))
                     .isInstanceOf(UserNotFoundException.class);
+
+            verifyNoInteractions(userAffectationResolver);
         }
     }
 }

@@ -4,15 +4,19 @@ import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.TokenRevocationPort;
 
 import java.util.Set;
+import java.util.UUID;
 
 public interface TokenPort extends TokenRevocationPort {
 
     // ── Génération ────────────────────────────────────────────────────
 
     /**
-     * Génère un access token signé contenant l'email et les codes de rôle.
+     * Génère un access token signé contenant l'email, les codes de rôle et,
+     * si l'utilisateur y est affecté, son entrepôt et/ou sa structure
+     * sanitaire ({@code entrepotId} / {@code structureSanitaireId} peuvent
+     * être {@code null}, auquel cas le claim correspondant est omis).
      */
-    String genererAccess(User user, Set<String> roleCodes);
+    String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId);
 
     /**
      * Génère un refresh token, signé, sans claims métier (juste subject + type).

@@ -16,9 +16,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Adapter JWT + révocation Redis du {@link TokenPort}.
@@ -71,10 +73,16 @@ public class JwtTokenAdapter implements TokenPort {
     // ── Génération ────────────────────────────────────────────────────────
 
     @Override
-    public String genererAccess(User user, Set<String> roleCodes) {
-        return jwtService.generateAccessToken(
-                user.getEmail().value(),
-                Map.of("roles", roleCodes));
+    public String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roleCodes);
+        if (entrepotId != null) {
+            claims.put("entrepotId", entrepotId.toString());
+        }
+        if (structureSanitaireId != null) {
+            claims.put("structureSanitaireId", structureSanitaireId.toString());
+        }
+        return jwtService.generateAccessToken(user.getEmail().value(), claims);
     }
 
     @Override
