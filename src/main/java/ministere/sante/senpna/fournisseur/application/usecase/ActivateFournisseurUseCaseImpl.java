@@ -8,6 +8,7 @@ import ministere.sante.senpna.fournisseur.domain.model.Fournisseur;
 import ministere.sante.senpna.fournisseur.domain.port.in.ActivateFournisseurUseCase;
 import ministere.sante.senpna.fournisseur.domain.port.out.FournisseurRepositoryPort;
 import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
+import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ActivateFournisseurUseCaseImpl implements ActivateFournisseurUseCase {
 
     private final FournisseurRepositoryPort fournisseurRepositoryPort;
+    private final FournisseurCachePort fournisseurCachePort;
     private final FournisseurDetailAssembler fournisseurDetailAssembler;
 
     public ActivateFournisseurUseCaseImpl(FournisseurRepositoryPort fournisseurRepositoryPort,
-            FournisseurDetailAssembler fournisseurDetailAssembler) {
+            FournisseurCachePort fournisseurCachePort, FournisseurDetailAssembler fournisseurDetailAssembler) {
         this.fournisseurRepositoryPort = fournisseurRepositoryPort;
+        this.fournisseurCachePort = fournisseurCachePort;
         this.fournisseurDetailAssembler = fournisseurDetailAssembler;
     }
 
@@ -33,6 +36,8 @@ public class ActivateFournisseurUseCaseImpl implements ActivateFournisseurUseCas
         fournisseur.activer();
 
         Fournisseur saved = fournisseurRepositoryPort.save(fournisseur);
+        fournisseurCachePort.reload();
+
         return fournisseurDetailAssembler.assembler(saved);
     }
 }

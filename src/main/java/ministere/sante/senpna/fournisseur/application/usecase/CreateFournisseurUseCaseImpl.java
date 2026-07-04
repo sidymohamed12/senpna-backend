@@ -7,6 +7,7 @@ import ministere.sante.senpna.fournisseur.domain.exception.NomFournisseurDejaUti
 import ministere.sante.senpna.fournisseur.domain.model.Fournisseur;
 import ministere.sante.senpna.fournisseur.domain.port.in.CreateFournisseurUseCase;
 import ministere.sante.senpna.fournisseur.domain.port.out.FournisseurRepositoryPort;
+import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateFournisseurUseCaseImpl implements CreateFournisseurUseCase {
 
     private final FournisseurRepositoryPort fournisseurRepositoryPort;
+    private final FournisseurCachePort fournisseurCachePort;
     private final FournisseurDetailAssembler fournisseurDetailAssembler;
 
     public CreateFournisseurUseCaseImpl(FournisseurRepositoryPort fournisseurRepositoryPort,
-            FournisseurDetailAssembler fournisseurDetailAssembler) {
+            FournisseurCachePort fournisseurCachePort, FournisseurDetailAssembler fournisseurDetailAssembler) {
         this.fournisseurRepositoryPort = fournisseurRepositoryPort;
+        this.fournisseurCachePort = fournisseurCachePort;
         this.fournisseurDetailAssembler = fournisseurDetailAssembler;
     }
 
@@ -34,6 +37,13 @@ public class CreateFournisseurUseCaseImpl implements CreateFournisseurUseCase {
                 command.email(), command.contactPrincipal());
 
         Fournisseur saved = fournisseurRepositoryPort.save(fournisseur);
+
+        // Recharge le cache immédiatement : le nouveau fournisseur doit
+        // être utilisable sans délai par les autres features (ex :
+        // création d'un lot dans la foulée), sans attendre un rechargement
+        // périodique — même principe que RegionCachePort.reload().
+        fournisseurCachePort.reload();
+
         return fournisseurDetailAssembler.assembler(saved);
     }
 }
