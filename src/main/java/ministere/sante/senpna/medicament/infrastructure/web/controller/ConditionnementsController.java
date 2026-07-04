@@ -67,7 +67,7 @@ public class ConditionnementsController {
         public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateConditionnementRequest request) {
                 ConditionnementDetail result = medicamentFacade.creerConditionnement(new CreateConditionnementCommand(
                                 request.medicamentId(), request.nom(), request.niveau(), request.quantiteUniteBase(),
-                                request.estUniteBase()));
+                                request.estUniteBase(), request.prixAchat(), request.prixVente()));
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
                                 RestResponse.response(HttpStatus.CREATED, toResponse(result), "CONDITIONNEMENT_CREATED",
@@ -81,7 +81,7 @@ public class ConditionnementsController {
                 ConditionnementDetail result = medicamentFacade
                                 .modifierConditionnement(new UpdateConditionnementCommand(
                                                 id, request.nom(), request.niveau(), request.quantiteUniteBase(),
-                                                request.estUniteBase()));
+                                                request.estUniteBase(), request.prixAchat(), request.prixVente()));
 
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
                                 "CONDITIONNEMENT_UPDATED", "Conditionnement modifié avec succès"));
@@ -141,7 +141,7 @@ public class ConditionnementsController {
 
         private ConditionnementResponse toResponse(ConditionnementDetail detail) {
                 return new ConditionnementResponse(detail.id(), detail.medicamentId(), detail.nom(), detail.niveau(),
-                                detail.quantiteUniteBase(), detail.estUniteBase(), detail.actif(), detail.createdAt(),
-                                detail.updatedAt());
+                                detail.quantiteUniteBase(), detail.estUniteBase(), detail.prixAchat(),
+                                detail.prixVente(), detail.actif(), detail.createdAt(), detail.updatedAt());
         }
 }

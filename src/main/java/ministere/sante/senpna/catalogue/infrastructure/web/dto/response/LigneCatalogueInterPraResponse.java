@@ -5,5 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record LigneCatalogueInterPraResponse(UUID medicamentId, String code, String nomCommercial, String dci,
-        String dosage, BigDecimal quantiteTotaleReseau, List<DisponibilitePraResponse> disponibilites) {
+                String familleNom, String fabricant, BigDecimal quantiteTotaleReseau,
+                List<ConditionnementCatalogueResponse> conditionnements,
+                List<DisponibilitePraResponse> disponibilites) {
 }

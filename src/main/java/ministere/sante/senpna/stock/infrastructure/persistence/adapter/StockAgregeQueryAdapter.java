@@ -54,6 +54,7 @@ public class StockAgregeQueryAdapter implements StockAgregeQueryPort {
                 row.getQuantiteReservee(),
                 row.getNombreLotsActifs() != null ? row.getNombreLotsActifs().intValue() : 0,
                 row.getProchaineDateExpiration(),
-                row.getPrixVenteMoyen());
+                row.getPrixVenteMoyen(),
+                row.getFournisseurId());
     }
 }

@@ -51,7 +51,7 @@ public class CreateConditionnementUseCaseImpl implements CreateConditionnementUs
         }
 
         Conditionnement conditionnement = Conditionnement.creer(medicament.getId(), command.nom(), command.niveau(),
-                command.quantiteUniteBase(), command.estUniteBase());
+                command.quantiteUniteBase(), command.estUniteBase(), command.prixAchat(), command.prixVente());
 
         Conditionnement saved = conditionnementRepositoryPort.save(conditionnement);
         return conditionnementDetailAssembler.assembler(saved);

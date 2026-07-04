@@ -27,4 +27,6 @@ public interface CatalogueAggregatRow {
     LocalDate getProchaineDateExpiration();
 
     BigDecimal getPrixVenteMoyen();
+
+    UUID getFournisseurId();
 }

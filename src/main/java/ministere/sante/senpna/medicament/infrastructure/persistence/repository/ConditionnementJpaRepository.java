@@ -5,6 +5,8 @@ import ministere.sante.senpna.medicament.infrastructure.persistence.entity.Condi
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public interface ConditionnementJpaRepository extends JpaRepository<ConditionnementJpaEntity, UUID>,
@@ -23,4 +25,8 @@ public interface ConditionnementJpaRepository extends JpaRepository<Conditionnem
     boolean existsByMedicamentIdAndEstUniteBaseTrueAndIdNot(UUID medicamentId, UUID id);
 
     long countByMedicamentIdAndEstUniteBaseTrueAndActifTrue(UUID medicamentId);
+
+    /** Utilisé par {@code ConditionnementQueryAdapter} (port {@code shared}) pour le catalogue. */
+    List<ConditionnementJpaEntity> findByMedicamentIdInAndActifTrueAndPrixVenteIsNotNullOrderByMedicamentIdAscNiveauAsc(
+            Collection<UUID> medicamentIds);
 }

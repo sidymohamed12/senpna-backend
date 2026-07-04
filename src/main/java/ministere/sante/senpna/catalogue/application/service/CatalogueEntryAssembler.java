@@ -2,11 +2,16 @@ package ministere.sante.senpna.catalogue.application.service;
 
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.CatalogueInterPraPage;
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.CataloguePage;
+import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.ConditionnementCatalogue;
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.DisponibilitePra;
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.LigneCatalogue;
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.LigneCatalogueInterPra;
+import ministere.sante.senpna.shared.domain.port.out.ConditionnementQueryPort;
+import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 import ministere.sante.senpna.shared.domain.port.out.MedicamentQueryPort;
+import ministere.sante.senpna.shared.domain.projection.ConditionnementProjection;
 import ministere.sante.senpna.shared.domain.projection.EntrepotProjection;
+import ministere.sante.senpna.shared.domain.projection.FournisseurProjection;
 import ministere.sante.senpna.shared.domain.projection.MedicamentProjection;
 import ministere.sante.senpna.shared.domain.projection.StockAgregeProjection;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
@@ -15,6 +20,7 @@ import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -27,10 +33,12 @@ import java.util.stream.Stream;
 /**
  * Assemble les projections de stock agrégées ({@link StockAgregeProjection},
  * port {@code shared}) avec le référentiel médicament
- * ({@link MedicamentProjection}, port {@code shared}) pour produire les
- * pages de catalogue exposées par les use cases — ne dépend que de
- * {@code shared}, jamais des modules {@code stock}, {@code medicament} ou
- * {@code organisation} directement.
+ * ({@link MedicamentProjection}), les fournisseurs
+ * ({@link FournisseurCachePort})
+ * et les conditionnements achetables ({@link ConditionnementQueryPort}) pour
+ * produire les pages de catalogue exposées par les use cases — ne dépend
+ * que de {@code shared}, jamais des modules {@code stock}, {@code medicament},
+ * {@code fournisseur} ou {@code organisation} directement.
  *
  * <h3>Pourquoi une pagination en mémoire</h3>
  * <p>
@@ -48,16 +56,29 @@ import java.util.stream.Stream;
 @Component
 public class CatalogueEntryAssembler {
 
+        private final FournisseurCachePort fournisseurCachePort;
+        private final ConditionnementQueryPort conditionnementQueryPort;
+
+        public CatalogueEntryAssembler(FournisseurCachePort fournisseurCachePort,
+                        ConditionnementQueryPort conditionnementQueryPort) {
+                this.fournisseurCachePort = fournisseurCachePort;
+                this.conditionnementQueryPort = conditionnementQueryPort;
+        }
+
         /** Assemble une page de catalogue « simple » (un seul entrepôt). */
         public CataloguePage assembler(List<StockAgregeProjection> lignes, MedicamentQueryPort medicamentQueryPort,
                         String recherche, Boolean ruptureUniquement, Integer pageDemandee, Integer sizeDemande) {
 
                 Map<UUID, MedicamentProjection> medicaments = chargerMedicaments(
                                 lignes.stream().map(StockAgregeProjection::medicamentId), medicamentQueryPort);
+                Map<UUID, List<ConditionnementCatalogue>> conditionnementsParMedicament = chargerConditionnements(
+                                medicaments.keySet());
 
                 List<LigneCatalogue> toutes = lignes.stream()
                                 .filter(ligne -> medicaments.containsKey(ligne.medicamentId()))
-                                .map(ligne -> versLigneCatalogue(ligne, medicaments.get(ligne.medicamentId())))
+                                .map(ligne -> versLigneCatalogue(ligne, medicaments.get(ligne.medicamentId()),
+                                                conditionnementsParMedicament.getOrDefault(ligne.medicamentId(),
+                                                                List.of())))
                                 .filter(ligne -> correspondRecherche(ligne.nomCommercial(), ligne.dci(), ligne.code(),
                                                 recherche))
                                 .filter(ligne -> !Boolean.TRUE.equals(ruptureUniquement) || ligne.enRupture())
@@ -84,6 +105,8 @@ public class CatalogueEntryAssembler {
 
                 Map<UUID, MedicamentProjection> medicaments = chargerMedicaments(
                                 lignes.stream().map(StockAgregeProjection::medicamentId), medicamentQueryPort);
+                Map<UUID, List<ConditionnementCatalogue>> conditionnementsParMedicament = chargerConditionnements(
+                                medicaments.keySet());
 
                 Map<UUID, List<StockAgregeProjection>> parMedicament = lignes.stream()
                                 .filter(ligne -> medicaments.containsKey(ligne.medicamentId()))
@@ -95,7 +118,8 @@ public class CatalogueEntryAssembler {
                 List<LigneCatalogueInterPra> toutes = parMedicament.entrySet().stream()
                                 .map(entry -> versLigneCatalogueInterPra(medicaments.get(entry.getKey()),
                                                 entry.getValue(),
-                                                prasParId))
+                                                prasParId,
+                                                conditionnementsParMedicament.getOrDefault(entry.getKey(), List.of())))
                                 .filter(ligne -> correspondRecherche(ligne.nomCommercial(), ligne.dci(), ligne.code(),
                                                 recherche))
                                 .filter(ligne -> !Boolean.TRUE.equals(ruptureUniquement)
@@ -111,23 +135,26 @@ public class CatalogueEntryAssembler {
 
         // ── Assemblage unitaire ──────────────────────────────────────────────
 
-        private LigneCatalogue versLigneCatalogue(StockAgregeProjection ligne, MedicamentProjection medicament) {
+        private LigneCatalogue versLigneCatalogue(StockAgregeProjection ligne, MedicamentProjection medicament,
+                        List<ConditionnementCatalogue> conditionnements) {
                 return new LigneCatalogue(
                                 medicament.id(),
                                 medicament.code(),
                                 medicament.nomCommercial(),
                                 medicament.dci(),
-                                medicament.dosage(),
-                                medicament.necessiteOrdonnance(),
+                                medicament.familleNom(),
+                                medicament.fabricant(),
+                                resoudreNomFournisseur(ligne.fournisseurId()),
                                 ligne.quantiteDisponibleALaVente(),
                                 ligne.nombreLotsActifs(),
                                 ligne.prochaineDateExpiration(),
-                                ligne.prixVenteMoyen(),
-                                ligne.enRupture());
+                                ligne.enRupture(),
+                                conditionnements);
         }
 
         private LigneCatalogueInterPra versLigneCatalogueInterPra(MedicamentProjection medicament,
-                        List<StockAgregeProjection> lignesParPra, Map<UUID, EntrepotProjection> prasParId) {
+                        List<StockAgregeProjection> lignesParPra, Map<UUID, EntrepotProjection> prasParId,
+                        List<ConditionnementCatalogue> conditionnements) {
 
                 List<DisponibilitePra> disponibilites = lignesParPra.stream()
                                 .map(ligne -> {
@@ -137,6 +164,7 @@ public class CatalogueEntryAssembler {
                                                         pra.code(),
                                                         pra.nom(),
                                                         pra.regionId(),
+                                                        resoudreNomFournisseur(ligne.fournisseurId()),
                                                         ligne.quantiteDisponibleALaVente(),
                                                         ligne.prochaineDateExpiration());
                                 })
@@ -152,8 +180,10 @@ public class CatalogueEntryAssembler {
                                 medicament.code(),
                                 medicament.nomCommercial(),
                                 medicament.dci(),
-                                medicament.dosage(),
+                                medicament.familleNom(),
+                                medicament.fabricant(),
                                 quantiteTotale,
+                                conditionnements,
                                 disponibilites);
         }
 
@@ -164,6 +194,30 @@ public class CatalogueEntryAssembler {
                 List<UUID> ids = medicamentIds.distinct().toList();
                 return medicamentQueryPort.findAllById(ids).stream()
                                 .collect(Collectors.toMap(MedicamentProjection::id, Function.identity()));
+        }
+
+        private Map<UUID, List<ConditionnementCatalogue>> chargerConditionnements(Collection<UUID> medicamentIds) {
+                return conditionnementQueryPort.findAllVendablesByMedicamentIdIn(medicamentIds).stream()
+                                .collect(Collectors.groupingBy(ConditionnementProjection::medicamentId,
+                                                Collectors.mapping(this::versConditionnementCatalogue,
+                                                                Collectors.toList())));
+        }
+
+        private ConditionnementCatalogue versConditionnementCatalogue(ConditionnementProjection conditionnement) {
+                return new ConditionnementCatalogue(
+                                conditionnement.id(),
+                                conditionnement.nom(),
+                                conditionnement.niveau(),
+                                conditionnement.quantiteUniteBase(),
+                                conditionnement.prixAchat(),
+                                conditionnement.prixVente());
+        }
+
+        private String resoudreNomFournisseur(UUID fournisseurId) {
+                if (fournisseurId == null) {
+                        return null;
+                }
+                return fournisseurCachePort.findById(fournisseurId).map(FournisseurProjection::nom).orElse(null);
         }
 
         private boolean correspondRecherche(String nomCommercial, String dci, String code, String recherche) {

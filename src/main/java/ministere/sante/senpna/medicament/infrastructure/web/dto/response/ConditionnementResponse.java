@@ -11,6 +11,8 @@ public record ConditionnementResponse(
         int niveau,
         BigDecimal quantiteUniteBase,
         boolean estUniteBase,
+        BigDecimal prixAchat,
+        BigDecimal prixVente,
         boolean actif,
         Instant createdAt,
         Instant updatedAt) {

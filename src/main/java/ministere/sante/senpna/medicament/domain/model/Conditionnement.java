@@ -22,7 +22,19 @@ import java.util.Objects;
  * niveau et du nom, sont des invariants <em>inter-agrégats</em> — vérifiés
  * par les use cases via le port de persistance, le modèle de domaine
  * n'ayant connaissance que de lui-même.
- * 
+ * </p>
+ *
+ * <p>
+ * <strong>Le prix se négocie par conditionnement, jamais par unité de
+ * base</strong> : on ne vend pas au comprimé mais à la boîte, au carton...
+ * {@code prixAchat}/{@code prixVente} sont donc portés ici plutôt que sur
+ * {@code Lot} — un carton et une boîte du même médicament peuvent avoir des
+ * prix différents alors qu'ils proviennent du même lot. Les deux champs
+ * sont optionnels et solidaires : un conditionnement sans prix n'est
+ * simplement pas proposé à la commande (cf. catalogue, qui ne liste que
+ * les conditionnements ayant un prix défini) ; un conditionnement dont
+ * l'usage n'est pas commercial (ex : l'unité de base, gardée pour le
+ * comptage de stock) peut rester sans prix indéfiniment.
  * </p>
  */
 public class Conditionnement extends AggregateRoot<ConditionnementId> {
@@ -34,41 +46,50 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
     private int niveau;
     private BigDecimal quantiteUniteBase;
     private boolean estUniteBase;
+    private BigDecimal prixAchat;
+    private BigDecimal prixVente;
     private boolean actif;
 
     private Conditionnement(ConditionnementId id, MedicamentId medicamentId, String nom, int niveau,
-            BigDecimal quantiteUniteBase, boolean estUniteBase, boolean actif, Instant createdAt,
-            Instant updatedAt) {
+            BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente,
+            boolean actif, Instant createdAt, Instant updatedAt) {
         super(id, createdAt, updatedAt);
         this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
         this.nom = validerNom(nom);
         this.niveau = validerNiveau(niveau);
         this.quantiteUniteBase = validerQuantite(quantiteUniteBase, estUniteBase);
         this.estUniteBase = estUniteBase;
+        validerPrix(prixAchat, prixVente);
+        this.prixAchat = prixAchat;
+        this.prixVente = prixVente;
         this.actif = actif;
     }
 
     public static Conditionnement reconstruct(ConditionnementId id, MedicamentId medicamentId, String nom,
-            int niveau, BigDecimal quantiteUniteBase, boolean estUniteBase, boolean actif, Instant createdAt,
-            Instant updatedAt) {
-        return new Conditionnement(id, medicamentId, nom, niveau, quantiteUniteBase, estUniteBase, actif, createdAt,
-                updatedAt);
+            int niveau, BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat,
+            BigDecimal prixVente, boolean actif, Instant createdAt, Instant updatedAt) {
+        return new Conditionnement(id, medicamentId, nom, niveau, quantiteUniteBase, estUniteBase, prixAchat,
+                prixVente, actif, createdAt, updatedAt);
     }
 
     public static Conditionnement creer(MedicamentId medicamentId, String nom, int niveau,
-            BigDecimal quantiteUniteBase, boolean estUniteBase) {
+            BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente) {
         Instant maintenant = Instant.now();
         return new Conditionnement(ConditionnementId.generate(), medicamentId, nom, niveau, quantiteUniteBase,
-                estUniteBase, true, maintenant, maintenant);
+                estUniteBase, prixAchat, prixVente, true, maintenant, maintenant);
     }
 
     // ── Comportements métier ────────────────────────────────────────────
 
-    public void modifierInformations(String nom, int niveau, BigDecimal quantiteUniteBase, boolean estUniteBase) {
+    public void modifierInformations(String nom, int niveau, BigDecimal quantiteUniteBase, boolean estUniteBase,
+            BigDecimal prixAchat, BigDecimal prixVente) {
         this.nom = validerNom(nom);
         this.niveau = validerNiveau(niveau);
         this.quantiteUniteBase = validerQuantite(quantiteUniteBase, estUniteBase);
         this.estUniteBase = estUniteBase;
+        validerPrix(prixAchat, prixVente);
+        this.prixAchat = prixAchat;
+        this.prixVente = prixVente;
         markUpdated();
     }
 
@@ -135,6 +156,22 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
         return quantiteUniteBase;
     }
 
+    private static void validerPrix(BigDecimal prixAchat, BigDecimal prixVente) {
+        if (prixAchat == null && prixVente == null) {
+            return;
+        }
+        if (prixAchat == null || prixVente == null) {
+            throw new IllegalArgumentException(
+                    "Le prix d'achat et le prix de vente doivent être définis ensemble, ou pas du tout");
+        }
+        if (prixAchat.signum() < 0 || prixVente.signum() < 0) {
+            throw new IllegalArgumentException("Les prix ne peuvent pas être négatifs");
+        }
+        if (prixVente.compareTo(prixAchat) < 0) {
+            throw new IllegalArgumentException("Le prix de vente ne peut pas être inférieur au prix d'achat");
+        }
+    }
+
     // ── Accesseurs ───────────────────────────────────────────────────────
 
     public MedicamentId getMedicamentId() {
@@ -157,6 +194,18 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
         return estUniteBase;
     }
 
+    public BigDecimal getPrixAchat() {
+        return prixAchat;
+    }
+
+    public BigDecimal getPrixVente() {
+        return prixVente;
+    }
+
+    public boolean aUnPrix() {
+        return prixVente != null;
+    }
+
     public boolean isActif() {
         return actif;
     }
@@ -170,6 +219,8 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
         result = prime * result + niveau;
         result = prime * result + Objects.hashCode(quantiteUniteBase);
         result = prime * result + (estUniteBase ? 1231 : 1237);
+        result = prime * result + Objects.hashCode(prixAchat);
+        result = prime * result + Objects.hashCode(prixVente);
         result = prime * result + (actif ? 1231 : 1237);
         return result;
     }
@@ -188,6 +239,8 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
                 && actif == other.actif
                 && Objects.equals(medicamentId, other.medicamentId)
                 && Objects.equals(nom, other.nom)
-                && Objects.equals(quantiteUniteBase, other.quantiteUniteBase);
+                && Objects.equals(quantiteUniteBase, other.quantiteUniteBase)
+                && Objects.equals(prixAchat, other.prixAchat)
+                && Objects.equals(prixVente, other.prixVente);
     }
 }

@@ -5,5 +5,5 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record DisponibilitePraResponse(UUID entrepotId, String codeEntrepot, String nomEntrepot, UUID regionId,
-        BigDecimal quantiteDisponible, LocalDate prochaineDateExpiration) {
+                String fournisseurNom, BigDecimal quantiteDisponible, LocalDate prochaineDateExpiration) {
 }

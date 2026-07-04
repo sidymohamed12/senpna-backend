@@ -18,6 +18,8 @@ public class ConditionnementMapper {
                 entity.getNiveau(),
                 entity.getQuantiteUniteBase(),
                 entity.isEstUniteBase(),
+                entity.getPrixAchat(),
+                entity.getPrixVente(),
                 entity.isActif(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
@@ -31,6 +33,8 @@ public class ConditionnementMapper {
                 conditionnement.getNiveau(),
                 conditionnement.getQuantiteUniteBase(),
                 conditionnement.isEstUniteBase(),
+                conditionnement.getPrixAchat(),
+                conditionnement.getPrixVente(),
                 conditionnement.isActif());
         entity.setCreatedAt(conditionnement.getCreatedAt());
         entity.setUpdatedAt(conditionnement.getUpdatedAt());

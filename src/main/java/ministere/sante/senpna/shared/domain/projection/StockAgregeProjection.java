@@ -30,10 +30,16 @@ import java.util.UUID;
  *                                lots contribuants (repère FEFO)
  * @param prixVenteMoyen          prix de vente moyen indicatif des lots
  *                                contribuants (peut être {@code null})
+ * @param fournisseurId           fournisseur du lot le plus proche de la
+ *                                péremption (FEFO) — celui qui sera
+ *                                effectivement sorti en premier ; sert de
+ *                                repère d'affichage, un médicament peut
+ *                                avoir été réapprovisionné auprès de plusieurs
+ *                                fournisseurs au fil du temps
  */
 public record StockAgregeProjection(UUID entrepotId, UUID medicamentId, BigDecimal quantiteDisponible,
         BigDecimal quantiteReservee, int nombreLotsActifs, LocalDate prochaineDateExpiration,
-        BigDecimal prixVenteMoyen) {
+        BigDecimal prixVenteMoyen, UUID fournisseurId) {
 
     public BigDecimal quantiteDisponibleALaVente() {
         return quantiteDisponible.subtract(quantiteReservee);

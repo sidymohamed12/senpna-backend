@@ -48,7 +48,7 @@ public class UpdateConditionnementUseCaseImpl implements UpdateConditionnementUs
         }
 
         conditionnement.modifierInformations(command.nom(), command.niveau(), command.quantiteUniteBase(),
-                command.estUniteBase());
+                command.estUniteBase(), command.prixAchat(), command.prixVente());
 
         Conditionnement saved = conditionnementRepositoryPort.save(conditionnement);
         return conditionnementDetailAssembler.assembler(saved);

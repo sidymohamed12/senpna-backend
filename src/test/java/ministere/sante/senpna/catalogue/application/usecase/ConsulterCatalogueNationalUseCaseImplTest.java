@@ -7,10 +7,13 @@ import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.Consult
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.LigneCatalogue;
 import ministere.sante.senpna.catalogue.domain.exception.CatalogueAccesRefuseException;
 import ministere.sante.senpna.catalogue.domain.exception.PnaCentraleIntrouvableException;
+import ministere.sante.senpna.shared.domain.port.out.ConditionnementQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.EntrepotQueryPort;
+import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 import ministere.sante.senpna.shared.domain.port.out.MedicamentQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.StockAgregeQueryPort;
 import ministere.sante.senpna.shared.domain.projection.EntrepotProjection;
+import ministere.sante.senpna.shared.domain.projection.FournisseurProjection;
 import ministere.sante.senpna.shared.domain.projection.MedicamentProjection;
 import ministere.sante.senpna.shared.domain.projection.StockAgregeProjection;
 
@@ -46,13 +49,18 @@ class ConsulterCatalogueNationalUseCaseImplTest {
     StockAgregeQueryPort stockAgregeQueryPort;
     @Mock
     MedicamentQueryPort medicamentQueryPort;
+    @Mock
+    FournisseurCachePort fournisseurCachePort;
+    @Mock
+    ConditionnementQueryPort conditionnementQueryPort;
 
-    CatalogueEntryAssembler catalogueEntryAssembler = new CatalogueEntryAssembler();
+    CatalogueEntryAssembler catalogueEntryAssembler;
 
     ConsulterCatalogueNationalUseCaseImpl sut;
 
     @BeforeEach
     void setUp() {
+        catalogueEntryAssembler = new CatalogueEntryAssembler(fournisseurCachePort, conditionnementQueryPort);
         sut = new ConsulterCatalogueNationalUseCaseImpl(catalogueAccessGuard, entrepotQueryPort,
                 stockAgregeQueryPort, medicamentQueryPort, catalogueEntryAssembler);
     }
@@ -78,7 +86,7 @@ class ConsulterCatalogueNationalUseCaseImplTest {
     }
 
     @Test
-    @DisplayName("cas nominal → agrège le stock de la PNA centrale et l'enrichit avec le référentiel médicament")
+    @DisplayName("cas nominal → agrège le stock de la PNA centrale, enrichit médicament/fournisseur/conditionnements")
     void casNominal_retourneCataloguePeuple() {
         UUID entrepotPnaId = UUID.randomUUID();
         EntrepotProjection pnaCentrale = new EntrepotProjection(entrepotPnaId, "PNA-CENTRAL", "PNA Centrale",
@@ -86,13 +94,18 @@ class ConsulterCatalogueNationalUseCaseImplTest {
         when(entrepotQueryPort.findPnaCentraleActive()).thenReturn(Optional.of(pnaCentrale));
 
         UUID medicamentId = UUID.randomUUID();
+        UUID fournisseurId = UUID.randomUUID();
         StockAgregeProjection ligne = new StockAgregeProjection(entrepotPnaId, medicamentId,
-                BigDecimal.valueOf(1000), BigDecimal.valueOf(200), 3, null, BigDecimal.valueOf(150));
+                BigDecimal.valueOf(1000), BigDecimal.valueOf(200), 3, null, BigDecimal.valueOf(150), fournisseurId);
         when(stockAgregeQueryPort.rechercherParEntrepot(entrepotPnaId)).thenReturn(List.of(ligne));
 
         MedicamentProjection medicament = new MedicamentProjection(medicamentId, "PARA-500", "Doliprane",
-                "Paracétamol", "500mg", false, true);
+                "Paracétamol", "Antalgique", "Sanofi", true);
         when(medicamentQueryPort.findAllById(any())).thenReturn(List.of(medicament));
+
+        when(fournisseurCachePort.findById(fournisseurId))
+                .thenReturn(Optional.of(new FournisseurProjection(fournisseurId, "Laboratoire A", true)));
+        when(conditionnementQueryPort.findAllVendablesByMedicamentIdIn(any())).thenReturn(List.of());
 
         CataloguePage page = sut.consulter(new ConsulterCatalogueNationalQuery(null, null, 0, 20));
 
@@ -100,6 +113,9 @@ class ConsulterCatalogueNationalUseCaseImplTest {
         LigneCatalogue ligneCatalogue = page.content().get(0);
         assertThat(ligneCatalogue.medicamentId()).isEqualTo(medicamentId);
         assertThat(ligneCatalogue.nomCommercial()).isEqualTo("Doliprane");
+        assertThat(ligneCatalogue.familleNom()).isEqualTo("Antalgique");
+        assertThat(ligneCatalogue.fabricant()).isEqualTo("Sanofi");
+        assertThat(ligneCatalogue.fournisseurNom()).isEqualTo("Laboratoire A");
         assertThat(ligneCatalogue.quantiteDisponibleALaVente()).isEqualByComparingTo(BigDecimal.valueOf(800));
         assertThat(ligneCatalogue.enRupture()).isFalse();
     }

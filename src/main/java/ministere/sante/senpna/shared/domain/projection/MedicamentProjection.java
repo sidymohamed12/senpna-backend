@@ -8,6 +8,6 @@ import java.util.UUID;
  * cross-feature (ex : catalogue), jamais l'agrégat {@code Medicament} complet,
  * dont {@code medicament} reste l'unique propriétaire.
  */
-public record MedicamentProjection(UUID id, String code, String nomCommercial, String dci, String dosage,
-                boolean necessiteOrdonnance, boolean actif) {
+public record MedicamentProjection(UUID id, String code, String nomCommercial, String dci, String familleNom,
+                String fabricant, boolean actif) {
 }

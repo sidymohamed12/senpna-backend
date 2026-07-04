@@ -16,6 +16,8 @@ public class ConditionnementDetailAssembler {
                 conditionnement.getNiveau(),
                 conditionnement.getQuantiteUniteBase(),
                 conditionnement.isEstUniteBase(),
+                conditionnement.getPrixAchat(),
+                conditionnement.getPrixVente(),
                 conditionnement.isActif(),
                 conditionnement.getCreatedAt(),
                 conditionnement.getUpdatedAt());

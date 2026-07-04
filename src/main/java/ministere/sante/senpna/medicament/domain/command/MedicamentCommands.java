@@ -119,11 +119,13 @@ public final class MedicamentCommands {
         // ── Conditionnement ─────────────────────────────────────────────────
 
         public record CreateConditionnementCommand(UUID medicamentId, String nom, int niveau,
-                        BigDecimal quantiteUniteBase, boolean estUniteBase) {
+                        BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat,
+                        BigDecimal prixVente) {
         }
 
         public record UpdateConditionnementCommand(UUID conditionnementId, String nom, int niveau,
-                        BigDecimal quantiteUniteBase, boolean estUniteBase) {
+                        BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat,
+                        BigDecimal prixVente) {
         }
 
         public record ArchiveConditionnementCommand(UUID conditionnementId) {
@@ -140,8 +142,8 @@ public final class MedicamentCommands {
         }
 
         public record ConditionnementDetail(UUID id, UUID medicamentId, String nom, int niveau,
-                        BigDecimal quantiteUniteBase, boolean estUniteBase, boolean actif, Instant createdAt,
-                        Instant updatedAt) {
+                        BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat,
+                        BigDecimal prixVente, boolean actif, Instant createdAt, Instant updatedAt) {
         }
 
         public record ConditionnementPage(List<ConditionnementDetail> content, int page, int size,

@@ -78,7 +78,7 @@ class ConditionnementUseCasesTest {
                     .thenAnswer(inv -> inv.getArgument(0));
 
             ConditionnementDetail result = useCase.creer(new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé",
-                    1, BigDecimal.ONE, true));
+                    1, BigDecimal.ONE, true, null, null));
 
             assertThat(result.nom()).isEqualTo("Comprimé");
             assertThat(result.estUniteBase()).isTrue();
@@ -92,7 +92,7 @@ class ConditionnementUseCasesTest {
             when(medicamentRepositoryPort.findById(MedicamentId.of(MEDICAMENT_ID))).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> useCase.creer(
-                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true)))
+                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true, null, null)))
                     .isInstanceOf(MedicamentIntrouvableException.class);
         }
 
@@ -107,7 +107,7 @@ class ConditionnementUseCasesTest {
                     .thenReturn(true);
 
             assertThatThrownBy(() -> useCase.creer(
-                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true)))
+                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true, null, null)))
                     .isInstanceOf(NiveauConditionnementDejaUtiliseException.class);
 
             verify(conditionnementRepositoryPort, never()).save(any());
@@ -126,7 +126,7 @@ class ConditionnementUseCasesTest {
                     .thenReturn(true);
 
             assertThatThrownBy(() -> useCase.creer(
-                    new CreateConditionnementCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"), false)))
+                    new CreateConditionnementCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"), false, null, null)))
                     .isInstanceOf(NomConditionnementDejaUtiliseException.class);
         }
 
@@ -144,7 +144,7 @@ class ConditionnementUseCasesTest {
             when(conditionnementRepositoryPort.existsUniteBaseByMedicamentId(any())).thenReturn(true);
 
             assertThatThrownBy(() -> useCase.creer(
-                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true)))
+                    new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE, true, null, null)))
                     .isInstanceOf(UniteBaseDejaDefinieException.class);
 
             verify(conditionnementRepositoryPort, never()).save(any());
@@ -177,7 +177,7 @@ class ConditionnementUseCasesTest {
             ArchiveConditionnementUseCaseImpl useCase = new ArchiveConditionnementUseCaseImpl(
                     conditionnementRepositoryPort, ASSEMBLER);
             Conditionnement uniteBase = Conditionnement.reconstruct(ConditionnementId.of(CONDITIONNEMENT_ID),
-                    MedicamentId.of(MEDICAMENT_ID), "Comprimé", 1, BigDecimal.ONE, true, true, Instant.now(),
+                    MedicamentId.of(MEDICAMENT_ID), "Comprimé", 1, BigDecimal.ONE, true, null, null, true, Instant.now(),
                     Instant.now());
             when(conditionnementRepositoryPort.findById(ConditionnementId.of(CONDITIONNEMENT_ID)))
                     .thenReturn(Optional.of(uniteBase));
@@ -196,7 +196,7 @@ class ConditionnementUseCasesTest {
             ArchiveConditionnementUseCaseImpl useCase = new ArchiveConditionnementUseCaseImpl(
                     conditionnementRepositoryPort, ASSEMBLER);
             Conditionnement boite = Conditionnement.reconstruct(ConditionnementId.of(CONDITIONNEMENT_ID),
-                    MedicamentId.of(MEDICAMENT_ID), "Boîte", 2, new BigDecimal("20"), false, true, Instant.now(),
+                    MedicamentId.of(MEDICAMENT_ID), "Boîte", 2, new BigDecimal("20"), false, null, null, true, Instant.now(),
                     Instant.now());
             when(conditionnementRepositoryPort.findById(ConditionnementId.of(CONDITIONNEMENT_ID)))
                     .thenReturn(Optional.of(boite));

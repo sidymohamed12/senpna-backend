@@ -58,12 +58,25 @@ public final class CatalogueCommands {
         // ── Résultats ────────────────────────────────────────────────────────
 
         /**
+         * Conditionnement achetable pour un médicament (niveau d'emballage
+         * avec son prix) — cf. règle « on ne vend pas par comprimé... mais
+         * par boîte ou carton ». Seuls les conditionnements ayant un prix
+         * défini sont listés ; c'est cette liste qui permet à l'acheteur de
+         * choisir dans quelle unité commander.
+         */
+        public record ConditionnementCatalogue(UUID id, String nom, int niveau, BigDecimal quantiteUniteBase,
+                        BigDecimal prixAchat, BigDecimal prixVente) {
+        }
+
+        /**
          * Ligne de catalogue « simple » — un entrepôt, un médicament, une
          * disponibilité.
          */
-        public record LigneCatalogue(UUID medicamentId, String code, String nomCommercial, String dci, String dosage,
-                        boolean necessiteOrdonnance, BigDecimal quantiteDisponibleALaVente, int nombreLotsActifs,
-                        LocalDate prochaineDateExpiration, BigDecimal prixVenteMoyen, boolean enRupture) {
+        public record LigneCatalogue(UUID medicamentId, String code, String nomCommercial, String dci,
+                        String familleNom, String fabricant, String fournisseurNom,
+                        BigDecimal quantiteDisponibleALaVente,
+                        int nombreLotsActifs, LocalDate prochaineDateExpiration, boolean enRupture,
+                        List<ConditionnementCatalogue> conditionnements) {
         }
 
         public record CataloguePage(List<LigneCatalogue> content, int page, int size, long totalElements,
@@ -75,7 +88,8 @@ public final class CatalogueCommands {
          * inter-PRA).
          */
         public record DisponibilitePra(UUID entrepotId, String codeEntrepot, String nomEntrepot, UUID regionId,
-                        BigDecimal quantiteDisponibleALaVente, LocalDate prochaineDateExpiration) {
+                        String fournisseurNom, BigDecimal quantiteDisponibleALaVente,
+                        LocalDate prochaineDateExpiration) {
         }
 
         /**
@@ -83,7 +97,8 @@ public final class CatalogueCommands {
          * disponibilité.
          */
         public record LigneCatalogueInterPra(UUID medicamentId, String code, String nomCommercial, String dci,
-                        String dosage, BigDecimal quantiteTotaleReseau, List<DisponibilitePra> disponibilites) {
+                        String familleNom, String fabricant, BigDecimal quantiteTotaleReseau,
+                        List<ConditionnementCatalogue> conditionnements, List<DisponibilitePra> disponibilites) {
         }
 
         public record CatalogueInterPraPage(List<LigneCatalogueInterPra> content, int page, int size,
