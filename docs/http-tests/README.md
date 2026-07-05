@@ -20,6 +20,12 @@ encore : Marketplace → cherche "REST Client" → Install.
 | `10-formes.http`                | `FormesController`               | créer / modifier / (dés)archiver / lister / obtenir une forme           |
 | `11-medicaments.http`           | `MedicamentsController`          | créer / modifier / (dés)archiver / lister / obtenir un médicament       |
 | `12-conditionnements.http`      | `ConditionnementsController`     | créer / modifier / (dés)archiver / lister / obtenir un conditionnement  |
+| `13-lots.http`                  | `LotsController`                 | cf. fichier (hors périmètre de ce tableau initial)                      |
+| `14-stocks.http`                | `StocksController`               | cf. fichier (hors périmètre de ce tableau initial)                      |
+| `15-mouvements-stock.http`      | `MouvementsStockController`      | cf. fichier (hors périmètre de ce tableau initial)                      |
+| `16-catalogue-national.http`    | `CatalogueNationalController`    | catalogue PNA (stock agrégé de la PNA centrale) — visible PNA + PRA      |
+| `17-catalogue-inter-pra.http`   | `CatalogueInterPraController`    | disponibilités de toutes les PRA, ventilées par PRA — visible PNA + PRA |
+| `18-catalogue-regional.http`    | `CatalogueRegionalController`    | catalogue régional (stock de la PRA d'une région) — visible par les structures sanitaires de cette région |
 
 **Chaque fichier est autonome** : il contient ses propres requêtes de
 login en haut (section `0a`, `0b`...) et réutilise leurs tokens pour le
@@ -43,6 +49,12 @@ d'environnement séparé à configurer.
    doit aussi être appliquée — elle peuple familles, formes,
    médicaments (Paracétamol, Amoxicilline, Ceftriaxone, etc.) et leurs
    conditionnements de démonstration référencés dans ces fichiers.
+5. Pour `16-catalogue-national.http` à `18-catalogue-regional.http` :
+   les migrations `V022__insert_mock_stock_data.sql` (lots/stocks) et
+   `V024__insert_mock_conditionnements_prix.sql` (prix de démonstration
+   des conditionnements — cf. `db/migration-dev`) doivent aussi être
+   appliquées. Sans `V024`, les conditionnements listés dans les lignes
+   de catalogue seraient vides (aucun prix défini).
 
 ## Comment exécuter une requête
 
@@ -91,3 +103,12 @@ l'exécuter.
   les rôles PNA et PRA ainsi qu'à `GESTIONNAIRE_STRUCTURE` — il n'existe
   donc pas de cas 403 sur les endpoints `GET` de ce module, seulement du
   401 sans authentification.
+- **Feature catalogue** (`16-catalogue-national.http` à
+  `18-catalogue-regional.http`) : ce n'est pas une table, c'est une vue
+  calculée à la volée sur les lignes de stock déjà existantes. Trois
+  règles de visibilité distinctes, chacune avec son propre contrôleur :
+  catalogue national et inter-PRA réservés aux acteurs PNA/PRA (jamais
+  une structure sanitaire, 403 sinon) ; catalogue régional réservé aux
+  structures sanitaires de la région concernée (le paramètre `regionId`
+  n'est utilisable que par un acteur PNA — pour tout autre acteur il est
+  silencieusement ignoré et remplacé par sa propre région).

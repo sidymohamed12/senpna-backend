@@ -1,0 +1,107 @@
+### ══════════════════════════════════════════════════════════════════
+### CatalogueNationalController — /api/catalogue/national
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011, V013, V018, V022 et V024 (db/migration-dev)
+### appliquées — V024 renseigne les prix de démonstration des
+### conditionnements (Paracétamol, Amoxicilline) utilisés par le
+### catalogue.
+###
+### Rappel : le catalogue n'est pas une table, c'est une vue calculée à
+### la volée sur les lignes de stock/lot déjà existantes — visible
+### uniquement par les acteurs PNA et PRA (jamais une structure
+### sanitaire, cf. règle « visible que par les PRA et le PNA »).
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentQuinineId = 62000000-0000-0000-0000-000000000005
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — MAGASINIER_PNA
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — ADMIN_PRA (Thiès) — un acteur PRA peut aussi consulter le catalogue PNA
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — GESTIONNAIRE_STRUCTURE — ne doit PAS pouvoir consulter ce catalogue
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. GET /api/catalogue/national — cas nominal (ADMIN_PNA)
+### Attendu : Paracétamol (fournisseur "Laboratoire Pharma Sénégal" — lot
+### FEFO, cf. lot 64...0001, celui qui expire le plus tôt), Ceftriaxone,
+### Amoxicilline (en rupture — transférée intégralement à Ziguinchor).
+### La Quinine N'APPARAÎT PAS : médicament archivé (actif=false), même si
+### son lot est encore ACTIF et non expiré (cf. V022).
+GET {{baseUrl}}/api/catalogue/national
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 2. GET /api/catalogue/national — un acteur PRA peut aussi consulter ce catalogue
+GET {{baseUrl}}/api/catalogue/national
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 3. GET /api/catalogue/national?recherche=para — recherche par nom/DCI/code
+GET {{baseUrl}}/api/catalogue/national?recherche=para
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 4. GET /api/catalogue/national?ruptureUniquement=true — uniquement les ruptures
+### Attendu : Amoxicilline seule (0 disponible à la vente à la PNA).
+GET {{baseUrl}}/api/catalogue/national?ruptureUniquement=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 5. GET /api/catalogue/national?page=0&size=1 — pagination personnalisée
+GET {{baseUrl}}/api/catalogue/national?page=0&size=1
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/catalogue/national — cas d'erreur, structure sanitaire (403 attendu)
+### Règle « visible que par les PRA et le PNA » — une structure sanitaire
+### n'a accès qu'au catalogue régional de sa propre région.
+GET {{baseUrl}}/api/catalogue/national
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/catalogue/national — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/catalogue/national

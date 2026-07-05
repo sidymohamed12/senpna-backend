@@ -4,6 +4,12 @@
 ### Fichier autonome : contient ses propres logins.
 ### Prérequis : V018__insert_mock_medicament_referentiel.sql (db/migration-dev)
 ### doit être appliquée (médicaments + conditionnements de démonstration).
+###
+### Depuis la feature catalogue, chaque conditionnement peut porter un
+### prix d'achat/vente (prixAchat/prixVente, optionnels et solidaires,
+### prixVente >= prixAchat — cf. migration V023, db/migration). Seuls les
+### conditionnements avec un prix défini apparaissent dans le catalogue
+### (cf. 16-catalogue-national.http et suivants).
 ### ══════════════════════════════════════════════════════════════════
 
 @baseUrl = http://localhost:8080
@@ -89,6 +95,7 @@ Content-Type: application/json
 
 
 ### 1. POST /api/conditionnements — créer un nouveau niveau pour le Sirop (unité de base, aucune existante)
+### Pas de prix : l'unité de base n'est pas commercialisée telle quelle (cf. Conditionnement.aUnPrix()).
 POST {{baseUrl}}/api/conditionnements
 Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
 Content-Type: application/json
@@ -102,7 +109,8 @@ Content-Type: application/json
 }
 
 
-### 2. POST /api/conditionnements — ajoute un niveau "Carton" au Sirop (créé par PHARMACIEN_PNA)
+### 2. POST /api/conditionnements — ajoute un niveau "Carton" au Sirop, avec un prix (créé par PHARMACIEN_PNA)
+### C'est ce prix qui rendra ce conditionnement visible dans le catalogue (cf. feature catalogue).
 POST {{baseUrl}}/api/conditionnements
 Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
 Content-Type: application/json
@@ -112,7 +120,9 @@ Content-Type: application/json
   "nom": "Carton",
   "niveau": 2,
   "quantiteUniteBase": 24,
-  "estUniteBase": false
+  "estUniteBase": false,
+  "prixAchat": 15000,
+  "prixVente": 19000
 }
 
 
@@ -241,6 +251,54 @@ Content-Type: application/json
 }
 
 
+### 11a. POST /api/conditionnements — cas d'erreur, prix de vente sans prix d'achat (400 attendu)
+### Les deux prix doivent être fournis ensemble, ou pas du tout (cf. Conditionnement.validerPrix).
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Prix incomplet",
+  "niveau": 3,
+  "quantiteUniteBase": 10,
+  "estUniteBase": false,
+  "prixVente": 5000
+}
+
+
+### 11b. POST /api/conditionnements — cas d'erreur, prix de vente inférieur au prix d'achat (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Prix incohérent",
+  "niveau": 3,
+  "quantiteUniteBase": 10,
+  "estUniteBase": false,
+  "prixAchat": 5000,
+  "prixVente": 4000
+}
+
+
+### 11c. POST /api/conditionnements — cas d'erreur, prix négatif (400 attendu)
+POST {{baseUrl}}/api/conditionnements
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "medicamentId": "{{medicamentCeftriaxoneId}}",
+  "nom": "Prix négatif",
+  "niveau": 3,
+  "quantiteUniteBase": 10,
+  "estUniteBase": false,
+  "prixAchat": -100,
+  "prixVente": 500
+}
+
+
 ### 12. POST /api/conditionnements — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
 POST {{baseUrl}}/api/conditionnements
 Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
@@ -269,7 +327,7 @@ Content-Type: application/json
 }
 
 
-### 14. PUT /api/conditionnements/{id} — modifier un conditionnement existant (renommer + reconvertir)
+### 14. PUT /api/conditionnements/{id} — modifier un conditionnement existant (renommer + reconvertir + tarifer)
 PUT {{baseUrl}}/api/conditionnements/{{conditionnementAmoxBoiteId}}
 Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
 Content-Type: application/json
@@ -278,7 +336,24 @@ Content-Type: application/json
   "nom": "Boîte de 30",
   "niveau": 2,
   "quantiteUniteBase": 30,
-  "estUniteBase": false
+  "estUniteBase": false,
+  "prixAchat": 4500,
+  "prixVente": 6000
+}
+
+
+### 14a. PUT /api/conditionnements/{id} — cas d'erreur, prix de vente inférieur au prix d'achat (400 attendu)
+PUT {{baseUrl}}/api/conditionnements/{{conditionnementAmoxBoiteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Boîte de 30",
+  "niveau": 2,
+  "quantiteUniteBase": 30,
+  "estUniteBase": false,
+  "prixAchat": 6000,
+  "prixVente": 4500
 }
 
 

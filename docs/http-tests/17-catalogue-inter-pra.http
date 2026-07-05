@@ -1,0 +1,96 @@
+### ══════════════════════════════════════════════════════════════════
+### CatalogueInterPraController — /api/catalogue/inter-pra
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011, V013, V018, V022 et V024 (db/migration-dev)
+### appliquées.
+###
+### Disponibilités de toutes les PRA actives, ventilées PRA par PRA (cf.
+### doc. flows §CAS 3 « Une PRA demande un transfert à une autre PRA ») —
+### visible par tous les acteurs PNA et PRA, quelle que soit leur propre
+### région. La PNA centrale elle-même n'apparaît pas ici : c'est le rôle
+### du catalogue national (cf. 16-catalogue-national.http). PRA-Kaolack
+### (désactivée, cf. V011) n'apparaît jamais.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentSiropId = 62000000-0000-0000-0000-000000000004
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PRA (Dakar) — une PRA peut voir les disponibilités des autres PRA
+# @name loginGestionnairePra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bineta.faye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — GESTIONNAIRE_STRUCTURE — ne doit PAS pouvoir consulter ce catalogue
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. GET /api/catalogue/inter-pra — cas nominal (ADMIN_PNA)
+### Attendu : Paracétamol → PRA-Thiès (5 000 disponibles, fournisseur
+### "Laboratoire Pharma Sénégal") ; Sirop Chlorphénamine → PRA-Dakar
+### (3 500 disponibles après réservation, fournisseur "MedSupply
+### Afrique") ; Amoxicilline → PRA-Ziguinchor (0 disponible, en rupture,
+### réappro déjà en commande à la PNA). Le lot Amoxicilline BLOQUÉ de
+### PRA-Thiès n'apparaît pas (statut non ACTIF).
+GET {{baseUrl}}/api/catalogue/inter-pra
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 2. GET /api/catalogue/inter-pra — une PRA (Dakar) peut voir la disponibilité d'une autre PRA
+### Cas d'usage réel : Dakar cherche qui a de l'Amoxicilline disponible
+### pour organiser un transfert inter-PRA (cf. doc. flows §CAS 3).
+GET {{baseUrl}}/api/catalogue/inter-pra?medicamentId={{medicamentAmoxicillineId}}
+Authorization: Bearer {{loginGestionnairePra.response.body.$.results.accessToken}}
+
+
+### 3. GET /api/catalogue/inter-pra?ruptureUniquement=true — uniquement les ruptures réseau
+### Attendu : Amoxicilline seule (0 sur l'ensemble des PRA actives).
+GET {{baseUrl}}/api/catalogue/inter-pra?ruptureUniquement=true
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 4. GET /api/catalogue/inter-pra?recherche=sirop — recherche par nom
+GET {{baseUrl}}/api/catalogue/inter-pra?recherche=sirop
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 5. GET /api/catalogue/inter-pra?page=0&size=1 — pagination personnalisée
+GET {{baseUrl}}/api/catalogue/inter-pra?page=0&size=1
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/catalogue/inter-pra — cas d'erreur, structure sanitaire (403 attendu)
+GET {{baseUrl}}/api/catalogue/inter-pra
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/catalogue/inter-pra — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/catalogue/inter-pra

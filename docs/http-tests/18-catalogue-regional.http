@@ -1,0 +1,119 @@
+### ══════════════════════════════════════════════════════════════════
+### CatalogueRegionalController — /api/catalogue/regional
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+### Prérequis : V011, V013, V018, V022 et V024 (db/migration-dev)
+### appliquées.
+###
+### Stock de la PRA d'une région, agrégé par médicament — visible
+### uniquement par les structures sanitaires de cette région. Une
+### structure sanitaire ne peut JAMAIS consulter le catalogue d'une
+### autre région que la sienne : le paramètre regionId est ignoré pour
+### elle (et pour une PRA) et remplacé par sa propre région ; seul un
+### acteur PNA peut cibler explicitement une région (supervision).
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+@regionDakarId = 10000000-0000-0000-0000-000000000001
+@regionKaolackId = 10000000-0000-0000-0000-000000000005
+@regionThiesId = 10000000-0000-0000-0000-000000000013
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — ADMIN_PRA (Thiès)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — GESTIONNAIRE_PRA (Dakar)
+# @name loginGestionnairePra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bineta.faye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — GESTIONNAIRE_STRUCTURE (Hôpital de Thiès → région Thiès)
+# @name loginGestionnaireStructure
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "awa.ndiaye@hopital-thies.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. GET /api/catalogue/regional — structure sanitaire, sans regionId → sa propre région (Thiès)
+### Attendu : catalogue de PRA-Thiès — Paracétamol, 5 000 disponibles.
+GET {{baseUrl}}/api/catalogue/regional
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 2. GET /api/catalogue/regional?regionId=... — structure sanitaire, regionId FOURNI mais IGNORÉ
+### Awa Ndiaye est rattachée à l'Hôpital de Thiès : même en demandant la
+### région de Dakar, elle reçoit le catalogue de SA région (Thiès), pas
+### celui de Dakar — c'est le cœur de la règle de portée.
+GET {{baseUrl}}/api/catalogue/regional?regionId={{regionDakarId}}
+Authorization: Bearer {{loginGestionnaireStructure.response.body.$.results.accessToken}}
+
+
+### 3. GET /api/catalogue/regional — acteur PRA (Thiès), sans regionId → sa propre région
+### Un acteur PRA consultant ce catalogue est lui aussi ramené à sa
+### propre région (c'est après tout son propre stock).
+GET {{baseUrl}}/api/catalogue/regional
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 4. GET /api/catalogue/regional — acteur PRA (Dakar), sans regionId → région de Dakar
+### Attendu : catalogue de PRA-Dakar — Sirop Chlorphénamine, 3 500 disponibles.
+GET {{baseUrl}}/api/catalogue/regional
+Authorization: Bearer {{loginGestionnairePra.response.body.$.results.accessToken}}
+
+
+### 5. GET /api/catalogue/regional?regionId=... — acteur PNA, région explicite (Thiès)
+### Seul un acteur national peut cibler n'importe quelle région (supervision).
+GET {{baseUrl}}/api/catalogue/regional?regionId={{regionThiesId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 6. GET /api/catalogue/regional?regionId=... — acteur PNA, région de Dakar
+GET {{baseUrl}}/api/catalogue/regional?regionId={{regionDakarId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 7. GET /api/catalogue/regional — cas d'erreur, acteur PNA SANS regionId (400 attendu)
+### Un acteur national n'a pas de région propre : il doit obligatoirement en préciser une.
+GET {{baseUrl}}/api/catalogue/regional
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 8. GET /api/catalogue/regional?regionId=... — cas d'erreur, région sans PRA active (404 attendu)
+### PRA-Kaolack existe mais est désactivée (cf. V011) → aucune PRA active pour cette région.
+GET {{baseUrl}}/api/catalogue/regional?regionId={{regionKaolackId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 9. GET /api/catalogue/regional — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/catalogue/regional
