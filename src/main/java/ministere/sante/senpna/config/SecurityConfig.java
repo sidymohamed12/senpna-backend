@@ -71,7 +71,10 @@ public class SecurityConfig {
                             .permitAll();
 
                     auth.requestMatchers(HttpMethod.GET,
-                            "/api/actualites/public")
+                            "/api/actualites/public",
+                            "/api/actualites/public/{id}",
+                            "/api/projets/public",
+                            "/api/projets/public/{id}")
                             .permitAll();
 
                     // Healthcheck monitoring
