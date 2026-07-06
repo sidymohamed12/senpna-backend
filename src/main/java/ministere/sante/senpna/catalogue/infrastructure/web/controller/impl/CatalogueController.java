@@ -25,24 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Consultation des catalogues (cf. doc. produit « Catalogue ») — trois
- * vues calculées, jamais persistées, sur les lignes de stock déjà
- * existantes :
- *
- * <pre>
- * GET /api/catalogue/national?recherche=&ruptureUniquement=&page=&size=
- *     → stock de la PNA centrale, agrégé par médicament — visible par les PRA et la PNA.
- *
- * GET /api/catalogue/inter-pra?recherche=&medicamentId=&ruptureUniquement=&page=&size=
- *     → disponibilités de toutes les PRA, ventilées PRA par PRA — visible par toutes les PRA et la PNA.
- *
- * GET /api/catalogue/regional?regionId=&recherche=&ruptureUniquement=&page=&size=
- *     → stock de la PRA d'une région, agrégé par médicament — visible uniquement par les
- *       structures sanitaires de cette région (regionId n'est utilisable que par un acteur PNA ;
- *       pour toute autre personne, sa propre région est utilisée quel que soit ce paramètre).
- * </pre>
- */
 @RestController
 public class CatalogueController implements ICatalogueController {
 

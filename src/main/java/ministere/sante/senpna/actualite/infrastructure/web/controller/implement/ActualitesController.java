@@ -1,6 +1,4 @@
-package ministere.sante.senpna.actualite.infrastructure.web.controller;
-
-import jakarta.validation.Valid;
+package ministere.sante.senpna.actualite.infrastructure.web.controller.implement;
 
 import ministere.sante.senpna.actualite.application.facade.ActualiteFacade;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.ActualiteDetail;
@@ -14,6 +12,7 @@ import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.MediaIn
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.PublierActualiteCommand;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.RemettreEnBrouillonActualiteCommand;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.UpdateActualiteCommand;
+import ministere.sante.senpna.actualite.infrastructure.web.controller.IActualitesController;
 import ministere.sante.senpna.actualite.infrastructure.web.dto.request.CreateActualiteRequest;
 import ministere.sante.senpna.actualite.infrastructure.web.dto.request.MediaRequest;
 import ministere.sante.senpna.actualite.infrastructure.web.dto.request.UpdateActualiteRequest;
@@ -27,36 +26,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Gestion des actualités (vie associative, projets, partenariats...).
- *
- * <pre>
- * POST   /api/actualites                    {categorie, titre, description?, medias?, tags?}
- * PUT    /api/actualites/{id}                {categorie, titre, description?, medias?, tags?}
- * PATCH  /api/actualites/{id}/publier
- * PATCH  /api/actualites/{id}/desactiver
- * PATCH  /api/actualites/{id}/brouillon
- * GET    /api/actualites/{id}
- * GET    /api/actualites?q=&categorie=&statut=&page=&size=&sortBy=&sortDirection=
- * </pre>
- */
 @RestController
-@RequestMapping("/api/actualites")
-public class ActualitesController {
+public class ActualitesController implements IActualitesController {
 
         private final ActualiteFacade actualiteFacade;
 
@@ -64,9 +41,9 @@ public class ActualitesController {
                 this.actualiteFacade = actualiteFacade;
         }
 
-        @PostMapping
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateActualiteRequest request) {
+        public ResponseEntity<Map<String, Object>> creer(CreateActualiteRequest request) {
                 ActualiteDetail result = actualiteFacade.creerActualite(new CreateActualiteCommand(
                                 currentUserId(), request.categorie(), request.titre(), request.description(),
                                 toMediaInputs(request.medias()), request.tags()));
@@ -76,10 +53,9 @@ public class ActualitesController {
                                                 "Actualité créée avec succès"));
         }
 
-        @PutMapping("/{id}")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-                        @Valid @RequestBody UpdateActualiteRequest request) {
+        public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateActualiteRequest request) {
                 ActualiteDetail result = actualiteFacade.modifierActualite(new UpdateActualiteCommand(
                                 id, request.categorie(), request.titre(), request.description(),
                                 toMediaInputs(request.medias()), request.tags()));
@@ -88,57 +64,52 @@ public class ActualitesController {
                                 "Actualité modifiée avec succès"));
         }
 
-        @PatchMapping("/{id}/publier")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> publier(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> publier(UUID id) {
                 ActualiteDetail result = actualiteFacade.publierActualite(new PublierActualiteCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_PUBLIEE",
                                 "Actualité publiée avec succès"));
         }
 
-        @PatchMapping("/{id}/desactiver")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> desactiver(UUID id) {
                 ActualiteDetail result = actualiteFacade.desactiverActualite(new DesactiverActualiteCommand(id));
                 return ResponseEntity
                                 .ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_DESACTIVEE",
                                                 "Actualité désactivée avec succès"));
         }
 
-        @PatchMapping("/{id}/brouillon")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> remettreEnBrouillon(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> remettreEnBrouillon(UUID id) {
                 ActualiteDetail result = actualiteFacade
                                 .remettreEnBrouillonActualite(new RemettreEnBrouillonActualiteCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_BROUILLON",
                                 "Actualité remise en brouillon"));
         }
 
-        @GetMapping("/{id}")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
                 ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
                                 "Actualité récupérée"));
         }
 
-        @GetMapping("/public/{id}")
-        public ResponseEntity<Map<String, Object>> obtenirPublic(@PathVariable UUID id) {
+        @Override
+        public ResponseEntity<Map<String, Object>> obtenirPublic(UUID id) {
                 ActualiteDetail result = actualiteFacade.obtenirActualitePublique(new GetActualiteQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
                                 "Actualité récupérée"));
         }
 
-        @GetMapping
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) String categorie,
-                        @RequestParam(required = false) String statut,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+                        String q, String categorie, String statut, Integer page, Integer size,
+                        String sortBy, String sortDirection) {
 
                 ActualitePage result = actualiteFacade.listerActualites(
                                 new ListActualitesQuery(q, categorie, statut, page, size, sortBy, sortDirection));
@@ -155,14 +126,10 @@ public class ActualitesController {
                                 result.page() >= result.totalPages() - 1));
         }
 
-        @GetMapping("/public")
+        @Override
         public ResponseEntity<Map<String, Object>> listerPublic(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) String categorie,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+                        String q, String categorie, Integer page, Integer size,
+                        String sortBy, String sortDirection) {
 
                 ActualitePage result = actualiteFacade.listerActualites(
                                 new ListActualitesQuery(q, categorie, "PUBLIE", page, size, sortBy, sortDirection));
