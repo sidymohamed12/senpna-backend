@@ -17,7 +17,7 @@ public class Projet extends AggregateRoot<ProjetId> {
     private static final int DESCRIPTION_MAX_LENGTH = 700;
     private static final int IMAGE_URL_MAX_LENGTH = 1000;
     private static final int LISTE_VALEURS_MAX = 10;
-    private static final int VALEUR_MAX_LENGTH = 200;
+    private static final int VALEUR_MAX_LENGTH = 400;
 
     private CategorieProjet categorie;
     private String nom;

@@ -115,7 +115,15 @@ public class ActualitesController {
         }
 
         @GetMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+                ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
+                                "Actualité récupérée"));
+        }
+
+        @GetMapping("/public/{id}")
+        public ResponseEntity<Map<String, Object>> obtenirPublic(@PathVariable UUID id) {
                 ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
                                 "Actualité récupérée"));

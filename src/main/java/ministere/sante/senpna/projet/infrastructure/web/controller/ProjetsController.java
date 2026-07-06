@@ -116,14 +116,22 @@ public class ProjetsController {
         }
 
         @GetMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
                 ProjetDetail result = projetFacade.obtenirProjet(new GetProjetQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PROJET_FOUND",
                                 "Projet récupéré"));
         }
 
+        @GetMapping("/public/{id}")
+        public ResponseEntity<Map<String, Object>> obtenirPublic(@PathVariable UUID id) {
+                ProjetDetail result = projetFacade.obtenirProjet(new GetProjetQuery(id));
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PROJET_FOUND",
+                                "Projet récupéré"));
+        }
+
         @GetMapping
-        @PreAuthorize("isAuthenticated()")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> lister(
                         @RequestParam(required = false) String q,
                         @RequestParam(required = false) String categorie,
