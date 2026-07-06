@@ -1,6 +1,5 @@
-package ministere.sante.senpna.utilisateurs.infrastructure.web.controller;
+package ministere.sante.senpna.utilisateurs.infrastructure.web.controller.implement;
 
-import jakarta.validation.Valid;
 import ministere.sante.senpna.shared.infrastructure.security.CurrentUser;
 import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 import ministere.sante.senpna.utilisateurs.application.facade.UserManagementFacade;
@@ -16,6 +15,7 @@ import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.RoleSumma
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UpdateUserCommand;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserPage;
+import ministere.sante.senpna.utilisateurs.infrastructure.web.controller.IUsersController;
 import ministere.sante.senpna.utilisateurs.infrastructure.web.dto.request.AssignRoleRequest;
 import ministere.sante.senpna.utilisateurs.infrastructure.web.dto.request.CreateUserRequest;
 import ministere.sante.senpna.utilisateurs.infrastructure.web.dto.request.UpdateUserRequest;
@@ -28,15 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -44,42 +35,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Endpoints d'administration des comptes utilisateurs : création,
- * consultation, modification, activation/désactivation et gestion des
- * rôles (RBAC).
- *
- * <p>
- * Réservé aux rôles {@code ADMIN_PNA} et {@code ADMIN_PRA} (cf. section 4
- * du modèle métier — "toutes les fonctionnalités PNA/PRA, gestion des
- * comptes, gestion des rôles").
- * </p>
- *
- * <p>
- * <strong>Hiérarchie de gestion</strong> (cf. {@code UserHierarchyGuard}) :
- * un {@code ADMIN_PRA} ne peut ni créer, modifier, activer, désactiver ou
- * changer les rôles d'un compte possédant un rôle national (PNA), ni d'un
- * autre compte {@code ADMIN_PRA} — y compris d'une région différente. Seul
- * un rôle national (PNA) a une portée illimitée sur l'ensemble des comptes.
- * </p>
- *
- * <h3>Routes</h3>
- * 
- * <pre>
- * POST   /api/users                     {nom,prenom,email,telephone?,roleIds}
- * GET    /api/users?q=&actif=&roleId=&page=&size=&sortBy=&sortDirection=
- * GET    /api/users/{id}
- * PUT    /api/users/{id}                 {nom,prenom,telephone?}
- * PATCH  /api/users/{id}/activer
- * PATCH  /api/users/{id}/desactiver
- * POST   /api/users/{id}/roles           {roleId}
- * DELETE /api/users/{id}/roles/{roleId}
- * </pre>
- */
 @RestController
-@RequestMapping("/api/users")
 @PreAuthorize("hasAnyRole('ADMIN_PNA','ADMIN_PRA')")
-public class UsersController {
+public class UsersController implements IUsersController {
 
         private final UserManagementFacade userManagementFacade;
 
@@ -87,8 +45,8 @@ public class UsersController {
                 this.userManagementFacade = userManagementFacade;
         }
 
-        @PostMapping
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateUserRequest request) {
+        @Override
+        public ResponseEntity<Map<String, Object>> creer(CreateUserRequest request) {
                 CreatedUser result = userManagementFacade.creer(new CreateUserCommand(
                                 currentUserId(), request.nom(), request.prenom(), request.email(),
                                 request.telephone(), request.roleIds(), request.entrepotId()));
@@ -101,15 +59,10 @@ public class UsersController {
                                                 "Utilisateur créé avec succès"));
         }
 
-        @GetMapping
+        @Override
         public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) Boolean actif,
-                        @RequestParam(required = false) UUID roleId,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+                        String q, Boolean actif, UUID roleId, Integer page, Integer size,
+                        String sortBy, String sortDirection) {
 
                 UserPage result = userManagementFacade.lister(
                                 new ListUsersQuery(q, actif, roleId, page, size, sortBy, sortDirection));
@@ -126,17 +79,16 @@ public class UsersController {
                                 result.page() >= result.totalPages() - 1));
         }
 
-        @GetMapping("/{id}")
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        @Override
+        public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
                 UserDetail result = userManagementFacade.obtenir(new GetUserQuery(id));
                 return ResponseEntity.ok(
                                 RestResponse.response(HttpStatus.OK, toResponse(result), "USER_FOUND",
                                                 "Utilisateur récupéré"));
         }
 
-        @PutMapping("/{id}")
-        public ResponseEntity<Map<String, Object>> modifier(
-                        @PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
+        @Override
+        public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateUserRequest request) {
                 UserDetail result = userManagementFacade.modifier(
                                 new UpdateUserCommand(id, currentUserId(), request.nom(), request.prenom(),
                                                 request.telephone()));
@@ -144,31 +96,30 @@ public class UsersController {
                                 "Utilisateur modifié avec succès"));
         }
 
-        @PatchMapping("/{id}/activer")
-        public ResponseEntity<Map<String, Object>> activer(@PathVariable UUID id) {
+        @Override
+        public ResponseEntity<Map<String, Object>> activer(UUID id) {
                 UserDetail result = userManagementFacade.activer(new ActivateUserCommand(id, currentUserId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "USER_ACTIVATED",
                                 "Utilisateur activé avec succès"));
         }
 
-        @PatchMapping("/{id}/desactiver")
-        public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
+        @Override
+        public ResponseEntity<Map<String, Object>> desactiver(UUID id) {
                 UserDetail result = userManagementFacade.desactiver(new DeactivateUserCommand(id, currentUserId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "USER_DEACTIVATED",
                                 "Utilisateur désactivé avec succès"));
         }
 
-        @PostMapping("/{id}/roles")
-        public ResponseEntity<Map<String, Object>> assignerRole(
-                        @PathVariable UUID id, @Valid @RequestBody AssignRoleRequest request) {
+        @Override
+        public ResponseEntity<Map<String, Object>> assignerRole(UUID id, AssignRoleRequest request) {
                 UserDetail result = userManagementFacade.assignerRole(
                                 new AssignRoleCommand(id, currentUserId(), request.roleId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ROLE_ASSIGNED",
                                 "Rôle attribué avec succès"));
         }
 
-        @DeleteMapping("/{id}/roles/{roleId}")
-        public ResponseEntity<Map<String, Object>> retirerRole(@PathVariable UUID id, @PathVariable UUID roleId) {
+        @Override
+        public ResponseEntity<Map<String, Object>> retirerRole(UUID id, UUID roleId) {
                 UserDetail result = userManagementFacade.retirerRole(
                                 new RevokeRoleCommand(id, currentUserId(), roleId));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ROLE_REVOKED",
