@@ -6,11 +6,13 @@ import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.Catalog
 import ministere.sante.senpna.catalogue.domain.command.CatalogueCommands.ConsulterCatalogueRegionalQuery;
 import ministere.sante.senpna.catalogue.domain.exception.AucunePraPourRegionException;
 import ministere.sante.senpna.catalogue.domain.port.in.ConsulterCatalogueRegionalUseCase;
+import ministere.sante.senpna.config.AppProperties;
 import ministere.sante.senpna.shared.domain.port.out.EntrepotQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.MedicamentQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.StockAgregeQueryPort;
 import ministere.sante.senpna.shared.domain.projection.EntrepotProjection;
 import ministere.sante.senpna.shared.domain.projection.StockAgregeProjection;
+import ministere.sante.senpna.shared.infrastructure.cache.JsonCacheSupport;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,33 +44,59 @@ import java.util.UUID;
 @Service
 public class ConsulterCatalogueRegionalUseCaseImpl implements ConsulterCatalogueRegionalUseCase {
 
+    private static final String PREFIX = "catalogue:regional:";
+
     private final CatalogueAccessGuard catalogueAccessGuard;
     private final EntrepotQueryPort entrepotQueryPort;
     private final StockAgregeQueryPort stockAgregeQueryPort;
     private final MedicamentQueryPort medicamentQueryPort;
     private final CatalogueEntryAssembler catalogueEntryAssembler;
+    private final JsonCacheSupport cache;
+    private final AppProperties appProperties;
 
     public ConsulterCatalogueRegionalUseCaseImpl(CatalogueAccessGuard catalogueAccessGuard,
             EntrepotQueryPort entrepotQueryPort, StockAgregeQueryPort stockAgregeQueryPort,
-            MedicamentQueryPort medicamentQueryPort, CatalogueEntryAssembler catalogueEntryAssembler) {
+            MedicamentQueryPort medicamentQueryPort, CatalogueEntryAssembler catalogueEntryAssembler,
+            JsonCacheSupport cache, AppProperties appProperties) {
         this.catalogueAccessGuard = catalogueAccessGuard;
         this.entrepotQueryPort = entrepotQueryPort;
         this.stockAgregeQueryPort = stockAgregeQueryPort;
         this.medicamentQueryPort = medicamentQueryPort;
         this.catalogueEntryAssembler = catalogueEntryAssembler;
+        this.cache = cache;
+        this.appProperties = appProperties;
     }
 
     @Override
     @Transactional(readOnly = true)
     public CataloguePage consulter(ConsulterCatalogueRegionalQuery query) {
+        // La région effective est résolue AVANT toute lecture de cache : c'est
+        // elle (jamais la région demandée) qui doit segmenter la clé, sous
+        // peine de fuite du catalogue d'une région vers une autre (cf.
+        // CatalogueAccessGuard : la région demandée est ignorée pour tout
+        // acteur non national).
         UUID regionEffective = catalogueAccessGuard.resoudreRegionPourCatalogueRegional(query.regionId());
 
+        String cleCache = cleCache(regionEffective, query);
+        return cache.get(cleCache, CataloguePage.class)
+                .orElseGet(() -> assembler(regionEffective, query, cleCache));
+    }
+
+    private CataloguePage assembler(UUID regionEffective, ConsulterCatalogueRegionalQuery query, String cleCache) {
         List<EntrepotProjection> pras = entrepotQueryPort.findPrasActivesParRegion(regionEffective);
         EntrepotProjection pra = pras.stream().findFirst().orElseThrow(AucunePraPourRegionException::new);
 
         List<StockAgregeProjection> lignes = stockAgregeQueryPort.rechercherParEntrepot(pra.id());
 
-        return catalogueEntryAssembler.assembler(lignes, medicamentQueryPort, query.recherche(),
+        CataloguePage page = catalogueEntryAssembler.assembler(lignes, medicamentQueryPort, query.recherche(),
                 query.ruptureUniquement(), query.page(), query.size());
+
+        cache.put(cleCache, page, appProperties.cache().catalogueTtl());
+        return page;
+    }
+
+    private String cleCache(UUID regionEffective, ConsulterCatalogueRegionalQuery query) {
+        return PREFIX + regionEffective + ":" + query.recherche() + ":" + query.ruptureUniquement() + ":"
+                + query.page() + ":" + query.size();
     }
 }

@@ -16,6 +16,9 @@ import ministere.sante.senpna.shared.domain.projection.EntrepotProjection;
 import ministere.sante.senpna.shared.domain.projection.FournisseurProjection;
 import ministere.sante.senpna.shared.domain.projection.MedicamentProjection;
 import ministere.sante.senpna.shared.domain.projection.StockAgregeProjection;
+import ministere.sante.senpna.config.AppProperties;
+import ministere.sante.senpna.shared.domain.port.out.CachePort;
+import ministere.sante.senpna.shared.infrastructure.cache.JsonCacheSupport;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +56,8 @@ class ConsulterCatalogueNationalUseCaseImplTest {
     FournisseurCachePort fournisseurCachePort;
     @Mock
     ConditionnementQueryPort conditionnementQueryPort;
+    @Mock
+    CachePort cachePort;
 
     CatalogueEntryAssembler catalogueEntryAssembler;
 
@@ -61,8 +66,11 @@ class ConsulterCatalogueNationalUseCaseImplTest {
     @BeforeEach
     void setUp() {
         catalogueEntryAssembler = new CatalogueEntryAssembler(fournisseurCachePort, conditionnementQueryPort);
+        JsonCacheSupport cache = new JsonCacheSupport(cachePort, new com.fasterxml.jackson.databind.ObjectMapper());
+        AppProperties appProperties = new AppProperties(null, null, null, null, null,
+                new AppProperties.CacheProperties(null, null, null, null, null, java.time.Duration.ofMinutes(1)));
         sut = new ConsulterCatalogueNationalUseCaseImpl(catalogueAccessGuard, entrepotQueryPort,
-                stockAgregeQueryPort, medicamentQueryPort, catalogueEntryAssembler);
+                stockAgregeQueryPort, medicamentQueryPort, catalogueEntryAssembler, cache, appProperties);
     }
 
     @Test
