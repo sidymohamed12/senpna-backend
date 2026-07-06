@@ -124,7 +124,7 @@ public class ActualitesController {
 
         @GetMapping("/public/{id}")
         public ResponseEntity<Map<String, Object>> obtenirPublic(@PathVariable UUID id) {
-                ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
+                ActualiteDetail result = actualiteFacade.obtenirActualitePublique(new GetActualiteQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
                                 "Actualité récupérée"));
         }

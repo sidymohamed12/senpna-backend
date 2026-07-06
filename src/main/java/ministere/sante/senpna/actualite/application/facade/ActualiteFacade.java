@@ -11,6 +11,7 @@ import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.Remettr
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.UpdateActualiteCommand;
 import ministere.sante.senpna.actualite.domain.port.in.CreateActualiteUseCase;
 import ministere.sante.senpna.actualite.domain.port.in.DesactiverActualiteUseCase;
+import ministere.sante.senpna.actualite.domain.port.in.GetActualitePubliqueUseCase;
 import ministere.sante.senpna.actualite.domain.port.in.GetActualiteUseCase;
 import ministere.sante.senpna.actualite.domain.port.in.ListActualitesUseCase;
 import ministere.sante.senpna.actualite.domain.port.in.PublierActualiteUseCase;
@@ -28,6 +29,7 @@ public class ActualiteFacade {
     private final DesactiverActualiteUseCase desactiverActualiteUseCase;
     private final RemettreEnBrouillonActualiteUseCase remettreEnBrouillonActualiteUseCase;
     private final GetActualiteUseCase getActualiteUseCase;
+    private final GetActualitePubliqueUseCase getActualitePubliqueUseCase;
     private final ListActualitesUseCase listActualitesUseCase;
 
     public ActualiteFacade(
@@ -37,6 +39,7 @@ public class ActualiteFacade {
             DesactiverActualiteUseCase desactiverActualiteUseCase,
             RemettreEnBrouillonActualiteUseCase remettreEnBrouillonActualiteUseCase,
             GetActualiteUseCase getActualiteUseCase,
+            GetActualitePubliqueUseCase getActualitePubliqueUseCase,
             ListActualitesUseCase listActualitesUseCase) {
         this.createActualiteUseCase = createActualiteUseCase;
         this.updateActualiteUseCase = updateActualiteUseCase;
@@ -44,6 +47,7 @@ public class ActualiteFacade {
         this.desactiverActualiteUseCase = desactiverActualiteUseCase;
         this.remettreEnBrouillonActualiteUseCase = remettreEnBrouillonActualiteUseCase;
         this.getActualiteUseCase = getActualiteUseCase;
+        this.getActualitePubliqueUseCase = getActualitePubliqueUseCase;
         this.listActualitesUseCase = listActualitesUseCase;
     }
 
@@ -69,6 +73,10 @@ public class ActualiteFacade {
 
     public ActualiteDetail obtenirActualite(GetActualiteQuery query) {
         return getActualiteUseCase.obtenir(query);
+    }
+
+    public ActualiteDetail obtenirActualitePublique(GetActualiteQuery query) {
+        return getActualitePubliqueUseCase.obtenirPublique(query);
     }
 
     public ActualitePage listerActualites(ListActualitesQuery query) {
