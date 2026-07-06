@@ -1,6 +1,4 @@
-package ministere.sante.senpna.fournisseur.infrastructure.web.controller;
-
-import jakarta.validation.Valid;
+package ministere.sante.senpna.fournisseur.infrastructure.web.controller.implemment;
 
 import ministere.sante.senpna.fournisseur.application.facade.FournisseurFacade;
 import ministere.sante.senpna.fournisseur.domain.command.FournisseurCommands.ActivateFournisseurCommand;
@@ -11,6 +9,7 @@ import ministere.sante.senpna.fournisseur.domain.command.FournisseurCommands.Fou
 import ministere.sante.senpna.fournisseur.domain.command.FournisseurCommands.GetFournisseurQuery;
 import ministere.sante.senpna.fournisseur.domain.command.FournisseurCommands.ListFournisseursQuery;
 import ministere.sante.senpna.fournisseur.domain.command.FournisseurCommands.UpdateFournisseurCommand;
+import ministere.sante.senpna.fournisseur.infrastructure.web.controller.IFournisseursController;
 import ministere.sante.senpna.fournisseur.infrastructure.web.dto.request.CreateFournisseurRequest;
 import ministere.sante.senpna.fournisseur.infrastructure.web.dto.request.UpdateFournisseurRequest;
 import ministere.sante.senpna.fournisseur.infrastructure.web.dto.response.FournisseurResponse;
@@ -19,36 +18,13 @@ import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Gestion des fournisseurs de médicaments — CRUD (cf. doc. métier §5). La
- * PNA est seule habilitée à gérer les fournisseurs (les achats
- * fournisseurs ne sont réalisés que par la PNA).
- *
- * <pre>
- * POST   /api/fournisseurs                  {nom, adresse?, telephone?, email?, contactPrincipal?}
- * PUT    /api/fournisseurs/{id}              {nom, adresse?, telephone?, email?, contactPrincipal?}
- * PATCH  /api/fournisseurs/{id}/activer
- * PATCH  /api/fournisseurs/{id}/desactiver
- * GET    /api/fournisseurs/{id}
- * GET    /api/fournisseurs?q=&actif=&page=&size=&sortBy=&sortDirection=
- * </pre>
- */
 @RestController
-@RequestMapping("/api/fournisseurs")
-public class FournisseursController {
+public class FournisseursController implements IFournisseursController {
 
         private final FournisseurFacade fournisseurFacade;
 
@@ -56,9 +32,9 @@ public class FournisseursController {
                 this.fournisseurFacade = fournisseurFacade;
         }
 
-        @PostMapping
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateFournisseurRequest request) {
+        public ResponseEntity<Map<String, Object>> creer(CreateFournisseurRequest request) {
                 FournisseurDetail result = fournisseurFacade.creerFournisseur(new CreateFournisseurCommand(
                                 request.nom(), request.adresse(), request.telephone(), request.email(),
                                 request.contactPrincipal()));
@@ -68,10 +44,9 @@ public class FournisseursController {
                                                 "Fournisseur créé avec succès"));
         }
 
-        @PutMapping("/{id}")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-                        @Valid @RequestBody UpdateFournisseurRequest request) {
+        public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateFournisseurRequest request) {
                 FournisseurDetail result = fournisseurFacade.modifierFournisseur(new UpdateFournisseurCommand(
                                 id, request.nom(), request.adresse(), request.telephone(), request.email(),
                                 request.contactPrincipal()));
@@ -80,18 +55,18 @@ public class FournisseursController {
                                 "Fournisseur modifié avec succès"));
         }
 
-        @PatchMapping("/{id}/activer")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> activer(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> activer(UUID id) {
                 FournisseurDetail result = fournisseurFacade.activerFournisseur(new ActivateFournisseurCommand(id));
                 return ResponseEntity
                                 .ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FOURNISSEUR_ACTIVATED",
                                                 "Fournisseur activé avec succès"));
         }
 
-        @PatchMapping("/{id}/desactiver")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-        public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> desactiver(UUID id) {
                 FournisseurDetail result = fournisseurFacade
                                 .desactiverFournisseur(new DeactivateFournisseurCommand(id));
                 return ResponseEntity
@@ -99,23 +74,18 @@ public class FournisseursController {
                                                 "Fournisseur désactivé avec succès"));
         }
 
-        @GetMapping("/{id}")
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA')")
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
                 FournisseurDetail result = fournisseurFacade.obtenirFournisseur(new GetFournisseurQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FOURNISSEUR_FOUND",
                                 "Fournisseur récupéré"));
         }
 
-        @GetMapping
+        @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA')")
         public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) Boolean actif,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+                        String q, Boolean actif, Integer page, Integer size, String sortBy, String sortDirection) {
 
                 FournisseurPage result = fournisseurFacade.listerFournisseurs(
                                 new ListFournisseursQuery(q, actif, page, size, sortBy, sortDirection));
