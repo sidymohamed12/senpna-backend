@@ -160,3 +160,8 @@ Content-Type: application/json
   "resetToken": "{{verify.response.body.$.results.resetToken}}",
   "nouveauMotDePasse": "court"
 }
+
+### 16. POST /api/auth/logout DÉCONNEXION ─────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{login.response.body.$.results.accessToken}}
