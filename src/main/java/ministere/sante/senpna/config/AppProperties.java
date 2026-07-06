@@ -86,6 +86,8 @@ public record AppProperties(
          *                      ({@code catalogue:national:*},
          *                      {@code catalogue:regional:*},
          *                      {@code catalogue:inter-pra:*})
+         * @param projetTtl     TTL du cache {@code projet:id:<id>}
+         * @param actualiteTtl  TTL du cache {@code actualite:id:<id>}
          */
         public record CacheProperties(
                         @DefaultValue("PT10M") Duration medicamentTtl,
@@ -93,6 +95,8 @@ public record AppProperties(
                         @DefaultValue("PT2M") Duration stockTtl,
                         @DefaultValue("PT6H") Duration mouvementTtl,
                         @DefaultValue("PT5M") Duration userTtl,
-                        @DefaultValue("PT1M") Duration catalogueTtl) {
+                        @DefaultValue("PT1M") Duration catalogueTtl,
+                        @DefaultValue("PT5M") Duration projetTtl,
+                        @DefaultValue("PT5M") Duration actualiteTtl) {
         }
 }

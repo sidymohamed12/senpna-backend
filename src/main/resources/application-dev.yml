@@ -158,7 +158,6 @@ app:
     from: ${MAIL_FROM:no-reply@senpharmaflow.gouv.sn}
     from-name: ${MAIL_FROM_NAME:SEN PharmaFlow}
   # Cache Redis clé/valeur (cache-aside, à la demande — cf. AppProperties.CacheProperties).
-  # Ne concerne pas régions/fournisseurs/formes/familles, préchargés en mémoire au démarrage.
   cache:
     medicament-ttl: PT10M
     lot-ttl: PT5M
@@ -166,6 +165,8 @@ app:
     mouvement-ttl: PT6H
     user-ttl: PT5M
     catalogue-ttl: PT1M
+    projet-ttl: PT5M
+    actualite-ttl: PT5M
 
 application:
   title: SEN PharmaFlow
