@@ -1,11 +1,13 @@
 package ministere.sante.senpna.auth.infrastructure.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.auth.application.facade.AuthFacade;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ForgotPasswordCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginResult;
+import ministere.sante.senpna.auth.domain.command.AuthCommands.LogoutCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.MeQuery;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.RefreshTokenCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ResendOtpCommand;
@@ -15,6 +17,7 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpResult;
 import ministere.sante.senpna.auth.infrastructure.web.dto.request.ForgotPasswordRequest;
 import ministere.sante.senpna.auth.infrastructure.web.dto.request.LoginRequest;
+import ministere.sante.senpna.auth.infrastructure.web.dto.request.LogoutRequest;
 import ministere.sante.senpna.auth.infrastructure.web.dto.request.RefreshTokenRequest;
 import ministere.sante.senpna.auth.infrastructure.web.dto.request.ResendOtpRequest;
 import ministere.sante.senpna.auth.infrastructure.web.dto.request.ResetPasswordRequest;
@@ -58,7 +61,9 @@ import java.util.Map;
  * <h3>Route authentifiée</h3>
  * 
  * <pre>
- * GET /api/auth/me → profil de l'utilisateur courant (déduit du JWT)
+ * GET  /api/auth/me     → profil de l'utilisateur courant (déduit du JWT)
+ * POST /api/auth/logout → révoque immédiatement l'access token courant
+ *                         (et le refresh token si transmis)
  * </pre>
  */
 @RestController
@@ -136,5 +141,29 @@ public class AuthController {
                 summary.structureSanitaireId());
 
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, body, "ME_SUCCESS", "Profil récupéré"));
+    }
+
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(
+            HttpServletRequest httpRequest,
+            @RequestBody(required = false) LogoutRequest request) {
+
+        String accessToken = extractBearerToken(httpRequest);
+        String refreshToken = request != null ? request.refreshToken() : null;
+
+        authFacade.logout(new LogoutCommand(accessToken, refreshToken));
+
+        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, null, "LOGOUT_SUCCESS",
+                "Déconnexion réussie"));
+    }
+
+    private String extractBearerToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith(BEARER_PREFIX)) {
+            return header.substring(BEARER_PREFIX.length());
+        }
+        return null;
     }
 }

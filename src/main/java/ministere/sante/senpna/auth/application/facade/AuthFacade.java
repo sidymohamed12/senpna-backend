@@ -4,6 +4,7 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ForgotPasswordCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.LoginResult;
+import ministere.sante.senpna.auth.domain.command.AuthCommands.LogoutCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.MeQuery;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.RefreshTokenCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.ResendOtpCommand;
@@ -13,6 +14,7 @@ import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpCommand;
 import ministere.sante.senpna.auth.domain.command.AuthCommands.VerifyOtpResult;
 import ministere.sante.senpna.auth.domain.port.in.ForgotPasswordUseCase;
 import ministere.sante.senpna.auth.domain.port.in.LoginUseCase;
+import ministere.sante.senpna.auth.domain.port.in.LogoutUseCase;
 import ministere.sante.senpna.auth.domain.port.in.MeUseCase;
 import ministere.sante.senpna.auth.domain.port.in.RefreshTokenUseCase;
 import ministere.sante.senpna.auth.domain.port.in.ResendOtpUseCase;
@@ -31,6 +33,7 @@ public class AuthFacade {
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final MeUseCase meUseCase;
+    private final LogoutUseCase logoutUseCase;
 
     public AuthFacade(
             LoginUseCase loginUseCase,
@@ -39,7 +42,8 @@ public class AuthFacade {
             VerifyOtpUseCase verifyOtpUseCase,
             ResetPasswordUseCase resetPasswordUseCase,
             RefreshTokenUseCase refreshTokenUseCase,
-            MeUseCase meUseCase) {
+            MeUseCase meUseCase,
+            LogoutUseCase logoutUseCase) {
         this.loginUseCase = loginUseCase;
         this.forgotPasswordUseCase = forgotPasswordUseCase;
         this.resendOtpUseCase = resendOtpUseCase;
@@ -47,6 +51,7 @@ public class AuthFacade {
         this.resetPasswordUseCase = resetPasswordUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.meUseCase = meUseCase;
+        this.logoutUseCase = logoutUseCase;
     }
 
     public LoginResult login(LoginCommand command) {
@@ -75,5 +80,9 @@ public class AuthFacade {
 
     public UserSummary me(MeQuery query) {
         return meUseCase.me(query);
+    }
+
+    public void logout(LogoutCommand command) {
+        logoutUseCase.logout(command);
     }
 }

@@ -28,6 +28,9 @@ public final class AuthCommands {
     public record RefreshTokenCommand(String refreshToken) {
     }
 
+    public record LogoutCommand(String accessToken, String refreshToken) {
+    }
+
     public record MeQuery(String email) {
     }
 

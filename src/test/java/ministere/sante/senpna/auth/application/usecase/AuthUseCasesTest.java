@@ -466,4 +466,50 @@ class AuthUseCasesTest {
             verifyNoInteractions(userAffectationResolver);
         }
     }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // LogoutUseCaseImpl
+    // ══════════════════════════════════════════════════════════════════════
+
+    @Nested
+    @ExtendWith(MockitoExtension.class)
+    @DisplayName("LogoutUseCaseImpl")
+    class LogoutTest {
+
+        private static final String ACCESS = "access-token";
+        private static final String REFRESH = "refresh-token";
+
+        @Mock
+        TokenPort tokenPort;
+        @InjectMocks
+        LogoutUseCaseImpl sut;
+
+        @Test
+        @DisplayName("révoque l'access token et le refresh token fournis")
+        void logout_revoque_access_et_refresh() {
+            sut.logout(new LogoutCommand(ACCESS, REFRESH));
+
+            verify(tokenPort).invalider(ACCESS);
+            verify(tokenPort).invalider(REFRESH);
+        }
+
+        @Test
+        @DisplayName("refresh token absent — ne révoque que l'access token")
+        void logout_sans_refresh_token() {
+            sut.logout(new LogoutCommand(ACCESS, null));
+
+            verify(tokenPort).invalider(ACCESS);
+            verify(tokenPort, times(1)).invalider(anyString());
+        }
+
+        @Test
+        @DisplayName("access token malformé — n'échoue pas, révoque quand même le refresh token")
+        void logout_access_token_invalide_ne_leve_pas() {
+            doThrow(new JwtException("token malformé")).when(tokenPort).invalider(ACCESS);
+
+            sut.logout(new LogoutCommand(ACCESS, REFRESH));
+
+            verify(tokenPort).invalider(REFRESH);
+        }
+    }
 }
