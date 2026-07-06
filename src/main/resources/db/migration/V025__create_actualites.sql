@@ -19,7 +19,7 @@ CREATE TABLE actualites (
     id           UUID          NOT NULL DEFAULT uuid_generate_v4(),
     categorie    VARCHAR(30)   NOT NULL,
     titre        VARCHAR(200)  NOT NULL,
-    description  VARCHAR(500),
+    description  TEXT,
     auteur_id    UUID          NOT NULL,
     auteur_nom   VARCHAR(200)  NOT NULL,
     statut       VARCHAR(20)   NOT NULL DEFAULT 'BROUILLON',

@@ -42,7 +42,7 @@ public class ActualiteJpaEntity extends BaseJpaEntity {
     @Column(name = "titre", nullable = false, length = 200)
     private String titre;
 
-    @Column(name = "description", length = 500)
+    @Column(name = "description", length = 700)
     private String description;
 
     @OneToMany(mappedBy = "actualite", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

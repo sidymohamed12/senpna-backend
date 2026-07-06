@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Actualite extends AggregateRoot<ActualiteId> {
 
     private static final int TITRE_MAX_LENGTH = 200;
-    private static final int DESCRIPTION_MAX_LENGTH = 500;
+    private static final int DESCRIPTION_MAX_LENGTH = 700;
     private static final int AUTEUR_NOM_MAX_LENGTH = 200;
     private static final int MEDIAS_MAX = 10;
     private static final int TAGS_MAX = 20;

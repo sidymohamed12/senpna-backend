@@ -122,6 +122,7 @@ public class ActualitesController {
         }
 
         @GetMapping
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> lister(
                         @RequestParam(required = false) String q,
                         @RequestParam(required = false) String categorie,
@@ -133,6 +134,30 @@ public class ActualitesController {
 
                 ActualitePage result = actualiteFacade.listerActualites(
                                 new ListActualitesQuery(q, categorie, statut, page, size, sortBy, sortDirection));
+
+                return ResponseEntity.ok(RestResponse.responsePaginate(
+                                HttpStatus.OK,
+                                result.content().stream().map(this::toResponse).toList(),
+                                "ACTUALITES_LISTED",
+                                "Liste des actualités récupérée",
+                                result.page(),
+                                result.totalPages(),
+                                result.totalElements(),
+                                result.page() == 0,
+                                result.page() >= result.totalPages() - 1));
+        }
+
+        @GetMapping("/public")
+        public ResponseEntity<Map<String, Object>> listerPublic(
+                        @RequestParam(required = false) String q,
+                        @RequestParam(required = false) String categorie,
+                        @RequestParam(required = false, defaultValue = "0") Integer page,
+                        @RequestParam(required = false, defaultValue = "20") Integer size,
+                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+
+                ActualitePage result = actualiteFacade.listerActualites(
+                                new ListActualitesQuery(q, categorie, "PUBLIE", page, size, sortBy, sortDirection));
 
                 return ResponseEntity.ok(RestResponse.responsePaginate(
                                 HttpStatus.OK,

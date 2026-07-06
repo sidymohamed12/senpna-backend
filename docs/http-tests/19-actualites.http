@@ -1,0 +1,332 @@
+### ══════════════════════════════════════════════════════════════════
+### ActualitesController — /api/actualites
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+###
+### Prérequis : V011__insert_mock_data.sql ET
+### V026__insert_mock_actualites.sql (db/migration-dev) appliquées.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+### Actualités de démonstration (cf. V026)
+@actualiteVieAssociativePublieeId = 70000000-0000-0000-0000-000000000001
+@actualiteProjetPublieeId = 70000000-0000-0000-0000-000000000002
+@actualitePartenariatBrouillonId = 70000000-0000-0000-0000-000000000003
+@actualiteCommuniqueDesactiveeId = 70000000-0000-0000-0000-000000000005
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (lecture seule attendue)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — ADMIN_PRA (pour le test de rôle insuffisant : la PRA ne gère pas les actualités)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/actualites — créer une actualité complète (image + vidéo externe + tags)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "VIE_ASSOCIATIVE",
+  "titre": "Actualité de test HTTP {{$timestamp}}",
+  "description": "Description de test créée via le client REST.",
+  "medias": [
+    { "type": "IMAGE", "url": "https://cdn.senpna.sn/actualites/test-1.jpg" },
+    { "type": "VIDEO", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+  ],
+  "tags": ["test", "http-client"]
+}
+
+
+### 2. POST /api/actualites — cas limite, seuls les champs obligatoires (categorie + titre)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "COMMUNIQUE",
+  "titre": "Actualité minimale {{$timestamp}}"
+}
+
+
+### 3. POST /api/actualites — cas d'erreur, titre manquant (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET"
+}
+
+
+### 4. POST /api/actualites — cas d'erreur, catégorie manquante (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Actualité sans catégorie"
+}
+
+
+### 5. POST /api/actualites — cas d'erreur, catégorie inconnue (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "CATEGORIE_INEXISTANTE",
+  "titre": "Actualité catégorie invalide"
+}
+
+
+### 6. POST /api/actualites — cas d'erreur, description de plus de 500 caractères (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "AUTRE",
+  "titre": "Description trop longue",
+  "description": "{{$randomInt}} Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum sed ut perspiciatis unde omnis iste natus error"
+}
+
+
+### 7. POST /api/actualites — cas d'erreur, type de média invalide (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Média invalide",
+  "medias": [
+    { "type": "AUDIO", "url": "https://cdn.senpna.sn/actualites/son.mp3" }
+  ]
+}
+
+
+### 8. POST /api/actualites — cas d'erreur, URL de média manquante (400 attendu)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Média sans URL",
+  "medias": [
+    { "type": "IMAGE", "url": "" }
+  ]
+}
+
+
+### 9. POST /api/actualites — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA, lecture seule)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Ne devrait pas être créée"
+}
+
+
+### 10. POST /api/actualites — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+POST {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Ne devrait pas être créée non plus"
+}
+
+
+### 11. POST /api/actualites — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/actualites
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Sans authentification"
+}
+
+
+### 12. PUT /api/actualites/{id} — modifier une actualité existante (remplace médias + tags)
+PUT {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PARTENARIAT",
+  "titre": "Partenariat avec une ONG internationale — mis à jour",
+  "description": "Signature officielle de la convention de partenariat prévue le mois prochain.",
+  "medias": [
+    { "type": "IMAGE", "url": "https://cdn.senpna.sn/actualites/partenariat-signature.jpg" }
+  ],
+  "tags": ["partenariat", "ong"]
+}
+
+
+### 13. PUT /api/actualites/{id} — cas d'erreur, titre vide (400 attendu)
+PUT {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PARTENARIAT",
+  "titre": ""
+}
+
+
+### 14. PUT /api/actualites/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/actualites/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PROJET",
+  "titre": "Actualité fantôme"
+}
+
+
+### 15. PUT /api/actualites/{id} — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA)
+PUT {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "categorie": "PARTENARIAT",
+  "titre": "Ne devrait pas être modifiée"
+}
+
+
+### 16. PATCH /api/actualites/{id}/publier — publie une actualité en brouillon
+PATCH {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}/publier
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/actualites/{id}/publier — cas idempotent (déjà publiée, 200 attendu)
+PATCH {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}/publier
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 18. PATCH /api/actualites/{id}/desactiver — masque l'actualité
+PATCH {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}/desactiver
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 19. PATCH /api/actualites/{id}/publier — republie une actualité désactivée
+PATCH {{baseUrl}}/api/actualites/{{actualiteCommuniqueDesactiveeId}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 20. PATCH /api/actualites/{id}/brouillon — repasse une actualité publiée en brouillon
+PATCH {{baseUrl}}/api/actualites/{{actualitePartenariatBrouillonId}}/brouillon
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 21. PATCH /api/actualites/{id}/publier — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/actualites/99999999-9999-9999-9999-999999999999/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 22. PATCH /api/actualites/{id}/desactiver — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+PATCH {{baseUrl}}/api/actualites/{{actualiteProjetPublieeId}}/desactiver
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/actualites/{id} — obtenir une actualité (lecture ouverte à tout utilisateur authentifié)
+GET {{baseUrl}}/api/actualites/{{actualiteVieAssociativePublieeId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/actualites/{id} — lecture par ADMIN_PRA (autorisée, contrairement à l'écriture)
+GET {{baseUrl}}/api/actualites/{{actualiteProjetPublieeId}}
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/actualites/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/actualites/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/actualites/{id} — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/actualites/{{actualiteVieAssociativePublieeId}}
+
+### 27. GET /api/actualites — liste publique de toutes les actualités, pagination par défaut
+GET {{baseUrl}}/api/actualites/public
+
+
+### 27. GET /api/actualites — lister toutes les actualités, pagination par défaut
+GET {{baseUrl}}/api/actualites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/actualites — filtré par catégorie
+GET {{baseUrl}}/api/actualites?categorie=VIE_ASSOCIATIVE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 29. GET /api/actualites — filtré par statut (uniquement publiées)
+GET {{baseUrl}}/api/actualites?statut=PUBLIE
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 30. GET /api/actualites — recherche texte (titre/description) + tri + pagination
+GET {{baseUrl}}/api/actualites?q=chaîne du froid&page=0&size=10&sortBy=titre&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 31. GET /api/actualites — recherche + catégorie + statut combinés, pagination personnalisée
+GET {{baseUrl}}/api/actualites?q=partenariat&categorie=PARTENARIAT&statut=BROUILLON&page=0&size=5
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 32. GET /api/actualites — cas d'erreur, catégorie de filtre invalide (400 attendu)
+GET {{baseUrl}}/api/actualites?categorie=CATEGORIE_INEXISTANTE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 33. GET /api/actualites — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/actualites
