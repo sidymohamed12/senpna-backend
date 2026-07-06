@@ -125,7 +125,7 @@ public class ProjetsController {
 
         @GetMapping("/public/{id}")
         public ResponseEntity<Map<String, Object>> obtenirPublic(@PathVariable UUID id) {
-                ProjetDetail result = projetFacade.obtenirProjet(new GetProjetQuery(id));
+                ProjetDetail result = projetFacade.obtenirProjetPublique(new GetProjetQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PROJET_FOUND",
                                 "Projet récupéré"));
         }

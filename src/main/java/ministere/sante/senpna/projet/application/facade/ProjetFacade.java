@@ -13,6 +13,7 @@ import ministere.sante.senpna.projet.domain.command.ProjetCommands.UpdateProjetC
 import ministere.sante.senpna.projet.domain.port.in.ArchiverProjetUseCase;
 import ministere.sante.senpna.projet.domain.port.in.CreateProjetUseCase;
 import ministere.sante.senpna.projet.domain.port.in.DesactiverProjetUseCase;
+import ministere.sante.senpna.projet.domain.port.in.GetProjetPubliqueUseCase;
 import ministere.sante.senpna.projet.domain.port.in.GetProjetUseCase;
 import ministere.sante.senpna.projet.domain.port.in.ListProjetsUseCase;
 import ministere.sante.senpna.projet.domain.port.in.PublierProjetUseCase;
@@ -31,6 +32,7 @@ public class ProjetFacade {
     private final DesactiverProjetUseCase desactiverProjetUseCase;
     private final RemettreEnBrouillonProjetUseCase remettreEnBrouillonProjetUseCase;
     private final GetProjetUseCase getProjetUseCase;
+    private final GetProjetPubliqueUseCase getProjetPubliqueUseCase;
     private final ListProjetsUseCase listProjetsUseCase;
 
     public ProjetFacade(
@@ -41,6 +43,7 @@ public class ProjetFacade {
             DesactiverProjetUseCase desactiverProjetUseCase,
             RemettreEnBrouillonProjetUseCase remettreEnBrouillonProjetUseCase,
             GetProjetUseCase getProjetUseCase,
+            GetProjetPubliqueUseCase getProjetPubliqueUseCase,
             ListProjetsUseCase listProjetsUseCase) {
         this.createProjetUseCase = createProjetUseCase;
         this.updateProjetUseCase = updateProjetUseCase;
@@ -49,6 +52,7 @@ public class ProjetFacade {
         this.desactiverProjetUseCase = desactiverProjetUseCase;
         this.remettreEnBrouillonProjetUseCase = remettreEnBrouillonProjetUseCase;
         this.getProjetUseCase = getProjetUseCase;
+        this.getProjetPubliqueUseCase = getProjetPubliqueUseCase;
         this.listProjetsUseCase = listProjetsUseCase;
     }
 
@@ -78,6 +82,10 @@ public class ProjetFacade {
 
     public ProjetDetail obtenirProjet(GetProjetQuery query) {
         return getProjetUseCase.obtenir(query);
+    }
+
+    public ProjetDetail obtenirProjetPublique(GetProjetQuery query) {
+        return getProjetPubliqueUseCase.obtenirPublique(query);
     }
 
     public ProjetPage listerProjets(ListProjetsQuery query) {
