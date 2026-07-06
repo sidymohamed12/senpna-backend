@@ -11,7 +11,8 @@ public record AppProperties(
                 SecurityProperties security,
                 OtpProperties otp,
                 RateLimitProperties rateLimit,
-                MailProperties mail) {
+                MailProperties mail,
+                CacheProperties cache) {
 
         // ── JWT ───────────────────────────────────────────────────────────────
 
@@ -58,5 +59,40 @@ public record AppProperties(
         public record MailProperties(
                         @DefaultValue("no-reply@senpharmaflow.gouv.sn") String from,
                         @DefaultValue("SEN PharmaFlow") String fromName) {
+        }
+
+        // ── Cache Redis (clé/valeur, hors régions/fournisseurs/formes/familles) ──
+        //
+        // Contrairement aux référentiels quasi-statiques (régions, fournisseurs,
+        // formes, familles — chargés intégralement en mémoire au démarrage, cf.
+        // *Cache dans shared/organisation/medicament), les agrégats ci-dessous
+        // changent trop souvent ou sont trop volumineux pour être préchargés :
+        // ils sont mis en cache à la clé (Redis, cache-aside) uniquement lors de
+        // leur consultation, avec un TTL court et une éviction explicite à
+        // chaque écriture.
+
+        /**
+         * TTL du cache applicatif clé/valeur (Redis) par agrégat/feature.
+         *
+         * @param medicamentTtl TTL du cache {@code medicament:id:<id>}
+         * @param lotTtl        TTL du cache {@code lot:id:<id>}
+         * @param stockTtl      TTL du cache {@code stock:id:<id>} /
+         *                      {@code stock:entrepot:<id>:lot:<id>}
+         * @param mouvementTtl  TTL du cache {@code mouvement:id:<id>} — long,
+         *                      le journal des mouvements est immuable une fois
+         *                      écrit (append-only)
+         * @param userTtl       TTL du cache {@code user:id:<id>}
+         * @param catalogueTtl  TTL du cache des pages de catalogue assemblées
+         *                      ({@code catalogue:national:*},
+         *                      {@code catalogue:regional:*},
+         *                      {@code catalogue:inter-pra:*})
+         */
+        public record CacheProperties(
+                        @DefaultValue("PT10M") Duration medicamentTtl,
+                        @DefaultValue("PT5M") Duration lotTtl,
+                        @DefaultValue("PT2M") Duration stockTtl,
+                        @DefaultValue("PT6H") Duration mouvementTtl,
+                        @DefaultValue("PT5M") Duration userTtl,
+                        @DefaultValue("PT1M") Duration catalogueTtl) {
         }
 }

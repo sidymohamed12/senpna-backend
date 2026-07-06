@@ -8,6 +8,7 @@ import ministere.sante.senpna.medicament.domain.model.Famille;
 import ministere.sante.senpna.medicament.domain.port.in.UpdateFamilleUseCase;
 import ministere.sante.senpna.medicament.domain.port.out.FamilleRepositoryPort;
 import ministere.sante.senpna.medicament.domain.valueobject.FamilleId;
+import ministere.sante.senpna.shared.domain.port.out.FamilleCachePort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateFamilleUseCaseImpl implements UpdateFamilleUseCase {
 
     private final FamilleRepositoryPort familleRepositoryPort;
+    private final FamilleCachePort familleCachePort;
     private final FamilleDetailAssembler familleDetailAssembler;
 
-    public UpdateFamilleUseCaseImpl(FamilleRepositoryPort familleRepositoryPort,
+    public UpdateFamilleUseCaseImpl(FamilleRepositoryPort familleRepositoryPort, FamilleCachePort familleCachePort,
             FamilleDetailAssembler familleDetailAssembler) {
         this.familleRepositoryPort = familleRepositoryPort;
+        this.familleCachePort = familleCachePort;
         this.familleDetailAssembler = familleDetailAssembler;
     }
 
@@ -33,6 +36,8 @@ public class UpdateFamilleUseCaseImpl implements UpdateFamilleUseCase {
         famille.modifierInformations(command.libelle(), command.description());
 
         Famille saved = familleRepositoryPort.save(famille);
+        familleCachePort.reload();
+
         return familleDetailAssembler.assembler(saved);
     }
 }

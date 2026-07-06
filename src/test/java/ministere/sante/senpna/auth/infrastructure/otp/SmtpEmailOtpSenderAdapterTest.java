@@ -34,7 +34,7 @@ class SmtpEmailOtpSenderAdapterTest {
     void setUp() {
         javaMailSender = mock(JavaMailSender.class);
         AppProperties appProperties = new AppProperties(null, null, null, null,
-                new AppProperties.MailProperties("no-reply@senpharmaflow.gouv.sn", "SEN PharmaFlow"));
+                new AppProperties.MailProperties("no-reply@senpharmaflow.gouv.sn", "SEN PharmaFlow"), null);
         sut = new SmtpEmailOtpSenderAdapter(javaMailSender, appProperties);
     }
 
