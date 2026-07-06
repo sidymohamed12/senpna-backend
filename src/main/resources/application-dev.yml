@@ -163,10 +163,10 @@ app:
     lot-ttl: PT5M
     stock-ttl: PT2M
     mouvement-ttl: PT6H
-    user-ttl: PT5M
+    user-ttl: PT5H
     catalogue-ttl: PT1M
-    projet-ttl: PT5M
-    actualite-ttl: PT5M
+    projet-ttl: PT24H
+    actualite-ttl: PT24H
 
 application:
   title: SEN PharmaFlow

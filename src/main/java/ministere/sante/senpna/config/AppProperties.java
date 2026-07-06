@@ -94,9 +94,9 @@ public record AppProperties(
                         @DefaultValue("PT5M") Duration lotTtl,
                         @DefaultValue("PT2M") Duration stockTtl,
                         @DefaultValue("PT6H") Duration mouvementTtl,
-                        @DefaultValue("PT5M") Duration userTtl,
+                        @DefaultValue("PT5H") Duration userTtl,
                         @DefaultValue("PT1M") Duration catalogueTtl,
-                        @DefaultValue("PT5M") Duration projetTtl,
-                        @DefaultValue("PT5M") Duration actualiteTtl) {
+                        @DefaultValue("PT24H") Duration projetTtl,
+                        @DefaultValue("PT24H") Duration actualiteTtl) {
         }
 }
