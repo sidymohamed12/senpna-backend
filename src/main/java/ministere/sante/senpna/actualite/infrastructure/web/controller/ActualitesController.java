@@ -58,120 +58,121 @@ import java.util.UUID;
 @RequestMapping("/api/actualites")
 public class ActualitesController {
 
-    private final ActualiteFacade actualiteFacade;
+        private final ActualiteFacade actualiteFacade;
 
-    public ActualitesController(ActualiteFacade actualiteFacade) {
-        this.actualiteFacade = actualiteFacade;
-    }
-
-    @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-    public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateActualiteRequest request) {
-        ActualiteDetail result = actualiteFacade.creerActualite(new CreateActualiteCommand(
-                currentUserId(), request.categorie(), request.titre(), request.description(),
-                toMediaInputs(request.medias()), request.tags()));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                RestResponse.response(HttpStatus.CREATED, toResponse(result), "ACTUALITE_CREATED",
-                        "Actualité créée avec succès"));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-    public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-            @Valid @RequestBody UpdateActualiteRequest request) {
-        ActualiteDetail result = actualiteFacade.modifierActualite(new UpdateActualiteCommand(
-                id, request.categorie(), request.titre(), request.description(),
-                toMediaInputs(request.medias()), request.tags()));
-
-        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_UPDATED",
-                "Actualité modifiée avec succès"));
-    }
-
-    @PatchMapping("/{id}/publier")
-    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-    public ResponseEntity<Map<String, Object>> publier(@PathVariable UUID id) {
-        ActualiteDetail result = actualiteFacade.publierActualite(new PublierActualiteCommand(id));
-        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_PUBLIEE",
-                "Actualité publiée avec succès"));
-    }
-
-    @PatchMapping("/{id}/desactiver")
-    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-    public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
-        ActualiteDetail result = actualiteFacade.desactiverActualite(new DesactiverActualiteCommand(id));
-        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_DESACTIVEE",
-                "Actualité désactivée avec succès"));
-    }
-
-    @PatchMapping("/{id}/brouillon")
-    @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
-    public ResponseEntity<Map<String, Object>> remettreEnBrouillon(@PathVariable UUID id) {
-        ActualiteDetail result = actualiteFacade
-                .remettreEnBrouillonActualite(new RemettreEnBrouillonActualiteCommand(id));
-        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_BROUILLON",
-                "Actualité remise en brouillon"));
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
-        ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
-        return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
-                "Actualité récupérée"));
-    }
-
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> lister(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String categorie,
-            @RequestParam(required = false) String statut,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size,
-            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-            @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
-
-        ActualitePage result = actualiteFacade.listerActualites(
-                new ListActualitesQuery(q, categorie, statut, page, size, sortBy, sortDirection));
-
-        return ResponseEntity.ok(RestResponse.responsePaginate(
-                HttpStatus.OK,
-                result.content().stream().map(this::toResponse).toList(),
-                "ACTUALITES_LISTED",
-                "Liste des actualités récupérée",
-                result.page(),
-                result.totalPages(),
-                result.totalElements(),
-                result.page() == 0,
-                result.page() >= result.totalPages() - 1));
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────────
-
-    private UUID currentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CurrentUser principal = (CurrentUser) authentication.getPrincipal();
-        return principal.getUserId();
-    }
-
-    private List<MediaInput> toMediaInputs(List<MediaRequest> medias) {
-        if (medias == null) {
-            return List.of();
+        public ActualitesController(ActualiteFacade actualiteFacade) {
+                this.actualiteFacade = actualiteFacade;
         }
-        return medias.stream().map(m -> new MediaInput(m.type(), m.url())).toList();
-    }
 
-    private ActualiteResponse toResponse(ActualiteDetail detail) {
-        List<MediaResponse> medias = detail.medias().stream()
-                .map(this::toMediaResponse)
-                .toList();
-        return new ActualiteResponse(detail.id(), detail.categorie(), detail.titre(), detail.description(), medias,
-                detail.auteurId(), detail.auteurNom(), detail.tags(), detail.statut(), detail.createdAt(),
-                detail.updatedAt());
-    }
+        @PostMapping
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateActualiteRequest request) {
+                ActualiteDetail result = actualiteFacade.creerActualite(new CreateActualiteCommand(
+                                currentUserId(), request.categorie(), request.titre(), request.description(),
+                                toMediaInputs(request.medias()), request.tags()));
 
-    private MediaResponse toMediaResponse(MediaDetail detail) {
-        return new MediaResponse(detail.id(), detail.type(), detail.url(), detail.ordre());
-    }
+                return ResponseEntity.status(HttpStatus.CREATED).body(
+                                RestResponse.response(HttpStatus.CREATED, toResponse(result), "ACTUALITE_CREATED",
+                                                "Actualité créée avec succès"));
+        }
+
+        @PutMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
+                        @Valid @RequestBody UpdateActualiteRequest request) {
+                ActualiteDetail result = actualiteFacade.modifierActualite(new UpdateActualiteCommand(
+                                id, request.categorie(), request.titre(), request.description(),
+                                toMediaInputs(request.medias()), request.tags()));
+
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_UPDATED",
+                                "Actualité modifiée avec succès"));
+        }
+
+        @PatchMapping("/{id}/publier")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+        public ResponseEntity<Map<String, Object>> publier(@PathVariable UUID id) {
+                ActualiteDetail result = actualiteFacade.publierActualite(new PublierActualiteCommand(id));
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_PUBLIEE",
+                                "Actualité publiée avec succès"));
+        }
+
+        @PatchMapping("/{id}/desactiver")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+        public ResponseEntity<Map<String, Object>> desactiver(@PathVariable UUID id) {
+                ActualiteDetail result = actualiteFacade.desactiverActualite(new DesactiverActualiteCommand(id));
+                return ResponseEntity
+                                .ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_DESACTIVEE",
+                                                "Actualité désactivée avec succès"));
+        }
+
+        @PatchMapping("/{id}/brouillon")
+        @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
+        public ResponseEntity<Map<String, Object>> remettreEnBrouillon(@PathVariable UUID id) {
+                ActualiteDetail result = actualiteFacade
+                                .remettreEnBrouillonActualite(new RemettreEnBrouillonActualiteCommand(id));
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_BROUILLON",
+                                "Actualité remise en brouillon"));
+        }
+
+        @GetMapping("/{id}")
+        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+                ActualiteDetail result = actualiteFacade.obtenirActualite(new GetActualiteQuery(id));
+                return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ACTUALITE_FOUND",
+                                "Actualité récupérée"));
+        }
+
+        @GetMapping
+        public ResponseEntity<Map<String, Object>> lister(
+                        @RequestParam(required = false) String q,
+                        @RequestParam(required = false) String categorie,
+                        @RequestParam(required = false) String statut,
+                        @RequestParam(required = false, defaultValue = "0") Integer page,
+                        @RequestParam(required = false, defaultValue = "20") Integer size,
+                        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+                        @RequestParam(required = false, defaultValue = "DESC") String sortDirection) {
+
+                ActualitePage result = actualiteFacade.listerActualites(
+                                new ListActualitesQuery(q, categorie, statut, page, size, sortBy, sortDirection));
+
+                return ResponseEntity.ok(RestResponse.responsePaginate(
+                                HttpStatus.OK,
+                                result.content().stream().map(this::toResponse).toList(),
+                                "ACTUALITES_LISTED",
+                                "Liste des actualités récupérée",
+                                result.page(),
+                                result.totalPages(),
+                                result.totalElements(),
+                                result.page() == 0,
+                                result.page() >= result.totalPages() - 1));
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private UUID currentUserId() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                CurrentUser principal = (CurrentUser) authentication.getPrincipal();
+                return principal.getUserId();
+        }
+
+        private List<MediaInput> toMediaInputs(List<MediaRequest> medias) {
+                if (medias == null) {
+                        return List.of();
+                }
+                return medias.stream().map(m -> new MediaInput(m.type(), m.url())).toList();
+        }
+
+        private ActualiteResponse toResponse(ActualiteDetail detail) {
+                List<MediaResponse> medias = detail.medias().stream()
+                                .map(this::toMediaResponse)
+                                .toList();
+                return new ActualiteResponse(detail.id(), detail.categorie(), detail.titre(), detail.description(),
+                                medias,
+                                detail.auteurId(), detail.auteurNom(), detail.tags(), detail.statut(),
+                                detail.createdAt(),
+                                detail.updatedAt());
+        }
+
+        private MediaResponse toMediaResponse(MediaDetail detail) {
+                return new MediaResponse(detail.id(), detail.type(), detail.url(), detail.ordre());
+        }
 }
