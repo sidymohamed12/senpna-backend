@@ -29,7 +29,7 @@ public enum MediaType {
     MEDIATHEQUE(
             Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4"),
             50 * 1024 * 1024L, // 50MB
-            "medias/"),
+            "mediatheque/"),
 
     FICHE_DE_POSTE(
             Set.of("image/jpeg", "image/png", "image/webp"),

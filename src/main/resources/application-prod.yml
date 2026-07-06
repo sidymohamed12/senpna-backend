@@ -97,6 +97,16 @@ server:
     min-spare-threads: 20
     connection-timeout: 20000
 
+# ── STORAGE ────────────────────────────────────────────────────────
+storage:
+  provider: ${STORAGE_PROVIDER:r2}
+  r2:
+    account-id: ${STORAGE_R2_ACCOUNT_ID}
+    access-key: ${STORAGE_R2_ACCESS_KEY}
+    secret-key: ${STORAGE_R2_SECRET_KEY}
+    public-url: ${STORAGE_R2_PUBLIC_URL}
+    bucket: ${STORAGE_BUCKET}
+
 # ── Logging JSON (Loki / ELK) ─────────────────────────────────────
 logging:
   level:

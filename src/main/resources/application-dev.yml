@@ -91,6 +91,16 @@ server:
     enabled: true
     mime-types: application/json
 
+# ── STORAGE ────────────────────────────────────────────────────────
+storage:
+  provider: r2
+  r2:
+    account-id: 0fa25dc9adf85ac33f8eb57731f8beb8
+    access-key: 2a99a9fe4afe4191cf75fa20c85c3276
+    secret-key: edb26f8448d40c83cf7097f814ce3769a75be2c65f7d04b6e5002c7e12c4f878
+    public-url: https://pub-96fbdbef29d44bb09237490751a6a876.r2.dev
+    bucket: sen-pna
+
 # ── Logging ────────────────────────────────────────────────────────
 logging:
   level:

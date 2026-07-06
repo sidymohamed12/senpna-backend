@@ -47,6 +47,10 @@ spring:
 server:
   port: 0 # Port aléatoire — tests parallèles safe
 
+# ── Storage ────────────────────────────────────────────────────────
+storage:
+  provider: mock
+
 # ── Logging — silencieux sauf erreurs ─────────────────────────────
 logging:
   level:
