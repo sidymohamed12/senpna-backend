@@ -1,6 +1,4 @@
-package ministere.sante.senpna.medicament.infrastructure.web.controller;
-
-import jakarta.validation.Valid;
+package ministere.sante.senpna.medicament.infrastructure.web.controller.implement;
 
 import ministere.sante.senpna.medicament.application.facade.MedicamentFacade;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ArchiveConditionnementCommand;
@@ -11,6 +9,7 @@ import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.Desar
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.GetConditionnementQuery;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ListConditionnementsQuery;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.UpdateConditionnementCommand;
+import ministere.sante.senpna.medicament.infrastructure.web.controller.IConditionnementsController;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.CreateConditionnementRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.UpdateConditionnementRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.response.ConditionnementResponse;
@@ -19,37 +18,13 @@ import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Gestion des conditionnements (niveaux d'emballage) d'un médicament.
- * Chaque médicament doit posséder exactement une unité de base
- * ({@code estUniteBase = true}),
- * dans laquelle son stock réel est exprimé.
- *
- * <pre>
- * POST   /api/conditionnements                  {medicamentId, nom, niveau, quantiteUniteBase, estUniteBase}
- * PUT    /api/conditionnements/{id}              {nom, niveau, quantiteUniteBase, estUniteBase}
- * PATCH  /api/conditionnements/{id}/archiver
- * PATCH  /api/conditionnements/{id}/desarchiver
- * GET    /api/conditionnements/{id}
- * GET    /api/conditionnements?medicamentId=&actif=&page=&size=&sortBy=&sortDirection=
- * </pre>
- */
 @RestController
-@RequestMapping("/api/conditionnements")
-public class ConditionnementsController {
+public class ConditionnementsController implements IConditionnementsController {
 
         private static final String ROLES_LECTURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA',"
                         + "'MAGASINIER_PNA','ADMIN_PRA','GESTIONNAIRE_PRA','PHARMACIEN_PRA','MAGASINIER_PRA',"
@@ -62,9 +37,9 @@ public class ConditionnementsController {
                 this.medicamentFacade = medicamentFacade;
         }
 
-        @PostMapping
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateConditionnementRequest request) {
+        public ResponseEntity<Map<String, Object>> creer(CreateConditionnementRequest request) {
                 ConditionnementDetail result = medicamentFacade.creerConditionnement(new CreateConditionnementCommand(
                                 request.medicamentId(), request.nom(), request.niveau(), request.quantiteUniteBase(),
                                 request.estUniteBase(), request.prixAchat(), request.prixVente()));
@@ -74,10 +49,9 @@ public class ConditionnementsController {
                                                 "Conditionnement créé avec succès"));
         }
 
-        @PutMapping("/{id}")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-                        @Valid @RequestBody UpdateConditionnementRequest request) {
+        public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateConditionnementRequest request) {
                 ConditionnementDetail result = medicamentFacade
                                 .modifierConditionnement(new UpdateConditionnementCommand(
                                                 id, request.nom(), request.niveau(), request.quantiteUniteBase(),
@@ -87,42 +61,38 @@ public class ConditionnementsController {
                                 "CONDITIONNEMENT_UPDATED", "Conditionnement modifié avec succès"));
         }
 
-        @PatchMapping("/{id}/archiver")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> archiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> archiver(UUID id) {
                 ConditionnementDetail result = medicamentFacade.archiverConditionnement(
                                 new ArchiveConditionnementCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
                                 "CONDITIONNEMENT_ARCHIVED", "Conditionnement archivé avec succès"));
         }
 
-        @PatchMapping("/{id}/desarchiver")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> desarchiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> desarchiver(UUID id) {
                 ConditionnementDetail result = medicamentFacade.desarchiverConditionnement(
                                 new DesarchiveConditionnementCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
                                 "CONDITIONNEMENT_DESARCHIVED", "Conditionnement désarchivé avec succès"));
         }
 
-        @GetMapping("/{id}")
+        @Override
         @PreAuthorize(ROLES_LECTURE)
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
                 ConditionnementDetail result = medicamentFacade.obtenirConditionnement(new GetConditionnementQuery(id));
                 return ResponseEntity
                                 .ok(RestResponse.response(HttpStatus.OK, toResponse(result), "CONDITIONNEMENT_FOUND",
                                                 "Conditionnement récupéré"));
         }
 
-        @GetMapping
+        @Override
         @PreAuthorize(ROLES_LECTURE)
         public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) UUID medicamentId,
-                        @RequestParam(required = false) Boolean actif,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "niveau") String sortBy,
-                        @RequestParam(required = false, defaultValue = "ASC") String sortDirection) {
+                        UUID medicamentId, Boolean actif, Integer page, Integer size, String sortBy,
+                        String sortDirection) {
 
                 ConditionnementPage result = medicamentFacade.listerConditionnements(
                                 new ListConditionnementsQuery(medicamentId, actif, page, size, sortBy, sortDirection));

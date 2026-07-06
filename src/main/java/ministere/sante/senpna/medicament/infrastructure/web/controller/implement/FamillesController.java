@@ -1,6 +1,4 @@
-package ministere.sante.senpna.medicament.infrastructure.web.controller;
-
-import jakarta.validation.Valid;
+package ministere.sante.senpna.medicament.infrastructure.web.controller.implement;
 
 import ministere.sante.senpna.medicament.application.facade.MedicamentFacade;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ArchiveFamilleCommand;
@@ -11,6 +9,7 @@ import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.Famil
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.GetFamilleQuery;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ListFamillesQuery;
 import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.UpdateFamilleCommand;
+import ministere.sante.senpna.medicament.infrastructure.web.controller.IFamillesController;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.CreateFamilleRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.UpdateFamilleRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.response.FamilleResponse;
@@ -19,36 +18,13 @@ import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Gestion du référentiel des familles thérapeutiques.
- * Utilisé par le catalogue des médicaments pour le classement et les
- * statistiques de consommation par famille.
- *
- * <pre>
- * POST   /api/familles                   {code, libelle, description?}
- * PUT    /api/familles/{id}               {libelle, description?}
- * PATCH  /api/familles/{id}/archiver
- * PATCH  /api/familles/{id}/desarchiver
- * GET    /api/familles/{id}
- * GET    /api/familles?q=&actif=&page=&size=&sortBy=&sortDirection=
- * </pre>
- */
 @RestController
-@RequestMapping("/api/familles")
-public class FamillesController {
+public class FamillesController implements IFamillesController {
 
         private static final String ROLES_LECTURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA',"
                         + "'MAGASINIER_PNA','ADMIN_PRA','GESTIONNAIRE_PRA','PHARMACIEN_PRA','MAGASINIER_PRA',"
@@ -61,9 +37,9 @@ public class FamillesController {
                 this.medicamentFacade = medicamentFacade;
         }
 
-        @PostMapping
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateFamilleRequest request) {
+        public ResponseEntity<Map<String, Object>> creer(CreateFamilleRequest request) {
                 FamilleDetail result = medicamentFacade.creerFamille(
                                 new CreateFamilleCommand(request.code(), request.libelle(), request.description()));
 
@@ -72,10 +48,9 @@ public class FamillesController {
                                                 "Famille créée avec succès"));
         }
 
-        @PutMapping("/{id}")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> modifier(@PathVariable UUID id,
-                        @Valid @RequestBody UpdateFamilleRequest request) {
+        public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateFamilleRequest request) {
                 FamilleDetail result = medicamentFacade.modifierFamille(
                                 new UpdateFamilleCommand(id, request.libelle(), request.description()));
 
@@ -83,39 +58,34 @@ public class FamillesController {
                                 "Famille modifiée avec succès"));
         }
 
-        @PatchMapping("/{id}/archiver")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> archiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> archiver(UUID id) {
                 FamilleDetail result = medicamentFacade.archiverFamille(new ArchiveFamilleCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_ARCHIVED",
                                 "Famille archivée avec succès"));
         }
 
-        @PatchMapping("/{id}/desarchiver")
+        @Override
         @PreAuthorize(ROLES_ECRITURE)
-        public ResponseEntity<Map<String, Object>> desarchiver(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> desarchiver(UUID id) {
                 FamilleDetail result = medicamentFacade.desarchiverFamille(new DesarchiveFamilleCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_DESARCHIVED",
                                 "Famille désarchivée avec succès"));
         }
 
-        @GetMapping("/{id}")
+        @Override
         @PreAuthorize(ROLES_LECTURE)
-        public ResponseEntity<Map<String, Object>> obtenir(@PathVariable UUID id) {
+        public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
                 FamilleDetail result = medicamentFacade.obtenirFamille(new GetFamilleQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_FOUND",
                                 "Famille récupérée"));
         }
 
-        @GetMapping
+        @Override
         @PreAuthorize(ROLES_LECTURE)
         public ResponseEntity<Map<String, Object>> lister(
-                        @RequestParam(required = false) String q,
-                        @RequestParam(required = false) Boolean actif,
-                        @RequestParam(required = false, defaultValue = "0") Integer page,
-                        @RequestParam(required = false, defaultValue = "20") Integer size,
-                        @RequestParam(required = false, defaultValue = "libelle") String sortBy,
-                        @RequestParam(required = false, defaultValue = "ASC") String sortDirection) {
+                        String q, Boolean actif, Integer page, Integer size, String sortBy, String sortDirection) {
 
                 FamillePage result = medicamentFacade.listerFamilles(
                                 new ListFamillesQuery(q, actif, page, size, sortBy, sortDirection));
