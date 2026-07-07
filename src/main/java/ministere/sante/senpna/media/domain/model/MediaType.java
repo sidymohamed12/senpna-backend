@@ -32,28 +32,43 @@ public enum MediaType {
             "mediatheque/"),
 
     FICHE_DE_POSTE(
-            Set.of("image/jpeg", "image/png", "image/webp"),
+            Set.of("application/pdf", "image/jpeg", "image/png", "image/webp"),
             5 * 1024 * 1024L, // 5MB
             "fiches-de-poste/"),
 
     CV(
-            Set.of("application/pdf"),
+            Set.of(
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
             5 * 1024 * 1024L, // 5MB
-            " cvs/"),
+            "cvs/",
+            true),
 
     LETTRE_DE_MOTIVATION(
-            Set.of("application/pdf"),
+            Set.of(
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
             5 * 1024 * 1024L, // 5MB
-            "lettres-de-motivation/");
+            "lettres-de-motivation/",
+            true);
 
     private final Set<String> contentTypesAutorises;
     private final long maxSizeBytes;
     private final String prefixe;
+    private final boolean utilisablePubliquement;
 
     MediaType(Set<String> contentTypesAutorises, long maxSizeBytes, String prefixe) {
+        this(contentTypesAutorises, maxSizeBytes, prefixe, false);
+    }
+
+    MediaType(Set<String> contentTypesAutorises, long maxSizeBytes, String prefixe,
+            boolean utilisablePubliquement) {
         this.contentTypesAutorises = contentTypesAutorises;
         this.maxSizeBytes = maxSizeBytes;
         this.prefixe = prefixe;
+        this.utilisablePubliquement = utilisablePubliquement;
     }
 
     public Set<String> getContentTypesAutorises() {
@@ -74,5 +89,17 @@ public enum MediaType {
 
     public String getMaxSizeEnMo() {
         return (maxSizeBytes / (1024 * 1024)) + "MB";
+    }
+
+    /**
+     * {@code true} pour les types de médias pouvant être demandés sans
+     * authentification via {@code POST /api/medias/presigned-url/public}
+     * — strictement limité aux pièces jointes d'un formulaire public
+     * (candidature : CV, lettre de motivation). Tous les autres types
+     * (contenus éditoriaux gérés par du personnel authentifié) restent
+     * exclusivement accessibles via l'endpoint authentifié standard.
+     */
+    public boolean estUtilisablePubliquement() {
+        return utilisablePubliquement;
     }
 }

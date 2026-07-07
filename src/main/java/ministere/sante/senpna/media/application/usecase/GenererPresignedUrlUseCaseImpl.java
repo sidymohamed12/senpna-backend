@@ -3,6 +3,7 @@ package ministere.sante.senpna.media.application.usecase;
 import ministere.sante.senpna.media.application.dto.GenererPresignedUrlCommand;
 import ministere.sante.senpna.media.application.dto.PresignedUrlResult;
 import ministere.sante.senpna.media.domain.exception.ContentTypeNonAutoriseException;
+import ministere.sante.senpna.media.domain.exception.MediaTypeNonAutorisePubliquementException;
 import ministere.sante.senpna.media.domain.exception.TailleFichierDepasseeException;
 import ministere.sante.senpna.media.domain.model.MediaType;
 import ministere.sante.senpna.media.domain.port.in.GenererPresignedUrlUseCase;
@@ -49,6 +50,18 @@ public class GenererPresignedUrlUseCaseImpl implements GenererPresignedUrlUseCas
 
     @Override
     public PresignedUrlResult generer(GenererPresignedUrlCommand command) {
+        return genererInterne(command);
+    }
+
+    @Override
+    public PresignedUrlResult genererPublique(GenererPresignedUrlCommand command) {
+        if (!command.mediaType().estUtilisablePubliquement()) {
+            throw new MediaTypeNonAutorisePubliquementException(command.mediaType().name());
+        }
+        return genererInterne(command);
+    }
+
+    private PresignedUrlResult genererInterne(GenererPresignedUrlCommand command) {
         MediaType mediaType = command.mediaType();
 
         // ── Validation Content-Type ──────────────────────────────────────
@@ -94,6 +107,8 @@ public class GenererPresignedUrlUseCaseImpl implements GenererPresignedUrlUseCas
             case "image/gif" -> "gif";
             case "video/mp4" -> "mp4";
             case "application/pdf" -> "pdf";
+            case "application/msword" -> "doc";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> "docx";
             case "image/jpeg", "image/jpg" -> "jpg";
             default -> "jpg";
         };

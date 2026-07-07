@@ -20,4 +20,13 @@ public interface GenererPresignedUrlUseCase {
      * @return URL d'upload signée + URL publique finale
      */
     PresignedUrlResult generer(GenererPresignedUrlCommand command);
+
+    /**
+     * Variante sans authentification, appelée par
+     * {@code POST /api/medias/presigned-url/public} — réservée aux pièces
+     * jointes d'un formulaire public (cf.
+     * {@code MediaType#estUtilisablePubliquement()}). Rejette toute
+     * demande portant sur un type de média non éligible.
+     */
+    PresignedUrlResult genererPublique(GenererPresignedUrlCommand command);
 }
