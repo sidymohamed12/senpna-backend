@@ -29,15 +29,16 @@ import java.util.Map;
  * <h3>Exceptions gérées</h3>
  *
  * <pre>
- * OpportuniteCarriereIntrouvableException → 404  offre introuvable
- * CandidatureIntrouvableException         → 404  candidature introuvable
- * TypeContratInvalideException            → 400  type de contrat hors énumération
- * StatutOpportuniteInvalideException      → 400  statut hors énumération
- * CiviliteInvalideException               → 400  civilité hors énumération (M/MME)
- * ConsentementRgpdRequisException         → 400  case de consentement RGPD non cochée
- * DateLimiteCandidatureInvalideException  → 400  date limite absente/postérieure à la date de début/dépassée à la publication
- * OpportuniteFermeeException              → 422  offre n'acceptant plus de nouvelles candidatures
- * </pre>
+ * OpportuniteCarriereIntrouvableException → 404 offre introuvable
+ * CandidatureIntrouvableException → 404 candidature introuvable
+ * TypeContratInvalideException → 400 type de contrat hors énumération
+ * StatutOpportuniteInvalideException → 400 statut hors énumération
+ * CiviliteInvalideException → 400 civilité hors énumération (M/MME)
+ * ConsentementRgpdRequisException → 400 case de consentement RGPD non cochée
+ * DateLimiteCandidatureInvalideException → 400 date limite absente/postérieure
+ * à la date de début/dépassée à la publication
+ * OpportuniteFermeeException → 422 offre n'acceptant plus de nouvelles
+ * candidatures
  */
 @RestControllerAdvice(assignableTypes = { OpportunitesCarriereController.class, CandidaturesController.class })
 public class CarriereExceptionHandler {

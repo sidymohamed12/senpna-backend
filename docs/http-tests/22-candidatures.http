@@ -1,0 +1,378 @@
+### ══════════════════════════════════════════════════════════════════
+### CandidaturesController — /api/candidatures
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+###
+### Prérequis : V011__insert_mock_data.sql ET
+### V031__insert_mock_opportunites_carriere.sql (db/migration-dev) appliquées.
+###
+### ⚠️ Les offres référencées ici (1, 4, 6, 7) ne sont jamais mutées par
+### 21-opportunites-carriere.http — ce fichier reste valide que l'autre
+### ait été exécuté avant ou non. Les offres 2, 3 et 5, elles, changent
+### de statut au fil de 21-opportunites-carriere.http : volontairement
+### pas utilisées ici pour éviter toute dépendance d'ordre d'exécution.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+### Offres de démonstration (cf. V031) — statuts stables, jamais modifiés par 21-opportunites-carriere.http
+@offreOuverteCompleteId = 90000000-0000-0000-0000-000000000001
+@offreEnCoursId = 90000000-0000-0000-0000-000000000004
+@offreExpireePersisteeId = 90000000-0000-0000-0000-000000000006
+@offreOuverteLongueId = 90000000-0000-0000-0000-000000000007
+
+### Candidatures de démonstration (cf. V031)
+@candidatureCompleteId = 91000000-0000-0000-0000-000000000001
+@candidatureCvSeulId = 91000000-0000-0000-0000-000000000002
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (lecture des candidatures non autorisée)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — ADMIN_PRA (pour le test de rôle insuffisant : la PRA ne gère pas les candidatures PNA)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/candidatures — soumission complète, SANS authentification (endpoint public)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "MME",
+  "nomComplet": "Test HTTP {{$timestamp}}",
+  "email": "test.http.{{$timestamp}}@example.sn",
+  "telephone": "+221770001122",
+  "cvUrl": "https://cdn.senpna.sn/cvs/test-http-cv.pdf",
+  "lettreMotivationUrl": "https://cdn.senpna.sn/lettres-de-motivation/test-http-lettre.pdf",
+  "messageComplementaire": "Candidature créée via le client REST.",
+  "consentementRgpd": true
+}
+
+
+### 2. POST /api/candidatures — cas limite, CV seul (sans lettre de motivation ni message, champs optionnels)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteLongueId}}",
+  "civilite": "M",
+  "nomComplet": "Candidat Minimal {{$timestamp}}",
+  "email": "candidat.minimal.{{$timestamp}}@example.sn",
+  "telephone": "+221770003344",
+  "cvUrl": "https://cdn.senpna.sn/cvs/candidat-minimal-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 3. POST /api/candidatures — cas d'erreur, opportunité ciblée manquante (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "civilite": "M",
+  "nomComplet": "Sans opportunité",
+  "email": "sans.opportunite@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-opportunite-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 4. POST /api/candidatures — cas d'erreur, civilité manquante (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "nomComplet": "Sans civilité",
+  "email": "sans.civilite@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-civilite-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 5. POST /api/candidatures — cas d'erreur, civilité hors énumération (400 attendu — CIVILITE_INVALIDE)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "DR",
+  "nomComplet": "Civilité invalide",
+  "email": "civilite.invalide@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/civilite-invalide-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 6. POST /api/candidatures — cas d'erreur, nom complet manquant (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "email": "sans.nom@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-nom-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 7. POST /api/candidatures — cas d'erreur, e-mail manquant (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Sans e-mail",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-email-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 8. POST /api/candidatures — cas d'erreur, e-mail mal formé (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "E-mail invalide",
+  "email": "pas-un-email",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/email-invalide-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 9. POST /api/candidatures — cas d'erreur, téléphone manquant (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Sans téléphone",
+  "email": "sans.telephone@example.sn",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-telephone-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 10. POST /api/candidatures — cas d'erreur, téléphone au format non international (400 attendu — VALIDATION_ERROR)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Téléphone invalide",
+  "email": "telephone.invalide@example.sn",
+  "telephone": "0770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/telephone-invalide-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 11. POST /api/candidatures — cas d'erreur, CV manquant (400 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Sans CV",
+  "email": "sans.cv@example.sn",
+  "telephone": "+221770005566",
+  "consentementRgpd": true
+}
+
+
+### 12. POST /api/candidatures — cas d'erreur, message complémentaire trop long (400 attendu, > 2000 caractères)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Message trop long",
+  "email": "message.trop.long@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/message-trop-long-cv.pdf",
+  "messageComplementaire": "{{$randomInt}} Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est qui dolorem ipsum quia dolor sit amet consectetur adipisci velit sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem ut enim ad minima veniam quis nostrum exercitationem ullam corporis suscipit laboriosam nisi ut aliquid ex ea commodi consequatur quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur vel illum qui dolorem eum fugiat quo voluptas nulla pariatur at vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident similique sunt in culpa qui officia deserunt mollitia animi id est laborum et dolorum fuga et harum quidem rerum facilis est et expedita distinctio nam libero tempore",
+  "consentementRgpd": true
+}
+
+
+### 13. POST /api/candidatures — cas d'erreur, consentement RGPD non coché (400 attendu — CONSENTEMENT_RGPD_REQUIS)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Sans consentement",
+  "email": "sans.consentement@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/sans-consentement-cv.pdf",
+  "consentementRgpd": false
+}
+
+
+### 14. POST /api/candidatures — cas d'erreur, consentement RGPD absent du corps (400 attendu — même règle)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreOuverteCompleteId}}",
+  "civilite": "M",
+  "nomComplet": "Consentement absent",
+  "email": "consentement.absent@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/consentement-absent-cv.pdf"
+}
+
+
+### 15. POST /api/candidatures — cas d'erreur, offre introuvable (404 attendu)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "99999999-9999-9999-9999-999999999999",
+  "civilite": "M",
+  "nomComplet": "Offre fantôme",
+  "email": "offre.fantome@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/offre-fantome-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 16. POST /api/candidatures — cas d'erreur, offre EN_COURS (422 attendu — OPPORTUNITE_FERMEE, n'accepte plus de candidatures)
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreEnCoursId}}",
+  "civilite": "M",
+  "nomComplet": "Trop tard, en cours de traitement",
+  "email": "trop.tard.en.cours@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/trop-tard-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 17. POST /api/candidatures — cas d'erreur, offre persistée OUVERT mais date limite dépassée (422 attendu — OPPORTUNITE_FERMEE)
+### Démontre que la règle d'acceptation utilise le statut EFFECTIF (getStatutEffectif()), pas le
+### statut persisté en base : l'offre 6 (cf. V031) reste marquée OUVERT tant que le job planifié de
+### clôture automatique n'est pas repassé, mais elle refuse déjà toute nouvelle candidature.
+POST {{baseUrl}}/api/candidatures
+Content-Type: application/json
+
+{
+  "opportuniteId": "{{offreExpireePersisteeId}}",
+  "civilite": "M",
+  "nomComplet": "Trop tard, date limite dépassée",
+  "email": "trop.tard.date.limite@example.sn",
+  "telephone": "+221770005566",
+  "cvUrl": "https://cdn.senpna.sn/cvs/trop-tard-date-limite-cv.pdf",
+  "consentementRgpd": true
+}
+
+
+### 18. GET /api/candidatures/{id} — obtenir une candidature (ADMIN_PNA)
+GET {{baseUrl}}/api/candidatures/{{candidatureCompleteId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/candidatures/{id} — obtenir une candidature (GESTIONNAIRE_PNA)
+GET {{baseUrl}}/api/candidatures/{{candidatureCvSeulId}}
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/candidatures/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/candidatures/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/candidatures/{id} — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA)
+GET {{baseUrl}}/api/candidatures/{{candidatureCompleteId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/candidatures/{id} — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+GET {{baseUrl}}/api/candidatures/{{candidatureCompleteId}}
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/candidatures/{id} — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/candidatures/{{candidatureCompleteId}}
+
+
+### 24. GET /api/candidatures — lister toutes les candidatures, pagination par défaut
+GET {{baseUrl}}/api/candidatures
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/candidatures — filtré par offre ciblée
+GET {{baseUrl}}/api/candidatures?opportuniteId={{offreOuverteCompleteId}}
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/candidatures — recherche texte (nom complet / e-mail) + pagination
+GET {{baseUrl}}/api/candidatures?q=diagne&page=0&size=10&sortBy=nomComplet&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. GET /api/candidatures — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA)
+GET {{baseUrl}}/api/candidatures
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 28. GET /api/candidatures — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/candidatures
