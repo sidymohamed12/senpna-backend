@@ -1,0 +1,472 @@
+### ══════════════════════════════════════════════════════════════════
+### OpportunitesCarriereController — /api/opportunites
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins.
+###
+### Prérequis : V011__insert_mock_data.sql ET
+### V031__insert_mock_opportunites_carriere.sql (db/migration-dev) appliquées.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+### Opportunités de démonstration (cf. V031)
+@offreCdiCompleteId = 90000000-0000-0000-0000-000000000001
+@offreCddMinimaleId = 90000000-0000-0000-0000-000000000002
+@offreStageBrouillonId = 90000000-0000-0000-0000-000000000003
+@offreFreelanceEnCoursId = 90000000-0000-0000-0000-000000000004
+@offreVolontariatClotureeId = 90000000-0000-0000-0000-000000000005
+@offreAutreExpireeId = 90000000-0000-0000-0000-000000000006
+@offreCdiDescriptionLongueId = 90000000-0000-0000-0000-000000000007
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (lecture seule attendue, ne gère pas les opportunités)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — ADMIN_PRA (pour le test de rôle insuffisant : la PRA ne gère pas les opportunités de carrière)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 1. POST /api/opportunites — créer une offre complète (fiche de poste, date de début, e-mail de contact)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Pharmacien(ne) hospitalier(ère) — test HTTP {{$timestamp}}",
+  "nomEntreprise": "Pharmacie Nationale d'Approvisionnement (PNA)",
+  "description": "Description de test créée via le client REST, couvrant mission et profil recherché.",
+  "ficheDePosteUrl": "https://cdn.senpna.sn/fiches-de-poste/test-http.pdf",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateDebut": "2027-01-15",
+  "dateLimiteCandidature": "2026-12-15",
+  "emailContact": "recrutement.test@senpna.sn"
+}
+
+
+### 2. POST /api/opportunites — cas limite, seuls les champs obligatoires
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre minimale {{$timestamp}}",
+  "nomEntreprise": "Pharmacie Régionale d'Approvisionnement de Kolda",
+  "description": "Description minimale, sans fiche de poste ni date de début ni e-mail de contact.",
+  "lieu": "Kolda, Sénégal",
+  "typeContrat": "CDD",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 3. POST /api/opportunites — cas d'erreur, titre manquant (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nomEntreprise": "PNA",
+  "description": "Sans titre",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 4. POST /api/opportunites — cas d'erreur, nom d'entreprise manquant (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre sans entreprise",
+  "description": "Sans nom d'entreprise",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 5. POST /api/opportunites — cas d'erreur, description manquante (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre sans description",
+  "nomEntreprise": "PNA",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 6. POST /api/opportunites — cas d'erreur, lieu manquant (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre sans lieu",
+  "nomEntreprise": "PNA",
+  "description": "Sans lieu",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 7. POST /api/opportunites — cas d'erreur, type de contrat manquant (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre sans type de contrat",
+  "nomEntreprise": "PNA",
+  "description": "Sans type de contrat",
+  "lieu": "Dakar, Sénégal",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 8. POST /api/opportunites — cas d'erreur, type de contrat inconnu (400 attendu — TYPE_CONTRAT_INVALIDE)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre type de contrat invalide",
+  "nomEntreprise": "PNA",
+  "description": "Type de contrat hors énumération",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "INTERIM",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 9. POST /api/opportunites — cas d'erreur, date limite de candidature manquante (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre sans date limite",
+  "nomEntreprise": "PNA",
+  "description": "Sans date limite de candidature",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI"
+}
+
+
+### 10. POST /api/opportunites — cas d'erreur, date limite postérieure à la date de début (400 attendu — DATE_LIMITE_CANDIDATURE_INVALIDE)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre dates incohérentes",
+  "nomEntreprise": "PNA",
+  "description": "La date limite est après la date de début",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateDebut": "2026-11-01",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 11. POST /api/opportunites — cas d'erreur, e-mail de contact invalide (400 attendu)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre e-mail de contact invalide",
+  "nomEntreprise": "PNA",
+  "description": "E-mail de contact mal formé",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01",
+  "emailContact": "pas-un-email"
+}
+
+
+### 12. POST /api/opportunites — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA, lecture seule)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Ne devrait pas être créée",
+  "nomEntreprise": "PNA",
+  "description": "Test rôle insuffisant",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 13. POST /api/opportunites — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+POST {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Ne devrait pas être créée non plus",
+  "nomEntreprise": "PNA",
+  "description": "Test rôle insuffisant",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 14. POST /api/opportunites — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/opportunites
+Content-Type: application/json
+
+{
+  "titre": "Sans authentification",
+  "nomEntreprise": "PNA",
+  "description": "Test sans JWT",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 15. PUT /api/opportunites/{id} — modifier une offre existante (remplace tout le contenu)
+PUT {{baseUrl}}/api/opportunites/{{offreStageBrouillonId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Stage — appui à la digitalisation des inventaires (mis à jour)",
+  "nomEntreprise": "Pharmacie Nationale d'Approvisionnement (PNA)",
+  "description": "Description mise à jour du stage, avec un périmètre légèrement élargi.",
+  "ficheDePosteUrl": "https://cdn.senpna.sn/fiches-de-poste/stage-digitalisation-inventaires.jpg",
+  "lieu": "Saint-Louis, Sénégal",
+  "typeContrat": "STAGE",
+  "dateDebut": "2027-03-01",
+  "dateLimiteCandidature": "2027-01-31",
+  "emailContact": "stages@senpna.sn"
+}
+
+
+### 16. PUT /api/opportunites/{id} — cas d'erreur, titre vide (400 attendu)
+PUT {{baseUrl}}/api/opportunites/{{offreStageBrouillonId}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "",
+  "nomEntreprise": "PNA",
+  "description": "Titre vide",
+  "lieu": "Saint-Louis, Sénégal",
+  "typeContrat": "STAGE",
+  "dateLimiteCandidature": "2027-01-31"
+}
+
+
+### 17. PUT /api/opportunites/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+PUT {{baseUrl}}/api/opportunites/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Offre fantôme",
+  "nomEntreprise": "PNA",
+  "description": "N'existe pas",
+  "lieu": "Dakar, Sénégal",
+  "typeContrat": "CDI",
+  "dateLimiteCandidature": "2026-12-01"
+}
+
+
+### 18. PUT /api/opportunites/{id} — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA)
+PUT {{baseUrl}}/api/opportunites/{{offreStageBrouillonId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Ne devrait pas être modifiée",
+  "nomEntreprise": "PNA",
+  "description": "Test rôle insuffisant",
+  "lieu": "Saint-Louis, Sénégal",
+  "typeContrat": "STAGE",
+  "dateLimiteCandidature": "2027-01-31"
+}
+
+
+### 19. PATCH /api/opportunites/{id}/publier — publie une offre en brouillon
+PATCH {{baseUrl}}/api/opportunites/{{offreStageBrouillonId}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 20. PATCH /api/opportunites/{id}/publier — cas idempotent (déjà ouverte, 200 attendu)
+PATCH {{baseUrl}}/api/opportunites/{{offreStageBrouillonId}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 21. PATCH /api/opportunites/{id}/publier — cas d'erreur, date limite déjà dépassée (400 attendu — DATE_LIMITE_CANDIDATURE_INVALIDE)
+### L'offre 6 est persistée OUVERT mais sa date_limite_candidature est déjà passée (cf. V031) :
+### republier échoue même si le statut persisté est déjà OUVERT.
+PATCH {{baseUrl}}/api/opportunites/{{offreAutreExpireeId}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 22. PATCH /api/opportunites/{id}/publier — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/opportunites/99999999-9999-9999-9999-999999999999/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 23. PATCH /api/opportunites/{id}/publier — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+PATCH {{baseUrl}}/api/opportunites/{{offreCddMinimaleId}}/publier
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 24. PATCH /api/opportunites/{id}/mettre-en-cours — passe une offre ouverte en traitement
+PATCH {{baseUrl}}/api/opportunites/{{offreCddMinimaleId}}/mettre-en-cours
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 25. PATCH /api/opportunites/{id}/mettre-en-cours — cas idempotent (déjà en cours, 200 attendu)
+PATCH {{baseUrl}}/api/opportunites/{{offreCddMinimaleId}}/mettre-en-cours
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 26. PATCH /api/opportunites/{id}/cloturer — clôture manuellement une offre
+PATCH {{baseUrl}}/api/opportunites/{{offreCddMinimaleId}}/cloturer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 27. PATCH /api/opportunites/{id}/cloturer — cas idempotent (déjà clôturée, 200 attendu)
+PATCH {{baseUrl}}/api/opportunites/{{offreCddMinimaleId}}/cloturer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 28. PATCH /api/opportunites/{id}/brouillon — remet une offre clôturée en brouillon
+PATCH {{baseUrl}}/api/opportunites/{{offreVolontariatClotureeId}}/brouillon
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 29. PATCH /api/opportunites/{id}/cloturer — cas d'erreur, rôle insuffisant (403 attendu — PHARMACIEN_PNA)
+PATCH {{baseUrl}}/api/opportunites/{{offreFreelanceEnCoursId}}/cloturer
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 30. GET /api/opportunites/{id} — obtenir une offre (lecture ouverte à tout utilisateur authentifié)
+GET {{baseUrl}}/api/opportunites/{{offreCdiCompleteId}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 31. GET /api/opportunites/{id} — lecture par ADMIN_PRA (autorisée, contrairement à l'écriture)
+GET {{baseUrl}}/api/opportunites/{{offreCdiCompleteId}}
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 32. GET /api/opportunites/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/opportunites/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 33. GET /api/opportunites/{id} — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/opportunites/{{offreCdiCompleteId}}
+
+
+### 34. GET /api/opportunites/public/{id} — offre ouverte visible publiquement, sans authentification
+GET {{baseUrl}}/api/opportunites/public/{{offreCdiCompleteId}}
+
+
+### 35. GET /api/opportunites/public/{id} — cas d'erreur, offre persistée OUVERT mais expirée (404 attendu)
+### Statut effectif calculé = CLOTURE malgré le statut persisté OUVERT (cf. V031, offre 6) :
+### non visible publiquement, quand bien même l'ID est correct.
+GET {{baseUrl}}/api/opportunites/public/{{offreAutreExpireeId}}
+
+
+### 36. GET /api/opportunites/public/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/opportunites/public/99999999-9999-9999-9999-999999999999
+
+
+### 37. GET /api/opportunites — lister toutes les offres, pagination par défaut (back-office)
+GET {{baseUrl}}/api/opportunites
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 38. GET /api/opportunites — filtré par type de contrat
+GET {{baseUrl}}/api/opportunites?typeContrat=CDI
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 39. GET /api/opportunites — filtré par statut
+GET {{baseUrl}}/api/opportunites?statut=EN_COURS
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 40. GET /api/opportunites — recherche texte (titre/entreprise/lieu) + tri + pagination
+GET {{baseUrl}}/api/opportunites?q=pharmacien&page=0&size=10&sortBy=titre&sortDirection=ASC
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 41. GET /api/opportunites — cas d'erreur, type de contrat de filtre invalide (400 attendu)
+GET {{baseUrl}}/api/opportunites?typeContrat=INTERIM
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 42. GET /api/opportunites — cas d'erreur, statut de filtre invalide (400 attendu)
+GET {{baseUrl}}/api/opportunites?statut=SUPPRIME
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 43. GET /api/opportunites — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/opportunites
+
+
+### 44. GET /api/opportunites/public — liste publique, pagination par défaut, sans authentification
+### N'inclut ni les offres BROUILLON, ni CLOTURE, ni l'offre 6 (OUVERT persisté mais expirée).
+GET {{baseUrl}}/api/opportunites/public
+
+
+### 45. GET /api/opportunites/public — filtré par type de contrat, sans authentification
+GET {{baseUrl}}/api/opportunites/public?typeContrat=CDI
+
+
+### 46. GET /api/opportunites/public — cas d'erreur, type de contrat invalide (400 attendu)
+GET {{baseUrl}}/api/opportunites/public?typeContrat=INTERIM
