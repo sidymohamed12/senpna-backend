@@ -74,7 +74,9 @@ public class SecurityConfig {
                             "/api/actualites/public",
                             "/api/actualites/public/{id}",
                             "/api/projets/public",
-                            "/api/projets/public/{id}")
+                            "/api/projets/public/{id}",
+                            "/api/opportunites/public",
+                            "/api/opportunites/public/{id}")
                             .permitAll();
 
                     // Healthcheck monitoring
