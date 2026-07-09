@@ -32,3 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 .env
+.env
+.env.prod
+.env.dev
+secrets/*.txt
+!secrets/README.md

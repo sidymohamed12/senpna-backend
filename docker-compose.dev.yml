@@ -1,0 +1,117 @@
+# ═══════════════════════════════════════════════════════════════════════
+# SEN PharmaFlow — docker-compose DEV
+#
+# Philosophie : en local, l'IDE reste le meilleur outil de développement
+# Java (hot-reload via spring-boot-devtools, debug natif, breakpoints).
+# Ce compose ne conteneurise donc QUE l'infrastructure (Redis, Adminer) :
+# l'application, lancée depuis l'IDE ou via `./mvnw spring-boot:run`,
+# consomme ces services sur localhost. Le SMTP reste le vrai compte
+# Gmail défini dans application-dev.yml — voulu, pour valider l'envoi réel.
+#
+# Valeurs en dur volontairement (pas de .env) : rien de sensible ici,
+# ce sont des identifiants de dev jetables, pas la peine d'indirection.
+#
+# Besoin de tester l'image Docker elle-même (onboarding sans JDK local,
+# CI locale, etc.) ? Le service "app" est disponible derrière un profil :
+#   docker compose --profile app up --build
+#
+# Usage courant (recommandé) :
+#   docker compose up -d            # redis, adminer
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# ═══════════════════════════════════════════════════════════════════════
+
+services:
+  # Optionnel — profil "postgres". Si vous avez déjà un Postgres local
+  # qui tourne sur localhost:5432 (ce que application-dev.yml attend
+  # tel quel), ignorez ce service et ne lancez pas ce profil.
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16.4-alpine
+    container_name: senpna-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: senpna
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SMS
+
+    volumes:
+      - senpna_pg_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d senpna"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [senpna-dev-net]
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: senpna-redis-dev
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [senpna-dev-net]
+
+  # UI web légère pour inspecter la base sans installer de client lourd.
+  # Renseignez le serveur dans l'UI : "postgres" si vous utilisez le
+  # profil postgres ci-dessus, sinon "host.docker.internal" pour votre
+  # Postgres local.
+  adminer:
+    image: adminer:4.8.1
+    container_name: senpna-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    networks: [senpna-dev-net]
+
+  # ── Optionnel : application conteneurisée (profil "app") ──────────────
+  # Combinez les profils si vous voulez aussi le Postgres conteneurisé :
+  #   docker compose --profile app --profile postgres up --build
+  # Pour utiliser votre Postgres LOCAL (recommandé, cf. plus haut) à la
+  # place, lancez seulement --profile app et changez SPRING_DATASOURCE_URL
+  # ci-dessous par : jdbc:postgresql://host.docker.internal:5432/senpna
+  app:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: senpna-app-dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "5005:5005" # port de debug distant (JDWP)
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # Surcharge des valeurs "localhost" d'application-dev.yml : les
+      # variables d'environnement Spring ont une priorité supérieure au
+      # fichier application-{profile}.yml, donc ceci fonctionne sans
+      # toucher au code.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/senpna
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: SMS
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+    volumes:
+      - ./src:/build/src # code monté : recompilation à chaud
+      - ./pom.xml:/build/pom.xml
+      - senpna_maven_repo_dev:/root/.m2 # cache Maven persistant entre rebuilds
+    depends_on:
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # nécessaire sous Linux
+    networks: [senpna-dev-net]
+
+networks:
+  senpna-dev-net:
+    driver: bridge
+
+volumes:
+  senpna_pg_dev_data:
+  senpna_maven_repo_dev:

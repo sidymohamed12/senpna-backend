@@ -1,0 +1,315 @@
+# ═══════════════════════════════════════════════════════════════════════
+# SEN PharmaFlow — docker-compose PROD (piloté par HashiCorp Vault)
+#
+# Aucun secret ne réside plus dans un fichier sur disque (.env, secrets
+# Docker fichiers, etc.), même conteneurisé. À la place :
+#
+#   1. Les vrais secrets (mots de passe DB/Redis, JWT_SECRET, SMTP,
+#      clés R2) vivent UNIQUEMENT dans Vault (chiffrés au repos par le
+#      "barrier" de Vault), sous secret/senpna/app et secret/senpna/db.
+#   2. Le conteneur "vault-agent" s'authentifie via AppRole et rend ces
+#      secrets en variables d'environnement dans un volume tmpfs
+#      (mémoire uniquement, jamais écrit sur le disque de l'hôte),
+#      partagé avec "app" (et "postgres"/"redis" si auto-hébergés).
+#   3. Chaque conteneur consommateur attend ce fichier puis exporte les
+#      variables juste avant de lancer son process réel — zéro
+#      modification du code Java, zéro dépendance Spring Cloud Vault.
+#
+# Ce qui reste "secret" à fournir au démarrage : uniquement les
+# identifiants AppRole (VAULT_ROLE_ID, VAULT_SECRET_ID), exportés dans
+# le shell/pipeline CI/CD au moment du déploiement — jamais dans un
+# fichier commité. role_id n'est pas sensible en soi (c'est un
+# identifiant, pas un secret — cf. doc Vault) ; secret_id peut être
+# généré "single-use" via response wrapping (voir BOOTSTRAP.md).
+#
+# Vault lui-même : le service "vault" ci-dessous (profil "vault-server")
+# est un serveur auto-hébergé mono-nœud, pratique pour démarrer. Si vous
+# avez déjà un cluster Vault (HCP Vault, Vault HA géré par une équipe
+# ops), ne lancez pas ce profil et pointez simplement VAULT_ADDR dessus.
+#
+# Usage :
+#   export VAULT_ADDR=http://vault:8200          # ou votre cluster externe
+#   export VAULT_ROLE_ID=<role_id>                # cf. BOOTSTRAP.md
+#   export VAULT_SECRET_ID=<secret_id à usage unique>
+#   docker compose -f docker-compose.prod.yml --profile vault-server --profile db up -d
+#   # (omettez --profile vault-server et/ou --profile db selon ce qui est managé en externe)
+# ═══════════════════════════════════════════════════════════════════════
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-common: &common
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging: *default-logging
+
+# Attente générique : bloque jusqu'à ce que le fichier de secrets rendu
+# par vault-agent existe, l'exporte, puis exec la vraie commande.
+x-wait-for-secrets: &wait-for-secrets
+  - /bin/sh
+  - -c
+
+services:
+  # ── Vault auto-hébergé (profil "vault-server") ────────────────────────
+  # Omettez ce profil si vous utilisez un cluster Vault externe/managé.
+  vault:
+    <<: *common
+    profiles: ["vault-server"]
+    image: hashicorp/vault:1.17
+    container_name: senpna-vault
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./docker/vault/server.hcl:/vault/config/server.hcl:ro
+      - senpna_vault_data:/vault/data
+    command: ["vault", "server", "-config=/vault/config/server.hcl"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://127.0.0.1:8200/v1/sys/health?standbyok=true",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+    networks: [backend]
+    # ⚠️ Après chaque (re)démarrage, ce nœud est "sealed" et doit être
+    # déscellé manuellement (`vault operator unseal` x3) — cf. BOOTSTRAP.md.
+
+  # ── Vault Agent : authentification AppRole + rendu des secrets ───────
+  vault-agent:
+    <<: *common
+    image: hashicorp/vault:1.17
+    container_name: senpna-vault-agent
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+    volumes:
+      - ./docker/vault/agent.hcl:/vault/config/agent.hcl:ro
+      - ./docker/vault/templates:/vault/config/templates:ro
+      - senpna_vault_runtime:/vault/runtime
+      - senpna_vault_secrets:/vault/secrets
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        set -e;
+        umask 077;
+        echo "$${VAULT_ROLE_ID:?VAULT_ROLE_ID manquant (export-le avant docker compose up)}" > /vault/runtime/role_id;
+        echo "$${VAULT_SECRET_ID:?VAULT_SECRET_ID manquant (export-le avant docker compose up)}" > /vault/runtime/secret_id;
+        exec vault agent -config=/vault/config/agent.hcl
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    networks: [backend]
+
+  # ── Postgres auto-hébergé (profil "db") ───────────────────────────────
+  # Omettez ce profil si votre base est managée (RDS, Neon…) : dans ce
+  # cas, DB_URL (rendu depuis Vault) pointe directement dessus.
+  postgres:
+    <<: *common
+    profiles: ["db"]
+    image: postgres:16.4-alpine
+    container_name: senpna-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-senpna}
+      POSTGRES_USER: ${POSTGRES_USER:-senpna_app}
+      # Convention nativement supportée par l'image officielle Postgres :
+      # elle lit elle-même le contenu du fichier, pas besoin de le sourcer.
+      POSTGRES_PASSWORD_FILE: /vault/secrets/postgres_password.txt
+    volumes:
+      - senpna_pg_data:/var/lib/postgresql/data
+      - senpna_vault_secrets:/vault/secrets:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        echo "En attente du secret Vault (postgres_password.txt)...";
+        until [ -f /vault/secrets/postgres_password.txt ]; do sleep 1; done;
+        exec docker-entrypoint.sh postgres
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-senpna_app} -d ${POSTGRES_DB:-senpna}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1G
+    networks: [backend]
+
+  redis:
+    <<: *common
+    profiles: ["db"]
+    image: redis:7.4-alpine
+    container_name: senpna-redis
+    volumes:
+      - senpna_redis_data:/data
+      - senpna_vault_secrets:/vault/secrets:ro
+    entrypoint: *wait-for-secrets
+    command:
+      - >
+        echo "En attente des secrets Vault (db.env)...";
+        until [ -f /vault/secrets/db.env ]; do sleep 1; done;
+        set -a; . /vault/secrets/db.env; set +a;
+        exec docker-entrypoint.sh redis-server
+        --requirepass "$$REDIS_PASSWORD"
+        --appendonly yes
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - >
+          . /vault/secrets/db.env 2>/dev/null;
+          redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 384M
+    networks: [backend]
+
+  # ── Application ────────────────────────────────────────────────────
+  app:
+    <<: *common
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: senpna-backend:${APP_VERSION:-latest}
+    container_name: senpna-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75
+        -XX:+ExitOnOutOfMemoryError
+    volumes:
+      - senpna_vault_secrets:/vault/secrets:ro
+    entrypoint: *wait-for-secrets
+    command:
+      - >
+        echo "En attente des secrets Vault (app.env)...";
+        until [ -f /vault/secrets/app.env ]; do sleep 1; done;
+        set -a; . /vault/secrets/app.env; set +a;
+        exec java org.springframework.boot.loader.launch.JarLauncher
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          memory: 512M
+    depends_on:
+      vault-agent:
+        condition: service_started
+    networks: [backend, frontend]
+
+  nginx:
+    <<: *common
+    image: nginx:1.27-alpine
+    container_name: senpna-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - senpna_certbot_conf:/etc/letsencrypt
+      - senpna_certbot_www:/var/www/certbot
+    depends_on:
+      app:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    networks: [frontend]
+
+  postgres-backup:
+    profiles: ["db"]
+    image: prodrigestivill/postgres-backup-local:16-alpine
+    container_name: senpna-postgres-backup
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-senpna}
+      POSTGRES_USER: ${POSTGRES_USER:-senpna_app}
+      # Cette image supporte aussi nativement le suffixe _FILE.
+      POSTGRES_PASSWORD_FILE: /vault/secrets/postgres_password.txt
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+    volumes:
+      - senpna_pg_backups:/backups
+      - senpna_vault_secrets:/vault/secrets:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [backend]
+
+networks:
+  backend:
+    driver: bridge
+    internal: true
+  frontend:
+    driver: bridge
+
+volumes:
+  # Volumes persistants classiques (données, chiffrées au repos par Postgres
+  # lui-même / par le barrier Vault — rien en clair).
+  senpna_pg_data:
+  senpna_redis_data:
+  senpna_pg_backups:
+  senpna_vault_data:
+  senpna_certbot_conf:
+  senpna_certbot_www:
+
+  # Volumes tmpfs : mémoire uniquement, jamais écrits sur le disque de
+  # l'hôte, effacés à l'arrêt des conteneurs.
+  senpna_vault_runtime:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=8m"
+  senpna_vault_secrets:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=8m"

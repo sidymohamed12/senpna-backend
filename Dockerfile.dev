@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════════════════════════
+# Dockerfile.dev — image de développement
+#
+# Utilisée UNIQUEMENT par le profil "app" de docker-compose.dev.yml,
+# pour onboarding rapide (pas de JDK/Maven local requis) ou CI locale.
+# En développement quotidien, préférez l'IDE + ./mvnw spring-boot:run
+# (hot-reload via spring-boot-devtools, breakpoints natifs).
+#
+# ⚠️ Nécessite le Maven Wrapper (.mvn/, mvnw). S'il est absent du repo,
+# générez-le une fois avec : mvn -N wrapper:wrapper
+# ═══════════════════════════════════════════════════════════════════
+
+FROM eclipse-temurin:21-jdk-alpine
+
+RUN apk add --no-cache bash
+
+WORKDIR /build
+
+# Dépendances d'abord : profite du cache Docker + du volume .m2 monté
+# par docker-compose.dev.yml tant que pom.xml ne change pas.
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -B -q
+
+COPY src/ src/
+
+EXPOSE 8080 5005
+
+ENTRYPOINT ["./mvnw", "spring-boot:run", \
+    "-Dspring-boot.run.profiles=dev", \
+    "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Xmx512m"]
