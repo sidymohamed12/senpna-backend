@@ -1,22 +1,12 @@
 # ═══════════════════════════════════════════════════════════════════════
 # SEN PharmaFlow — docker-compose DEV
 #
-# Philosophie : en local, l'IDE reste le meilleur outil de développement
-# Java (hot-reload via spring-boot-devtools, debug natif, breakpoints).
-# Ce compose ne conteneurise donc QUE l'infrastructure (Redis, Adminer) :
-# l'application, lancée depuis l'IDE ou via `./mvnw spring-boot:run`,
-# consomme ces services sur localhost. Le SMTP reste le vrai compte
-# Gmail défini dans application-dev.yml — voulu, pour valider l'envoi réel.
-#
-# Valeurs en dur volontairement (pas de .env) : rien de sensible ici,
-# ce sont des identifiants de dev jetables, pas la peine d'indirection.
-#
 # Besoin de tester l'image Docker elle-même (onboarding sans JDK local,
 # CI locale, etc.) ? Le service "app" est disponible derrière un profil :
 #   docker compose --profile app up --build
 #
 # Usage courant (recommandé) :
-#   docker compose up -d            # redis, adminer
+#   docker compose -f docker-compose.dev.yml --profile app --profile postgres up -d  # redis, adminer, app & postgres
 #   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 # ═══════════════════════════════════════════════════════════════════════
 
