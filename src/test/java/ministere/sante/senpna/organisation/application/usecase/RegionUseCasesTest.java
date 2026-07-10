@@ -4,9 +4,9 @@ import ministere.sante.senpna.organisation.application.service.RegionDetailAssem
 import ministere.sante.senpna.organisation.application.usecase.region.CreateRegionUseCaseImpl;
 import ministere.sante.senpna.organisation.application.usecase.region.GetRegionUseCaseImpl;
 import ministere.sante.senpna.organisation.application.usecase.region.ListRegionsUseCaseImpl;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreateRegionCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetRegionQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RegionDetail;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.CreateRegionCommand;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.GetRegionQuery;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.RegionDetail;
 import ministere.sante.senpna.organisation.domain.exception.CodeRegionDejaUtiliseException;
 import ministere.sante.senpna.organisation.domain.exception.RegionIntrouvableException;
 import ministere.sante.senpna.organisation.domain.model.Region;

@@ -1,6 +1,6 @@
 package ministere.sante.senpna.medicament.application.service;
 
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ConditionnementDetail;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ConditionnementDetail;
 import ministere.sante.senpna.medicament.domain.model.Conditionnement;
 
 import org.springframework.stereotype.Component;

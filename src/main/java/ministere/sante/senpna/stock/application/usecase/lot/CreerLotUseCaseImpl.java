@@ -4,7 +4,7 @@ import ministere.sante.senpna.fournisseur.domain.exception.FournisseurIntrouvabl
 import ministere.sante.senpna.fournisseur.domain.model.Fournisseur;
 import ministere.sante.senpna.fournisseur.domain.port.out.FournisseurRepositoryPort;
 import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
-import ministere.sante.senpna.medicament.domain.exception.MedicamentIntrouvableException;
+import ministere.sante.senpna.medicament.domain.exception.medicament.MedicamentIntrouvableException;
 import ministere.sante.senpna.medicament.domain.model.Medicament;
 import ministere.sante.senpna.medicament.domain.port.out.MedicamentRepositoryPort;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;

@@ -47,7 +47,6 @@ import ministere.sante.senpna.organisation.domain.valueobject.TypeStructureSanit
 import ministere.sante.senpna.shared.domain.events.AdhesionValideeEvent;
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.shared.domain.port.out.EventPublisherPort;
-import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 
 import org.junit.jupiter.api.DisplayName;

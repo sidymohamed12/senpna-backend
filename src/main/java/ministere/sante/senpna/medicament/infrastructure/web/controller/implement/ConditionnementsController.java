@@ -1,14 +1,14 @@
 package ministere.sante.senpna.medicament.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.medicament.application.facade.MedicamentFacade;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ArchiveConditionnementCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ConditionnementDetail;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ConditionnementPage;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.CreateConditionnementCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.DesarchiveConditionnementCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.GetConditionnementQuery;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ListConditionnementsQuery;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.UpdateConditionnementCommand;
+import ministere.sante.senpna.medicament.application.facade.ConditionnementFacade;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ArchiveConditionnementCommand;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ConditionnementDetail;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ConditionnementPage;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.CreateConditionnementCommand;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.DesarchiveConditionnementCommand;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.GetConditionnementQuery;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ListConditionnementsQuery;
+import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.UpdateConditionnementCommand;
 import ministere.sante.senpna.medicament.infrastructure.web.controller.IConditionnementsController;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.CreateConditionnementRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.UpdateConditionnementRequest;
@@ -31,18 +31,20 @@ public class ConditionnementsController implements IConditionnementsController {
                         + "'GESTIONNAIRE_STRUCTURE')";
         private static final String ROLES_ECRITURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA')";
 
-        private final MedicamentFacade medicamentFacade;
+        private final ConditionnementFacade conditionnementFacade;
 
-        public ConditionnementsController(MedicamentFacade medicamentFacade) {
-                this.medicamentFacade = medicamentFacade;
+        public ConditionnementsController(ConditionnementFacade conditionnementFacade) {
+                this.conditionnementFacade = conditionnementFacade;
         }
 
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> creer(CreateConditionnementRequest request) {
-                ConditionnementDetail result = medicamentFacade.creerConditionnement(new CreateConditionnementCommand(
-                                request.medicamentId(), request.nom(), request.niveau(), request.quantiteUniteBase(),
-                                request.estUniteBase(), request.prixAchat(), request.prixVente()));
+                ConditionnementDetail result = conditionnementFacade
+                                .creerConditionnement(new CreateConditionnementCommand(
+                                                request.medicamentId(), request.nom(), request.niveau(),
+                                                request.quantiteUniteBase(),
+                                                request.estUniteBase(), request.prixAchat(), request.prixVente()));
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
                                 RestResponse.response(HttpStatus.CREATED, toResponse(result), "CONDITIONNEMENT_CREATED",
@@ -52,7 +54,7 @@ public class ConditionnementsController implements IConditionnementsController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateConditionnementRequest request) {
-                ConditionnementDetail result = medicamentFacade
+                ConditionnementDetail result = conditionnementFacade
                                 .modifierConditionnement(new UpdateConditionnementCommand(
                                                 id, request.nom(), request.niveau(), request.quantiteUniteBase(),
                                                 request.estUniteBase(), request.prixAchat(), request.prixVente()));
@@ -64,7 +66,7 @@ public class ConditionnementsController implements IConditionnementsController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> archiver(UUID id) {
-                ConditionnementDetail result = medicamentFacade.archiverConditionnement(
+                ConditionnementDetail result = conditionnementFacade.archiverConditionnement(
                                 new ArchiveConditionnementCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
                                 "CONDITIONNEMENT_ARCHIVED", "Conditionnement archivé avec succès"));
@@ -73,7 +75,7 @@ public class ConditionnementsController implements IConditionnementsController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> desarchiver(UUID id) {
-                ConditionnementDetail result = medicamentFacade.desarchiverConditionnement(
+                ConditionnementDetail result = conditionnementFacade.desarchiverConditionnement(
                                 new DesarchiveConditionnementCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result),
                                 "CONDITIONNEMENT_DESARCHIVED", "Conditionnement désarchivé avec succès"));
@@ -82,7 +84,8 @@ public class ConditionnementsController implements IConditionnementsController {
         @Override
         @PreAuthorize(ROLES_LECTURE)
         public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
-                ConditionnementDetail result = medicamentFacade.obtenirConditionnement(new GetConditionnementQuery(id));
+                ConditionnementDetail result = conditionnementFacade
+                                .obtenirConditionnement(new GetConditionnementQuery(id));
                 return ResponseEntity
                                 .ok(RestResponse.response(HttpStatus.OK, toResponse(result), "CONDITIONNEMENT_FOUND",
                                                 "Conditionnement récupéré"));
@@ -94,7 +97,7 @@ public class ConditionnementsController implements IConditionnementsController {
                         UUID medicamentId, Boolean actif, Integer page, Integer size, String sortBy,
                         String sortDirection) {
 
-                ConditionnementPage result = medicamentFacade.listerConditionnements(
+                ConditionnementPage result = conditionnementFacade.listerConditionnements(
                                 new ListConditionnementsQuery(medicamentId, actif, page, size, sortBy, sortDirection));
 
                 return ResponseEntity.ok(RestResponse.responsePaginate(

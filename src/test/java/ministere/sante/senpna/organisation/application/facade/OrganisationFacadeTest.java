@@ -1,7 +1,17 @@
 package ministere.sante.senpna.organisation.application.facade;
 
+import ministere.sante.senpna.organisation.domain.command.Entrepot.ActivatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.CreatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.DeactivatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotDetail;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotPage;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.GetEntrepotQuery;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.ListEntrepotsQuery;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.UpdatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.*;
-import ministere.sante.senpna.organisation.domain.port.in.*;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.CreateRegionCommand;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.GetRegionQuery;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.RegionDetail;
 import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignStructureToPraUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignStructureToRegionUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignUserToEntrepotUseCase;
@@ -55,51 +65,81 @@ class OrganisationFacadeTest {
 
     @Mock
     CreateRegionUseCase createRegionUseCase;
+
     @Mock
     GetRegionUseCase getRegionUseCase;
+
     @Mock
     ListRegionsUseCase listRegionsUseCase;
+
     @Mock
     CreatePraUseCase createPraUseCase;
+
     @Mock
     UpdatePraUseCase updatePraUseCase;
+
     @Mock
     DeactivatePraUseCase deactivatePraUseCase;
+
     @Mock
     ActivatePraUseCase activatePraUseCase;
+
     @Mock
     GetEntrepotUseCase getEntrepotUseCase;
+
     @Mock
     ListEntrepotsUseCase listEntrepotsUseCase;
+
     @Mock
     CreateStructureSanitaireUseCase createStructureSanitaireUseCase;
+
     @Mock
     UpdateStructureSanitaireUseCase updateStructureSanitaireUseCase;
+
     @Mock
     ValidateAdhesionUseCase validateAdhesionUseCase;
+
     @Mock
     RejectAdhesionUseCase rejectAdhesionUseCase;
+
     @Mock
     ActivateStructureSanitaireUseCase activateStructureSanitaireUseCase;
+
     @Mock
     DeactivateStructureSanitaireUseCase deactivateStructureSanitaireUseCase;
+
     @Mock
     AssignStructureToRegionUseCase assignStructureToRegionUseCase;
+
     @Mock
     AssignStructureToPraUseCase assignStructureToPraUseCase;
+
     @Mock
     GetStructureSanitaireUseCase getStructureSanitaireUseCase;
+
     @Mock
     ListStructuresSanitairesUseCase listStructuresSanitairesUseCase;
+
     @Mock
     AssignUserToEntrepotUseCase assignUserToEntrepotUseCase;
+
     @Mock
     AssignUserToStructureUseCase assignUserToStructureUseCase;
+
     @Mock
     UnassignUserUseCase unassignUserUseCase;
 
     @InjectMocks
-    OrganisationFacade sut;
+    OrganisationFacade sutOrga;
+
+    @InjectMocks
+    EntrepotFacade sutEntrepot;
+
+    @InjectMocks
+    PraFacade sutPra;
+
+    @InjectMocks
+    RegionFacade sutRegion;
 
     private static final UUID ID = UUID.randomUUID();
 
@@ -123,7 +163,7 @@ class OrganisationFacadeTest {
         CreateRegionCommand command = new CreateRegionCommand("DAKAR", "Dakar");
         when(createRegionUseCase.creer(command)).thenReturn(REGION_DETAIL);
 
-        assertThat(sut.creerRegion(command)).isEqualTo(REGION_DETAIL);
+        assertThat(sutRegion.creerRegion(command)).isEqualTo(REGION_DETAIL);
         verify(createRegionUseCase).creer(command);
     }
 
@@ -133,7 +173,7 @@ class OrganisationFacadeTest {
         GetRegionQuery query = new GetRegionQuery(ID);
         when(getRegionUseCase.obtenir(query)).thenReturn(REGION_DETAIL);
 
-        assertThat(sut.obtenirRegion(query)).isEqualTo(REGION_DETAIL);
+        assertThat(sutRegion.obtenirRegion(query)).isEqualTo(REGION_DETAIL);
         verify(getRegionUseCase).obtenir(query);
     }
 
@@ -142,7 +182,7 @@ class OrganisationFacadeTest {
     void listerRegions_delegue() {
         when(listRegionsUseCase.lister()).thenReturn(List.of(REGION_DETAIL));
 
-        assertThat(sut.listerRegions()).containsExactly(REGION_DETAIL);
+        assertThat(sutRegion.listerRegions()).containsExactly(REGION_DETAIL);
         verify(listRegionsUseCase).lister();
     }
 
@@ -154,7 +194,7 @@ class OrganisationFacadeTest {
         CreatePraCommand command = new CreatePraCommand("PRA-DAKAR", "PRA Dakar", ID, null, null);
         when(createPraUseCase.creer(command)).thenReturn(ENTREPOT_DETAIL);
 
-        assertThat(sut.creerPra(command)).isEqualTo(ENTREPOT_DETAIL);
+        assertThat(sutPra.creerPra(command)).isEqualTo(ENTREPOT_DETAIL);
         verify(createPraUseCase).creer(command);
     }
 
@@ -164,7 +204,7 @@ class OrganisationFacadeTest {
         UpdatePraCommand command = new UpdatePraCommand(ID, ID, "PRA Dakar", null, null, null);
         when(updatePraUseCase.modifier(command)).thenReturn(ENTREPOT_DETAIL);
 
-        assertThat(sut.modifierPra(command)).isEqualTo(ENTREPOT_DETAIL);
+        assertThat(sutPra.modifierPra(command)).isEqualTo(ENTREPOT_DETAIL);
         verify(updatePraUseCase).modifier(command);
     }
 
@@ -174,7 +214,7 @@ class OrganisationFacadeTest {
         DeactivatePraCommand command = new DeactivatePraCommand(ID, ID);
         when(deactivatePraUseCase.desactiver(command)).thenReturn(ENTREPOT_DETAIL);
 
-        assertThat(sut.desactiverPra(command)).isEqualTo(ENTREPOT_DETAIL);
+        assertThat(sutPra.desactiverPra(command)).isEqualTo(ENTREPOT_DETAIL);
         verify(deactivatePraUseCase).desactiver(command);
     }
 
@@ -184,7 +224,7 @@ class OrganisationFacadeTest {
         ActivatePraCommand command = new ActivatePraCommand(ID, ID);
         when(activatePraUseCase.activer(command)).thenReturn(ENTREPOT_DETAIL);
 
-        assertThat(sut.activerPra(command)).isEqualTo(ENTREPOT_DETAIL);
+        assertThat(sutPra.activerPra(command)).isEqualTo(ENTREPOT_DETAIL);
         verify(activatePraUseCase).activer(command);
     }
 
@@ -194,7 +234,7 @@ class OrganisationFacadeTest {
         GetEntrepotQuery query = new GetEntrepotQuery(ID);
         when(getEntrepotUseCase.obtenir(query)).thenReturn(ENTREPOT_DETAIL);
 
-        assertThat(sut.obtenirEntrepot(query)).isEqualTo(ENTREPOT_DETAIL);
+        assertThat(sutEntrepot.obtenirEntrepot(query)).isEqualTo(ENTREPOT_DETAIL);
         verify(getEntrepotUseCase).obtenir(query);
     }
 
@@ -205,7 +245,7 @@ class OrganisationFacadeTest {
         EntrepotPage page = new EntrepotPage(List.of(ENTREPOT_DETAIL), 0, 20, 1, 1);
         when(listEntrepotsUseCase.lister(query)).thenReturn(page);
 
-        assertThat(sut.listerEntrepots(query)).isEqualTo(page);
+        assertThat(sutEntrepot.listerEntrepots(query)).isEqualTo(page);
         verify(listEntrepotsUseCase).lister(query);
     }
 
@@ -218,7 +258,7 @@ class OrganisationFacadeTest {
                 TypeStructureSanitaire.HOPITAL, ID, null, null, null, null, "Ndiaye", "Fatou");
         when(createStructureSanitaireUseCase.creer(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.creerStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.creerStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(createStructureSanitaireUseCase).creer(command);
     }
 
@@ -229,7 +269,7 @@ class OrganisationFacadeTest {
                 null, null, null, null);
         when(updateStructureSanitaireUseCase.modifier(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.modifierStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.modifierStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(updateStructureSanitaireUseCase).modifier(command);
     }
 
@@ -239,7 +279,7 @@ class OrganisationFacadeTest {
         ValidateAdhesionCommand command = new ValidateAdhesionCommand(ID);
         when(validateAdhesionUseCase.valider(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.validerAdhesion(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.validerAdhesion(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(validateAdhesionUseCase).valider(command);
     }
 
@@ -249,7 +289,7 @@ class OrganisationFacadeTest {
         RejectAdhesionCommand command = new RejectAdhesionCommand(ID, "motif");
         when(rejectAdhesionUseCase.rejeter(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.rejeterAdhesion(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.rejeterAdhesion(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(rejectAdhesionUseCase).rejeter(command);
     }
 
@@ -259,7 +299,7 @@ class OrganisationFacadeTest {
         ActivateStructureSanitaireCommand command = new ActivateStructureSanitaireCommand(ID);
         when(activateStructureSanitaireUseCase.activer(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.activerStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.activerStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(activateStructureSanitaireUseCase).activer(command);
     }
 
@@ -269,7 +309,7 @@ class OrganisationFacadeTest {
         DeactivateStructureSanitaireCommand command = new DeactivateStructureSanitaireCommand(ID);
         when(deactivateStructureSanitaireUseCase.desactiver(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.desactiverStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.desactiverStructureSanitaire(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(deactivateStructureSanitaireUseCase).desactiver(command);
     }
 
@@ -279,7 +319,7 @@ class OrganisationFacadeTest {
         AssignStructureToRegionCommand command = new AssignStructureToRegionCommand(ID, ID);
         when(assignStructureToRegionUseCase.affecter(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.affecterStructureARegion(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.affecterStructureARegion(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(assignStructureToRegionUseCase).affecter(command);
     }
 
@@ -289,7 +329,7 @@ class OrganisationFacadeTest {
         AssignStructureToPraCommand command = new AssignStructureToPraCommand(ID, ID);
         when(assignStructureToPraUseCase.affecter(command)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.affecterStructureAPra(command)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.affecterStructureAPra(command)).isEqualTo(STRUCTURE_DETAIL);
         verify(assignStructureToPraUseCase).affecter(command);
     }
 
@@ -299,7 +339,7 @@ class OrganisationFacadeTest {
         GetStructureSanitaireQuery query = new GetStructureSanitaireQuery(ID);
         when(getStructureSanitaireUseCase.obtenir(query)).thenReturn(STRUCTURE_DETAIL);
 
-        assertThat(sut.obtenirStructureSanitaire(query)).isEqualTo(STRUCTURE_DETAIL);
+        assertThat(sutOrga.obtenirStructureSanitaire(query)).isEqualTo(STRUCTURE_DETAIL);
         verify(getStructureSanitaireUseCase).obtenir(query);
     }
 
@@ -311,7 +351,7 @@ class OrganisationFacadeTest {
         StructureSanitairePage page = new StructureSanitairePage(List.of(STRUCTURE_DETAIL), 0, 20, 1, 1);
         when(listStructuresSanitairesUseCase.lister(query)).thenReturn(page);
 
-        assertThat(sut.listerStructuresSanitaires(query)).isEqualTo(page);
+        assertThat(sutOrga.listerStructuresSanitaires(query)).isEqualTo(page);
         verify(listStructuresSanitairesUseCase).lister(query);
     }
 
@@ -323,7 +363,7 @@ class OrganisationFacadeTest {
         AssignUserToEntrepotCommand command = new AssignUserToEntrepotCommand(ID, ID);
         when(assignUserToEntrepotUseCase.affecter(command)).thenReturn(AFFECTATION_DETAIL);
 
-        assertThat(sut.affecterUtilisateurAEntrepot(command)).isEqualTo(AFFECTATION_DETAIL);
+        assertThat(sutOrga.affecterUtilisateurAEntrepot(command)).isEqualTo(AFFECTATION_DETAIL);
         verify(assignUserToEntrepotUseCase).affecter(command);
     }
 
@@ -333,7 +373,7 @@ class OrganisationFacadeTest {
         AssignUserToStructureCommand command = new AssignUserToStructureCommand(ID, ID);
         when(assignUserToStructureUseCase.affecter(command)).thenReturn(AFFECTATION_DETAIL);
 
-        assertThat(sut.affecterUtilisateurAStructure(command)).isEqualTo(AFFECTATION_DETAIL);
+        assertThat(sutOrga.affecterUtilisateurAStructure(command)).isEqualTo(AFFECTATION_DETAIL);
         verify(assignUserToStructureUseCase).affecter(command);
     }
 
@@ -343,7 +383,7 @@ class OrganisationFacadeTest {
         UnassignUserCommand command = new UnassignUserCommand(ID);
         when(unassignUserUseCase.retirer(command)).thenReturn(AFFECTATION_DETAIL);
 
-        assertThat(sut.retirerAffectationUtilisateur(command)).isEqualTo(AFFECTATION_DETAIL);
+        assertThat(sutOrga.retirerAffectationUtilisateur(command)).isEqualTo(AFFECTATION_DETAIL);
         verify(unassignUserUseCase).retirer(command);
     }
 }

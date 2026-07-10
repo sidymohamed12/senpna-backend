@@ -1,14 +1,14 @@
 package ministere.sante.senpna.medicament.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.medicament.application.facade.MedicamentFacade;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ArchiveFamilleCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.CreateFamilleCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.DesarchiveFamilleCommand;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.FamilleDetail;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.FamillePage;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.GetFamilleQuery;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.ListFamillesQuery;
-import ministere.sante.senpna.medicament.domain.command.MedicamentCommands.UpdateFamilleCommand;
+import ministere.sante.senpna.medicament.application.facade.FamilleFacade;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.ArchiveFamilleCommand;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.CreateFamilleCommand;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.DesarchiveFamilleCommand;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.FamilleDetail;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.FamillePage;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.GetFamilleQuery;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.ListFamillesQuery;
+import ministere.sante.senpna.medicament.domain.command.FamilleCommands.UpdateFamilleCommand;
 import ministere.sante.senpna.medicament.infrastructure.web.controller.IFamillesController;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.CreateFamilleRequest;
 import ministere.sante.senpna.medicament.infrastructure.web.dto.request.UpdateFamilleRequest;
@@ -31,16 +31,16 @@ public class FamillesController implements IFamillesController {
                         + "'GESTIONNAIRE_STRUCTURE')";
         private static final String ROLES_ECRITURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA')";
 
-        private final MedicamentFacade medicamentFacade;
+        private final FamilleFacade familleFacade;
 
-        public FamillesController(MedicamentFacade medicamentFacade) {
-                this.medicamentFacade = medicamentFacade;
+        public FamillesController(FamilleFacade familleFacade) {
+                this.familleFacade = familleFacade;
         }
 
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> creer(CreateFamilleRequest request) {
-                FamilleDetail result = medicamentFacade.creerFamille(
+                FamilleDetail result = familleFacade.creerFamille(
                                 new CreateFamilleCommand(request.code(), request.libelle(), request.description()));
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -51,7 +51,7 @@ public class FamillesController implements IFamillesController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdateFamilleRequest request) {
-                FamilleDetail result = medicamentFacade.modifierFamille(
+                FamilleDetail result = familleFacade.modifierFamille(
                                 new UpdateFamilleCommand(id, request.libelle(), request.description()));
 
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_UPDATED",
@@ -61,7 +61,7 @@ public class FamillesController implements IFamillesController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> archiver(UUID id) {
-                FamilleDetail result = medicamentFacade.archiverFamille(new ArchiveFamilleCommand(id));
+                FamilleDetail result = familleFacade.archiverFamille(new ArchiveFamilleCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_ARCHIVED",
                                 "Famille archivée avec succès"));
         }
@@ -69,7 +69,7 @@ public class FamillesController implements IFamillesController {
         @Override
         @PreAuthorize(ROLES_ECRITURE)
         public ResponseEntity<Map<String, Object>> desarchiver(UUID id) {
-                FamilleDetail result = medicamentFacade.desarchiverFamille(new DesarchiveFamilleCommand(id));
+                FamilleDetail result = familleFacade.desarchiverFamille(new DesarchiveFamilleCommand(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_DESARCHIVED",
                                 "Famille désarchivée avec succès"));
         }
@@ -77,7 +77,7 @@ public class FamillesController implements IFamillesController {
         @Override
         @PreAuthorize(ROLES_LECTURE)
         public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
-                FamilleDetail result = medicamentFacade.obtenirFamille(new GetFamilleQuery(id));
+                FamilleDetail result = familleFacade.obtenirFamille(new GetFamilleQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "FAMILLE_FOUND",
                                 "Famille récupérée"));
         }
@@ -87,7 +87,7 @@ public class FamillesController implements IFamillesController {
         public ResponseEntity<Map<String, Object>> lister(
                         String q, Boolean actif, Integer page, Integer size, String sortBy, String sortDirection) {
 
-                FamillePage result = medicamentFacade.listerFamilles(
+                FamillePage result = familleFacade.listerFamilles(
                                 new ListFamillesQuery(q, actif, page, size, sortBy, sortDirection));
 
                 return ResponseEntity.ok(RestResponse.responsePaginate(
