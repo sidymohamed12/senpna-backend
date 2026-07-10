@@ -43,6 +43,28 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<querydsl.version>5.1.0</querydsl.version>
 		<jjwt.version>0.12.6</jjwt.version>
+		<jacoco.version>0.8.12</jacoco.version>
+
+		<!-- ══════════════════════════════════════
+		     SONARCLOUD
+		     ⚠️ À ADAPTER : remplacez par votre organisation et la clé
+		     de projet réelles créées sur https://sonarcloud.io
+		     (Sonar > Administration > ... ou lors de l'import du repo).
+		     ══════════════════════════════════════ -->
+		<sonar.organization>sidymohamed12</sonar.organization>
+		<sonar.projectKey>sidymohamed12_senpna-backend</sonar.projectKey>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<!-- Exclut le code généré (QueryDSL Q*, MapStruct impl) et les DTO/entités du calcul de
+		couverture -->
+		<sonar.coverage.exclusions>
+			**/generated-sources/**,
+			**/Q*.java,
+			**/*MapperImpl.java,
+			**/config/**,
+			**/*Application.java
+		</sonar.coverage.exclusions>
+		<sonar.java.source>21</sonar.java.source>
 	</properties>
 
 	<dependencies>
@@ -278,12 +300,56 @@
 				</configuration>
 			</plugin>
 
+			<!-- ══════════════════════════════════════
+			     JACOCO — couverture de code
+			     prepare-agent : instrumente les classes avant l'exécution des tests
+			     report        : génère target/site/jacoco/jacoco.xml, consommé par SonarCloud
+			     ══════════════════════════════════════ -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>jacoco-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-prepare-agent-integration</id>
+						<goals>
+							<goal>prepare-agent-integration</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+							<goal>report-integration</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<!-- Tests d'intégration : uniquement le tag "integration" -->
 				<configuration>
 					<groups>integration</groups>
+					<!--
+					  ✅ AJOUTÉ : aucun application.yml par défaut n'existe (seulement
+					  application-{profile}.yml), donc sans profil actif, le contexte
+					  Spring des tests @SpringBootTest ne trouve aucune configuration.
+					  On force explicitement le profil "test" (H2 in-memory, pas
+					  d'infra externe requise) pour que `mvn verify` soit reproductible
+					  partout (poste local, CI) sans dépendre d'une variable d'env.
+					-->
+					<systemPropertyVariables>
+						<spring.profiles.active>test</spring.profiles.active>
+					</systemPropertyVariables>
 				</configuration>
 				<executions>
 					<execution>
