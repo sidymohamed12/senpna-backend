@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.lot;
 
 import ministere.sante.senpna.fournisseur.domain.exception.FournisseurIntrouvableException;
 import ministere.sante.senpna.fournisseur.domain.model.Fournisseur;

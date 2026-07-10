@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.stock;
 
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableException;

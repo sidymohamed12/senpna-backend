@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.mouvement;
 
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;

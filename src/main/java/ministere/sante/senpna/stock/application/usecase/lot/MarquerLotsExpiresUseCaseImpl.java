@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.lot;
 
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.port.in.lot.MarquerLotsExpiresUseCase;

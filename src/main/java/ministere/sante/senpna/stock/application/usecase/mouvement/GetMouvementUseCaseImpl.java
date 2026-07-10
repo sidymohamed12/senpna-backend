@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.mouvement;
 
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.MouvementDetailAssembler;

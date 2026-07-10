@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.stock;
 
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;

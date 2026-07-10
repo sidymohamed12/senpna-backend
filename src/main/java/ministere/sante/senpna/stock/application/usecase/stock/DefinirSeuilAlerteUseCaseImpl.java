@@ -1,31 +1,26 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.stock;
 
-import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
-import ministere.sante.senpna.stock.domain.command.StockCommands.LibererReservationCommand;
+import ministere.sante.senpna.stock.domain.command.StockCommands.DefinirSeuilAlerteCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
 import ministere.sante.senpna.stock.domain.exception.stock.StockIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Stock;
-import ministere.sante.senpna.stock.domain.port.in.stock.LibererReservationUseCase;
+import ministere.sante.senpna.stock.domain.port.in.stock.DefinirSeuilAlerteUseCase;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
-import ministere.sante.senpna.stock.domain.valueobject.LotId;
+import ministere.sante.senpna.stock.domain.valueobject.StockId;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Libère tout ou partie d'une réservation (commande annulée, rejetée, ou
- * quantité revue à la baisse — cf. doc. métier §10).
- */
 @Service
-public class LibererReservationUseCaseImpl implements LibererReservationUseCase {
+public class DefinirSeuilAlerteUseCaseImpl implements DefinirSeuilAlerteUseCase {
 
     private final StockRepositoryPort stockRepositoryPort;
     private final StockDetailAssembler stockDetailAssembler;
     private final EntrepotScopeGuard entrepotScopeGuard;
 
-    public LibererReservationUseCaseImpl(StockRepositoryPort stockRepositoryPort,
+    public DefinirSeuilAlerteUseCaseImpl(StockRepositoryPort stockRepositoryPort,
             StockDetailAssembler stockDetailAssembler, EntrepotScopeGuard entrepotScopeGuard) {
         this.stockRepositoryPort = stockRepositoryPort;
         this.stockDetailAssembler = stockDetailAssembler;
@@ -34,16 +29,17 @@ public class LibererReservationUseCaseImpl implements LibererReservationUseCase 
 
     @Override
     @Transactional
-    public StockDetail liberer(LibererReservationCommand command) {
-        entrepotScopeGuard.verifierEcritureAutorisee(command.entrepotId());
-
-        Stock stock = stockRepositoryPort
-                .findByEntrepotIdAndLotIdForUpdate(EntrepotId.of(command.entrepotId()), LotId.of(command.lotId()))
+    public StockDetail definir(DefinirSeuilAlerteCommand command) {
+        Stock stock = stockRepositoryPort.findById(StockId.of(command.stockId()))
                 .orElseThrow(StockIntrouvableException::new);
 
-        stock.libererReservation(command.quantite());
-        Stock saved = stockRepositoryPort.save(stock);
+        // Le stockId ne révèle pas son entrepôt tant qu'on ne l'a pas chargé :
+        // la vérification de portée n'intervient donc qu'à ce stade.
+        entrepotScopeGuard.verifierEcritureAutorisee(stock.getEntrepotId().getValue());
 
+        stock.definirSeuilAlerte(command.seuilAlerte());
+
+        Stock saved = stockRepositoryPort.save(stock);
         return stockDetailAssembler.assembler(saved);
     }
 }

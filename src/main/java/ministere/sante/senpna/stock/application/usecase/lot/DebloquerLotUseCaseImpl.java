@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.application.usecase;
+package ministere.sante.senpna.stock.application.usecase.lot;
 
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
 import ministere.sante.senpna.stock.application.service.LotOwnershipGuard;
