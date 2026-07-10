@@ -1,7 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase;
 
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.MarquerLotsExpiresUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.MarquerLotsExpiresUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 
 import org.slf4j.Logger;

@@ -15,7 +15,7 @@ import ministere.sante.senpna.stock.domain.exception.stock.StockIntrouvableExcep
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.model.MouvementStock;
 import ministere.sante.senpna.stock.domain.model.Stock;
-import ministere.sante.senpna.stock.domain.port.in.SortirStockUseCase;
+import ministere.sante.senpna.stock.domain.port.in.mouvement.SortirStockUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.port.out.MouvementStockRepositoryPort;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;

@@ -9,7 +9,7 @@ import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.ListMo
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementPage;
 import ministere.sante.senpna.stock.domain.criteria.MouvementSearchCriteria;
 import ministere.sante.senpna.stock.domain.model.MouvementStock;
-import ministere.sante.senpna.stock.domain.port.in.ListMouvementsUseCase;
+import ministere.sante.senpna.stock.domain.port.in.mouvement.ListMouvementsUseCase;
 import ministere.sante.senpna.stock.domain.port.out.MouvementStockRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.SensMouvement;
 import ministere.sante.senpna.stock.domain.valueobject.TypeMouvement;

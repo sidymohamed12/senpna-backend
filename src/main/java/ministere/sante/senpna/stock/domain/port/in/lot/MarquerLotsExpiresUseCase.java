@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.domain.port.in;
+package ministere.sante.senpna.stock.domain.port.in.lot;
 
 /**
  * Détecte et marque {@code EXPIRE} tous les lots {@code ACTIF} dont la

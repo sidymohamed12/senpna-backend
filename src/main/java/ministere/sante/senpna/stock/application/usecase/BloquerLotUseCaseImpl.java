@@ -6,7 +6,7 @@ import ministere.sante.senpna.stock.domain.command.LotCommands.BloquerLotCommand
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
 import ministere.sante.senpna.stock.domain.exception.lot.LotIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.BloquerLotUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.BloquerLotUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
 

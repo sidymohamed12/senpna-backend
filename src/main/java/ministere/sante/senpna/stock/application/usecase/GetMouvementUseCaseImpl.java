@@ -7,7 +7,7 @@ import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.Mouvem
 import ministere.sante.senpna.stock.domain.exception.PorteeEntrepotInterditeException;
 import ministere.sante.senpna.stock.domain.exception.mouvement.MouvementStockIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.MouvementStock;
-import ministere.sante.senpna.stock.domain.port.in.GetMouvementUseCase;
+import ministere.sante.senpna.stock.domain.port.in.mouvement.GetMouvementUseCase;
 import ministere.sante.senpna.stock.domain.port.out.MouvementStockRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.MouvementStockId;
 

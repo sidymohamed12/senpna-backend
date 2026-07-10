@@ -8,7 +8,7 @@ import ministere.sante.senpna.stock.domain.command.LotCommands.AlertePeremptionQ
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotPage;
 import ministere.sante.senpna.stock.domain.criteria.AlertePeremptionCriteria;
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.ListerAlertesPeremptionUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.ListerAlertesPeremptionUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 
 import org.springframework.stereotype.Service;

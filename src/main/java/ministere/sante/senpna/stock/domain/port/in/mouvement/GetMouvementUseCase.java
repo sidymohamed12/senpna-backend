@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.domain.port.in;
+package ministere.sante.senpna.stock.domain.port.in.mouvement;
 
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.GetMouvementQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementDetail;

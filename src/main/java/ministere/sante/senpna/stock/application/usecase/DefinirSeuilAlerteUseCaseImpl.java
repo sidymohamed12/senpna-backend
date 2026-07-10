@@ -6,7 +6,7 @@ import ministere.sante.senpna.stock.domain.command.StockCommands.DefinirSeuilAle
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
 import ministere.sante.senpna.stock.domain.exception.stock.StockIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Stock;
-import ministere.sante.senpna.stock.domain.port.in.DefinirSeuilAlerteUseCase;
+import ministere.sante.senpna.stock.domain.port.in.stock.DefinirSeuilAlerteUseCase;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.StockId;
 

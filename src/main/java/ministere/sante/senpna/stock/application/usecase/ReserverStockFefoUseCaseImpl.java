@@ -11,7 +11,7 @@ import ministere.sante.senpna.stock.domain.command.StockCommands.ReserverStockFe
 import ministere.sante.senpna.stock.domain.exception.stock.StockInsuffisantException;
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.model.Stock;
-import ministere.sante.senpna.stock.domain.port.in.ReserverStockFefoUseCase;
+import ministere.sante.senpna.stock.domain.port.in.stock.ReserverStockFefoUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 

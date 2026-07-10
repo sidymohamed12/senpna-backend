@@ -8,7 +8,7 @@ import ministere.sante.senpna.stock.domain.command.StockCommands.ListStocksQuery
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockPage;
 import ministere.sante.senpna.stock.domain.criteria.StockSearchCriteria;
 import ministere.sante.senpna.stock.domain.model.Stock;
-import ministere.sante.senpna.stock.domain.port.in.ListerAlertesRuptureUseCase;
+import ministere.sante.senpna.stock.domain.port.in.stock.ListerAlertesRuptureUseCase;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 
 import org.springframework.stereotype.Service;

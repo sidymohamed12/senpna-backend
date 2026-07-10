@@ -1,12 +1,12 @@
 package ministere.sante.senpna.stock.infrastructure.scheduler;
 
-import ministere.sante.senpna.stock.domain.port.in.MarquerLotsExpiresUseCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import ministere.sante.senpna.stock.domain.port.in.lot.MarquerLotsExpiresUseCase;
 
 /**
  * Job planifié quotidien qui détecte les lots {@code ACTIF} dont la date

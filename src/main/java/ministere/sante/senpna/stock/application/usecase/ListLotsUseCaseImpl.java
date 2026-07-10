@@ -9,7 +9,7 @@ import ministere.sante.senpna.stock.domain.command.LotCommands.ListLotsQuery;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotPage;
 import ministere.sante.senpna.stock.domain.criteria.LotSearchCriteria;
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.ListLotsUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.ListLotsUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.StatutLot;
 

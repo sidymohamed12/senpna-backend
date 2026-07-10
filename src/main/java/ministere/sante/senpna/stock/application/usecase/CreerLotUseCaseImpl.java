@@ -14,7 +14,7 @@ import ministere.sante.senpna.stock.domain.command.LotCommands.CreerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
 import ministere.sante.senpna.stock.domain.exception.lot.NumeroLotDejaUtiliseException;
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.CreerLotUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.CreerLotUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 
 import org.springframework.stereotype.Service;

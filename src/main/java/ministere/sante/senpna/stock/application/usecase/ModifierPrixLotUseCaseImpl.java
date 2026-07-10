@@ -6,7 +6,7 @@ import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
 import ministere.sante.senpna.stock.domain.command.LotCommands.ModifierPrixLotCommand;
 import ministere.sante.senpna.stock.domain.exception.lot.LotIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Lot;
-import ministere.sante.senpna.stock.domain.port.in.ModifierPrixLotUseCase;
+import ministere.sante.senpna.stock.domain.port.in.lot.ModifierPrixLotUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
 
