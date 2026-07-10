@@ -2,6 +2,12 @@ package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.EntrepotDetailAssembler;
 import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;
+import ministere.sante.senpna.organisation.application.usecase.PRA.ActivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.PRA.CreatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.PRA.DeactivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.PRA.UpdatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.entrepot.GetEntrepotUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.entrepot.ListEntrepotsUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.DeactivatePraCommand;
@@ -215,7 +221,8 @@ class EntrepotUseCasesTest {
 
             assertThatThrownBy(() -> sut.modifier(
                     new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null)))
-                    .isInstanceOf(ministere.sante.senpna.organisation.domain.exception.AccesRegionRefuseException.class);
+                    .isInstanceOf(
+                            ministere.sante.senpna.organisation.domain.exception.AccesRegionRefuseException.class);
 
             verify(entrepotRepositoryPort, never()).save(any());
         }

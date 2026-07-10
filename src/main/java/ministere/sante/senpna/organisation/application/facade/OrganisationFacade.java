@@ -1,46 +1,24 @@
 package ministere.sante.senpna.organisation.application.facade;
 
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.*;
-import ministere.sante.senpna.organisation.domain.port.in.ActivatePraUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.ActivateStructureSanitaireUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.AssignStructureToPraUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.AssignStructureToRegionUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.AssignUserToEntrepotUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.AssignUserToStructureUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.CreatePraUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.CreateRegionUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.CreateStructureSanitaireUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.DeactivatePraUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.DeactivateStructureSanitaireUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.GetEntrepotUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.GetRegionUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.GetStructureSanitaireUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.ListEntrepotsUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.ListRegionsUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.ListStructuresSanitairesUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.RejectAdhesionUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.UnassignUserUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.UpdatePraUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.UpdateStructureSanitaireUseCase;
-import ministere.sante.senpna.organisation.domain.port.in.ValidateAdhesionUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignStructureToPraUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignStructureToRegionUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignUserToEntrepotUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.AssignUserToStructureUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.RejectAdhesionUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.UnassignUserUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.affectation.ValidateAdhesionUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.ActivateStructureSanitaireUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.CreateStructureSanitaireUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.DeactivateStructureSanitaireUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.GetStructureSanitaireUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.ListStructuresSanitairesUseCase;
+import ministere.sante.senpna.organisation.domain.port.in.structure.UpdateStructureSanitaireUseCase;
 
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class OrganisationFacade {
-
-    private final CreateRegionUseCase createRegionUseCase;
-    private final GetRegionUseCase getRegionUseCase;
-    private final ListRegionsUseCase listRegionsUseCase;
-
-    private final CreatePraUseCase createPraUseCase;
-    private final UpdatePraUseCase updatePraUseCase;
-    private final DeactivatePraUseCase deactivatePraUseCase;
-    private final ActivatePraUseCase activatePraUseCase;
-    private final GetEntrepotUseCase getEntrepotUseCase;
-    private final ListEntrepotsUseCase listEntrepotsUseCase;
 
     private final CreateStructureSanitaireUseCase createStructureSanitaireUseCase;
     private final UpdateStructureSanitaireUseCase updateStructureSanitaireUseCase;
@@ -58,15 +36,6 @@ public class OrganisationFacade {
     private final UnassignUserUseCase unassignUserUseCase;
 
     public OrganisationFacade(
-            CreateRegionUseCase createRegionUseCase,
-            GetRegionUseCase getRegionUseCase,
-            ListRegionsUseCase listRegionsUseCase,
-            CreatePraUseCase createPraUseCase,
-            UpdatePraUseCase updatePraUseCase,
-            DeactivatePraUseCase deactivatePraUseCase,
-            ActivatePraUseCase activatePraUseCase,
-            GetEntrepotUseCase getEntrepotUseCase,
-            ListEntrepotsUseCase listEntrepotsUseCase,
             CreateStructureSanitaireUseCase createStructureSanitaireUseCase,
             UpdateStructureSanitaireUseCase updateStructureSanitaireUseCase,
             ValidateAdhesionUseCase validateAdhesionUseCase,
@@ -80,15 +49,6 @@ public class OrganisationFacade {
             AssignUserToEntrepotUseCase assignUserToEntrepotUseCase,
             AssignUserToStructureUseCase assignUserToStructureUseCase,
             UnassignUserUseCase unassignUserUseCase) {
-        this.createRegionUseCase = createRegionUseCase;
-        this.getRegionUseCase = getRegionUseCase;
-        this.listRegionsUseCase = listRegionsUseCase;
-        this.createPraUseCase = createPraUseCase;
-        this.updatePraUseCase = updatePraUseCase;
-        this.deactivatePraUseCase = deactivatePraUseCase;
-        this.activatePraUseCase = activatePraUseCase;
-        this.getEntrepotUseCase = getEntrepotUseCase;
-        this.listEntrepotsUseCase = listEntrepotsUseCase;
         this.createStructureSanitaireUseCase = createStructureSanitaireUseCase;
         this.updateStructureSanitaireUseCase = updateStructureSanitaireUseCase;
         this.validateAdhesionUseCase = validateAdhesionUseCase;
@@ -102,46 +62,6 @@ public class OrganisationFacade {
         this.assignUserToEntrepotUseCase = assignUserToEntrepotUseCase;
         this.assignUserToStructureUseCase = assignUserToStructureUseCase;
         this.unassignUserUseCase = unassignUserUseCase;
-    }
-
-    // ── Région ──────────────────────────────────────────────────────────
-
-    public RegionDetail creerRegion(CreateRegionCommand command) {
-        return createRegionUseCase.creer(command);
-    }
-
-    public RegionDetail obtenirRegion(GetRegionQuery query) {
-        return getRegionUseCase.obtenir(query);
-    }
-
-    public List<RegionDetail> listerRegions() {
-        return listRegionsUseCase.lister();
-    }
-
-    // ── PRA (entrepôt) ──────────────────────────────────────────────────
-
-    public EntrepotDetail creerPra(CreatePraCommand command) {
-        return createPraUseCase.creer(command);
-    }
-
-    public EntrepotDetail modifierPra(UpdatePraCommand command) {
-        return updatePraUseCase.modifier(command);
-    }
-
-    public EntrepotDetail desactiverPra(DeactivatePraCommand command) {
-        return deactivatePraUseCase.desactiver(command);
-    }
-
-    public EntrepotDetail activerPra(ActivatePraCommand command) {
-        return activatePraUseCase.activer(command);
-    }
-
-    public EntrepotDetail obtenirEntrepot(GetEntrepotQuery query) {
-        return getEntrepotUseCase.obtenir(query);
-    }
-
-    public EntrepotPage listerEntrepots(ListEntrepotsQuery query) {
-        return listEntrepotsUseCase.lister(query);
     }
 
     // ── Structure sanitaire ─────────────────────────────────────────────

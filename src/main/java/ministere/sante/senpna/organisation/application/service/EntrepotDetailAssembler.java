@@ -1,6 +1,6 @@
 package ministere.sante.senpna.organisation.application.service;
 
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotDetail;
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.shared.domain.port.out.RegionCachePort;
 import ministere.sante.senpna.shared.domain.projection.RegionProjection;

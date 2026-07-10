@@ -1,6 +1,16 @@
 package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.StructureSanitaireDetailAssembler;
+import ministere.sante.senpna.organisation.application.usecase.affectation.AssignStructureToPraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.affectation.AssignStructureToRegionUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.affectation.RejectAdhesionUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.affectation.ValidateAdhesionUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.ActivateStructureSanitaireUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.CreateStructureSanitaireUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.DeactivateStructureSanitaireUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.GetStructureSanitaireUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.ListStructuresSanitairesUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.strcuture.UpdateStructureSanitaireUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivateStructureSanitaireCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignStructureToPraCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignStructureToRegionCommand;
@@ -316,7 +326,8 @@ class StructureSanitaireUseCasesTest {
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // ActivateStructureSanitaireUseCaseImpl / DeactivateStructureSanitaireUseCaseImpl
+    // ActivateStructureSanitaireUseCaseImpl /
+    // DeactivateStructureSanitaireUseCaseImpl
     // ══════════════════════════════════════════════════════════════════════
 
     @Nested

@@ -1,9 +1,9 @@
 package ministere.sante.senpna.organisation.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.organisation.application.facade.OrganisationFacade;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreateRegionCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetRegionQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RegionDetail;
+import ministere.sante.senpna.organisation.application.facade.RegionFacade;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.CreateRegionCommand;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.GetRegionQuery;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.RegionDetail;
 import ministere.sante.senpna.organisation.infrastructure.web.controller.IRegionsController;
 import ministere.sante.senpna.organisation.infrastructure.web.dto.request.CreateRegionRequest;
 import ministere.sante.senpna.organisation.infrastructure.web.dto.response.RegionResponse;
@@ -21,16 +21,16 @@ import java.util.UUID;
 @RestController
 public class RegionsController implements IRegionsController {
 
-    private final OrganisationFacade organisationFacade;
+    private final RegionFacade regionFacade;
 
-    public RegionsController(OrganisationFacade organisationFacade) {
-        this.organisationFacade = organisationFacade;
+    public RegionsController(RegionFacade regionFacade) {
+        this.regionFacade = regionFacade;
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
     public ResponseEntity<Map<String, Object>> creer(CreateRegionRequest request) {
-        RegionDetail result = organisationFacade.creerRegion(new CreateRegionCommand(request.code(), request.nom()));
+        RegionDetail result = regionFacade.creerRegion(new CreateRegionCommand(request.code(), request.nom()));
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 RestResponse.response(HttpStatus.CREATED, toResponse(result), "REGION_CREATED",
                         "Région créée avec succès"));
@@ -39,7 +39,7 @@ public class RegionsController implements IRegionsController {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
     public ResponseEntity<Map<String, Object>> lister() {
-        List<RegionResponse> results = organisationFacade.listerRegions().stream().map(this::toResponse).toList();
+        List<RegionResponse> results = regionFacade.listerRegions().stream().map(this::toResponse).toList();
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, results, "REGIONS_LISTED",
                 "Liste des régions récupérée"));
     }
@@ -47,7 +47,7 @@ public class RegionsController implements IRegionsController {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
     public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
-        RegionDetail result = organisationFacade.obtenirRegion(new GetRegionQuery(id));
+        RegionDetail result = regionFacade.obtenirRegion(new GetRegionQuery(id));
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "REGION_FOUND",
                 "Région récupérée"));
     }

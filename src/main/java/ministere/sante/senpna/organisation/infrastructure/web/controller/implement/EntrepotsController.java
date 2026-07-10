@@ -1,10 +1,10 @@
 package ministere.sante.senpna.organisation.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.organisation.application.facade.OrganisationFacade;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotPage;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetEntrepotQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ListEntrepotsQuery;
+import ministere.sante.senpna.organisation.application.facade.EntrepotFacade;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotDetail;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotPage;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.GetEntrepotQuery;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.ListEntrepotsQuery;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
 import ministere.sante.senpna.organisation.infrastructure.web.controller.IEntrepotsController;
 import ministere.sante.senpna.organisation.infrastructure.web.dto.response.EntrepotResponse;
@@ -22,15 +22,15 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
 public class EntrepotsController implements IEntrepotsController {
 
-    private final OrganisationFacade organisationFacade;
+    private final EntrepotFacade entrepotFacade;
 
-    public EntrepotsController(OrganisationFacade organisationFacade) {
-        this.organisationFacade = organisationFacade;
+    public EntrepotsController(EntrepotFacade entrepotFacade) {
+        this.entrepotFacade = entrepotFacade;
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
-        EntrepotDetail result = organisationFacade.obtenirEntrepot(new GetEntrepotQuery(id));
+        EntrepotDetail result = entrepotFacade.obtenirEntrepot(new GetEntrepotQuery(id));
         return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "ENTREPOT_FOUND",
                 "Entrepôt récupéré"));
     }
@@ -40,7 +40,7 @@ public class EntrepotsController implements IEntrepotsController {
             String q, TypeEntrepot type, UUID regionId, Boolean actif, Integer page, Integer size,
             String sortBy, String sortDirection) {
 
-        EntrepotPage result = organisationFacade.listerEntrepots(
+        EntrepotPage result = entrepotFacade.listerEntrepots(
                 new ListEntrepotsQuery(q, type, regionId, actif, page, size, sortBy, sortDirection));
 
         return ResponseEntity.ok(RestResponse.responsePaginate(

@@ -1,6 +1,9 @@
 package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.RegionDetailAssembler;
+import ministere.sante.senpna.organisation.application.usecase.region.CreateRegionUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.region.GetRegionUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.region.ListRegionsUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreateRegionCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetRegionQuery;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RegionDetail;

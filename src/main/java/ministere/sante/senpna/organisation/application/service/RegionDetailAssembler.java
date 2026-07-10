@@ -1,6 +1,6 @@
 package ministere.sante.senpna.organisation.application.service;
 
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.RegionDetail;
+import ministere.sante.senpna.organisation.domain.command.RegionCommand.RegionDetail;
 import ministere.sante.senpna.organisation.domain.model.Region;
 
 import org.springframework.stereotype.Component;

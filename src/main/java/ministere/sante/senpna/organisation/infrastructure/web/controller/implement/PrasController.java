@@ -1,14 +1,15 @@
 package ministere.sante.senpna.organisation.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.organisation.application.facade.OrganisationFacade;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ActivatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.CreatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.DeactivatePraCommand;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotDetail;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.EntrepotPage;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.GetEntrepotQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.ListEntrepotsQuery;
-import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UpdatePraCommand;
+import ministere.sante.senpna.organisation.application.facade.EntrepotFacade;
+import ministere.sante.senpna.organisation.application.facade.PraFacade;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.ActivatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.CreatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.DeactivatePraCommand;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotDetail;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotPage;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.GetEntrepotQuery;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.ListEntrepotsQuery;
+import ministere.sante.senpna.organisation.domain.command.Entrepot.UpdatePraCommand;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
 import ministere.sante.senpna.organisation.infrastructure.web.controller.IPrasController;
 import ministere.sante.senpna.organisation.infrastructure.web.dto.request.CreatePraRequest;
@@ -30,16 +31,18 @@ import java.util.UUID;
 @RestController
 public class PrasController implements IPrasController {
 
-        private final OrganisationFacade organisationFacade;
+        private final PraFacade praFacade;
+        private final EntrepotFacade entrepotFacade;
 
-        public PrasController(OrganisationFacade organisationFacade) {
-                this.organisationFacade = organisationFacade;
+        public PrasController(PraFacade praFacade, EntrepotFacade entrepotFacade) {
+                this.praFacade = praFacade;
+                this.entrepotFacade = entrepotFacade;
         }
 
         @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')")
         public ResponseEntity<Map<String, Object>> creer(CreatePraRequest request) {
-                EntrepotDetail result = organisationFacade.creerPra(new CreatePraCommand(
+                EntrepotDetail result = praFacade.creerPra(new CreatePraCommand(
                                 request.code(), request.nom(), request.regionId(), request.adresse(),
                                 request.telephone()));
                 return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -50,7 +53,7 @@ public class PrasController implements IPrasController {
         @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
         public ResponseEntity<Map<String, Object>> modifier(UUID id, UpdatePraRequest request) {
-                EntrepotDetail result = organisationFacade.modifierPra(new UpdatePraCommand(
+                EntrepotDetail result = praFacade.modifierPra(new UpdatePraCommand(
                                 id, currentUserId(), request.nom(), request.adresse(), request.telephone(),
                                 request.regionId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PRA_UPDATED",
@@ -60,7 +63,7 @@ public class PrasController implements IPrasController {
         @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
         public ResponseEntity<Map<String, Object>> desactiver(UUID id) {
-                EntrepotDetail result = organisationFacade.desactiverPra(new DeactivatePraCommand(id, currentUserId()));
+                EntrepotDetail result = praFacade.desactiverPra(new DeactivatePraCommand(id, currentUserId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PRA_DEACTIVATED",
                                 "PRA désactivée avec succès"));
         }
@@ -68,7 +71,7 @@ public class PrasController implements IPrasController {
         @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
         public ResponseEntity<Map<String, Object>> activer(UUID id) {
-                EntrepotDetail result = organisationFacade.activerPra(new ActivatePraCommand(id, currentUserId()));
+                EntrepotDetail result = praFacade.activerPra(new ActivatePraCommand(id, currentUserId()));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PRA_ACTIVATED",
                                 "PRA activée avec succès"));
         }
@@ -76,7 +79,7 @@ public class PrasController implements IPrasController {
         @Override
         @PreAuthorize("hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','ADMIN_PRA','GESTIONNAIRE_PRA')")
         public ResponseEntity<Map<String, Object>> obtenir(UUID id) {
-                EntrepotDetail result = organisationFacade.obtenirEntrepot(new GetEntrepotQuery(id));
+                EntrepotDetail result = entrepotFacade.obtenirEntrepot(new GetEntrepotQuery(id));
                 return ResponseEntity.ok(RestResponse.response(HttpStatus.OK, toResponse(result), "PRA_FOUND",
                                 "PRA récupérée"));
         }
@@ -87,7 +90,7 @@ public class PrasController implements IPrasController {
                         String q, UUID regionId, Boolean actif, Integer page, Integer size, String sortBy,
                         String sortDirection) {
 
-                EntrepotPage result = organisationFacade.listerEntrepots(
+                EntrepotPage result = entrepotFacade.listerEntrepots(
                                 new ListEntrepotsQuery(q, TypeEntrepot.PRA, regionId, actif, page, size, sortBy,
                                                 sortDirection));
 

@@ -1,5 +1,8 @@
 package ministere.sante.senpna.organisation.application.usecase;
 
+import ministere.sante.senpna.organisation.application.usecase.affectation.AssignUserToEntrepotUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.affectation.AssignUserToStructureUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.affectation.UnassignUserUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignUserToEntrepotCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.AssignUserToStructureCommand;
 import ministere.sante.senpna.organisation.domain.command.OrganisationCommands.UnassignUserCommand;
@@ -168,7 +171,8 @@ class UserAffectationUseCasesTest {
         @DisplayName("adhésion non validée → StructureSanitaireNonValideeException")
         void affecter_adhesionNonValidee_leveException() {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(true);
-            StructureSanitaire structureEnAttente = StructureSanitaire.reconstruct(StructureSanitaireId.of(STRUCTURE_ID),
+            StructureSanitaire structureEnAttente = StructureSanitaire.reconstruct(
+                    StructureSanitaireId.of(STRUCTURE_ID),
                     "HOP-X", "Hôpital X", TypeStructureSanitaire.HOPITAL, RegionId.generate(), null, null, null,
                     null, null, "Ndiaye", "Fatou", StatutAdhesion.EN_ATTENTE_VALIDATION, null, false, Instant.now(),
                     Instant.now());
