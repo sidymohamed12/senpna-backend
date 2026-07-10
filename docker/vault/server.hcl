@@ -10,7 +10,7 @@
 # ═══════════════════════════════════════════════════════════════════
 
 storage "file" {
-  path = "/vault/data"
+  path = "/vault/file"
 }
 
 listener "tcp" {

@@ -65,7 +65,7 @@ services:
       - IPC_LOCK
     volumes:
       - ./docker/vault/server.hcl:/vault/config/server.hcl:ro
-      - senpna_vault_data:/vault/data
+      - senpna_vault_data:/vault/file
     command: ["vault", "server", "-config=/vault/config/server.hcl"]
     healthcheck:
       test:
@@ -97,6 +97,8 @@ services:
       - IPC_LOCK
     environment:
       VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+      VAULT_ROLE_ID: ${VAULT_ROLE_ID:?VAULT_ROLE_ID manquant (export-le avant docker compose up)}
+      VAULT_SECRET_ID: ${VAULT_SECRET_ID:?VAULT_SECRET_ID manquant (export-le avant docker compose up)}
     volumes:
       - ./docker/vault/agent.hcl:/vault/config/agent.hcl:ro
       - ./docker/vault/templates:/vault/config/templates:ro
@@ -108,8 +110,8 @@ services:
       - >
         set -e;
         umask 077;
-        echo "$${VAULT_ROLE_ID:?VAULT_ROLE_ID manquant (export-le avant docker compose up)}" > /vault/runtime/role_id;
-        echo "$${VAULT_SECRET_ID:?VAULT_SECRET_ID manquant (export-le avant docker compose up)}" > /vault/runtime/secret_id;
+        echo "$$VAULT_ROLE_ID" > /vault/runtime/role_id;
+        echo "$$VAULT_SECRET_ID" > /vault/runtime/secret_id;
         exec vault agent -config=/vault/config/agent.hcl
     deploy:
       resources:
@@ -216,7 +218,7 @@ services:
         echo "En attente des secrets Vault (app.env)...";
         until [ -f /vault/secrets/app.env ]; do sleep 1; done;
         set -a; . /vault/secrets/app.env; set +a;
-        exec java org.springframework.boot.loader.launch.JarLauncher
+        exec java -jar app.jar
     read_only: true
     tmpfs:
       - /tmp
