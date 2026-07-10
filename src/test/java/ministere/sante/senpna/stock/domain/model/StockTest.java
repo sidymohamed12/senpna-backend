@@ -3,7 +3,7 @@ package ministere.sante.senpna.stock.domain.model;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.stock.domain.exception.ReservationInsuffisanteException;
-import ministere.sante.senpna.stock.domain.exception.StockInsuffisantException;
+import ministere.sante.senpna.stock.domain.exception.stock.StockInsuffisantException;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
 
 import org.junit.jupiter.api.DisplayName;

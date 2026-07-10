@@ -4,7 +4,7 @@ import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
 import ministere.sante.senpna.stock.application.service.LotOwnershipGuard;
 import ministere.sante.senpna.stock.domain.command.LotCommands.GetLotQuery;
 import ministere.sante.senpna.stock.domain.command.LotCommands.LotDetail;
-import ministere.sante.senpna.stock.domain.exception.LotIntrouvableException;
+import ministere.sante.senpna.stock.domain.exception.lot.LotIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.port.in.GetLotUseCase;
 import ministere.sante.senpna.stock.domain.port.out.LotRepositoryPort;

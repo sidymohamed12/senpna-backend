@@ -8,7 +8,7 @@ import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.domain.command.StockCommands.AllocationLot;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReservationFefoResult;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReserverStockFefoCommand;
-import ministere.sante.senpna.stock.domain.exception.StockInsuffisantException;
+import ministere.sante.senpna.stock.domain.exception.stock.StockInsuffisantException;
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.model.Stock;
 import ministere.sante.senpna.stock.domain.port.in.ReserverStockFefoUseCase;

@@ -8,7 +8,7 @@ import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReservationFefoResult;
 import ministere.sante.senpna.stock.domain.command.StockCommands.ReserverStockFefoCommand;
-import ministere.sante.senpna.stock.domain.exception.StockInsuffisantException;
+import ministere.sante.senpna.stock.domain.exception.stock.StockInsuffisantException;
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.model.Stock;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
@@ -83,7 +83,7 @@ class ReserverStockFefoUseCaseImplTest {
                 @DisplayName("consomme le lot expirant le plus tôt en premier (FEFO)")
                 void reserver_consommeLePlusAncienDabord() {
                         useCase = new ReserverStockFefoUseCaseImpl(lotRepositoryPort, stockRepositoryPort,
-                    entrepotRepositoryPort, entrepotScopeGuard);
+                                        entrepotRepositoryPort, entrepotScopeGuard);
 
                         Lot lotProche = lot("LOT-PROCHE", LocalDate.now().plusDays(30));
                         Lot lotLointain = lot("LOT-LOINTAIN", LocalDate.now().plusDays(365));
@@ -123,7 +123,7 @@ class ReserverStockFefoUseCaseImplTest {
                 @DisplayName("quantité insuffisante sur l'ensemble des lots → StockInsuffisantException")
                 void reserver_stockInsuffisant_leveException() {
                         useCase = new ReserverStockFefoUseCaseImpl(lotRepositoryPort, stockRepositoryPort,
-                    entrepotRepositoryPort, entrepotScopeGuard);
+                                        entrepotRepositoryPort, entrepotScopeGuard);
 
                         Lot lotUnique = lot("LOT-UNIQUE", LocalDate.now().plusDays(90));
                         Stock stock = stockAvecQuantite(lotUnique.getId(), new BigDecimal("10"));
@@ -145,7 +145,7 @@ class ReserverStockFefoUseCaseImplTest {
                 @DisplayName("aucun lot disponible → StockInsuffisantException")
                 void reserver_aucunLot_leveException() {
                         useCase = new ReserverStockFefoUseCaseImpl(lotRepositoryPort, stockRepositoryPort,
-                    entrepotRepositoryPort, entrepotScopeGuard);
+                                        entrepotRepositoryPort, entrepotScopeGuard);
 
                         when(entrepotRepositoryPort.findById(ENTREPOT_ID)).thenReturn(Optional.of(entrepotPra()));
                         when(lotRepositoryPort.findActifsNonExpiresParMedicamentTriesFefo(MEDICAMENT_ID))

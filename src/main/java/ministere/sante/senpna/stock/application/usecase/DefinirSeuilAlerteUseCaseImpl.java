@@ -4,7 +4,7 @@ import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.DefinirSeuilAlerteCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
-import ministere.sante.senpna.stock.domain.exception.StockIntrouvableException;
+import ministere.sante.senpna.stock.domain.exception.stock.StockIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Stock;
 import ministere.sante.senpna.stock.domain.port.in.DefinirSeuilAlerteUseCase;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;

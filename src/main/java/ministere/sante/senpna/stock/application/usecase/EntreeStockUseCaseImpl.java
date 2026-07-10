@@ -9,7 +9,7 @@ import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.EntreeStockCommand;
 import ministere.sante.senpna.stock.domain.command.StockCommands.StockDetail;
-import ministere.sante.senpna.stock.domain.exception.LotIntrouvableException;
+import ministere.sante.senpna.stock.domain.exception.lot.LotIntrouvableException;
 import ministere.sante.senpna.stock.domain.model.Lot;
 import ministere.sante.senpna.stock.domain.model.MouvementStock;
 import ministere.sante.senpna.stock.domain.model.Stock;

@@ -1,7 +1,7 @@
 package ministere.sante.senpna.stock.application.service;
 
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
-import ministere.sante.senpna.stock.domain.exception.LotHorsPorteeException;
+import ministere.sante.senpna.stock.domain.exception.lot.LotHorsPorteeException;
 import ministere.sante.senpna.stock.domain.model.Stock;
 import ministere.sante.senpna.stock.domain.port.out.StockRepositoryPort;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;

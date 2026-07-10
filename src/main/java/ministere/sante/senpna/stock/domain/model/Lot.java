@@ -3,7 +3,7 @@ package ministere.sante.senpna.stock.domain.model;
 import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.shared.domain.model.AggregateRoot;
-import ministere.sante.senpna.stock.domain.exception.LotExpireException;
+import ministere.sante.senpna.stock.domain.exception.lot.LotExpireException;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
 import ministere.sante.senpna.stock.domain.valueobject.StatutLot;
 

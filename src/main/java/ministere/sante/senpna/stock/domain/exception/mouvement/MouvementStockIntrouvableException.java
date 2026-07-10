@@ -1,4 +1,4 @@
-package ministere.sante.senpna.stock.domain.exception;
+package ministere.sante.senpna.stock.domain.exception.mouvement;
 
 import ministere.sante.senpna.shared.domain.exception.NotFoundException;
 
