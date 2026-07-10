@@ -1,6 +1,6 @@
 package ministere.sante.senpna.stock.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.stock.application.facade.StockFacade;
+import ministere.sante.senpna.stock.application.facade.MouvementStockFacade;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.GetMouvementQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.ListMouvementsQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementDetail;
@@ -23,9 +23,9 @@ public class MouvementsStockController implements IMouvementsStockController {
 
     private static final String ROLES_LECTURE = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA','PHARMACIEN_PNA','MAGASINIER_PNA','ADMIN_PRA','GESTIONNAIRE_PRA','PHARMACIEN_PRA','MAGASINIER_PRA')";
 
-    private final StockFacade stockFacade;
+    private final MouvementStockFacade stockFacade;
 
-    public MouvementsStockController(StockFacade stockFacade) {
+    public MouvementsStockController(MouvementStockFacade stockFacade) {
         this.stockFacade = stockFacade;
     }
 

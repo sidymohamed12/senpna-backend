@@ -1,6 +1,6 @@
 package ministere.sante.senpna.stock.infrastructure.web.controller.implement;
 
-import ministere.sante.senpna.stock.application.facade.StockFacade;
+import ministere.sante.senpna.stock.application.facade.LotFacade;
 import ministere.sante.senpna.stock.domain.command.LotCommands.AlertePeremptionQuery;
 import ministere.sante.senpna.stock.domain.command.LotCommands.BloquerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.CreerLotCommand;
@@ -38,9 +38,9 @@ public class LotsController implements ILotsController {
         private static final String ROLES_PHARMACOVIGILANCE = "hasAnyRole('ADMIN_PNA','PHARMACIEN_PNA','ADMIN_PRA','PHARMACIEN_PRA')";
         private static final String ROLES_PRIX = "hasAnyRole('ADMIN_PNA','GESTIONNAIRE_PNA')";
 
-        private final StockFacade stockFacade;
+        private final LotFacade stockFacade;
 
-        public LotsController(StockFacade stockFacade) {
+        public LotsController(LotFacade stockFacade) {
                 this.stockFacade = stockFacade;
         }
 
