@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public final class Quantity {
 
+    private static final String NEGATIVE_QUANTITY_ERROR_MESSAGE = "La quantité à comparer ne peut pas être null ";
+
     public static final Quantity ZERO = new Quantity(0);
 
     private final int value;
@@ -60,17 +62,17 @@ public final class Quantity {
     }
 
     public boolean isGreaterThan(Quantity other) {
-        Objects.requireNonNull(other, "La quantité à comparer ne peut pas être null");
+        Objects.requireNonNull(other, NEGATIVE_QUANTITY_ERROR_MESSAGE);
         return this.value > other.value;
     }
 
     public boolean isGreaterThanOrEqualTo(Quantity other) {
-        Objects.requireNonNull(other, "La quantité à comparer ne peut pas être null");
+        Objects.requireNonNull(other, NEGATIVE_QUANTITY_ERROR_MESSAGE);
         return this.value >= other.value;
     }
 
     public boolean isLessThan(Quantity other) {
-        Objects.requireNonNull(other, "La quantité à comparer ne peut pas être null");
+        Objects.requireNonNull(other, NEGATIVE_QUANTITY_ERROR_MESSAGE);
         return this.value < other.value;
     }
 
