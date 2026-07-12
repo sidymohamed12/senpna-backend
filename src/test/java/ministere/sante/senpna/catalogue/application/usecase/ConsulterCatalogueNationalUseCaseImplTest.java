@@ -81,7 +81,8 @@ class ConsulterCatalogueNationalUseCaseImplTest {
         void acteurNonAutorise_refuse() {
                 doThrow(new CatalogueAccesRefuseException()).when(catalogueAccessGuard).verifierActeurPnaOuPra();
 
-                assertThatThrownBy(() -> sut.consulter(new ConsulterCatalogueNationalQuery(null, null, 0, 20)))
+                var consulterCatalogueNationalQuery = new ConsulterCatalogueNationalQuery(null, null, 0, 20);
+                assertThatThrownBy(() -> sut.consulter(consulterCatalogueNationalQuery))
                                 .isInstanceOf(CatalogueAccesRefuseException.class);
 
                 verify(stockAgregeQueryPort, never()).rechercherParEntrepot(any());
@@ -92,7 +93,8 @@ class ConsulterCatalogueNationalUseCaseImplTest {
         void aucunePnaCentrale_leveException() {
                 when(entrepotQueryPort.findPnaCentraleActive()).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> sut.consulter(new ConsulterCatalogueNationalQuery(null, null, 0, 20)))
+                var consulterCatalogueNationalQuery = new ConsulterCatalogueNationalQuery(null, null, 0, 20);
+                assertThatThrownBy(() -> sut.consulter(consulterCatalogueNationalQuery))
                                 .isInstanceOf(PnaCentraleIntrouvableException.class);
         }
 

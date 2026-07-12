@@ -63,7 +63,8 @@ class StockTest {
             Stock stock = stockOuvert();
 
             assertThatThrownBy(() -> stock.entrer(BigDecimal.ZERO)).isInstanceOf(IllegalArgumentException.class);
-            assertThatThrownBy(() -> stock.entrer(new BigDecimal("-5")))
+            var bigDecimal = new BigDecimal("-5");
+            assertThatThrownBy(() -> stock.entrer(bigDecimal))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -90,7 +91,8 @@ class StockTest {
             Stock stock = stockOuvert();
             stock.entrer(new BigDecimal("50"));
 
-            assertThatThrownBy(() -> stock.reserver(new BigDecimal("51")))
+            var bigDecimal = new BigDecimal("51");
+            assertThatThrownBy(() -> stock.reserver(bigDecimal))
                     .isInstanceOf(StockInsuffisantException.class);
         }
 
@@ -131,7 +133,8 @@ class StockTest {
             stock.entrer(new BigDecimal("100"));
             stock.reserver(new BigDecimal("10"));
 
-            assertThatThrownBy(() -> stock.libererReservation(new BigDecimal("11")))
+            var bigDecimal = new BigDecimal("11");
+            assertThatThrownBy(() -> stock.libererReservation(bigDecimal))
                     .isInstanceOf(ReservationInsuffisanteException.class);
         }
     }
@@ -160,7 +163,8 @@ class StockTest {
             stock.entrer(new BigDecimal("100"));
             stock.reserver(new BigDecimal("90"));
 
-            assertThatThrownBy(() -> stock.sortir(new BigDecimal("11")))
+            var bigDecimal = new BigDecimal("11");
+            assertThatThrownBy(() -> stock.sortir(bigDecimal))
                     .isInstanceOf(StockInsuffisantException.class);
         }
     }
@@ -189,7 +193,8 @@ class StockTest {
             stock.entrer(new BigDecimal("100"));
             stock.reserver(new BigDecimal("10"));
 
-            assertThatThrownBy(() -> stock.sortirDepuisReservation(new BigDecimal("11")))
+            var bigDecimal = new BigDecimal("11");
+            assertThatThrownBy(() -> stock.sortirDepuisReservation(bigDecimal))
                     .isInstanceOf(ReservationInsuffisanteException.class);
         }
     }
@@ -237,10 +242,12 @@ class StockTest {
         @Test
         @DisplayName("reconstruction avec réservée > disponible → IllegalArgumentException")
         void reconstruct_reserveeSuperieureADisponible_leveException() {
-            assertThatThrownBy(() -> Stock.reconstruct(
-                    ministere.sante.senpna.stock.domain.valueobject.StockId.generate(), ENTREPOT_ID, LOT_ID,
-                    MEDICAMENT_ID, new BigDecimal("10"), new BigDecimal("20"), BigDecimal.ZERO, null,
-                    java.time.Instant.now(), java.time.Instant.now()))
+            var generate = ministere.sante.senpna.stock.domain.valueobject.StockId.generate();
+            var bigDecimal = new BigDecimal("10");
+            var bigDecimal2 = new BigDecimal("20");
+            var now = java.time.Instant.now();
+            var now2 = java.time.Instant.now();
+            assertThatThrownBy(() -> Stock.reconstruct( generate, ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, bigDecimal, bigDecimal2, BigDecimal.ZERO, null, now, now2))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

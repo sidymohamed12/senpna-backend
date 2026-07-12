@@ -111,7 +111,8 @@ class EntrepotUseCasesTest {
         @Test
         @DisplayName("regionId null → ValidationException")
         void creer_sansRegionId_leveException() {
-            assertThatThrownBy(() -> sut.creer(new CreatePraCommand("PRA-X", "PRA X", null, null, null)))
+            var createPraCommand = new CreatePraCommand("PRA-X", "PRA X", null, null, null);
+            assertThatThrownBy(() -> sut.creer(createPraCommand))
                     .isInstanceOf(ValidationException.class);
 
             verifyNoInteractions(regionRepositoryPort, entrepotRepositoryPort);
@@ -122,8 +123,9 @@ class EntrepotUseCasesTest {
         void creer_regionIntrouvable_leveException() {
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
+            var createPraCommand = new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null);
             assertThatThrownBy(
-                    () -> sut.creer(new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null)))
+                    () -> sut.creer(createPraCommand))
                     .isInstanceOf(RegionIntrouvableException.class);
 
             verify(entrepotRepositoryPort, never()).save(any());
@@ -136,8 +138,9 @@ class EntrepotUseCasesTest {
             regionInactive.desactiver();
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionInactive));
 
+            var createPraCommand = new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null);
             assertThatThrownBy(
-                    () -> sut.creer(new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null)))
+                    () -> sut.creer(createPraCommand))
                     .isInstanceOf(RegionInactiveException.class);
         }
 
@@ -147,8 +150,9 @@ class EntrepotUseCasesTest {
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionActive()));
             when(entrepotRepositoryPort.existsByCode(any())).thenReturn(true);
 
+            var createPraCommand = new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null);
             assertThatThrownBy(
-                    () -> sut.creer(new CreatePraCommand("PRA-DAKAR", "PRA Dakar", REGION_ID, null, null)))
+                    () -> sut.creer(createPraCommand))
                     .isInstanceOf(CodeEntrepotDejaUtiliseException.class);
 
             verify(entrepotRepositoryPort, never()).save(any());
@@ -194,8 +198,8 @@ class EntrepotUseCasesTest {
         void modifier_introuvable_leveException() {
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.modifier(
-                    new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null)))
+            var updatePraCommand = new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null);
+            assertThatThrownBy(() -> sut.modifier(updatePraCommand))
                     .isInstanceOf(EntrepotIntrouvableException.class);
         }
 
@@ -204,8 +208,8 @@ class EntrepotUseCasesTest {
         void modifier_typePnaCentral_leveException() {
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(pnaCentraleExistante()));
 
-            assertThatThrownBy(() -> sut.modifier(
-                    new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null)))
+            var updatePraCommand = new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null);
+            assertThatThrownBy(() -> sut.modifier(updatePraCommand))
                     .isInstanceOf(TypeEntrepotInvalideException.class);
 
             verifyNoInteractions(regionScopeResolver);
@@ -218,8 +222,8 @@ class EntrepotUseCasesTest {
             doThrow(new ministere.sante.senpna.organisation.domain.exception.AccesRegionRefuseException())
                     .when(regionScopeResolver).verifierAccesRegion(any(), any());
 
-            assertThatThrownBy(() -> sut.modifier(
-                    new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null)))
+            var updatePraCommand = new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, null);
+            assertThatThrownBy(() -> sut.modifier(updatePraCommand))
                     .isInstanceOf(
                             ministere.sante.senpna.organisation.domain.exception.AccesRegionRefuseException.class);
 
@@ -235,8 +239,8 @@ class EntrepotUseCasesTest {
             UUID nouvelleRegionId = UUID.randomUUID();
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionInactive));
 
-            assertThatThrownBy(() -> sut.modifier(
-                    new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, nouvelleRegionId)))
+            var updatePraCommand = new UpdatePraCommand(ENTREPOT_ID, ACTEUR_ID, "Nom", null, null, nouvelleRegionId);
+            assertThatThrownBy(() -> sut.modifier(updatePraCommand))
                     .isInstanceOf(RegionInactiveException.class);
         }
     }
@@ -276,7 +280,8 @@ class EntrepotUseCasesTest {
         void desactiver_typeInvalide_leveException() {
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(pnaCentraleExistante()));
 
-            assertThatThrownBy(() -> sut.desactiver(new DeactivatePraCommand(ENTREPOT_ID, ACTEUR_ID)))
+            var deactivatePraCommand = new DeactivatePraCommand(ENTREPOT_ID, ACTEUR_ID);
+            assertThatThrownBy(() -> sut.desactiver(deactivatePraCommand))
                     .isInstanceOf(TypeEntrepotInvalideException.class);
 
             verifyNoInteractions(regionScopeResolver);
@@ -320,7 +325,8 @@ class EntrepotUseCasesTest {
         void activer_introuvable_leveException() {
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.activer(new ActivatePraCommand(ENTREPOT_ID, ACTEUR_ID)))
+            var activatePraCommand = new ActivatePraCommand(ENTREPOT_ID, ACTEUR_ID);
+            assertThatThrownBy(() -> sut.activer(activatePraCommand))
                     .isInstanceOf(EntrepotIntrouvableException.class);
         }
     }
@@ -358,7 +364,8 @@ class EntrepotUseCasesTest {
         void obtenir_introuvable_leveException() {
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetEntrepotQuery(ENTREPOT_ID)))
+            var getEntrepotQuery = new GetEntrepotQuery(ENTREPOT_ID);
+            assertThatThrownBy(() -> sut.obtenir(getEntrepotQuery))
                     .isInstanceOf(EntrepotIntrouvableException.class);
         }
     }

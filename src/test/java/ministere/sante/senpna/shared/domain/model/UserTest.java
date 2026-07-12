@@ -1,7 +1,6 @@
 package ministere.sante.senpna.shared.domain.model;
 
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 import ministere.sante.senpna.shared.domain.valueobject.HashedPassword;
 import ministere.sante.senpna.shared.domain.valueobject.Nom;
@@ -332,7 +331,8 @@ class UserTest {
             User user = UserFixtures.actif();
             Set<UUID> ids = user.getRoleIds();
 
-            assertThatThrownBy(() -> ids.add(UUID.randomUUID()))
+            var randomUUID = UUID.randomUUID();
+            assertThatThrownBy(() -> ids.add(randomUUID))
                     .isInstanceOf(UnsupportedOperationException.class);
         }
     }

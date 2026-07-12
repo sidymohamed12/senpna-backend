@@ -50,163 +50,174 @@ import static org.mockito.Mockito.when;
 @DisplayName("CatalogueAccessGuard")
 class CatalogueAccessGuardTest {
 
-    @Mock
-    UserManagementRepositoryPort userManagementRepositoryPort;
-    @Mock
-    RoleCachePort roleCachePort;
-    @Mock
-    UserAffectationRepositoryPort userAffectationRepositoryPort;
-    @Mock
-    EntrepotQueryPort entrepotQueryPort;
-    @Mock
-    StructureSanitaireQueryPort structureSanitaireQueryPort;
+        @Mock
+        UserManagementRepositoryPort userManagementRepositoryPort;
+        @Mock
+        RoleCachePort roleCachePort;
+        @Mock
+        UserAffectationRepositoryPort userAffectationRepositoryPort;
+        @Mock
+        EntrepotQueryPort entrepotQueryPort;
+        @Mock
+        StructureSanitaireQueryPort structureSanitaireQueryPort;
 
-    CatalogueAccessGuard sut;
+        CatalogueAccessGuard sut;
 
-    private static final UUID ACTEUR_ID = UUID.randomUUID();
-    private static final UUID ROLE_ADMIN_PNA_ID = UUID.fromString("e0000000-0000-0000-0000-000000000001");
-    private static final UUID ROLE_ADMIN_PRA_ID = UUID.fromString("e0000000-0000-0000-0000-000000000002");
+        private static final UUID ACTEUR_ID = UUID.randomUUID();
+        private static final UUID ROLE_ADMIN_PNA_ID = UUID.fromString("e0000000-0000-0000-0000-000000000001");
+        private static final UUID ROLE_ADMIN_PRA_ID = UUID.fromString("e0000000-0000-0000-0000-000000000002");
 
-    @BeforeEach
-    void setUp() {
-        sut = new CatalogueAccessGuard(userManagementRepositoryPort, roleCachePort, userAffectationRepositoryPort,
-                entrepotQueryPort, structureSanitaireQueryPort);
-        SecurityContextHolder.clearContext();
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
-
-    private User acteurAvecRoles(Set<UUID> roleIds) {
-        return User.reconstruct(UserId.of(ACTEUR_ID), Nom.of(UserFixtures.NOM), Prenom.of(UserFixtures.PRENOM),
-                Email.of(UserFixtures.EMAIL), null, HashedPassword.of(UserFixtures.PASSWORD_HASH), true, roleIds, 0,
-                null, Instant.now(), Instant.now());
-    }
-
-    private void authentifier(String... roleCodes) {
-        CurrentUser currentUser = Mockito.mock(CurrentUser.class);
-        Mockito.lenient().when(currentUser.getUserId()).thenReturn(ACTEUR_ID);
-
-        List<GrantedAuthority> authorities = List.of(roleCodes).stream()
-                .map(code -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + code))
-                .toList();
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(currentUser, null, authorities));
-    }
-
-    @Nested
-    @DisplayName("verifierActeurPnaOuPra()")
-    class VerifierActeurPnaOuPra {
-
-        @Test
-        @DisplayName("acteur PNA → autorisé")
-        void pna_autorise() {
-            authentifier("GESTIONNAIRE_PNA");
-            assertThatCode(sut::verifierActeurPnaOuPra).doesNotThrowAnyException();
+        @BeforeEach
+        void setUp() {
+                sut = new CatalogueAccessGuard(userManagementRepositoryPort, roleCachePort,
+                                userAffectationRepositoryPort,
+                                entrepotQueryPort, structureSanitaireQueryPort);
+                SecurityContextHolder.clearContext();
         }
 
-        @Test
-        @DisplayName("acteur PRA → autorisé")
-        void pra_autorise() {
-            authentifier("MAGASINIER_PRA");
-            assertThatCode(sut::verifierActeurPnaOuPra).doesNotThrowAnyException();
+        @AfterEach
+        void tearDown() {
+                SecurityContextHolder.clearContext();
         }
 
-        @Test
-        @DisplayName("acteur structure sanitaire → CatalogueAccesRefuseException")
-        void structure_refuse() {
-            authentifier("GESTIONNAIRE_STRUCTURE");
-            assertThatThrownBy(sut::verifierActeurPnaOuPra).isInstanceOf(CatalogueAccesRefuseException.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("resoudreRegionPourCatalogueRegional()")
-    class ResoudreRegionPourCatalogueRegional {
-
-        @Test
-        @DisplayName("acteur national (PNA) sans région fournie → ValidationException")
-        void national_sansRegion_leveValidationException() {
-            authentifier("ADMIN_PNA");
-            when(userManagementRepositoryPort.findById(any()))
-                    .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
-            when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
-                    .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA", "Administrateur PNA")));
-
-            assertThatThrownBy(() -> sut.resoudreRegionPourCatalogueRegional(null))
-                    .isInstanceOf(ValidationException.class);
+        private User acteurAvecRoles(Set<UUID> roleIds) {
+                return User.reconstruct(UserId.of(ACTEUR_ID), Nom.of(UserFixtures.NOM), Prenom.of(UserFixtures.PRENOM),
+                                Email.of(UserFixtures.EMAIL), null, HashedPassword.of(UserFixtures.PASSWORD_HASH), true,
+                                roleIds, 0,
+                                null, Instant.now(), Instant.now());
         }
 
-        @Test
-        @DisplayName("acteur national (PNA) avec région fournie → région conservée telle quelle")
-        void national_avecRegion_conserveeTelleQuelle() {
-            authentifier("ADMIN_PNA");
-            when(userManagementRepositoryPort.findById(any()))
-                    .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
-            when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
-                    .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA", "Administrateur PNA")));
+        private void authentifier(String... roleCodes) {
+                CurrentUser currentUser = Mockito.mock(CurrentUser.class);
+                Mockito.lenient().when(currentUser.getUserId()).thenReturn(ACTEUR_ID);
 
-            UUID regionDemandee = UUID.randomUUID();
+                List<GrantedAuthority> authorities = List.of(roleCodes).stream()
+                                .map(code -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + code))
+                                .toList();
 
-            assertThat(sut.resoudreRegionPourCatalogueRegional(regionDemandee)).isEqualTo(regionDemandee);
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(currentUser, null, authorities));
         }
 
-        @Test
-        @DisplayName("structure sanitaire → région demandée ignorée, remplacée par sa propre région")
-        void structure_rameneeASaPropreRegion() {
-            authentifier("GESTIONNAIRE_STRUCTURE");
-            when(userManagementRepositoryPort.findById(any()))
-                    .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-            when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                    .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "GESTIONNAIRE_STRUCTURE", "Gest.")));
+        @Nested
+        @DisplayName("verifierActeurPnaOuPra()")
+        class VerifierActeurPnaOuPra {
 
-            UUID regionStructure = UUID.randomUUID();
-            UUID structureId = UUID.randomUUID();
-            when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
-                    .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, null, structureId)));
-            when(structureSanitaireQueryPort.findById(structureId)).thenReturn(Optional.of(
-                    new StructureSanitaireProjection(structureId, "HOP-X", "Hôpital X", regionStructure, null,
-                            true)));
+                @Test
+                @DisplayName("acteur PNA → autorisé")
+                void pna_autorise() {
+                        authentifier("GESTIONNAIRE_PNA");
+                        assertThatCode(sut::verifierActeurPnaOuPra).doesNotThrowAnyException();
+                }
 
-            UUID autreRegionDemandee = UUID.randomUUID();
+                @Test
+                @DisplayName("acteur PRA → autorisé")
+                void pra_autorise() {
+                        authentifier("MAGASINIER_PRA");
+                        assertThatCode(sut::verifierActeurPnaOuPra).doesNotThrowAnyException();
+                }
 
-            assertThat(sut.resoudreRegionPourCatalogueRegional(autreRegionDemandee)).isEqualTo(regionStructure);
+                @Test
+                @DisplayName("acteur structure sanitaire → CatalogueAccesRefuseException")
+                void structure_refuse() {
+                        authentifier("GESTIONNAIRE_STRUCTURE");
+                        assertThatThrownBy(sut::verifierActeurPnaOuPra)
+                                        .isInstanceOf(CatalogueAccesRefuseException.class);
+                }
         }
 
-        @Test
-        @DisplayName("acteur PRA → toujours ramené à la région de sa propre PRA")
-        void pra_rameneASaPropreRegion() {
-            authentifier("MAGASINIER_PRA");
-            when(userManagementRepositoryPort.findById(any()))
-                    .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-            when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                    .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "MAGASINIER_PRA", "Magasinier PRA")));
+        @Nested
+        @DisplayName("resoudreRegionPourCatalogueRegional()")
+        class ResoudreRegionPourCatalogueRegional {
 
-            UUID regionPra = UUID.randomUUID();
-            UUID entrepotId = UUID.randomUUID();
-            when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
-                    .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null)));
-            when(entrepotQueryPort.findById(entrepotId)).thenReturn(Optional.of(
-                    new EntrepotProjection(entrepotId, "PRA-X", "PRA X", "PRA", regionPra, true)));
+                @Test
+                @DisplayName("acteur national (PNA) sans région fournie → ValidationException")
+                void national_sansRegion_leveValidationException() {
+                        authentifier("ADMIN_PNA");
+                        when(userManagementRepositoryPort.findById(any()))
+                                        .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
+                        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
+                                        .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
+                                                        "Administrateur PNA")));
 
-            assertThat(sut.resoudreRegionPourCatalogueRegional(UUID.randomUUID())).isEqualTo(regionPra);
+                        assertThatThrownBy(() -> sut.resoudreRegionPourCatalogueRegional(null))
+                                        .isInstanceOf(ValidationException.class);
+                }
+
+                @Test
+                @DisplayName("acteur national (PNA) avec région fournie → région conservée telle quelle")
+                void national_avecRegion_conserveeTelleQuelle() {
+                        authentifier("ADMIN_PNA");
+                        when(userManagementRepositoryPort.findById(any()))
+                                        .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PNA_ID))));
+                        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PNA_ID)))
+                                        .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
+                                                        "Administrateur PNA")));
+
+                        UUID regionDemandee = UUID.randomUUID();
+
+                        assertThat(sut.resoudreRegionPourCatalogueRegional(regionDemandee)).isEqualTo(regionDemandee);
+                }
+
+                @Test
+                @DisplayName("structure sanitaire → région demandée ignorée, remplacée par sa propre région")
+                void structure_rameneeASaPropreRegion() {
+                        authentifier("GESTIONNAIRE_STRUCTURE");
+                        when(userManagementRepositoryPort.findById(any()))
+                                        .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                        .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID,
+                                                        "GESTIONNAIRE_STRUCTURE", "Gest.")));
+
+                        UUID regionStructure = UUID.randomUUID();
+                        UUID structureId = UUID.randomUUID();
+                        when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
+                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, null, structureId)));
+                        when(structureSanitaireQueryPort.findById(structureId)).thenReturn(Optional.of(
+                                        new StructureSanitaireProjection(structureId, "HOP-X", "Hôpital X",
+                                                        regionStructure, null,
+                                                        true)));
+
+                        UUID autreRegionDemandee = UUID.randomUUID();
+
+                        assertThat(sut.resoudreRegionPourCatalogueRegional(autreRegionDemandee))
+                                        .isEqualTo(regionStructure);
+                }
+
+                @Test
+                @DisplayName("acteur PRA → toujours ramené à la région de sa propre PRA")
+                void pra_rameneASaPropreRegion() {
+                        authentifier("MAGASINIER_PRA");
+                        when(userManagementRepositoryPort.findById(any()))
+                                        .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                        .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "MAGASINIER_PRA",
+                                                        "Magasinier PRA")));
+
+                        UUID regionPra = UUID.randomUUID();
+                        UUID entrepotId = UUID.randomUUID();
+                        when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
+                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null)));
+                        when(entrepotQueryPort.findById(entrepotId)).thenReturn(Optional.of(
+                                        new EntrepotProjection(entrepotId, "PRA-X", "PRA X", "PRA", regionPra, true)));
+
+                        assertThat(sut.resoudreRegionPourCatalogueRegional(UUID.randomUUID())).isEqualTo(regionPra);
+                }
+
+                @Test
+                @DisplayName("acteur non affecté → CatalogueAccesRefuseException")
+                void nonAffecte_refuse() {
+                        authentifier("GESTIONNAIRE_STRUCTURE");
+                        when(userManagementRepositoryPort.findById(any()))
+                                        .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
+                        when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
+                                        .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID,
+                                                        "GESTIONNAIRE_STRUCTURE", "Gest.")));
+                        when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID)).thenReturn(Optional.empty());
+
+                        var randomUUID = UUID.randomUUID();
+                        assertThatThrownBy(() -> sut.resoudreRegionPourCatalogueRegional(randomUUID))
+                                        .isInstanceOf(CatalogueAccesRefuseException.class);
+                }
         }
-
-        @Test
-        @DisplayName("acteur non affecté → CatalogueAccesRefuseException")
-        void nonAffecte_refuse() {
-            authentifier("GESTIONNAIRE_STRUCTURE");
-            when(userManagementRepositoryPort.findById(any()))
-                    .thenReturn(Optional.of(acteurAvecRoles(Set.of(ROLE_ADMIN_PRA_ID))));
-            when(roleCachePort.findAllById(Set.of(ROLE_ADMIN_PRA_ID)))
-                    .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "GESTIONNAIRE_STRUCTURE", "Gest.")));
-            when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> sut.resoudreRegionPourCatalogueRegional(UUID.randomUUID()))
-                    .isInstanceOf(CatalogueAccesRefuseException.class);
-        }
-    }
 }

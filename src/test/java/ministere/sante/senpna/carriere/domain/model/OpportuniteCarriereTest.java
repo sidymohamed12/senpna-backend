@@ -362,7 +362,9 @@ class OpportuniteCarriereTest {
         return builder.build();
     }
 
-    /** Petit builder de confort pour ne faire varier qu'un seul paramètre par test. */
+    /**
+     * Petit builder de confort pour ne faire varier qu'un seul paramètre par test.
+     */
     private static final class OpportuniteBuilder {
         private String titre = "Titre valide";
         private String nomEntreprise = "Entreprise valide";

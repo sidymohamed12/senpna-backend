@@ -181,7 +181,8 @@ class UserManagementUseCasesTest {
         void creer_emailDejaUtilise_leve_exception() {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(true);
 
-            assertThatThrownBy(() -> sut.creer(commandeValide()))
+            var commandeValide = commandeValide();
+            assertThatThrownBy(() -> sut.creer(commandeValide))
                     .isInstanceOf(EmailDejaUtiliseException.class);
 
             verifyNoInteractions(roleQueryPort, passwordEncoderPort, temporaryPasswordGenerator, userDetailAssembler,
@@ -223,7 +224,8 @@ class UserManagementUseCasesTest {
             when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
             when(roleQueryPort.findById(ROLE_ID)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.creer(commandeValide()))
+            var commandeValide = commandeValide();
+            assertThatThrownBy(() -> sut.creer(commandeValide))
                     .isInstanceOf(RoleIntrouvableException.class);
 
             verifyNoInteractions(passwordEncoderPort, temporaryPasswordGenerator, userDetailAssembler);
@@ -283,7 +285,8 @@ class UserManagementUseCasesTest {
         void obtenir_introuvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetUserQuery(USER_ID)))
+            var getUserQuery = new GetUserQuery(USER_ID);
+            assertThatThrownBy(() -> sut.obtenir(getUserQuery))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(userDetailAssembler);
@@ -322,7 +325,7 @@ class UserManagementUseCasesTest {
             UserPage result = sut.lister(query);
 
             assertThat(result.content()).containsExactly(DETAIL_FICTIF, DETAIL_FICTIF);
-            assertThat(result.page()).isEqualTo(0);
+            assertThat(result.page()).isZero();
             assertThat(result.size()).isEqualTo(20);
             assertThat(result.totalElements()).isEqualTo(2);
             assertThat(result.totalPages()).isEqualTo(1);
@@ -334,7 +337,7 @@ class UserManagementUseCasesTest {
             assertThat(criteriaCaptor.getValue().recherche()).isEqualTo("dupont");
             assertThat(criteriaCaptor.getValue().actif()).isTrue();
             assertThat(criteriaCaptor.getValue().roleId()).isEqualTo(ROLE_ID);
-            assertThat(pageRequestCaptor.getValue().page()).isEqualTo(0);
+            assertThat(pageRequestCaptor.getValue().page()).isZero();
             assertThat(pageRequestCaptor.getValue().size()).isEqualTo(20);
             assertThat(pageRequestCaptor.getValue().sortBy()).isEqualTo("nom");
         }
@@ -471,7 +474,8 @@ class UserManagementUseCasesTest {
         void activer_introuvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.activer(new ActivateUserCommand(USER_ID, ACTEUR_ID)))
+            var activateUserCommand = new ActivateUserCommand(USER_ID, ACTEUR_ID);
+            assertThatThrownBy(() -> sut.activer(activateUserCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -515,7 +519,8 @@ class UserManagementUseCasesTest {
         @Test
         @DisplayName("auto-désactivation → AutoDesactivationInterditeException, sans accès au repository")
         void desactiver_soiMeme_leve_exception() {
-            assertThatThrownBy(() -> sut.desactiver(new DeactivateUserCommand(USER_ID, USER_ID)))
+            var deactivateUserCommand = new DeactivateUserCommand(USER_ID, USER_ID);
+            assertThatThrownBy(() -> sut.desactiver(deactivateUserCommand))
                     .isInstanceOf(AutoDesactivationInterditeException.class);
 
             verifyNoInteractions(userManagementRepositoryPort, userDetailAssembler);
@@ -526,7 +531,8 @@ class UserManagementUseCasesTest {
         void desactiver_introuvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.desactiver(new DeactivateUserCommand(USER_ID, AUTRE_USER_ID)))
+            var deactivateUserCommand = new DeactivateUserCommand(USER_ID, AUTRE_USER_ID);
+            assertThatThrownBy(() -> sut.desactiver(deactivateUserCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -575,7 +581,8 @@ class UserManagementUseCasesTest {
         void assigner_roleIntrouvable_leve_exception() {
             when(roleQueryPort.existsById(AUTRE_ROLE_ID)).thenReturn(false);
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
+            var assignRoleCommand = new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID);
+            assertThatThrownBy(() -> sut.assigner(assignRoleCommand))
                     .isInstanceOf(RoleIntrouvableException.class);
 
             verifyNoInteractions(userManagementRepositoryPort, userDetailAssembler);
@@ -587,7 +594,8 @@ class UserManagementUseCasesTest {
             when(roleQueryPort.existsById(AUTRE_ROLE_ID)).thenReturn(true);
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
+            var assignRoleCommand = new AssignRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID);
+            assertThatThrownBy(() -> sut.assigner(assignRoleCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -599,7 +607,8 @@ class UserManagementUseCasesTest {
             when(roleQueryPort.existsById(ROLE_ID)).thenReturn(true);
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.assigner(new AssignRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
+            var assignRoleCommand = new AssignRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID);
+            assertThatThrownBy(() -> sut.assigner(assignRoleCommand))
                     .isInstanceOf(RoleDejaAssigneException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -645,7 +654,8 @@ class UserManagementUseCasesTest {
         void retirer_userIntrouvable_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
+            var revokeRoleCommand = new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID);
+            assertThatThrownBy(() -> sut.retirer(revokeRoleCommand))
                     .isInstanceOf(UserNotFoundException.class);
         }
 
@@ -654,7 +664,8 @@ class UserManagementUseCasesTest {
         void retirer_roleNonAssigne_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID)))
+            var revokeRoleCommand = new RevokeRoleCommand(USER_ID, ACTEUR_ID, AUTRE_ROLE_ID);
+            assertThatThrownBy(() -> sut.retirer(revokeRoleCommand))
                     .isInstanceOf(RoleNonAssigneException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
@@ -665,7 +676,8 @@ class UserManagementUseCasesTest {
         void retirer_dernierRole_leve_exception() {
             when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.of(UserFixtures.actif()));
 
-            assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID)))
+            var revokeRoleCommand = new RevokeRoleCommand(USER_ID, ACTEUR_ID, ROLE_ID);
+            assertThatThrownBy(() -> sut.retirer(revokeRoleCommand))
                     .isInstanceOf(DernierRoleException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());

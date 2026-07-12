@@ -93,7 +93,7 @@ class OtpServiceTest {
         void genererEtEnvoyer_init_attempts() {
             sut.genererEtEnvoyer(EMAIL, OtpChannel.EMAIL, DESTINATION);
 
-            verify(cachePort).put(eq("otp:attempts:" + EMAIL), eq("0"), eq(TTL));
+            verify(cachePort).put("otp:attempts:" + EMAIL, "0", TTL);
         }
 
         @Test
@@ -183,7 +183,7 @@ class OtpServiceTest {
             assertThatThrownBy(() -> sut.valider(EMAIL, CODE))
                     .isInstanceOf(OtpInvalideException.class);
 
-            verify(cachePort).put(eq("otp:attempts:" + EMAIL), eq("1"), eq(TTL));
+            verify(cachePort).put("otp:attempts:" + EMAIL, "1", TTL);
         }
 
         @Test

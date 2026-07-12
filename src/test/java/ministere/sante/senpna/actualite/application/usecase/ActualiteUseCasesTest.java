@@ -96,9 +96,8 @@ class ActualiteUseCasesTest {
                                         userManagementRepositoryPort, commandMapper, assembler);
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID))).thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase
-                                        .creer(new CreateActualiteCommand(AUTEUR_ID, "PROJET", "Titre", null,
-                                                        List.of(), List.of())))
+                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "PROJET", "Titre", null, List.of(), List.of());
+                        assertThatThrownBy(() -> useCase.creer(createActualiteCommand))
                                         .isInstanceOf(UserNotFoundException.class);
 
                         verify(actualiteRepositoryPort, never()).save(any());
@@ -116,9 +115,8 @@ class ActualiteUseCasesTest {
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.of(auteur));
 
-                        assertThatThrownBy(() -> useCase
-                                        .creer(new CreateActualiteCommand(AUTEUR_ID, "INEXISTANTE", "Titre",
-                                                        null, List.of(), List.of())))
+                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "INEXISTANTE", "Titre", null, List.of(), List.of());
+                        assertThatThrownBy(() -> useCase.creer(createActualiteCommand))
                                         .isInstanceOf(CategorieActualiteInvalideException.class);
                 }
         }
@@ -157,9 +155,8 @@ class ActualiteUseCasesTest {
                         when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase
-                                        .modifier(new UpdateActualiteCommand(ACTUALITE_ID, "PROJET", "Titre",
-                                                        null, List.of(), List.of())))
+                        var updateActualiteCommand = new UpdateActualiteCommand(ACTUALITE_ID, "PROJET", "Titre", null, List.of(), List.of());
+                        assertThatThrownBy(() -> useCase.modifier(updateActualiteCommand))
                                         .isInstanceOf(ActualiteIntrouvableException.class);
                 }
         }
@@ -212,7 +209,8 @@ class ActualiteUseCasesTest {
                         when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.publier(new PublierActualiteCommand(ACTUALITE_ID)))
+                        var publierActualiteCommand = new PublierActualiteCommand(ACTUALITE_ID);
+                        assertThatThrownBy(() -> useCase.publier(publierActualiteCommand))
                                         .isInstanceOf(ActualiteIntrouvableException.class);
                 }
         }
@@ -247,7 +245,8 @@ class ActualiteUseCasesTest {
                         when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.obtenir(new GetActualiteQuery(ACTUALITE_ID)))
+                        var getActualiteQuery = new GetActualiteQuery(ACTUALITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenir(getActualiteQuery))
                                         .isInstanceOf(ActualiteIntrouvableException.class);
                 }
         }

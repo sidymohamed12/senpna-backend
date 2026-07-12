@@ -44,8 +44,8 @@ class LotTest {
         @Test
         @DisplayName("numéro de lot vide → IllegalArgumentException")
         void creer_numeroLotVide_leveException() {
-            assertThatThrownBy(() -> Lot.creer("  ", MEDICAMENT_ID, FOURNISSEUR_ID, null,
-                    LocalDate.now().plusYears(1), null, null))
+            var now = LocalDate.now().plusYears(1);
+            assertThatThrownBy(() -> Lot.creer("  ", MEDICAMENT_ID, FOURNISSEUR_ID, null, now, null, null))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -59,16 +59,18 @@ class LotTest {
         @Test
         @DisplayName("date de fabrication postérieure à la date d'expiration → IllegalArgumentException")
         void creer_fabricationApresExpiration_leveException() {
-            assertThatThrownBy(() -> Lot.creer("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID,
-                    LocalDate.now().plusDays(10), LocalDate.now(), null, null))
+            var now = LocalDate.now().plusDays(10);
+            var now2 = LocalDate.now();
+            assertThatThrownBy(() -> Lot.creer("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, now, now2, null, null))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("prix négatif → IllegalArgumentException")
         void creer_prixNegatif_leveException() {
-            assertThatThrownBy(() -> Lot.creer("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null,
-                    LocalDate.now().plusYears(1), new BigDecimal("-1"), null))
+            var now = LocalDate.now().plusYears(1);
+            var bigDecimal = new BigDecimal("-1");
+            assertThatThrownBy(() -> Lot.creer("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null, now, bigDecimal, null))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 

@@ -97,9 +97,9 @@ class ConditionnementUseCasesTest {
                         when(medicamentRepositoryPort.findById(MedicamentId.of(MEDICAMENT_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.creer(
-                                        new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE,
-                                                        true, null, null)))
+                        var createConditionnementCommand = new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé",
+                                        1, BigDecimal.ONE, true, null, null);
+                        assertThatThrownBy(() -> useCase.creer(createConditionnementCommand))
                                         .isInstanceOf(MedicamentIntrouvableException.class);
                 }
 
@@ -114,9 +114,9 @@ class ConditionnementUseCasesTest {
                                         org.mockito.ArgumentMatchers.eq(1)))
                                         .thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.creer(
-                                        new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE,
-                                                        true, null, null)))
+                        var createConditionnementCommand = new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé",
+                                        1, BigDecimal.ONE, true, null, null);
+                        assertThatThrownBy(() -> useCase.creer(createConditionnementCommand))
                                         .isInstanceOf(NiveauConditionnementDejaUtiliseException.class);
 
                         verify(conditionnementRepositoryPort, never()).save(any());
@@ -135,9 +135,9 @@ class ConditionnementUseCasesTest {
                         when(conditionnementRepositoryPort.existsByMedicamentIdAndNomIgnoreCase(any(), any()))
                                         .thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.creer(
-                                        new CreateConditionnementCommand(MEDICAMENT_ID, "Boîte", 2,
-                                                        new BigDecimal("20"), false, null, null)))
+                        var createConditionnementCommand = new CreateConditionnementCommand(MEDICAMENT_ID, "Boîte", 2,
+                                        new BigDecimal("20"), false, null, null);
+                        assertThatThrownBy(() -> useCase.creer(createConditionnementCommand))
                                         .isInstanceOf(NomConditionnementDejaUtiliseException.class);
                 }
 
@@ -155,9 +155,9 @@ class ConditionnementUseCasesTest {
                                         .thenReturn(false);
                         when(conditionnementRepositoryPort.existsUniteBaseByMedicamentId(any())).thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.creer(
-                                        new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE,
-                                                        true, null, null)))
+                        var createConditionnementCommand = new CreateConditionnementCommand(MEDICAMENT_ID, "Comprimé",
+                                        1, BigDecimal.ONE, true, null, null);
+                        assertThatThrownBy(() -> useCase.creer(createConditionnementCommand))
                                         .isInstanceOf(UniteBaseDejaDefinieException.class);
 
                         verify(conditionnementRepositoryPort, never()).save(any());
@@ -180,8 +180,9 @@ class ConditionnementUseCasesTest {
                         when(conditionnementRepositoryPort.findById(ConditionnementId.of(CONDITIONNEMENT_ID)))
                                         .thenReturn(Optional.empty());
 
+                        var archiveCommand = new ArchiveConditionnementCommand(CONDITIONNEMENT_ID);
                         assertThatThrownBy(
-                                        () -> useCase.archiver(new ArchiveConditionnementCommand(CONDITIONNEMENT_ID)))
+                                        () -> useCase.archiver(archiveCommand))
                                         .isInstanceOf(ConditionnementIntrouvableException.class);
                 }
 
@@ -200,8 +201,9 @@ class ConditionnementUseCasesTest {
                         when(conditionnementRepositoryPort.estUniqueUniteBaseActive(MedicamentId.of(MEDICAMENT_ID),
                                         ConditionnementId.of(CONDITIONNEMENT_ID))).thenReturn(true);
 
+                        var archiveCommand = new ArchiveConditionnementCommand(CONDITIONNEMENT_ID);
                         assertThatThrownBy(
-                                        () -> useCase.archiver(new ArchiveConditionnementCommand(CONDITIONNEMENT_ID)))
+                                        () -> useCase.archiver(archiveCommand))
                                         .isInstanceOf(DerniereUniteBaseException.class);
 
                         verify(conditionnementRepositoryPort, never()).save(any());

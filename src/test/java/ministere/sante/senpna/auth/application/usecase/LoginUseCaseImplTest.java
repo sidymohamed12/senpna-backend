@@ -134,7 +134,8 @@ class LoginUseCaseImplTest {
         void login_user_absent_leve_invalid_credentials() {
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, PASSWORD)))
+            var loginCommand = new LoginCommand(EMAIL, PASSWORD);
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(InvalidCredentialsException.class);
 
             verifyNoInteractions(passwordEncoderPort, authTokenFactory);
@@ -160,7 +161,8 @@ class LoginUseCaseImplTest {
         @Test
         @DisplayName("lève InvalidCredentialsException")
         void login_mauvaisPassword_leve_invalid_credentials() {
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, "mauvais")))
+            var loginCommand = new LoginCommand(EMAIL, "mauvais");
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(InvalidCredentialsException.class);
         }
 
@@ -169,7 +171,8 @@ class LoginUseCaseImplTest {
         void login_mauvaisPassword_incremente_echecs() {
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, "mauvais")))
+            var loginCommand = new LoginCommand(EMAIL, "mauvais");
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(InvalidCredentialsException.class);
 
             verify(userRepositoryPort).save(captor.capture());
@@ -185,7 +188,8 @@ class LoginUseCaseImplTest {
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, "mauvais")))
+            var loginCommand = new LoginCommand(EMAIL, "mauvais");
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(InvalidCredentialsException.class);
 
             verify(userRepositoryPort).save(captor.capture());
@@ -209,7 +213,8 @@ class LoginUseCaseImplTest {
             when(userRepositoryPort.findByEmail(any()))
                     .thenReturn(Optional.of(UserFixtures.verrouille()));
 
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, PASSWORD)))
+            var loginCommand = new LoginCommand(EMAIL, PASSWORD);
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(CompteVerrouilleException.class);
 
             verifyNoInteractions(passwordEncoderPort);
@@ -232,7 +237,8 @@ class LoginUseCaseImplTest {
             when(passwordEncoderPort.correspond(any(), any())) // ← any() ici aussi
                     .thenReturn(true);
 
-            assertThatThrownBy(() -> sut.login(new LoginCommand(EMAIL, PASSWORD)))
+            var loginCommand = new LoginCommand(EMAIL, PASSWORD);
+            assertThatThrownBy(() -> sut.login(loginCommand))
                     .isInstanceOf(CompteInactifException.class);
 
             verifyNoInteractions(authTokenFactory);

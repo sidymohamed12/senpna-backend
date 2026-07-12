@@ -81,8 +81,8 @@ class FournisseurUseCasesTest {
                                         assembler);
                         when(fournisseurRepositoryPort.existsByNomIgnoreCase("laboratoire a")).thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.creer(
-                                        new CreateFournisseurCommand("laboratoire a", null, null, null, null)))
+                        var createFournisseurCommand = new CreateFournisseurCommand("laboratoire a", null, null, null, null);
+                        assertThatThrownBy(() -> useCase.creer( createFournisseurCommand))
                                         .isInstanceOf(NomFournisseurDejaUtiliseException.class);
 
                         verify(fournisseurRepositoryPort, never()).save(any());
@@ -135,9 +135,8 @@ class FournisseurUseCasesTest {
                         when(fournisseurRepositoryPort.findById(FournisseurId.of(FOURNISSEUR_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.modifier(
-                                        new UpdateFournisseurCommand(FOURNISSEUR_ID, "Laboratoire B", null, null, null,
-                                                        null)))
+                        var updateFournisseurCommand = new UpdateFournisseurCommand(FOURNISSEUR_ID, "Laboratoire B", null, null, null, null);
+                        assertThatThrownBy(() -> useCase.modifier( updateFournisseurCommand))
                                         .isInstanceOf(FournisseurIntrouvableException.class);
                 }
 
@@ -155,9 +154,8 @@ class FournisseurUseCasesTest {
                         when(fournisseurRepositoryPort.existsByNomIgnoreCaseAndIdNot(eq("Laboratoire B"), any()))
                                         .thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.modifier(
-                                        new UpdateFournisseurCommand(FOURNISSEUR_ID, "Laboratoire B", null, null, null,
-                                                        null)))
+                        var updateFournisseurCommand = new UpdateFournisseurCommand(FOURNISSEUR_ID, "Laboratoire B", null, null, null, null);
+                        assertThatThrownBy(() -> useCase.modifier( updateFournisseurCommand))
                                         .isInstanceOf(NomFournisseurDejaUtiliseException.class);
 
                         verify(fournisseurRepositoryPort, never()).save(any());
@@ -198,7 +196,8 @@ class FournisseurUseCasesTest {
                         when(fournisseurRepositoryPort.findById(FournisseurId.of(FOURNISSEUR_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.obtenir(new GetFournisseurQuery(FOURNISSEUR_ID)))
+                        var getFournisseurQuery = new GetFournisseurQuery(FOURNISSEUR_ID);
+                        assertThatThrownBy(() -> useCase.obtenir(getFournisseurQuery))
                                         .isInstanceOf(FournisseurIntrouvableException.class);
                 }
         }
@@ -290,7 +289,8 @@ class FournisseurUseCasesTest {
                         when(fournisseurRepositoryPort.findById(FournisseurId.of(FOURNISSEUR_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.activer(new ActivateFournisseurCommand(FOURNISSEUR_ID)))
+                        var activateFournisseurCommand = new ActivateFournisseurCommand(FOURNISSEUR_ID);
+                        assertThatThrownBy(() -> useCase.activer(activateFournisseurCommand))
                                         .isInstanceOf(FournisseurIntrouvableException.class);
                 }
         }

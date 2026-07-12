@@ -131,7 +131,8 @@ class CandidatureUseCasesTest {
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.soumettre(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.soumettre(commandeValide))
                                         .isInstanceOf(UserNotFoundException.class);
 
                         verify(candidatureRepositoryPort, never()).save(any());
@@ -146,7 +147,8 @@ class CandidatureUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.soumettre(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.soumettre(commandeValide))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
 
                         verify(candidatureRepositoryPort, never()).save(any());
@@ -162,7 +164,8 @@ class CandidatureUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(offre));
 
-                        assertThatThrownBy(() -> useCase.soumettre(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.soumettre(commandeValide))
                                         .isInstanceOf(OpportuniteFermeeException.class);
 
                         verify(candidatureRepositoryPort, never()).save(any());
@@ -182,7 +185,8 @@ class CandidatureUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(offre));
 
-                        assertThatThrownBy(() -> useCase.soumettre(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.soumettre(commandeValide))
                                         .isInstanceOf(OpportuniteFermeeException.class);
                 }
 
@@ -196,9 +200,8 @@ class CandidatureUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(offre));
 
-                        assertThatThrownBy(() -> useCase.soumettre(new SoumettreCandidatureCommand(OPPORTUNITE_ID,
-                                        "DR", "Fatou Diagne", "fatou.diagne@example.sn", "+221771112233",
-                                        "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, true)))
+                        var soumettreCandidatureCommand = new SoumettreCandidatureCommand(OPPORTUNITE_ID, "DR", "Fatou Diagne", "fatou.diagne@example.sn", "+221771112233", "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, true);
+                        assertThatThrownBy(() -> useCase.soumettre(soumettreCandidatureCommand))
                                         .isInstanceOf(CiviliteInvalideException.class);
                 }
         }
@@ -233,7 +236,8 @@ class CandidatureUseCasesTest {
                         when(candidatureRepositoryPort.findById(CandidatureId.of(CANDIDATURE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.obtenir(new GetCandidatureQuery(CANDIDATURE_ID)))
+                        var getCandidatureQuery = new GetCandidatureQuery(CANDIDATURE_ID);
+                        assertThatThrownBy(() -> useCase.obtenir(getCandidatureQuery))
                                         .isInstanceOf(CandidatureIntrouvableException.class);
                 }
         }

@@ -166,10 +166,11 @@ class UserManagementServicesTest {
         void generer_contientToutesLesCategories() {
             String motDePasse = sut.generer();
 
-            assertThat(motDePasse).containsPattern("[ABCDEFGHJKLMNPQRSTUVWXYZ]"); // majuscules sans I/O
-            assertThat(motDePasse).containsPattern("[abcdefghijkmnpqrstuvwxyz]"); // minuscules sans l/o
-            assertThat(motDePasse).containsPattern("[2-9]"); // chiffres sans 0/1
-            assertThat(motDePasse).containsPattern("[!@#$%^&*_=+\\-]");
+            assertThat(motDePasse)
+                    .containsPattern("[ABCDEFGHJKLMNPQRSTUVWXYZ]") // majuscules sans I/O
+                    .containsPattern("[abcdefghijkmnpqrstuvwxyz]") // minuscules sans l/o
+                    .containsPattern("[2-9]") // chiffres sans 0/1
+                    .containsPattern("[!@#$%^&*_=+\\-]");
         }
 
         @Test

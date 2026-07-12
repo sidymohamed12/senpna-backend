@@ -60,7 +60,7 @@ class SmtpEmailOtpSenderAdapterTest {
         verify(javaMailSender).send(captor.capture());
 
         MimeMessage envoye = captor.getValue();
-        assertThat(envoye.getAllRecipients()[0].toString()).isEqualTo("user@example.com");
+        assertThat(envoye.getAllRecipients()[0].toString()).hasToString("user@example.com");
         assertThat(envoye.getSubject()).contains("vérification");
         assertThat(envoye.getFrom()[0].toString()).contains("no-reply@senpharmaflow.gouv.sn");
     }

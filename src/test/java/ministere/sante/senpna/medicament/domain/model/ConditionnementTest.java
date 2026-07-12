@@ -51,8 +51,8 @@ class ConditionnementTest {
         @Test
         @DisplayName("unité de base avec quantité ≠ 1 → IllegalArgumentException")
         void creer_uniteBaseQuantiteInvalide_leveException() {
-            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Comprimé", 1, new BigDecimal("2"), true,
-                    null, null))
+            var bigDecimal = new BigDecimal("2");
+            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Comprimé", 1, bigDecimal, true, null, null))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -90,24 +90,29 @@ class ConditionnementTest {
         @Test
         @DisplayName("prix de vente sans prix d'achat → IllegalArgumentException")
         void creer_prixIncomplet_leveException() {
-            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"), false,
-                    null, new BigDecimal("1000")))
+            var bigDecimal = new BigDecimal("20");
+            var bigDecimal2 = new BigDecimal("1000");
+            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, null, bigDecimal2))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("prix de vente inférieur au prix d'achat → IllegalArgumentException")
         void creer_prixVenteInferieurPrixAchat_leveException() {
-            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"), false,
-                    new BigDecimal("1000"), new BigDecimal("500")))
+            var bigDecimal = new BigDecimal("20");
+            var bigDecimal2 = new BigDecimal("1000");
+            var bigDecimal3 = new BigDecimal("500");
+            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, bigDecimal2, bigDecimal3))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("prix négatif → IllegalArgumentException")
         void creer_prixNegatif_leveException() {
-            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"), false,
-                    new BigDecimal("-1"), new BigDecimal("500")))
+            var bigDecimal = new BigDecimal("20");
+            var bigDecimal2 = new BigDecimal("-1");
+            var bigDecimal3 = new BigDecimal("500");
+            assertThatThrownBy(() -> Conditionnement.creer(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, bigDecimal2, bigDecimal3))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -133,7 +138,8 @@ class ConditionnementTest {
             Conditionnement carton = Conditionnement.creer(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
                     false, null, null);
 
-            assertThatThrownBy(() -> carton.convertirVersUniteBase(new BigDecimal("-1")))
+            var bigDecimal = new BigDecimal("-1");
+            assertThatThrownBy(() -> carton.convertirVersUniteBase(bigDecimal))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

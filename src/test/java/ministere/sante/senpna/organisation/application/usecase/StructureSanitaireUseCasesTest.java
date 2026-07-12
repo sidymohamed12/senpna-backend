@@ -155,7 +155,8 @@ class StructureSanitaireUseCasesTest {
         void creer_regionIntrouvable_leveException() {
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.creer(commandeValide())).isInstanceOf(RegionIntrouvableException.class);
+            var commandeValide = commandeValide();
+            assertThatThrownBy(() -> sut.creer(commandeValide)).isInstanceOf(RegionIntrouvableException.class);
         }
 
         @Test
@@ -165,7 +166,8 @@ class StructureSanitaireUseCasesTest {
             regionInactive.desactiver();
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionInactive));
 
-            assertThatThrownBy(() -> sut.creer(commandeValide())).isInstanceOf(RegionInactiveException.class);
+            var commandeValide = commandeValide();
+            assertThatThrownBy(() -> sut.creer(commandeValide)).isInstanceOf(RegionInactiveException.class);
         }
 
         @Test
@@ -174,7 +176,8 @@ class StructureSanitaireUseCasesTest {
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionActive()));
             when(structureSanitaireRepositoryPort.existsByCode(any())).thenReturn(true);
 
-            assertThatThrownBy(() -> sut.creer(commandeValide()))
+            var commandeValide = commandeValide();
+            assertThatThrownBy(() -> sut.creer(commandeValide))
                     .isInstanceOf(CodeStructureSanitaireDejaUtiliseException.class);
 
             verify(structureSanitaireRepositoryPort, never()).save(any());
@@ -219,8 +222,8 @@ class StructureSanitaireUseCasesTest {
         void modifier_introuvable_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.modifier(
-                    new UpdateStructureSanitaireCommand(STRUCTURE_ID, "Nom", null, null, null, null, null, null)))
+            var updateStructureSanitaireCommand = new UpdateStructureSanitaireCommand(STRUCTURE_ID, "Nom", null, null, null, null, null, null);
+            assertThatThrownBy(() -> sut.modifier( updateStructureSanitaireCommand))
                     .isInstanceOf(StructureSanitaireIntrouvableException.class);
         }
     }
@@ -265,7 +268,8 @@ class StructureSanitaireUseCasesTest {
         void valider_dejaTraitee_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureValidee()));
 
-            assertThatThrownBy(() -> sut.valider(new ValidateAdhesionCommand(STRUCTURE_ID)))
+            var validateAdhesionCommand = new ValidateAdhesionCommand(STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.valider(validateAdhesionCommand))
                     .isInstanceOf(DemandeAdhesionDejaTraiteeException.class);
 
             verifyNoInteractions(eventPublisherPort);
@@ -277,7 +281,8 @@ class StructureSanitaireUseCasesTest {
         void valider_introuvable_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.valider(new ValidateAdhesionCommand(STRUCTURE_ID)))
+            var validateAdhesionCommand = new ValidateAdhesionCommand(STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.valider(validateAdhesionCommand))
                     .isInstanceOf(StructureSanitaireIntrouvableException.class);
         }
     }
@@ -319,7 +324,8 @@ class StructureSanitaireUseCasesTest {
         void rejeter_dejaTraitee_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureValidee()));
 
-            assertThatThrownBy(() -> sut.rejeter(new RejectAdhesionCommand(STRUCTURE_ID, "motif")))
+            var rejectAdhesionCommand = new RejectAdhesionCommand(STRUCTURE_ID, "motif");
+            assertThatThrownBy(() -> sut.rejeter(rejectAdhesionCommand))
                     .isInstanceOf(DemandeAdhesionDejaTraiteeException.class);
         }
     }
@@ -346,7 +352,8 @@ class StructureSanitaireUseCasesTest {
         void activer_adhesionNonValidee_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente()));
 
-            assertThatThrownBy(() -> sut.activer(new ActivateStructureSanitaireCommand(STRUCTURE_ID)))
+            var activateStructureSanitaireCommand = new ActivateStructureSanitaireCommand(STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.activer(activateStructureSanitaireCommand))
                     .isInstanceOf(StructureSanitaireNonValideeException.class);
         }
 
@@ -436,8 +443,8 @@ class StructureSanitaireUseCasesTest {
             regionInactive.desactiver();
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.of(regionInactive));
 
-            assertThatThrownBy(() -> sut.affecter(
-                    new AssignStructureToRegionCommand(STRUCTURE_ID, UUID.randomUUID())))
+            var assignStructureToRegionCommand = new AssignStructureToRegionCommand(STRUCTURE_ID, UUID.randomUUID());
+            assertThatThrownBy(() -> sut.affecter( assignStructureToRegionCommand))
                     .isInstanceOf(RegionInactiveException.class);
         }
     }
@@ -478,7 +485,8 @@ class StructureSanitaireUseCasesTest {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente()));
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.affecter(new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID)))
+            var assignStructureToPraCommand = new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID);
+            assertThatThrownBy(() -> sut.affecter(assignStructureToPraCommand))
                     .isInstanceOf(EntrepotIntrouvableException.class);
         }
 
@@ -490,7 +498,8 @@ class StructureSanitaireUseCasesTest {
                     TypeEntrepot.PNA_CENTRAL, null, null, null, null, true, Instant.now(), Instant.now());
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(pnaCentral));
 
-            assertThatThrownBy(() -> sut.affecter(new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID)))
+            var assignStructureToPraCommand = new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID);
+            assertThatThrownBy(() -> sut.affecter(assignStructureToPraCommand))
                     .isInstanceOf(TypeEntrepotInvalideException.class);
         }
 
@@ -502,7 +511,8 @@ class StructureSanitaireUseCasesTest {
                     TypeEntrepot.PRA, RegionId.of(REGION_ID), null, null, null, false, Instant.now(), Instant.now());
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(praInactive));
 
-            assertThatThrownBy(() -> sut.affecter(new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID)))
+            var assignStructureToPraCommand = new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID);
+            assertThatThrownBy(() -> sut.affecter(assignStructureToPraCommand))
                     .isInstanceOf(EntrepotInactifException.class);
         }
     }
@@ -540,7 +550,8 @@ class StructureSanitaireUseCasesTest {
         void obtenir_introuvable_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetStructureSanitaireQuery(STRUCTURE_ID)))
+            var getStructureSanitaireQuery = new GetStructureSanitaireQuery(STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.obtenir(getStructureSanitaireQuery))
                     .isInstanceOf(StructureSanitaireIntrouvableException.class);
         }
     }

@@ -199,7 +199,7 @@ class ValueObjectsTest {
         void of_string() {
             String uuidStr = "11111111-1111-1111-1111-111111111111";
             UserId id = UserId.of(uuidStr);
-            assertThat(id.getValue().toString()).isEqualTo(uuidStr);
+            assertThat(id.getValue().toString()).hasToString(uuidStr);
         }
 
         @Test

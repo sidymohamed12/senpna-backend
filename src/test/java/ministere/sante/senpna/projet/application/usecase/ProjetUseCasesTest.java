@@ -75,8 +75,8 @@ class ProjetUseCasesTest {
             CreateProjetUseCaseImpl useCase = new CreateProjetUseCaseImpl(projetRepositoryPort, commandMapper,
                     assembler);
 
-            assertThatThrownBy(() -> useCase.creer(new CreateProjetCommand("INEXISTANTE", "Nom", null, List.of(),
-                    List.of(), null)))
+            var createProjetCommand = new CreateProjetCommand("INEXISTANTE", "Nom", null, List.of(), List.of(), null);
+            assertThatThrownBy(() -> useCase.creer(createProjetCommand))
                     .isInstanceOf(CategorieProjetInvalideException.class);
 
             verify(projetRepositoryPort, never()).save(any());
@@ -114,8 +114,8 @@ class ProjetUseCasesTest {
                     assembler);
             when(projetRepositoryPort.findById(ProjetId.of(PROJET_ID))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> useCase.modifier(new UpdateProjetCommand(PROJET_ID, "SANTE", "Nom", null,
-                    List.of(), List.of(), null)))
+            var updateProjetCommand = new UpdateProjetCommand(PROJET_ID, "SANTE", "Nom", null, List.of(), List.of(), null);
+            assertThatThrownBy(() -> useCase.modifier(updateProjetCommand))
                     .isInstanceOf(ProjetIntrouvableException.class);
         }
     }
@@ -161,7 +161,8 @@ class ProjetUseCasesTest {
             PublierProjetUseCaseImpl useCase = new PublierProjetUseCaseImpl(projetRepositoryPort, assembler);
             when(projetRepositoryPort.findById(ProjetId.of(PROJET_ID))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> useCase.publier(new PublierProjetCommand(PROJET_ID)))
+            var publierProjetCommand = new PublierProjetCommand(PROJET_ID);
+            assertThatThrownBy(() -> useCase.publier(publierProjetCommand))
                     .isInstanceOf(ProjetIntrouvableException.class);
         }
     }
@@ -192,7 +193,8 @@ class ProjetUseCasesTest {
             GetProjetUseCaseImpl useCase = new GetProjetUseCaseImpl(projetRepositoryPort, assembler);
             when(projetRepositoryPort.findById(ProjetId.of(PROJET_ID))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> useCase.obtenir(new GetProjetQuery(PROJET_ID)))
+            var getProjetQuery = new GetProjetQuery(PROJET_ID);
+            assertThatThrownBy(() -> useCase.obtenir(getProjetQuery))
                     .isInstanceOf(ProjetIntrouvableException.class);
         }
     }

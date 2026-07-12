@@ -100,7 +100,8 @@ class UserHierarchyGuardTest {
                                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PNA_ID, "ADMIN_PNA",
                                                 "Administrateur PNA")));
 
-                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PNA_ID)))
+                var setOf = Set.of(ROLE_ADMIN_PNA_ID);
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, setOf))
                                 .isInstanceOf(GestionUtilisateurInterditeException.class)
                                 .isInstanceOf(ForbiddenException.class);
         }
@@ -114,7 +115,8 @@ class UserHierarchyGuardTest {
                                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA",
                                                 "Administrateur PRA")));
 
-                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_ADMIN_PRA_ID)))
+                var setOf = Set.of(ROLE_ADMIN_PRA_ID);
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, setOf))
                                 .isInstanceOf(GestionUtilisateurInterditeException.class);
         }
 
@@ -149,7 +151,8 @@ class UserHierarchyGuardTest {
                                                 "GESTIONNAIRE_STRUCTURE",
                                                 "Gestionnaire Structure")));
 
-                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(roleGestionnaireStructureId)))
+                var setOf = Set.of(roleGestionnaireStructureId);
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, setOf))
                                 .isInstanceOf(GestionUtilisateurInterditeException.class);
         }
 
@@ -170,7 +173,8 @@ class UserHierarchyGuardTest {
         void acteurIntrouvable_leveException() {
                 when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, Set.of(ROLE_GESTIONNAIRE_PRA_ID)))
+                var setOf = Set.of(ROLE_GESTIONNAIRE_PRA_ID);
+                assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, setOf))
                                 .isInstanceOf(UserNotFoundException.class);
         }
 }

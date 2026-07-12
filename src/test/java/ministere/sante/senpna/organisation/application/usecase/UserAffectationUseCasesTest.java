@@ -97,7 +97,8 @@ class UserAffectationUseCasesTest {
         void affecter_userIntrouvable_leveException() {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(false);
 
-            assertThatThrownBy(() -> sut.affecter(new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID)))
+            var assignUserToEntrepotCommand = new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID);
+            assertThatThrownBy(() -> sut.affecter(assignUserToEntrepotCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(entrepotRepositoryPort);
@@ -109,7 +110,8 @@ class UserAffectationUseCasesTest {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(true);
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.affecter(new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID)))
+            var assignUserToEntrepotCommand = new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID);
+            assertThatThrownBy(() -> sut.affecter(assignUserToEntrepotCommand))
                     .isInstanceOf(EntrepotIntrouvableException.class);
 
             verify(userAffectationRepositoryPort, never()).affecterEntrepot(any(), any());
@@ -123,7 +125,8 @@ class UserAffectationUseCasesTest {
                     TypeEntrepot.PRA, RegionId.generate(), null, null, null, false, Instant.now(), Instant.now());
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepotInactif));
 
-            assertThatThrownBy(() -> sut.affecter(new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID)))
+            var assignUserToEntrepotCommand = new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID);
+            assertThatThrownBy(() -> sut.affecter(assignUserToEntrepotCommand))
                     .isInstanceOf(EntrepotInactifException.class);
         }
     }
@@ -163,7 +166,8 @@ class UserAffectationUseCasesTest {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(true);
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.affecter(new AssignUserToStructureCommand(USER_ID, STRUCTURE_ID)))
+            var assignUserToStructureCommand = new AssignUserToStructureCommand(USER_ID, STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.affecter(assignUserToStructureCommand))
                     .isInstanceOf(StructureSanitaireIntrouvableException.class);
         }
 
@@ -178,7 +182,8 @@ class UserAffectationUseCasesTest {
                     Instant.now());
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente));
 
-            assertThatThrownBy(() -> sut.affecter(new AssignUserToStructureCommand(USER_ID, STRUCTURE_ID)))
+            var assignUserToStructureCommand = new AssignUserToStructureCommand(USER_ID, STRUCTURE_ID);
+            assertThatThrownBy(() -> sut.affecter(assignUserToStructureCommand))
                     .isInstanceOf(StructureSanitaireNonValideeException.class);
 
             verify(userAffectationRepositoryPort, never()).affecterStructureSanitaire(any(), any());
@@ -216,7 +221,8 @@ class UserAffectationUseCasesTest {
         void retirer_userIntrouvable_leveException() {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(false);
 
-            assertThatThrownBy(() -> sut.retirer(new UnassignUserCommand(USER_ID)))
+            var unassignUserCommand = new UnassignUserCommand(USER_ID);
+            assertThatThrownBy(() -> sut.retirer(unassignUserCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userAffectationRepositoryPort, never()).retirerAffectation(any());

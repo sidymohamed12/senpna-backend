@@ -137,8 +137,8 @@ class ReserverStockFefoUseCaseImplTest {
                         when(stockRepositoryPort.save(any(Stock.class)))
                                         .thenAnswer(invocation -> invocation.getArgument(0));
 
-                        assertThatThrownBy(() -> useCase.reserver(new ReserverStockFefoCommand(ENTREPOT_ID.getValue(),
-                                        MEDICAMENT_ID.getValue(), new BigDecimal("25"), null)))
+                        var reserverStockFefoCommand = new ReserverStockFefoCommand(ENTREPOT_ID.getValue(), MEDICAMENT_ID.getValue(), new BigDecimal("25"), null);
+                        assertThatThrownBy(() -> useCase.reserver(reserverStockFefoCommand))
                                         .isInstanceOf(StockInsuffisantException.class);
                 }
 
@@ -152,8 +152,8 @@ class ReserverStockFefoUseCaseImplTest {
                         when(lotRepositoryPort.findActifsNonExpiresParMedicamentTriesFefo(MEDICAMENT_ID))
                                         .thenReturn(List.of());
 
-                        assertThatThrownBy(() -> useCase.reserver(new ReserverStockFefoCommand(ENTREPOT_ID.getValue(),
-                                        MEDICAMENT_ID.getValue(), new BigDecimal("5"), null)))
+                        var reserverStockFefoCommand = new ReserverStockFefoCommand(ENTREPOT_ID.getValue(), MEDICAMENT_ID.getValue(), new BigDecimal("5"), null);
+                        assertThatThrownBy(() -> useCase.reserver(reserverStockFefoCommand))
                                         .isInstanceOf(StockInsuffisantException.class);
                 }
         }

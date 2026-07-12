@@ -61,28 +61,27 @@ class CandidatureTest {
         @Test
         @DisplayName("consentement RGPD non coché → ConsentementRgpdRequisException")
         void soumettre_consentementRefuse_leveException() {
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne",
-                    Email.of("fatou.diagne@example.sn"), Phone.of("+221771112233"),
-                    "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, false, "Titre", "Entreprise",
-                    "rh@senpna.sn"))
+            var emailOf = Email.of("fatou.diagne@example.sn");
+            var phoneOf = Phone.of("+221771112233");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, false, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(ConsentementRgpdRequisException.class);
         }
 
         @Test
         @DisplayName("nom complet vide → IllegalArgumentException")
         void soumettre_nomCompletVide_leveException() {
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "   ",
-                    Email.of("test@example.sn"), Phone.of("+221771112233"), "https://cdn.senpna.sn/cvs/test.pdf",
-                    null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            var emailOf = Email.of("test@example.sn");
+            var phoneOf = Phone.of("+221771112233");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "   ", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("CV manquant → IllegalArgumentException")
         void soumettre_cvManquant_leveException() {
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr",
-                    Email.of("test@example.sn"), Phone.of("+221771112233"), "", null, null, true, "Titre",
-                    "Entreprise", "rh@senpna.sn"))
+            var emailOf = Email.of("test@example.sn");
+            var phoneOf = Phone.of("+221771112233");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -91,27 +90,25 @@ class CandidatureTest {
         void soumettre_messageTropLong_leveException() {
             String messageTropLong = "a".repeat(2001);
 
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr",
-                    Email.of("test@example.sn"), Phone.of("+221771112233"), "https://cdn.senpna.sn/cvs/test.pdf",
-                    null, messageTropLong, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            var emailOf = Email.of("test@example.sn");
+            var phoneOf = Phone.of("+221771112233");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, messageTropLong, true, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("email null → NullPointerException")
         void soumettre_emailNull_leveException() {
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", null,
-                    Phone.of("+221771112233"), "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre",
-                    "Entreprise", "rh@senpna.sn"))
+            var phoneOf = Phone.of("+221771112233");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", null, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("téléphone null → NullPointerException")
         void soumettre_telephoneNull_leveException() {
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr",
-                    Email.of("test@example.sn"), null, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true,
-                    "Titre", "Entreprise", "rh@senpna.sn"))
+            var emailOf = Email.of("test@example.sn");
+            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, null, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
                     .isInstanceOf(NullPointerException.class);
         }
     }

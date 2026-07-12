@@ -171,8 +171,10 @@ class EntrepotTest {
         @Test
         @DisplayName("reconstruit une PRA sans région → IllegalArgumentException (invariant vérifié aussi au reconstruct)")
         void reconstruct_praSansRegion_leveException() {
-            assertThatThrownBy(() -> Entrepot.reconstruct(EntrepotId.generate(), "PRA-X", "PRA X", TypeEntrepot.PRA,
-                    null, null, null, null, true, Instant.now(), Instant.now()))
+            var generate = EntrepotId.generate();
+            var now = Instant.now();
+            var now2 = Instant.now();
+            assertThatThrownBy(() -> Entrepot.reconstruct(generate, "PRA-X", "PRA X", TypeEntrepot.PRA, null, null, null, null, true, now, now2))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

@@ -102,9 +102,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.creer(new CreateOpportuniteCarriereCommand(AUTEUR_ID,
-                                        "Titre", "Entreprise", "Description", null, "Dakar, Sénégal", "CDI", null,
-                                        LocalDate.now().plusDays(30), null)))
+                        var createOpportuniteCarriereCommand = new CreateOpportuniteCarriereCommand(AUTEUR_ID, "Titre", "Entreprise", "Description", null, "Dakar, Sénégal", "CDI", null, LocalDate.now().plusDays(30), null);
+                        assertThatThrownBy(() -> useCase.creer(createOpportuniteCarriereCommand))
                                         .isInstanceOf(UserNotFoundException.class);
 
                         verify(opportuniteCarriereRepositoryPort, never()).save(any());
@@ -119,9 +118,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.of(auteurValide()));
 
-                        assertThatThrownBy(() -> useCase.creer(new CreateOpportuniteCarriereCommand(AUTEUR_ID,
-                                        "Titre", "Entreprise", "Description", null, "Dakar, Sénégal", "INTERIM", null,
-                                        LocalDate.now().plusDays(30), null)))
+                        var createOpportuniteCarriereCommand = new CreateOpportuniteCarriereCommand(AUTEUR_ID, "Titre", "Entreprise", "Description", null, "Dakar, Sénégal", "INTERIM", null, LocalDate.now().plusDays(30), null);
+                        assertThatThrownBy(() -> useCase.creer(createOpportuniteCarriereCommand))
                                         .isInstanceOf(TypeContratInvalideException.class);
                 }
         }
@@ -210,9 +208,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.modifier(new UpdateOpportuniteCarriereCommand(
-                                        OPPORTUNITE_ID, "Titre", "Entreprise", "Description", null, "Dakar, Sénégal",
-                                        "CDI", null, LocalDate.now().plusDays(30), null)))
+                        var updateOpportuniteCarriereCommand = new UpdateOpportuniteCarriereCommand( OPPORTUNITE_ID, "Titre", "Entreprise", "Description", null, "Dakar, Sénégal", "CDI", null, LocalDate.now().plusDays(30), null);
+                        assertThatThrownBy(() -> useCase.modifier(updateOpportuniteCarriereCommand))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
                 }
         }
@@ -255,7 +252,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
 
-                        assertThatThrownBy(() -> useCase.publier(new PublierOpportuniteCommand(OPPORTUNITE_ID)))
+                        var publierOpportuniteCommand = new PublierOpportuniteCommand(OPPORTUNITE_ID);
+                        assertThatThrownBy(() -> useCase.publier(publierOpportuniteCommand))
                                         .isInstanceOf(DateLimiteCandidatureInvalideException.class);
                 }
 
@@ -267,7 +265,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.publier(new PublierOpportuniteCommand(OPPORTUNITE_ID)))
+                        var publierOpportuniteCommand = new PublierOpportuniteCommand(OPPORTUNITE_ID);
+                        assertThatThrownBy(() -> useCase.publier(publierOpportuniteCommand))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
                 }
 
@@ -355,7 +354,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.obtenir(new GetOpportuniteCarriereQuery(OPPORTUNITE_ID)))
+                        var getOpportuniteCarriereQuery = new GetOpportuniteCarriereQuery(OPPORTUNITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenir(getOpportuniteCarriereQuery))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
                 }
 
@@ -383,8 +383,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
 
-                        assertThatThrownBy(() -> useCase
-                                        .obtenirPublique(new GetOpportuniteCarriereQuery(OPPORTUNITE_ID)))
+                        var getOpportuniteCarriereQuery = new GetOpportuniteCarriereQuery(OPPORTUNITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenirPublique(getOpportuniteCarriereQuery))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
                 }
 
@@ -401,8 +401,8 @@ class OpportuniteCarriereUseCasesTest {
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
 
-                        assertThatThrownBy(() -> useCase
-                                        .obtenirPublique(new GetOpportuniteCarriereQuery(OPPORTUNITE_ID)))
+                        var getOpportuniteCarriereQuery = new GetOpportuniteCarriereQuery(OPPORTUNITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenirPublique(getOpportuniteCarriereQuery))
                                         .isInstanceOf(OpportuniteCarriereIntrouvableException.class);
                 }
         }
@@ -437,8 +437,8 @@ class OpportuniteCarriereUseCasesTest {
                         ListOpportunitesCarriereUseCaseImpl useCase = new ListOpportunitesCarriereUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, commandMapper, assembler);
 
-                        assertThatThrownBy(() -> useCase.lister(new ListOpportunitesCarriereQuery(null, "INTERIM",
-                                        null, false, 0, 20, "createdAt", "DESC")))
+                        var listOpportunitesCarriereQuery = new ListOpportunitesCarriereQuery(null, "INTERIM", null, false, 0, 20, "createdAt", "DESC");
+                        assertThatThrownBy(() -> useCase.lister(listOpportunitesCarriereQuery))
                                         .isInstanceOf(TypeContratInvalideException.class);
                 }
         }

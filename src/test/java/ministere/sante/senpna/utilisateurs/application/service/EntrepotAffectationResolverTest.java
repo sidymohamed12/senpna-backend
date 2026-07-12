@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,15 +59,17 @@ class EntrepotAffectationResolverTest {
     @Test
     @DisplayName("aucun type requis mais entrepotId fourni → EntrepotNonApplicableException")
     void resoudre_aucunTypeRequisMaisEntrepotFourni_leveException() {
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("ADMIN_PNA"), ENTREPOT_ID))
+        var setOf = Set.of("ADMIN_PNA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, ENTREPOT_ID))
                 .isInstanceOf(EntrepotNonApplicableException.class);
     }
 
     @Test
     @DisplayName("rôles PRA et PNA mélangés → ConflitTypeEntrepotException")
     void resoudre_typesConflictuels_leveException() {
+        var setOf = Set.of("GESTIONNAIRE_PRA", "GESTIONNAIRE_PNA");
         assertThatThrownBy(
-                () -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA", "GESTIONNAIRE_PNA"), ENTREPOT_ID))
+                () -> sut.resoudre(ACTEUR_ID, setOf, ENTREPOT_ID))
                 .isInstanceOf(ConflitTypeEntrepotException.class);
     }
 
@@ -90,7 +91,8 @@ class EntrepotAffectationResolverTest {
     void resoudre_acteurNational_sansEntrepot_leveException() {
         when(userHierarchyGuard.estActeurNational(ACTEUR_ID)).thenReturn(true);
 
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA"), null))
+        var setOf = Set.of("GESTIONNAIRE_PRA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, null))
                 .isInstanceOf(EntrepotRequisException.class);
     }
 
@@ -100,7 +102,8 @@ class EntrepotAffectationResolverTest {
         when(userHierarchyGuard.estActeurNational(ACTEUR_ID)).thenReturn(true);
         when(entrepotQueryPort.findById(ENTREPOT_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA"), ENTREPOT_ID))
+        var setOf = Set.of("GESTIONNAIRE_PRA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, ENTREPOT_ID))
                 .isInstanceOf(EntrepotIntrouvableException.class);
     }
 
@@ -112,7 +115,8 @@ class EntrepotAffectationResolverTest {
                 Optional.of(new EntrepotProjection(ENTREPOT_ID, "PRA-THIES", "PRA Thiès", "PRA", UUID.randomUUID(),
                         false)));
 
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA"), ENTREPOT_ID))
+        var setOf = Set.of("GESTIONNAIRE_PRA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, ENTREPOT_ID))
                 .isInstanceOf(EntrepotInactifException.class);
     }
 
@@ -124,7 +128,8 @@ class EntrepotAffectationResolverTest {
                 Optional.of(new EntrepotProjection(ENTREPOT_ID, "PNA-CENTRAL", "PNA Centrale", "PNA_CENTRAL", null,
                         true)));
 
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA"), ENTREPOT_ID))
+        var setOf = Set.of("GESTIONNAIRE_PRA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, ENTREPOT_ID))
                 .isInstanceOf(TypeEntrepotIncompatibleException.class);
     }
 
@@ -151,7 +156,8 @@ class EntrepotAffectationResolverTest {
         when(userHierarchyGuard.estActeurNational(ACTEUR_ID)).thenReturn(false);
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, Set.of("GESTIONNAIRE_PRA"), null))
+        var setOf = Set.of("GESTIONNAIRE_PRA");
+        assertThatThrownBy(() -> sut.resoudre(ACTEUR_ID, setOf, null))
                 .isInstanceOf(ActeurNonAffecteException.class);
     }
 }

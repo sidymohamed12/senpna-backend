@@ -52,7 +52,7 @@ class SmtpAccountMailAdapterTest {
         verify(javaMailSender).send(captor.capture());
 
         MimeMessage envoye = captor.getValue();
-        assertThat(envoye.getAllRecipients()[0].toString()).isEqualTo("jean.diop@sante.gouv.sn");
+        assertThat(envoye.getAllRecipients()[0].toString()).hasToString("jean.diop@sante.gouv.sn");
         assertThat(envoye.getSubject()).contains("compte");
     }
 

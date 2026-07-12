@@ -1,7 +1,6 @@
 package ministere.sante.senpna.auth.infrastructure.cache;
 
 import ministere.sante.senpna.auth.domain.exception.ResetTokenInvalideException;
-import ministere.sante.senpna.auth.domain.port.out.ResetTokenPort;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.shared.domain.port.out.CachePort;
 
@@ -26,11 +25,13 @@ import static org.mockito.Mockito.*;
 @DisplayName("RedisResetTokenAdapter")
 class RedisResetTokenAdapterTest {
 
-    @Mock private CachePort cachePort;
-    @InjectMocks private RedisResetTokenAdapter sut;
+    @Mock
+    private CachePort cachePort;
+    @InjectMocks
+    private RedisResetTokenAdapter sut;
 
-    private static final UUID   USER_ID = UserFixtures.USER_ID;
-    private static final String EMAIL   = UserFixtures.EMAIL;
+    private static final UUID USER_ID = UserFixtures.USER_ID;
+    private static final String EMAIL = UserFixtures.EMAIL;
 
     // ══════════════════════════════════════════════════════════════════════
     // genererResetToken
@@ -43,7 +44,7 @@ class RedisResetTokenAdapterTest {
         @Test
         @DisplayName("stocke userId|email avec préfixe 'auth:reset:' et TTL de 5 min")
         void generer_stocke_avec_bon_format() {
-            ArgumentCaptor<String> keyCaptor   = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
 

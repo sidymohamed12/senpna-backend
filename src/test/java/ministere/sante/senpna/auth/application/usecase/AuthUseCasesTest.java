@@ -87,8 +87,8 @@ class AuthUseCasesTest {
         void demander_user_absent_leve_exception() {
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.demander(
-                    new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL)))
+            var forgotPasswordCommand = new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL);
+            assertThatThrownBy(() -> sut.demander( forgotPasswordCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(otpService);
@@ -102,8 +102,8 @@ class AuthUseCasesTest {
             when(otpDestinationResolver.resoudre(user, OtpChannel.SMS))
                     .thenThrow(new BusinessRuleException("Aucun téléphone", "NO_PHONE_REGISTERED"));
 
-            assertThatThrownBy(() -> sut.demander(
-                    new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.SMS)))
+            var forgotPasswordCommand = new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.SMS);
+            assertThatThrownBy(() -> sut.demander( forgotPasswordCommand))
                     .isInstanceOf(BusinessRuleException.class);
 
             verifyNoInteractions(otpService);
@@ -146,8 +146,8 @@ class AuthUseCasesTest {
         void renvoyer_user_absent_leve_exception() {
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.renvoyer(
-                    new ResendOtpCommand(UserFixtures.EMAIL, OtpChannel.EMAIL)))
+            var resendOtpCommand = new ResendOtpCommand(UserFixtures.EMAIL, OtpChannel.EMAIL);
+            assertThatThrownBy(() -> sut.renvoyer( resendOtpCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(otpService);
@@ -192,7 +192,8 @@ class AuthUseCasesTest {
         void verifier_otp_invalide_leve_exception() {
             doThrow(new OtpInvalideException()).when(otpService).valider(anyString(), anyString());
 
-            assertThatThrownBy(() -> sut.verifier(new VerifyOtpCommand(UserFixtures.EMAIL, "000000")))
+            var verifyOtpCommand = new VerifyOtpCommand(UserFixtures.EMAIL, "000000");
+            assertThatThrownBy(() -> sut.verifier(verifyOtpCommand))
                     .isInstanceOf(OtpInvalideException.class);
 
             verifyNoInteractions(resetTokenPort);
@@ -203,7 +204,8 @@ class AuthUseCasesTest {
         void verifier_otp_expire_leve_exception() {
             doThrow(new OtpExpireException()).when(otpService).valider(anyString(), anyString());
 
-            assertThatThrownBy(() -> sut.verifier(new VerifyOtpCommand(UserFixtures.EMAIL, "123456")))
+            var verifyOtpCommand = new VerifyOtpCommand(UserFixtures.EMAIL, "123456");
+            assertThatThrownBy(() -> sut.verifier(verifyOtpCommand))
                     .isInstanceOf(OtpExpireException.class);
         }
 
@@ -212,7 +214,8 @@ class AuthUseCasesTest {
         void verifier_otp_ok_user_absent_leve_exception() {
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.verifier(new VerifyOtpCommand(UserFixtures.EMAIL, "123456")))
+            var verifyOtpCommand = new VerifyOtpCommand(UserFixtures.EMAIL, "123456");
+            assertThatThrownBy(() -> sut.verifier(verifyOtpCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(resetTokenPort);
@@ -260,8 +263,8 @@ class AuthUseCasesTest {
             when(resetTokenPort.validerEtExtraireUserId("bad-token"))
                     .thenThrow(new ResetTokenInvalideException());
 
-            assertThatThrownBy(() -> sut.reinitialiser(
-                    new ResetPasswordCommand("bad-token", "NouveauMdp@2024")))
+            var resetPasswordCommand = new ResetPasswordCommand("bad-token", "NouveauMdp@2024");
+            assertThatThrownBy(() -> sut.reinitialiser( resetPasswordCommand))
                     .isInstanceOf(ResetTokenInvalideException.class);
 
             verifyNoInteractions(userRepositoryPort, passwordEncoderPort);
@@ -274,8 +277,8 @@ class AuthUseCasesTest {
                     .thenReturn(UserFixtures.USER_ID);
             when(userRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.reinitialiser(
-                    new ResetPasswordCommand("token", "NouveauMdp@2024")))
+            var resetPasswordCommand = new ResetPasswordCommand("token", "NouveauMdp@2024");
+            assertThatThrownBy(() -> sut.reinitialiser( resetPasswordCommand))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(passwordEncoderPort);
@@ -346,7 +349,8 @@ class AuthUseCasesTest {
         void rafraichir_token_revoque_leve_exception() {
             when(tokenPort.estInvalide(OLD_REFRESH)).thenReturn(true);
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(InvalidRefreshTokenException.class);
 
             verify(tokenPort, never()).invalider(anyString());
@@ -358,7 +362,8 @@ class AuthUseCasesTest {
             when(tokenPort.estInvalide(OLD_REFRESH)).thenReturn(false);
             when(tokenPort.estRefreshToken(OLD_REFRESH)).thenReturn(false);
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(InvalidRefreshTokenException.class);
         }
 
@@ -369,7 +374,8 @@ class AuthUseCasesTest {
             when(tokenPort.estRefreshToken(OLD_REFRESH)).thenReturn(true);
             when(tokenPort.estExpire(OLD_REFRESH)).thenReturn(true);
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(InvalidRefreshTokenException.class);
 
             verify(tokenPort, never()).invalider(anyString());
@@ -385,7 +391,8 @@ class AuthUseCasesTest {
             when(userRepositoryPort.findByEmail(any()))
                     .thenReturn(Optional.of(UserFixtures.inactif()));
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(CompteInactifException.class);
 
             verify(tokenPort, never()).invalider(anyString());
@@ -398,7 +405,8 @@ class AuthUseCasesTest {
             when(tokenPort.estRefreshToken(OLD_REFRESH))
                     .thenThrow(new JwtException("signature invalide"));
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(InvalidRefreshTokenException.class);
         }
 
@@ -411,7 +419,8 @@ class AuthUseCasesTest {
             when(tokenPort.extraireEmail(OLD_REFRESH)).thenReturn(UserFixtures.EMAIL);
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.rafraichir(new RefreshTokenCommand(OLD_REFRESH)))
+            var refreshTokenCommand = new RefreshTokenCommand(OLD_REFRESH);
+            assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))
                     .isInstanceOf(InvalidRefreshTokenException.class);
         }
     }
@@ -460,7 +469,8 @@ class AuthUseCasesTest {
         void me_user_absent_leve_exception() {
             when(userRepositoryPort.findByEmail(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.me(new MeQuery(UserFixtures.EMAIL)))
+            var meQuery = new MeQuery(UserFixtures.EMAIL);
+            assertThatThrownBy(() -> sut.me(meQuery))
                     .isInstanceOf(UserNotFoundException.class);
 
             verifyNoInteractions(userAffectationResolver);

@@ -67,25 +67,24 @@ class MouvementStockTest {
         @Test
         @DisplayName("transfert sans entrepôt destination → MouvementStockInvalideException")
         void creer_transfertSansDestination_leveException() {
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE,
-                    ENTREPOT_ID, null, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("10"), null, null,
-                    UTILISATEUR_ID))
+            var bigDecimal = new BigDecimal("10");
+            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE, ENTREPOT_ID, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
         @Test
         @DisplayName("sortie sans entrepôt source → MouvementStockInvalideException")
         void creer_sortieSansSource_leveException() {
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.CASSE, SensMouvement.SORTIE, null, null,
-                    null, LOT_ID, MEDICAMENT_ID, new BigDecimal("1"), null, null, UTILISATEUR_ID))
+            var bigDecimal = new BigDecimal("1");
+            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.CASSE, SensMouvement.SORTIE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
         @Test
         @DisplayName("entrée sans entrepôt destination → MouvementStockInvalideException")
         void creer_entreeSansDestination_leveException() {
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
-                    null, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("1"), null, null, UTILISATEUR_ID))
+            var bigDecimal = new BigDecimal("1");
+            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
@@ -100,8 +99,8 @@ class MouvementStockTest {
         @Test
         @DisplayName("utilisateur null → NullPointerException")
         void creer_utilisateurNull_leveException() {
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
-                    ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("1"), null, null, null))
+            var bigDecimal = new BigDecimal("1");
+            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, null))
                     .isInstanceOf(NullPointerException.class);
         }
     }

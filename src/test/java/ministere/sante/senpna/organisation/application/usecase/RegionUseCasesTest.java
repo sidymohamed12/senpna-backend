@@ -93,7 +93,8 @@ class RegionUseCasesTest {
         void creer_codeDejaUtilise_leveException() {
             when(regionRepositoryPort.existsByCode("DAKAR")).thenReturn(true);
 
-            assertThatThrownBy(() -> sut.creer(new CreateRegionCommand("dakar", "Dakar")))
+            var createRegionCommand = new CreateRegionCommand("dakar", "Dakar");
+            assertThatThrownBy(() -> sut.creer(createRegionCommand))
                     .isInstanceOf(CodeRegionDejaUtiliseException.class);
 
             verify(regionRepositoryPort, never()).save(any());
@@ -134,7 +135,8 @@ class RegionUseCasesTest {
         void obtenir_introuvable_leveException() {
             when(regionRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetRegionQuery(REGION_ID)))
+            var getRegionQuery = new GetRegionQuery(REGION_ID);
+            assertThatThrownBy(() -> sut.obtenir(getRegionQuery))
                     .isInstanceOf(RegionIntrouvableException.class);
 
             verifyNoInteractions(regionDetailAssembler);

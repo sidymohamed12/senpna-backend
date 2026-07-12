@@ -210,7 +210,8 @@ class EntrepotScopeGuardTest {
         void praSurRessourceAutrui_refuse() {
             authentifier(UUID.randomUUID(), "MAGASINIER_PRA");
 
-            assertThatThrownBy(() -> guard.verifierLectureAutorisee(UUID.randomUUID()))
+            var randomUUID = UUID.randomUUID();
+            assertThatThrownBy(() -> guard.verifierLectureAutorisee(randomUUID))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
         }
 

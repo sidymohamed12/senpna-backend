@@ -128,7 +128,8 @@ class MedicamentUseCasesTest {
                                         familleRepositoryPort, formeRepositoryPort, assembler);
                         when(medicamentRepositoryPort.existsByCodeIgnoreCase("PARA500")).thenReturn(true);
 
-                        assertThatThrownBy(() -> useCase.creer(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.creer(commandeValide))
                                         .isInstanceOf(CodeMedicamentDejaUtiliseException.class);
 
                         verify(medicamentRepositoryPort, never()).save(any());
@@ -142,7 +143,8 @@ class MedicamentUseCasesTest {
                         when(medicamentRepositoryPort.existsByCodeIgnoreCase("PARA500")).thenReturn(false);
                         when(familleRepositoryPort.findById(FamilleId.of(FAMILLE_ID))).thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.creer(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.creer(commandeValide))
                                         .isInstanceOf(FamilleIntrouvableException.class);
                 }
 
@@ -158,7 +160,8 @@ class MedicamentUseCasesTest {
                         when(familleRepositoryPort.findById(FamilleId.of(FAMILLE_ID)))
                                         .thenReturn(Optional.of(familleArchivee));
 
-                        assertThatThrownBy(() -> useCase.creer(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.creer(commandeValide))
                                         .isInstanceOf(FamilleInactiveException.class);
 
                         verify(medicamentRepositoryPort, never()).save(any());
@@ -174,7 +177,8 @@ class MedicamentUseCasesTest {
                                         .thenReturn(Optional.of(familleActive()));
                         when(formeRepositoryPort.findById(FormeId.of(FORME_ID))).thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.creer(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.creer(commandeValide))
                                         .isInstanceOf(FormeIntrouvableException.class);
                 }
 
@@ -191,7 +195,8 @@ class MedicamentUseCasesTest {
                                         .thenReturn(Optional.of(familleActive()));
                         when(formeRepositoryPort.findById(FormeId.of(FORME_ID))).thenReturn(Optional.of(formeArchivee));
 
-                        assertThatThrownBy(() -> useCase.creer(commandeValide()))
+                        var commandeValide = commandeValide();
+                        assertThatThrownBy(() -> useCase.creer(commandeValide))
                                         .isInstanceOf(FormeInactiveException.class);
                 }
         }
@@ -218,9 +223,8 @@ class MedicamentUseCasesTest {
                         when(medicamentRepositoryPort.findById(MedicamentId.of(MEDICAMENT_ID)))
                                         .thenReturn(Optional.empty());
 
-                        assertThatThrownBy(() -> useCase.modifier(new UpdateMedicamentCommand(MEDICAMENT_ID, "Nom",
-                                        "DCI",
-                                        "10mg", FORME_ID, FAMILLE_ID, null, null, null, null, false, null, null, null)))
+                        var updateMedicamentCommand = new UpdateMedicamentCommand(MEDICAMENT_ID, "Nom", "DCI", "10mg", FORME_ID, FAMILLE_ID, null, null, null, null, false, null, null, null);
+                        assertThatThrownBy(() -> useCase.modifier(updateMedicamentCommand))
                                         .isInstanceOf(MedicamentIntrouvableException.class);
                 }
 
