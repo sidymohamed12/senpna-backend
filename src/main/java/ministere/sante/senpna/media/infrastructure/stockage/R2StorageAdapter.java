@@ -60,9 +60,6 @@ public class R2StorageAdapter implements StoragePort {
         private final S3Presigner s3Presigner;
         private final String bucket;
         private final String publicUrl;
-        private final String accountId;
-        private final String accessKey;
-        private final String secretKey;
 
         /**
          * @param s3Client  client AWS S3 v2 configuré avec l'endpoint R2
@@ -77,9 +74,6 @@ public class R2StorageAdapter implements StoragePort {
                         String accountId, String accessKey, String secretKey) {
                 this.s3Client = s3Client;
                 this.bucket = bucket;
-                this.accountId = accountId;
-                this.accessKey = accessKey;
-                this.secretKey = secretKey;
                 this.publicUrl = publicUrl.endsWith("/")
                                 ? publicUrl.substring(0, publicUrl.length() - 1)
                                 : publicUrl;
