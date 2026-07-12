@@ -11,14 +11,16 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LotOwnershipGuard")
@@ -42,9 +44,10 @@ class LotOwnershipGuardTest {
             guard = new LotOwnershipGuard(stockRepositoryPort, entrepotScopeGuard);
             when(entrepotScopeGuard.estActeurNational()).thenReturn(true);
 
-            guard.verifierAccesLot(LotId.generate()); // ne doit pas lever
+            assertThatCode(() -> guard.verifierAccesLot(LotId.generate()))
+                    .doesNotThrowAnyException();
 
-            Mockito.verifyNoInteractions(stockRepositoryPort);
+            verifyNoInteractions(stockRepositoryPort);
         }
 
         @Test
@@ -57,9 +60,10 @@ class LotOwnershipGuardTest {
             when(entrepotScopeGuard.estActeurNational()).thenReturn(false);
             when(entrepotScopeGuard.entrepotIdCourant()).thenReturn(entrepotId);
             when(stockRepositoryPort.findByEntrepotIdAndLotId(EntrepotId.of(entrepotId), lotId))
-                    .thenReturn(Optional.of(Mockito.mock(Stock.class)));
+                    .thenReturn(Optional.of(mock(Stock.class)));
 
-            guard.verifierAccesLot(lotId); // ne doit pas lever
+            assertThatCode(() -> guard.verifierAccesLot(lotId))
+                    .doesNotThrowAnyException();
         }
 
         @Test
@@ -74,7 +78,8 @@ class LotOwnershipGuardTest {
             when(stockRepositoryPort.findByEntrepotIdAndLotId(EntrepotId.of(entrepotId), lotId))
                     .thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> guard.verifierAccesLot(lotId)).isInstanceOf(LotHorsPorteeException.class);
+            assertThatThrownBy(() -> guard.verifierAccesLot(lotId))
+                    .isInstanceOf(LotHorsPorteeException.class);
         }
     }
 }

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +18,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("EntrepotScopeGuard")
 class EntrepotScopeGuardTest {
@@ -37,10 +39,11 @@ class EntrepotScopeGuardTest {
     }
 
     private void authentifier(UUID entrepotId, String... roleCodes) {
-        CurrentUser currentUser = Mockito.mock(CurrentUser.class);
-        Mockito.when(currentUser.getEntrepotId()).thenReturn(entrepotId);
+        CurrentUser currentUser = mock(CurrentUser.class);
+        when(currentUser.getEntrepotId()).thenReturn(entrepotId);
 
-        List<GrantedAuthority> authorities = List.of(roleCodes).stream()
+        List<GrantedAuthority> authorities = List.of(roleCodes)
+                .stream()
                 .map(code -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + code))
                 .toList();
 
@@ -56,6 +59,7 @@ class EntrepotScopeGuardTest {
         @DisplayName("acteur avec un rôle *_PNA → true")
         void avecRolePna_retourneTrue() {
             authentifier(UUID.randomUUID(), "MAGASINIER_PNA");
+
             assertThat(guard.estActeurNational()).isTrue();
         }
 
@@ -63,6 +67,7 @@ class EntrepotScopeGuardTest {
         @DisplayName("acteur multi-rôles incluant un rôle PNA → true")
         void multiRolesAvecPna_retourneTrue() {
             authentifier(UUID.randomUUID(), "GESTIONNAIRE_PRA", "ADMIN_PNA");
+
             assertThat(guard.estActeurNational()).isTrue();
         }
 
@@ -70,6 +75,7 @@ class EntrepotScopeGuardTest {
         @DisplayName("acteur avec uniquement des rôles *_PRA → false")
         void avecRolePraUniquement_retourneFalse() {
             authentifier(UUID.randomUUID(), "GESTIONNAIRE_PRA");
+
             assertThat(guard.estActeurNational()).isFalse();
         }
     }
@@ -92,7 +98,8 @@ class EntrepotScopeGuardTest {
         void nonAffecte_leveException() {
             authentifier(null, "GESTIONNAIRE_PRA");
 
-            assertThatThrownBy(guard::entrepotIdCourant).isInstanceOf(AucunEntrepotAffecteException.class);
+            assertThatThrownBy(guard::entrepotIdCourant)
+                    .isInstanceOf(AucunEntrepotAffecteException.class);
         }
     }
 
@@ -106,26 +113,27 @@ class EntrepotScopeGuardTest {
             UUID entrepotId = UUID.randomUUID();
             authentifier(entrepotId, "MAGASINIER_PRA");
 
-            assertThatCode_ne_leve_rien(() -> guard.verifierEcritureAutorisee(entrepotId));
+            assertThatCode(() -> guard.verifierEcritureAutorisee(entrepotId))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         @DisplayName("PRA ciblant un autre entrepôt → PorteeEntrepotInterditeException")
         void praSurAutreEntrepot_refuse() {
             authentifier(UUID.randomUUID(), "MAGASINIER_PRA");
-            UUID autreEntrepot = UUID.randomUUID();
 
-            assertThatThrownBy(() -> guard.verifierEcritureAutorisee(autreEntrepot))
+            var entrepotIdAutre = UUID.randomUUID();
+            assertThatThrownBy(() -> guard.verifierEcritureAutorisee(entrepotIdAutre))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
         }
 
         @Test
-        @DisplayName("PNA ciblant un entrepôt autre que le sien → refusé (l'écriture reste limitée à son propre entrepôt)")
+        @DisplayName("PNA ciblant un entrepôt autre que le sien → refusé")
         void pnaSurAutreEntrepot_refuseAussi() {
             authentifier(UUID.randomUUID(), "MAGASINIER_PNA");
-            UUID autreEntrepot = UUID.randomUUID();
 
-            assertThatThrownBy(() -> guard.verifierEcritureAutorisee(autreEntrepot))
+            var entrepotIdAutre = UUID.randomUUID();
+            assertThatThrownBy(() -> guard.verifierEcritureAutorisee(entrepotIdAutre))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
         }
 
@@ -136,10 +144,6 @@ class EntrepotScopeGuardTest {
 
             assertThatThrownBy(() -> guard.verifierEcritureAutorisee(null))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
-        }
-
-        private void assertThatCode_ne_leve_rien(Runnable r) {
-            r.run(); // lève si le guard refuse — pas d'assertion supplémentaire nécessaire
         }
     }
 
@@ -153,34 +157,37 @@ class EntrepotScopeGuardTest {
             authentifier(UUID.randomUUID(), "ADMIN_PNA");
             UUID entrepotDemande = UUID.randomUUID();
 
-            assertThat(guard.entrepotIdPourLecture(entrepotDemande)).isEqualTo(entrepotDemande);
+            assertThat(guard.entrepotIdPourLecture(entrepotDemande))
+                    .isEqualTo(entrepotDemande);
         }
 
         @Test
-        @DisplayName("PNA : aucun filtre demandé (null) → reste null (vision globale)")
+        @DisplayName("PNA : aucun filtre demandé → null")
         void pna_sansFiltre_resteNull() {
             authentifier(UUID.randomUUID(), "ADMIN_PNA");
 
-            assertThat(guard.entrepotIdPourLecture(null)).isNull();
+            assertThat(guard.entrepotIdPourLecture(null))
+                    .isNull();
         }
 
         @Test
-        @DisplayName("PRA : filtre demandé ignoré, toujours ramené à son propre entrepôt")
+        @DisplayName("PRA : filtre demandé ignoré")
         void pra_toujoursRameneASonEntrepot() {
             UUID entrepotCourant = UUID.randomUUID();
             authentifier(entrepotCourant, "GESTIONNAIRE_PRA");
-            UUID entrepotDemande = UUID.randomUUID();
 
-            assertThat(guard.entrepotIdPourLecture(entrepotDemande)).isEqualTo(entrepotCourant);
+            assertThat(guard.entrepotIdPourLecture(UUID.randomUUID()))
+                    .isEqualTo(entrepotCourant);
         }
 
         @Test
-        @DisplayName("PRA : aucun filtre demandé → ramené quand même à son propre entrepôt")
+        @DisplayName("PRA : aucun filtre demandé → propre entrepôt")
         void pra_sansFiltre_rameneASonEntrepot() {
             UUID entrepotCourant = UUID.randomUUID();
             authentifier(entrepotCourant, "PHARMACIEN_PRA");
 
-            assertThat(guard.entrepotIdPourLecture(null)).isEqualTo(entrepotCourant);
+            assertThat(guard.entrepotIdPourLecture(null))
+                    .isEqualTo(entrepotCourant);
         }
     }
 
@@ -189,11 +196,12 @@ class EntrepotScopeGuardTest {
     class VerifierLectureAutorisee {
 
         @Test
-        @DisplayName("PNA : toujours autorisé, quel que soit l'entrepôt de la ressource")
+        @DisplayName("PNA : toujours autorisé")
         void pna_toujoursAutorise() {
             authentifier(UUID.randomUUID(), "ADMIN_PNA");
 
-            assertThatCode_ne_leve_rien(() -> guard.verifierLectureAutorisee(UUID.randomUUID()));
+            assertThatCode(() -> guard.verifierLectureAutorisee(UUID.randomUUID()))
+                    .doesNotThrowAnyException();
         }
 
         @Test
@@ -202,21 +210,18 @@ class EntrepotScopeGuardTest {
             UUID entrepotId = UUID.randomUUID();
             authentifier(entrepotId, "MAGASINIER_PRA");
 
-            assertThatCode_ne_leve_rien(() -> guard.verifierLectureAutorisee(entrepotId));
+            assertThatCode(() -> guard.verifierLectureAutorisee(entrepotId))
+                    .doesNotThrowAnyException();
         }
 
         @Test
-        @DisplayName("PRA sur la ressource d'un autre entrepôt → PorteeEntrepotInterditeException")
+        @DisplayName("PRA sur la ressource d'un autre entrepôt → refusé")
         void praSurRessourceAutrui_refuse() {
             authentifier(UUID.randomUUID(), "MAGASINIER_PRA");
 
-            var randomUUID = UUID.randomUUID();
-            assertThatThrownBy(() -> guard.verifierLectureAutorisee(randomUUID))
+            var entrepotIdAutre = UUID.randomUUID();
+            assertThatThrownBy(() -> guard.verifierLectureAutorisee(entrepotIdAutre))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
-        }
-
-        private void assertThatCode_ne_leve_rien(Runnable r) {
-            r.run();
         }
     }
 
@@ -228,7 +233,9 @@ class EntrepotScopeGuardTest {
         @DisplayName("acteur PNA → autorisé")
         void pna_autorise() {
             authentifier(UUID.randomUUID(), "GESTIONNAIRE_PNA");
-            guard.verifierActeurNational(); // ne doit pas lever
+
+            assertThatCode(guard::verifierActeurNational)
+                    .doesNotThrowAnyException();
         }
 
         @Test
