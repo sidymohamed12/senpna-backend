@@ -60,19 +60,19 @@ jobs:
           # et le blame git (auteur des issues).
           fetch-depth: 0
 
+      # ℹ️ Pas de "cache: maven" ici : sur un runner self-hosted, ~/.m2
+      # persiste déjà sur le disque local d'un run à l'autre (contrairement
+      # à un runner GitHub-hosted, recréé à neuf à chaque exécution).
+      # Activer ce cache force GitHub à restaurer un blob de plusieurs
+      # centaines de Mo à plusieurs Go depuis ses serveurs à chaque run —
+      # sur une connexion résidentielle, le téléchargement peut dépasser la
+      # durée de validité du jeton d'accès temporaire et échouer en plein
+      # milieu (Server failed to authenticate the request).
       - name: Configuration JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: maven
-
-      - name: Cache des packages SonarQube
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
       - name: Compilation, tests et couverture JaCoCo
         # Le profil "test" (H2 in-memory, sans Redis) est déjà forcé par
