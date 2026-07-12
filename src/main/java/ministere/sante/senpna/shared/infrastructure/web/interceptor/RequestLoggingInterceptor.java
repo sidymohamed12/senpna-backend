@@ -5,8 +5,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -40,13 +42,23 @@ import java.util.UUID;
  */
 public class RequestLoggingInterceptor implements HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestLoggingInterceptor.class);
+    private static final String LOG_REQUEST_IN = "[→] {} {}";
+    private static final String LOG_REQUEST_OUT = "[←] {} {} → {} ({}ms)";
+    private static final String LOG_REQUEST_OUT_ERROR = "[←] {} {} → {} ({}ms) — {}";
+
+    private static final List<String> TECHNICAL_PATHS = List.of(
+            "/actuator",
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/favicon.ico");
 
     private static final String ATTR_START_TIME = "req_start_time";
     private static final String MDC_REQUEST_ID = "requestId";
     private static final String MDC_METHOD = "method";
     private static final String MDC_PATH = "path";
     private static final String MDC_IP = "ip";
+
+    private static final Logger log = LoggerFactory.getLogger(RequestLoggingInterceptor.class);
 
     @Override
     public boolean preHandle(
@@ -58,22 +70,23 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+
         String requestId = UUID.randomUUID().toString();
-        String method = request.getMethod();
-        String path = request.getRequestURI();
-        String ip = extractIp(request);
 
         MDC.put(MDC_REQUEST_ID, requestId);
-        MDC.put(MDC_METHOD, method);
-        MDC.put(MDC_PATH, path);
-        MDC.put(MDC_IP, ip);
+        MDC.put(MDC_METHOD, request.getMethod());
+        MDC.put(MDC_PATH, request.getRequestURI());
+        MDC.put(MDC_IP, extractIp(request));
 
-        // Injecte dans la réponse pour la traçabilité côté client / gateway
         response.setHeader("X-Request-Id", requestId);
         request.setAttribute(ATTR_START_TIME, System.currentTimeMillis());
 
-        log.info("[→] {} {}", method, path);
-        return true;
+        log.info(LOG_REQUEST_IN, request.getMethod(), request.getRequestURI());
+
+        return response.getStatus() < HttpServletResponse.SC_BAD_REQUEST;
     }
 
     @Override
@@ -92,14 +105,14 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         int status = response.getStatus();
 
         if (ex != null) {
-            log.error("[←] {} {} → {} ({}ms) — {}", request.getMethod(),
+            log.error(LOG_REQUEST_OUT_ERROR, request.getMethod(),
                     request.getRequestURI(), status, duration, ex.getMessage());
         } else if (status >= 500) {
-            log.error("[←] {} {} → {} ({}ms)", request.getMethod(), request.getRequestURI(), status, duration);
+            log.error(LOG_REQUEST_OUT, request.getMethod(), request.getRequestURI(), status, duration);
         } else if (status >= 400) {
-            log.warn("[←] {} {} → {} ({}ms)", request.getMethod(), request.getRequestURI(), status, duration);
+            log.warn(LOG_REQUEST_OUT, request.getMethod(), request.getRequestURI(), status, duration);
         } else {
-            log.info("[←] {} {} → {} ({}ms)", request.getMethod(), request.getRequestURI(), status, duration);
+            log.info(LOG_REQUEST_OUT, request.getMethod(), request.getRequestURI(), status, duration);
         }
 
         // Nettoyage obligatoire — threads Tomcat sont réutilisés entre requêtes
@@ -112,10 +125,8 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private boolean isTechnicalPath(String path) {
-        return path.startsWith("/actuator")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
-                || path.startsWith("/favicon.ico");
+        return TECHNICAL_PATHS.stream()
+                .anyMatch(path::startsWith);
     }
 
     private String extractIp(HttpServletRequest request) {
