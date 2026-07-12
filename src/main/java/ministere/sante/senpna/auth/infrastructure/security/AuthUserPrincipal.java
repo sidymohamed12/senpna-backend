@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 public class AuthUserPrincipal implements UserDetails, CurrentUser {
 
-    private final User user;
+    private final transient User user;
     private final Set<String> roleCodes;
     private UUID entrepotId;
     private UUID structureSanitaireId;
