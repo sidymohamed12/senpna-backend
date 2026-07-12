@@ -95,7 +95,7 @@ jobs:
       # mc1arke/sonarqube-community-branch-plugin si besoin plus tard).
       # On limite donc l'analyse aux push sur main.
       - name: Analyse SonarQube (Quality Gate)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
