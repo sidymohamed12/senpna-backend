@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.stock.infrastructure.web.controller.implement.StocksController;
@@ -69,35 +68,33 @@ public interface IStocksController {
       Rôle requis : `ADMIN_PNA`, `MAGASINIER_PNA`, `ADMIN_PRA` ou `MAGASINIER_PRA` — \
       l'entrepôt ciblé (`entrepotId`) doit être le sien, qu'il soit acteur PNA ou PRA \
       (contrairement à la lecture, l'écriture n'est jamais élargie à un autre entrepôt).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Entrée en stock enregistrée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "STOCK_ENTREE_ENREGISTREE",
-            "message": "Entrée en stock enregistrée avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "id": "550e8400-e29b-41d4-a716-446655440000",
-              "entrepotId": "8a2c...",
-              "lotId": "3e7a...",
-              "medicamentId": "6b1f...",
-              "quantiteDisponible": 500,
-              "quantiteReservee": 0,
-              "quantiteDisponibleALaVente": 500,
-              "quantiteEnCommande": 0,
-              "seuilAlerte": 100,
-              "enRupture": false,
-              "seuilAtteint": false,
-              "createdAt": "2024-01-01T12:00:00Z",
-              "updatedAt": "2024-01-01T12:00:00Z"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : entrepôt/lot/quantité/type de mouvement manquant, quantité non strictement positive, ou type de mouvement invalide (TYPE_MOUVEMENT_INVALID)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Lot ou entrepôt introuvable (LOT_NOT_FOUND / ENTREPOT_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "201", description = "Entrée en stock enregistrée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "STOCK_ENTREE_ENREGISTREE",
+        "message": "Entrée en stock enregistrée avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "entrepotId": "8a2c...",
+          "lotId": "3e7a...",
+          "medicamentId": "6b1f...",
+          "quantiteDisponible": 500,
+          "quantiteReservee": 0,
+          "quantiteDisponibleALaVente": 500,
+          "quantiteEnCommande": 0,
+          "seuilAlerte": 100,
+          "enRupture": false,
+          "seuilAtteint": false,
+          "createdAt": "2024-01-01T12:00:00Z",
+          "updatedAt": "2024-01-01T12:00:00Z"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : entrepôt/lot/quantité/type de mouvement manquant, quantité non strictement positive, ou type de mouvement invalide (TYPE_MOUVEMENT_INVALID)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Lot ou entrepôt introuvable (LOT_NOT_FOUND / ENTREPOT_NOT_FOUND)")
   @PostMapping("/entrees")
   ResponseEntity<Map<String, Object>> entrer(@Valid @RequestBody EntreeStockRequest request);
 
@@ -117,14 +114,12 @@ public interface IStocksController {
       Rôle requis : `ADMIN_PNA`, `MAGASINIER_PNA`, `ADMIN_PRA` ou `MAGASINIER_PRA` — \
       l'entrepôt source doit être le sien ; l'entrepôt destination d'un transfert \
       appartient à l'acteur qui traitera sa propre réception, de son côté.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Sortie de stock enregistrée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR), ou type de mouvement invalide (TYPE_MOUVEMENT_INVALID)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt source différent du sien (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Lot, entrepôt, ou ligne de stock introuvable (LOT_NOT_FOUND / ENTREPOT_NOT_FOUND / STOCK_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Lot bloqué ou expiré pour une sortie d'expédition (LOT_NOT_AVAILABLE), quantité disponible insuffisante (STOCK_INSUFFICIENT), ou quantité réservée insuffisante si depuisReservation=true (RESERVATION_INSUFFICIENT)")
-  })
+  @ApiResponse(responseCode = "201", description = "Sortie de stock enregistrée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR), ou type de mouvement invalide (TYPE_MOUVEMENT_INVALID)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt source différent du sien (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Lot, entrepôt, ou ligne de stock introuvable (LOT_NOT_FOUND / ENTREPOT_NOT_FOUND / STOCK_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Lot bloqué ou expiré pour une sortie d'expédition (LOT_NOT_AVAILABLE), quantité disponible insuffisante (STOCK_INSUFFICIENT), ou quantité réservée insuffisante si depuisReservation=true (RESERVATION_INSUFFICIENT)")
   @PostMapping("/sorties")
   ResponseEntity<Map<String, Object>> sortir(@Valid @RequestBody SortieStockRequest request);
 
@@ -137,14 +132,12 @@ public interface IStocksController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       l'entrepôt ciblé doit être le sien.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Quantité réservée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Lot ou ligne de stock introuvable (LOT_NOT_FOUND / STOCK_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Lot bloqué ou expiré (LOT_NOT_AVAILABLE), ou quantité disponible insuffisante (STOCK_INSUFFICIENT)")
-  })
+  @ApiResponse(responseCode = "200", description = "Quantité réservée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Lot ou ligne de stock introuvable (LOT_NOT_FOUND / STOCK_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Lot bloqué ou expiré (LOT_NOT_AVAILABLE), ou quantité disponible insuffisante (STOCK_INSUFFICIENT)")
   @PostMapping("/reservations")
   ResponseEntity<Map<String, Object>> reserver(@Valid @RequestBody ReserverStockRequest request);
 
@@ -160,32 +153,30 @@ public interface IStocksController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       l'entrepôt ciblé doit être le sien.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Réservation automatique effectuée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 200,
-            "type": "STOCK_RESERVE_FEFO",
-            "message": "Réservation automatique (FEFO) effectuée avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "entrepotId": "8a2c...",
-              "medicamentId": "6b1f...",
-              "quantiteDemandee": 300,
-              "quantiteAllouee": 300,
-              "entierementSatisfaite": true,
-              "allocations": [
-                { "lotId": "3e7a...", "numeroLot": "SAN-2026-0042", "quantiteAllouee": 200 },
-                { "lotId": "9c4d...", "numeroLot": "SAN-2026-0051", "quantiteAllouee": 100 }
-              ]
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Quantité demandée non entièrement satisfaisable par les lots disponibles — aucune réservation partielle conservée (STOCK_INSUFFICIENT)")
-  })
+  @ApiResponse(responseCode = "200", description = "Réservation automatique effectuée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "STOCK_RESERVE_FEFO",
+        "message": "Réservation automatique (FEFO) effectuée avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "entrepotId": "8a2c...",
+          "medicamentId": "6b1f...",
+          "quantiteDemandee": 300,
+          "quantiteAllouee": 300,
+          "entierementSatisfaite": true,
+          "allocations": [
+            { "lotId": "3e7a...", "numeroLot": "SAN-2026-0042", "quantiteAllouee": 200 },
+            { "lotId": "9c4d...", "numeroLot": "SAN-2026-0051", "quantiteAllouee": 100 }
+          ]
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Quantité demandée non entièrement satisfaisable par les lots disponibles — aucune réservation partielle conservée (STOCK_INSUFFICIENT)")
   @PostMapping("/reservations/fefo")
   ResponseEntity<Map<String, Object>> reserverFefo(@Valid @RequestBody ReserverStockFefoRequest request);
 
@@ -195,14 +186,12 @@ public interface IStocksController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       l'entrepôt ciblé doit être le sien.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Réservation libérée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Quantité réservée insuffisante pour la libération demandée (RESERVATION_INSUFFICIENT)")
-  })
+  @ApiResponse(responseCode = "200", description = "Réservation libérée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou entrepôt ciblé différent du sien (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Quantité réservée insuffisante pour la libération demandée (RESERVATION_INSUFFICIENT)")
   @PostMapping("/reservations/liberer")
   ResponseEntity<Map<String, Object>> libererReservation(@Valid @RequestBody LibererReservationRequest request);
 
@@ -213,12 +202,10 @@ public interface IStocksController {
       de son propre entrepôt ; un acteur PNA a une portée illimitée.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Stock récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter la ligne d'un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Stock récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter la ligne d'un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant de la ligne de stock") @PathVariable UUID id);
@@ -231,13 +218,11 @@ public interface IStocksController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       la ligne ciblée doit appartenir à son propre entrepôt.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Seuil d'alerte défini"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : seuil négatif"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou ligne appartenant à un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Seuil d'alerte défini")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : seuil négatif")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou ligne appartenant à un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Ligne de stock introuvable (STOCK_NOT_FOUND)")
   @PatchMapping("/{id}/seuil-alerte")
   ResponseEntity<Map<String, Object>> definirSeuilAlerte(
       @Parameter(description = "Identifiant de la ligne de stock") @PathVariable UUID id,
@@ -254,42 +239,40 @@ public interface IStocksController {
       il est **ignoré** et systématiquement remplacé par son propre entrepôt.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des stocks récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des stocks récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "STOCKS_LISTED",
+        "message": "Liste des stocks récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "STOCKS_LISTED",
-            "message": "Liste des stocks récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "entrepotId": "8a2c...",
-                "lotId": "3e7a...",
-                "medicamentId": "6b1f...",
-                "quantiteDisponible": 500,
-                "quantiteReservee": 50,
-                "quantiteDisponibleALaVente": 450,
-                "quantiteEnCommande": 0,
-                "seuilAlerte": 100,
-                "enRupture": false,
-                "seuilAtteint": false,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 15,
-              "totalItems": 289,
-              "first": true,
-              "last": false
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "entrepotId": "8a2c...",
+            "lotId": "3e7a...",
+            "medicamentId": "6b1f...",
+            "quantiteDisponible": 500,
+            "quantiteReservee": 50,
+            "quantiteDisponibleALaVente": 450,
+            "quantiteEnCommande": 0,
+            "seuilAlerte": 100,
+            "enRupture": false,
+            "seuilAtteint": false,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 15,
+          "totalItems": 289,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Filtre sur un entrepôt — pris en compte uniquement pour un acteur PNA ; ignoré et forcé à son propre entrepôt pour un acteur PRA") @RequestParam(required = false) UUID entrepotId,
@@ -311,11 +294,9 @@ public interface IStocksController {
       acteur PRA).
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Alertes de rupture récupérées"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+  @ApiResponse(responseCode = "200", description = "Alertes de rupture récupérées")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping("/alertes/rupture")
   ResponseEntity<Map<String, Object>> alertesRupture(
       @Parameter(description = "Filtre sur un entrepôt — pris en compte uniquement pour un acteur PNA ; ignoré et forcé à son propre entrepôt pour un acteur PRA") @RequestParam(required = false) UUID entrepotId,

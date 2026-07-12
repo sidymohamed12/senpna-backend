@@ -3,7 +3,6 @@ package ministere.sante.senpna.carriere.infrastructure.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -33,6 +32,7 @@ import java.util.UUID;
  * cette API. Le front suit le même flux en 3 étapes que le reste du
  * projet (cf. {@code MediaController}) :
  * </p>
+ * 
  * <pre>
  * 1. POST /api/medias/presigned-url   {mediaType: "FICHE_DE_POSTE", contentType, tailleBytes}
  *      → uploadUrl (signée, 10 min) + publicUrl
@@ -60,10 +60,10 @@ import java.util.UUID;
  * </pre>
  */
 @Tag(name = "Opportunités de carrière", description = """
-        Gestion des offres d'emploi / opportunités de carrière : création, modification, cycle de vie \
-        éditorial (brouillon → ouvert → en cours → clôturé, manuel ou automatique par dépassement de la \
-        date limite de candidature) et consultation, y compris les endpoints publics `/public` et \
-        `/public/{id}` ne nécessitant pas d'authentification.""")
+                Gestion des offres d'emploi / opportunités de carrière : création, modification, cycle de vie \
+                éditorial (brouillon → ouvert → en cours → clôturé, manuel ou automatique par dépassement de la \
+                date limite de candidature) et consultation, y compris les endpoints publics `/public` et \
+                `/public/{id}` ne nécessitant pas d'authentification.""")
 @RequestMapping("/api/opportunites")
 public interface IOpportunitesCarriereController {
 
@@ -77,12 +77,10 @@ public interface IOpportunitesCarriereController {
                         token JWT.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "201", description = "Offre créée"),
-                        @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-        })
+        @ApiResponse(responseCode = "201", description = "Offre créée")
+        @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
         @PostMapping
         ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateOpportuniteCarriereRequest request);
 
@@ -93,13 +91,11 @@ public interface IOpportunitesCarriereController {
                         omise/`null` pour la retirer.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre modifiée"),
-                        @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre modifiée")
+        @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
         @PutMapping("/{id}")
         ResponseEntity<Map<String, Object>> modifier(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id,
@@ -110,13 +106,11 @@ public interface IOpportunitesCarriereController {
                         de candidature est déjà dépassée. Opération idempotente.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre publiée"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)"),
-                        @ApiResponse(responseCode = "400", description = "Date limite de candidature dépassée (DATE_LIMITE_CANDIDATURE_INVALIDE)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre publiée")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
+        @ApiResponse(responseCode = "400", description = "Date limite de candidature dépassée (DATE_LIMITE_CANDIDATURE_INVALIDE)")
         @PatchMapping("/{id}/publier")
         ResponseEntity<Map<String, Object>> publier(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -126,12 +120,10 @@ public interface IOpportunitesCarriereController {
                         de nouvelles candidatures. Opération idempotente.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre passée en traitement"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre passée en traitement")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
         @PatchMapping("/{id}/mettre-en-cours")
         ResponseEntity<Map<String, Object>> mettreEnCours(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -142,12 +134,10 @@ public interface IOpportunitesCarriereController {
                         planifié de clôture automatique). Opération idempotente.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre clôturée"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre clôturée")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
         @PatchMapping("/{id}/cloturer")
         ResponseEntity<Map<String, Object>> cloturer(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -157,12 +147,10 @@ public interface IOpportunitesCarriereController {
                         retravailler une offre déjà publiée avant de la republier. Opération idempotente.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre remise en brouillon"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre remise en brouillon")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
         @PatchMapping("/{id}/brouillon")
         ResponseEntity<Map<String, Object>> remettreEnBrouillon(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -171,12 +159,10 @@ public interface IOpportunitesCarriereController {
                         Retourne le détail complet d'une offre quel que soit son statut — usage back-office.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre récupérée"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre récupérée")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
         @GetMapping("/{id}")
         ResponseEntity<Map<String, Object>> obtenir(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -185,10 +171,9 @@ public interface IOpportunitesCarriereController {
                         Endpoint public, sans authentification, destiné au site vitrine. Ne retourne l'offre que \
                         si elle est visible publiquement (`OUVERT` ou `EN_COURS`, date limite non dépassée) — \
                         sinon 404, même avec un identifiant correct.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Offre récupérée"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable ou non visible publiquement (OPPORTUNITE_CARRIERE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Offre récupérée")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable ou non visible publiquement (OPPORTUNITE_CARRIERE_NOT_FOUND)")
+
         @GetMapping("/public/{id}")
         ResponseEntity<Map<String, Object>> obtenirPublic(
                         @Parameter(description = "Identifiant de l'offre") @PathVariable UUID id);
@@ -198,12 +183,10 @@ public interface IOpportunitesCarriereController {
                         texte libre (titre, entreprise, lieu), `typeContrat` et `statut` filtrent respectivement.
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Liste récupérée"),
-                        @ApiResponse(responseCode = "400", description = "typeContrat ou statut invalide"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-        })
+        @ApiResponse(responseCode = "200", description = "Liste récupérée")
+        @ApiResponse(responseCode = "400", description = "typeContrat ou statut invalide")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
         @GetMapping
         ResponseEntity<Map<String, Object>> lister(
                         @RequestParam(required = false) String q,
@@ -218,10 +201,8 @@ public interface IOpportunitesCarriereController {
                         Endpoint public, sans authentification. Ne retourne que les offres `OUVERT`/`EN_COURS` \
                         dont la date limite de candidature n'est pas dépassée — le paramètre `statut` n'existe \
                         volontairement pas ici.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Liste récupérée"),
-                        @ApiResponse(responseCode = "400", description = "typeContrat invalide")
-        })
+        @ApiResponse(responseCode = "200", description = "Liste récupérée")
+        @ApiResponse(responseCode = "400", description = "typeContrat invalide")
         @GetMapping("/public")
         ResponseEntity<Map<String, Object>> listerPublic(
                         @RequestParam(required = false) String q,

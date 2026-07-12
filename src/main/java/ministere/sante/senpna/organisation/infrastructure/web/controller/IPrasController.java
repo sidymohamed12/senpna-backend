@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.organisation.infrastructure.web.controller.implement.PrasController;
@@ -62,35 +61,33 @@ public interface IPrasController {
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA` — la création n'est pas ouverte aux \
       rôles PRA, contrairement à la modification et à l'activation/désactivation.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "PRA créée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "PRA_CREATED",
-            "message": "PRA créée avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "id": "550e8400-e29b-41d4-a716-446655440000",
-              "code": "PRA-DAKAR",
-              "nom": "PRA de Dakar",
-              "type": "PRA",
-              "regionId": "3e7a...",
-              "regionNom": "Dakar",
-              "adresse": "Route de Rufisque",
-              "telephone": "+221771234567",
-              "responsableUserId": null,
-              "actif": true,
-              "createdAt": "2024-01-01T12:00:00Z",
-              "updatedAt": "2024-01-01T12:00:00Z"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : code/nom/région manquant, code ou téléphone mal formé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer une PRA"),
-      @ApiResponse(responseCode = "409", description = "Ce code d'entrepôt est déjà utilisé (ENTREPOT_CODE_ALREADY_USED)"),
-      @ApiResponse(responseCode = "422", description = "La région référencée est désactivée (REGION_INACTIVE)")
-  })
+  @ApiResponse(responseCode = "201", description = "PRA créée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "PRA_CREATED",
+        "message": "PRA créée avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "code": "PRA-DAKAR",
+          "nom": "PRA de Dakar",
+          "type": "PRA",
+          "regionId": "3e7a...",
+          "regionNom": "Dakar",
+          "adresse": "Route de Rufisque",
+          "telephone": "+221771234567",
+          "responsableUserId": null,
+          "actif": true,
+          "createdAt": "2024-01-01T12:00:00Z",
+          "updatedAt": "2024-01-01T12:00:00Z"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : code/nom/région manquant, code ou téléphone mal formé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer une PRA")
+  @ApiResponse(responseCode = "409", description = "Ce code d'entrepôt est déjà utilisé (ENTREPOT_CODE_ALREADY_USED)")
+  @ApiResponse(responseCode = "422", description = "La région référencée est désactivée (REGION_INACTIVE)")
   @PostMapping
   ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreatePraRequest request);
 
@@ -102,14 +99,12 @@ public interface IPrasController {
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       un acteur PRA ne peut modifier que la PRA de sa propre région (`REGION_ACCESS_DENIED` \
       sinon), alors qu'un acteur PNA national peut modifier n'importe quelle PRA.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "PRA modifiée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de modifier la PRA d'une autre région (REGION_ACCESS_DENIED)"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE), ou la nouvelle région référencée est désactivée (REGION_INACTIVE)")
-  })
+  @ApiResponse(responseCode = "200", description = "PRA modifiée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de modifier la PRA d'une autre région (REGION_ACCESS_DENIED)")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE), ou la nouvelle région référencée est désactivée (REGION_INACTIVE)")
   @PutMapping("/{id}")
   ResponseEntity<Map<String, Object>> modifier(
       @Parameter(description = "Identifiant de la PRA") @PathVariable UUID id,
@@ -120,13 +115,11 @@ public interface IPrasController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       même restriction de portée régionale que pour la modification.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "PRA désactivée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de désactiver la PRA d'une autre région (REGION_ACCESS_DENIED)"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE)")
-  })
+  @ApiResponse(responseCode = "200", description = "PRA désactivée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de désactiver la PRA d'une autre région (REGION_ACCESS_DENIED)")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE)")
   @PatchMapping("/{id}/desactiver")
   ResponseEntity<Map<String, Object>> desactiver(
       @Parameter(description = "Identifiant de la PRA") @PathVariable UUID id);
@@ -136,13 +129,11 @@ public interface IPrasController {
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA` — \
       même restriction de portée régionale que pour la modification.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "PRA activée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'activer la PRA d'une autre région (REGION_ACCESS_DENIED)"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE)")
-  })
+  @ApiResponse(responseCode = "200", description = "PRA activée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'activer la PRA d'une autre région (REGION_ACCESS_DENIED)")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE)")
   @PatchMapping("/{id}/activer")
   ResponseEntity<Map<String, Object>> activer(
       @Parameter(description = "Identifiant de la PRA") @PathVariable UUID id);
@@ -153,12 +144,10 @@ public interface IPrasController {
       l'entrepôt consulté est bien de type PRA.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "PRA récupérée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "PRA récupérée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant de la PRA") @PathVariable UUID id);
@@ -170,41 +159,39 @@ public interface IPrasController {
       pilotent le tri (défaut `createdAt`/`DESC`).
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des PRA récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des PRA récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "PRAS_LISTED",
+        "message": "Liste des PRA récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "PRAS_LISTED",
-            "message": "Liste des PRA récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "code": "PRA-DAKAR",
-                "nom": "PRA de Dakar",
-                "type": "PRA",
-                "regionId": "3e7a...",
-                "regionNom": "Dakar",
-                "adresse": "Route de Rufisque",
-                "telephone": "+221771234567",
-                "responsableUserId": "8a2c...",
-                "actif": true,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 1,
-              "totalItems": 14,
-              "first": true,
-              "last": true
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "code": "PRA-DAKAR",
+            "nom": "PRA de Dakar",
+            "type": "PRA",
+            "regionId": "3e7a...",
+            "regionNom": "Dakar",
+            "adresse": "Route de Rufisque",
+            "telephone": "+221771234567",
+            "responsableUserId": "8a2c...",
+            "actif": true,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 1,
+          "totalItems": 14,
+          "first": true,
+          "last": true
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le code ou le nom") @RequestParam(required = false) String q,

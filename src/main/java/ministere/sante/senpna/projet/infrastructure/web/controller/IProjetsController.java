@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.projet.infrastructure.web.controller.implement.ProjetsController;
@@ -67,31 +66,29 @@ public interface IProjetsController {
       chacun limités à 10 éléments de 200 caractères maximum.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Projet créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "PROJET_CREATED",
-            "message": "Projet créé avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "id": "550e8400-e29b-41d4-a716-446655440000",
-              "categorie": "SANTE",
-              "nom": "Vaccination rurale 2026",
-              "description": "Campagne de vaccination dans les zones reculées.",
-              "objectifs": ["Vacciner 50 000 enfants", "Former 200 agents de santé"],
-              "impacts": ["Réduction de la mortalité infantile"],
-              "imageUrl": "https://cdn.senpna.sn/projet/6b1f.jpg",
-              "statut": "BROUILLON",
-              "createdAt": "2024-01-01T12:00:00Z",
-              "updatedAt": "2024-01-01T12:00:00Z"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : catégorie/nom manquant, tailles dépassées"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer un projet")
-  })
+  @ApiResponse(responseCode = "201", description = "Projet créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "PROJET_CREATED",
+        "message": "Projet créé avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "categorie": "SANTE",
+          "nom": "Vaccination rurale 2026",
+          "description": "Campagne de vaccination dans les zones reculées.",
+          "objectifs": ["Vacciner 50 000 enfants", "Former 200 agents de santé"],
+          "impacts": ["Réduction de la mortalité infantile"],
+          "imageUrl": "https://cdn.senpna.sn/projet/6b1f.jpg",
+          "statut": "BROUILLON",
+          "createdAt": "2024-01-01T12:00:00Z",
+          "updatedAt": "2024-01-01T12:00:00Z"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : catégorie/nom manquant, tailles dépassées")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer un projet")
   @PostMapping
   ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateProjetRequest request);
 
@@ -103,13 +100,11 @@ public interface IProjetsController {
       vie.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet modifié"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à modifier un projet"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet modifié")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à modifier un projet")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @PutMapping("/{id}")
   ResponseEntity<Map<String, Object>> modifier(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id,
@@ -122,12 +117,10 @@ public interface IProjetsController {
       sur un projet déjà publié ne renvoie pas d'erreur.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet publié"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à publier un projet"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet publié")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à publier un projet")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @PatchMapping("/{id}/publier")
   ResponseEntity<Map<String, Object>> publier(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -139,12 +132,10 @@ public interface IProjetsController {
       consultable pour l'historique. Opération idempotente.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet archivé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à archiver un projet"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet archivé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à archiver un projet")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @PatchMapping("/{id}/archiver")
   ResponseEntity<Map<String, Object>> archiver(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -155,12 +146,10 @@ public interface IProjetsController {
       `PATCH /{id}/publier`. Opération idempotente.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet désactivé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à désactiver un projet"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet désactivé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à désactiver un projet")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @PatchMapping("/{id}/desactiver")
   ResponseEntity<Map<String, Object>> desactiver(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -171,12 +160,10 @@ public interface IProjetsController {
       publié ou archivé avant de le republier. Opération idempotente.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet remis en brouillon"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet remis en brouillon")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @PatchMapping("/{id}/brouillon")
   ResponseEntity<Map<String, Object>> remettreEnBrouillon(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -187,12 +174,10 @@ public interface IProjetsController {
       publique, restreinte aux projets publiés, voir `GET /public/{id}`.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable (PROJET_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -202,10 +187,8 @@ public interface IProjetsController {
       projet que si son statut est `PUBLIE` — un projet en `BROUILLON`, `ARCHIVE` ou \
       `DESACTIVE` renvoie une 404, même si son identifiant est correct, afin de ne jamais \
       exposer de contenu non publié.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Projet publié récupéré"),
-      @ApiResponse(responseCode = "404", description = "Projet introuvable ou non publié (PROJET_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Projet publié récupéré")
+  @ApiResponse(responseCode = "404", description = "Projet introuvable ou non publié (PROJET_NOT_FOUND)")
   @GetMapping("/public/{id}")
   ResponseEntity<Map<String, Object>> obtenirPublic(
       @Parameter(description = "Identifiant du projet") @PathVariable UUID id);
@@ -220,40 +203,38 @@ public interface IProjetsController {
       validation plutôt que d'être silencieusement ignorée.
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des projets récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des projets récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "PROJETS_LISTED",
+        "message": "Liste des projets récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "PROJETS_LISTED",
-            "message": "Liste des projets récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "categorie": "SANTE",
-                "nom": "Vaccination rurale 2026",
-                "description": "Campagne de vaccination dans les zones reculées.",
-                "objectifs": ["Vacciner 50 000 enfants"],
-                "impacts": ["Réduction de la mortalité infantile"],
-                "imageUrl": "https://cdn.senpna.sn/projet/6b1f.jpg",
-                "statut": "PUBLIE",
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 2,
-              "totalItems": 23,
-              "first": true,
-              "last": false
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "categorie": "SANTE",
+            "nom": "Vaccination rurale 2026",
+            "description": "Campagne de vaccination dans les zones reculées.",
+            "objectifs": ["Vacciner 50 000 enfants"],
+            "impacts": ["Réduction de la mortalité infantile"],
+            "imageUrl": "https://cdn.senpna.sn/projet/6b1f.jpg",
+            "statut": "PUBLIE",
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "400", description = "categorie ou statut invalide (CATEGORIE_PROJET_INVALIDE / STATUT_PROJET_INVALIDE)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 2,
+          "totalItems": 23,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "categorie ou statut invalide (CATEGORIE_PROJET_INVALIDE / STATUT_PROJET_INVALIDE)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le nom ou la description") @RequestParam(required = false) String q,
@@ -272,10 +253,8 @@ public interface IProjetsController {
 
       `q` recherche en texte libre, `categorie` filtre sur `CategorieProjet`, \
       `sortBy`/`sortDirection` pilotent le tri (ex. `createdAt`/`DESC`).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des projets publiés récupérée"),
-      @ApiResponse(responseCode = "400", description = "categorie invalide (CATEGORIE_PROJET_INVALIDE)")
-  })
+  @ApiResponse(responseCode = "200", description = "Liste des projets publiés récupérée")
+  @ApiResponse(responseCode = "400", description = "categorie invalide (CATEGORIE_PROJET_INVALIDE)")
   @GetMapping("/public")
   ResponseEntity<Map<String, Object>> listerPublic(
       @Parameter(description = "Recherche texte libre sur le nom ou la description") @RequestParam(required = false) String q,

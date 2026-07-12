@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.stock.infrastructure.web.controller.implement.LotsController;
@@ -63,36 +62,34 @@ public interface ILotsController {
       différents peuvent partager le même numéro de lot fournisseur).
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `PHARMACIEN_PNA` ou `MAGASINIER_PNA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Lot créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "LOT_CREATED",
-            "message": "Lot créé avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "id": "550e8400-e29b-41d4-a716-446655440000",
-              "numeroLot": "SAN-2026-0042",
-              "medicamentId": "8a2c...",
-              "fournisseurId": "3e7a...",
-              "dateFabrication": "2025-11-01",
-              "dateExpiration": "2027-11-01",
-              "prixAchat": 500,
-              "prixVente": 750,
-              "statut": "ACTIF",
-              "expire": false,
-              "joursAvantExpiration": 700,
-              "createdAt": "2024-01-01T12:00:00Z",
-              "updatedAt": "2024-01-01T12:00:00Z"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : numéro de lot/médicament/fournisseur/date d'expiration manquant, prix négatif"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer un lot (réservé aux acteurs PNA)"),
-      @ApiResponse(responseCode = "404", description = "Médicament ou fournisseur introuvable (MEDICAMENT_NOT_FOUND / FOURNISSEUR_NOT_FOUND)"),
-      @ApiResponse(responseCode = "409", description = "Un lot avec ce numéro existe déjà pour ce médicament (LOT_NUMERO_ALREADY_USED)")
-  })
+  @ApiResponse(responseCode = "201", description = "Lot créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "LOT_CREATED",
+        "message": "Lot créé avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "numeroLot": "SAN-2026-0042",
+          "medicamentId": "8a2c...",
+          "fournisseurId": "3e7a...",
+          "dateFabrication": "2025-11-01",
+          "dateExpiration": "2027-11-01",
+          "prixAchat": 500,
+          "prixVente": 750,
+          "statut": "ACTIF",
+          "expire": false,
+          "joursAvantExpiration": 700,
+          "createdAt": "2024-01-01T12:00:00Z",
+          "updatedAt": "2024-01-01T12:00:00Z"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : numéro de lot/médicament/fournisseur/date d'expiration manquant, prix négatif")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé à créer un lot (réservé aux acteurs PNA)")
+  @ApiResponse(responseCode = "404", description = "Médicament ou fournisseur introuvable (MEDICAMENT_NOT_FOUND / FOURNISSEUR_NOT_FOUND)")
+  @ApiResponse(responseCode = "409", description = "Un lot avec ce numéro existe déjà pour ce médicament (LOT_NUMERO_ALREADY_USED)")
   @PostMapping
   ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreerLotRequest request);
 
@@ -104,13 +101,11 @@ public interface ILotsController {
       Opération idempotente sur un lot déjà bloqué.
 
       Rôle requis : `ADMIN_PNA`, `PHARMACIEN_PNA`, `ADMIN_PRA` ou `PHARMACIEN_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Lot bloqué"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)"),
-      @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Le lot est expiré — statut terminal, ne peut plus être bloqué (LOT_EXPIRED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Lot bloqué")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)")
+  @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Le lot est expiré — statut terminal, ne peut plus être bloqué (LOT_EXPIRED)")
   @PatchMapping("/{id}/bloquer")
   ResponseEntity<Map<String, Object>> bloquer(
       @Parameter(description = "Identifiant du lot") @PathVariable UUID id);
@@ -120,13 +115,11 @@ public interface ILotsController {
       Mêmes règles de portée qu'au blocage. Opération idempotente sur un lot déjà actif.
 
       Rôle requis : `ADMIN_PNA`, `PHARMACIEN_PNA`, `ADMIN_PRA` ou `PHARMACIEN_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Lot débloqué"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)"),
-      @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Le lot est expiré — statut terminal, ne peut plus être débloqué (LOT_EXPIRED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Lot débloqué")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)")
+  @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Le lot est expiré — statut terminal, ne peut plus être débloqué (LOT_EXPIRED)")
   @PatchMapping("/{id}/debloquer")
   ResponseEntity<Map<String, Object>> debloquer(
       @Parameter(description = "Identifiant du lot") @PathVariable UUID id);
@@ -139,13 +132,11 @@ public interface ILotsController {
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA` uniquement — contrairement au \
       blocage/déblocage, la modification du prix n'est pas ouverte aux rôles PRA.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Prix du lot modifié"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : prix négatif"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)"),
-      @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Prix du lot modifié")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : prix négatif")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'agir sur un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)")
+  @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
   @PatchMapping("/{id}/prix")
   ResponseEntity<Map<String, Object>> modifierPrix(
       @Parameter(description = "Identifiant du lot") @PathVariable UUID id,
@@ -158,12 +149,10 @@ public interface ILotsController {
       illimitée sur le référentiel des lots.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Lot récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)"),
-      @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Lot récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter un lot jamais présent dans son entrepôt (LOT_OUT_OF_SCOPE)")
+  @ApiResponse(responseCode = "404", description = "Lot introuvable (LOT_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant du lot") @PathVariable UUID id);
@@ -181,43 +170,41 @@ public interface ILotsController {
       propre stock.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des lots récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des lots récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "LOTS_LISTED",
+        "message": "Liste des lots récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "LOTS_LISTED",
-            "message": "Liste des lots récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "numeroLot": "SAN-2026-0042",
-                "medicamentId": "8a2c...",
-                "fournisseurId": "3e7a...",
-                "dateFabrication": "2025-11-01",
-                "dateExpiration": "2027-11-01",
-                "prixAchat": 500,
-                "prixVente": 750,
-                "statut": "ACTIF",
-                "expire": false,
-                "joursAvantExpiration": 700,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 8,
-              "totalItems": 152,
-              "first": true,
-              "last": false
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "numeroLot": "SAN-2026-0042",
+            "medicamentId": "8a2c...",
+            "fournisseurId": "3e7a...",
+            "dateFabrication": "2025-11-01",
+            "dateExpiration": "2027-11-01",
+            "prixAchat": 500,
+            "prixVente": 750,
+            "statut": "ACTIF",
+            "expire": false,
+            "joursAvantExpiration": 700,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Statut de lot invalide (LOT_STATUT_INVALID)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 8,
+          "totalItems": 152,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Statut de lot invalide (LOT_STATUT_INVALID)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le numéro de lot") @RequestParam(required = false) String q,
@@ -240,11 +227,9 @@ public interface ILotsController {
       acteur PRA).
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Alertes de péremption récupérées"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+  @ApiResponse(responseCode = "200", description = "Alertes de péremption récupérées")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping("/alertes/peremption")
   ResponseEntity<Map<String, Object>> alertesPeremption(
       @Parameter(description = "Horizon en jours à partir d'aujourd'hui (doit être strictement positif)") @RequestParam(required = false, defaultValue = "365") int horizonJours,

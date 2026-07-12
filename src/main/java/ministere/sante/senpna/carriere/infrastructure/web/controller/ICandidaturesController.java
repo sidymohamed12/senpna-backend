@@ -3,7 +3,6 @@ package ministere.sante.senpna.carriere.infrastructure.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -33,6 +32,7 @@ import java.util.UUID;
  * étapes que le reste du projet (cf. {@code MediaController}), via la
  * variante publique de l'endpoint de génération d'URL pré-signée :
  * </p>
+ * 
  * <pre>
  * 1. POST /api/medias/presigned-url/public   {mediaType: "CV" | "LETTRE_DE_MOTIVATION", contentType, tailleBytes}
  *      → uploadUrl (signée, 10 min) + publicUrl
@@ -54,8 +54,8 @@ import java.util.UUID;
  * </pre>
  */
 @Tag(name = "Candidatures", description = """
-        Soumission et consultation des candidatures à une opportunité de carrière — formulaire de \
-        postulation public (`POST /api/candidatures`) et revue back-office des candidatures reçues.""")
+                Soumission et consultation des candidatures à une opportunité de carrière — formulaire de \
+                postulation public (`POST /api/candidatures`) et revue back-office des candidatures reçues.""")
 @RequestMapping("/api/candidatures")
 public interface ICandidaturesController {
 
@@ -71,12 +71,10 @@ public interface ICandidaturesController {
                         toute nouvelle candidature). Un accusé de réception est envoyé au candidat et une \
                         notification au contact RH de l'offre, de façon asynchrone et best-effort — un incident \
                         SMTP n'affecte jamais la confirmation de soumission renvoyée au candidat.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "201", description = "Candidature soumise"),
-                        @ApiResponse(responseCode = "400", description = "Corps invalide, e-mail/téléphone invalide, ou consentement RGPD manquant (VALIDATION_ERROR / CONSENTEMENT_RGPD_REQUIS)"),
-                        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)"),
-                        @ApiResponse(responseCode = "422", description = "L'offre n'accepte plus de nouvelles candidatures (OPPORTUNITE_FERMEE)")
-        })
+        @ApiResponse(responseCode = "201", description = "Candidature soumise")
+        @ApiResponse(responseCode = "400", description = "Corps invalide, e-mail/téléphone invalide, ou consentement RGPD manquant (VALIDATION_ERROR / CONSENTEMENT_RGPD_REQUIS)")
+        @ApiResponse(responseCode = "404", description = "Offre introuvable (OPPORTUNITE_CARRIERE_NOT_FOUND)")
+        @ApiResponse(responseCode = "422", description = "L'offre n'accepte plus de nouvelles candidatures (OPPORTUNITE_FERMEE)")
         @PostMapping
         ResponseEntity<Map<String, Object>> soumettre(@Valid @RequestBody SoumettreCandidatureRequest request);
 
@@ -84,12 +82,10 @@ public interface ICandidaturesController {
                         Retourne le détail complet d'une candidature — usage back-office (revue des candidatures).
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Candidature récupérée"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-                        @ApiResponse(responseCode = "404", description = "Candidature introuvable (CANDIDATURE_NOT_FOUND)")
-        })
+        @ApiResponse(responseCode = "200", description = "Candidature récupérée")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+        @ApiResponse(responseCode = "404", description = "Candidature introuvable (CANDIDATURE_NOT_FOUND)")
         @GetMapping("/{id}")
         ResponseEntity<Map<String, Object>> obtenir(
                         @Parameter(description = "Identifiant de la candidature") @PathVariable UUID id);
@@ -99,11 +95,9 @@ public interface ICandidaturesController {
                         et recherche texte libre (`q`, sur le nom complet et l'e-mail du candidat).
 
                         Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA`.""")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Liste récupérée"),
-                        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-                        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-        })
+        @ApiResponse(responseCode = "200", description = "Liste récupérée")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
         @GetMapping
         ResponseEntity<Map<String, Object>> lister(
                         @RequestParam(required = false) UUID opportuniteId,

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ministere.sante.senpna.utilisateurs.infrastructure.web.controller.implement.UsersController;
@@ -84,40 +83,38 @@ public interface IUsersController {
 
       Cette règle de hiérarchie de gestion documentée au niveau du contrôleur s'applique \
       également ici : un `ADMIN_PRA` ne peut pas créer de compte avec un rôle national.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Utilisateur créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "USER_CREATED",
-            "message": "Utilisateur créé avec succès",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "user": {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "nom": "Ndiaye",
-                "prenom": "Fatou",
-                "email": "fatou.ndiaye@senpna.sn",
-                "telephone": "+221771234567",
-                "actif": true,
-                "roles": [
-                  { "id": "8a2c...", "code": "PHARMACIEN_PRA", "nom": "Pharmacien PRA" }
-                ],
-                "entrepotId": "3e7a...",
-                "structureSanitaireId": null,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              },
-              "motDePasseTemporaire": "Xk7$mQ2pLw9r"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : nom/prénom/email manquant, email ou téléphone mal formé, aucun rôle fourni (ROLE_REQUIRED)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'attribuer un rôle hors de sa portée hiérarchique (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)"),
-      @ApiResponse(responseCode = "409", description = "Cet email est déjà utilisé par un autre utilisateur (EMAIL_ALREADY_USED)"),
-      @ApiResponse(responseCode = "422", description = "Rôle réservé à une création automatisée (ROLE_CREATION_RESERVED), entrepôt désactivé (ENTREPOT_INACTIVE), type d'entrepôt incompatible avec les rôles demandés (ENTREPOT_TYPE_INCOMPATIBLE), ou combinaison de rôles exigeant des types d'entrepôt différents (ENTREPOT_TYPE_CONFLICT)")
-  })
+  @ApiResponse(responseCode = "201", description = "Utilisateur créé", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "USER_CREATED",
+        "message": "Utilisateur créé avec succès",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "user": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "nom": "Ndiaye",
+            "prenom": "Fatou",
+            "email": "fatou.ndiaye@senpna.sn",
+            "telephone": "+221771234567",
+            "actif": true,
+            "roles": [
+              { "id": "8a2c...", "code": "PHARMACIEN_PRA", "nom": "Pharmacien PRA" }
+            ],
+            "entrepotId": "3e7a...",
+            "structureSanitaireId": null,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
+          },
+          "motDePasseTemporaire": "Xk7$mQ2pLw9r"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : nom/prénom/email manquant, email ou téléphone mal formé, aucun rôle fourni (ROLE_REQUIRED)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant d'attribuer un rôle hors de sa portée hiérarchique (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
+  @ApiResponse(responseCode = "409", description = "Cet email est déjà utilisé par un autre utilisateur (EMAIL_ALREADY_USED)")
+  @ApiResponse(responseCode = "422", description = "Rôle réservé à une création automatisée (ROLE_CREATION_RESERVED), entrepôt désactivé (ENTREPOT_INACTIVE), type d'entrepôt incompatible avec les rôles demandés (ENTREPOT_TYPE_INCOMPATIBLE), ou combinaison de rôles exigeant des types d'entrepôt différents (ENTREPOT_TYPE_CONFLICT)")
   @PostMapping
   ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateUserRequest request);
 
@@ -126,42 +123,40 @@ public interface IUsersController {
       recherche en texte libre (nom, prénom, email). `actif` filtre sur le statut. \
       `roleId` filtre sur les utilisateurs possédant un rôle donné. `sortBy`/`sortDirection` \
       pilotent le tri (défaut `createdAt`/`DESC`).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des utilisateurs récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des utilisateurs récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "USERS_LISTED",
+        "message": "Liste des utilisateurs récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "USERS_LISTED",
-            "message": "Liste des utilisateurs récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "nom": "Ndiaye",
-                "prenom": "Fatou",
-                "email": "fatou.ndiaye@senpna.sn",
-                "telephone": "+221771234567",
-                "actif": true,
-                "roles": [
-                  { "id": "8a2c...", "code": "PHARMACIEN_PRA", "nom": "Pharmacien PRA" }
-                ],
-                "entrepotId": "3e7a...",
-                "structureSanitaireId": null,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "nom": "Ndiaye",
+            "prenom": "Fatou",
+            "email": "fatou.ndiaye@senpna.sn",
+            "telephone": "+221771234567",
+            "actif": true,
+            "roles": [
+              { "id": "8a2c...", "code": "PHARMACIEN_PRA", "nom": "Pharmacien PRA" }
             ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 4,
-              "totalItems": 73,
-              "first": true,
-              "last": false
-            }
+            "entrepotId": "3e7a...",
+            "structureSanitaireId": null,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 4,
+          "totalItems": 73,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le nom, le prénom ou l'email") @RequestParam(required = false) String q,
@@ -175,12 +170,10 @@ public interface IUsersController {
   @Operation(summary = "Obtenir un utilisateur", description = """
       Retourne le détail complet d'un compte utilisateur, y compris ses rôles et son \
       rattachement organisationnel (entrepôt ou structure sanitaire).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Utilisateur récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Utilisateur récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id);
@@ -193,13 +186,11 @@ public interface IUsersController {
 
       Soumis à la même hiérarchie de gestion que la création (un `ADMIN_PRA` ne peut pas \
       modifier un compte à portée nationale ou un autre `ADMIN_PRA`).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Utilisateur modifié"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : nom/prénom manquant, téléphone mal formé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Utilisateur modifié")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : nom/prénom manquant, téléphone mal formé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
   @PutMapping("/{id}")
   ResponseEntity<Map<String, Object>> modifier(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id,
@@ -209,12 +200,10 @@ public interface IUsersController {
       Réactive un compte désactivé, lui permettant de nouveau de s'authentifier.
 
       Soumis à la même hiérarchie de gestion que la création.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Utilisateur activé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Utilisateur activé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
   @PatchMapping("/{id}/activer")
   ResponseEntity<Map<String, Object>> activer(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id);
@@ -226,13 +215,11 @@ public interface IUsersController {
       accidentellement lui-même verrouillé hors du système.
 
       Soumis par ailleurs à la même hiérarchie de gestion que la création.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Utilisateur désactivé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Un utilisateur ne peut pas désactiver son propre compte (SELF_DEACTIVATION_FORBIDDEN)")
-  })
+  @ApiResponse(responseCode = "200", description = "Utilisateur désactivé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Utilisateur introuvable (USER_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Un utilisateur ne peut pas désactiver son propre compte (SELF_DEACTIVATION_FORBIDDEN)")
   @PatchMapping("/{id}/desactiver")
   ResponseEntity<Map<String, Object>> desactiver(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id);
@@ -244,14 +231,12 @@ public interface IUsersController {
       Soumis à la même hiérarchie de gestion que la création : la vérification porte sur \
       l'ensemble des rôles du compte **après** attribution — un `ADMIN_PRA` ne peut donc \
       pas, par ce biais, faire passer un compte sous sa gestion à portée nationale.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Rôle attribué"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : roleId manquant"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte/rôle hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur ou rôle introuvable (USER_NOT_FOUND / ROLE_NOT_FOUND)"),
-      @ApiResponse(responseCode = "409", description = "Ce rôle est déjà attribué à cet utilisateur (ROLE_ALREADY_ASSIGNED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Rôle attribué")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : roleId manquant")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte/rôle hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Utilisateur ou rôle introuvable (USER_NOT_FOUND / ROLE_NOT_FOUND)")
+  @ApiResponse(responseCode = "409", description = "Ce rôle est déjà attribué à cet utilisateur (ROLE_ALREADY_ASSIGNED)")
   @PostMapping("/{id}/roles")
   ResponseEntity<Map<String, Object>> assignerRole(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id,
@@ -263,13 +248,11 @@ public interface IUsersController {
       sans aucun droit.
 
       Soumis à la même hiérarchie de gestion que la création.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Rôle retiré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Utilisateur introuvable, ou ce rôle n'est pas attribué à cet utilisateur (USER_NOT_FOUND / USER_ROLE_NOT_ASSIGNED)"),
-      @ApiResponse(responseCode = "422", description = "Ce rôle est l'unique rôle actif de l'utilisateur (LAST_ROLE_REQUIRED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Rôle retiré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou compte hors de la portée hiérarchique de l'acteur (USER_MANAGEMENT_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Utilisateur introuvable, ou ce rôle n'est pas attribué à cet utilisateur (USER_NOT_FOUND / USER_ROLE_NOT_ASSIGNED)")
+  @ApiResponse(responseCode = "422", description = "Ce rôle est l'unique rôle actif de l'utilisateur (LAST_ROLE_REQUIRED)")
   @DeleteMapping("/{id}/roles/{roleId}")
   ResponseEntity<Map<String, Object>> retirerRole(
       @Parameter(description = "Identifiant de l'utilisateur") @PathVariable UUID id,

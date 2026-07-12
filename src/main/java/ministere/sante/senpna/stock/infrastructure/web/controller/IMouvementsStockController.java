@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ministere.sante.senpna.stock.infrastructure.web.controller.implement.MouvementsStockController;
 
@@ -52,12 +51,10 @@ public interface IMouvementsStockController {
       portée illimitée.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Mouvement récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter un mouvement d'un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)"),
-      @ApiResponse(responseCode = "404", description = "Mouvement introuvable (MOUVEMENT_STOCK_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Mouvement récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé, ou acteur PRA tentant de consulter un mouvement d'un autre entrepôt (ENTREPOT_SCOPE_FORBIDDEN)")
+  @ApiResponse(responseCode = "404", description = "Mouvement introuvable (MOUVEMENT_STOCK_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant du mouvement") @PathVariable UUID id);
@@ -74,44 +71,42 @@ public interface IMouvementsStockController {
       il est **ignoré** et systématiquement remplacé par son propre entrepôt.
 
       Rôle requis : acteurs PNA ou PRA (tous rôles).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des mouvements récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des mouvements récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "MOUVEMENTS_LISTED",
+        "message": "Liste des mouvements de stock récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "MOUVEMENTS_LISTED",
-            "message": "Liste des mouvements de stock récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "typeMouvement": "ENTREE_ACHAT",
-                "sens": "ENTREE",
-                "entrepotSourceId": null,
-                "entrepotDestinationId": "8a2c...",
-                "commandeId": null,
-                "lotId": "3e7a...",
-                "medicamentId": "6b1f...",
-                "quantite": 500,
-                "dateMouvement": "2026-01-05T09:00:00Z",
-                "referenceDocument": "BR-2026-014",
-                "motif": null,
-                "utilisateurId": "9c4d...",
-                "createdAt": "2026-01-05T09:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 12,
-              "totalItems": 231,
-              "first": true,
-              "last": false
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "typeMouvement": "ENTREE_ACHAT",
+            "sens": "ENTREE",
+            "entrepotSourceId": null,
+            "entrepotDestinationId": "8a2c...",
+            "commandeId": null,
+            "lotId": "3e7a...",
+            "medicamentId": "6b1f...",
+            "quantite": 500,
+            "dateMouvement": "2026-01-05T09:00:00Z",
+            "referenceDocument": "BR-2026-014",
+            "motif": null,
+            "utilisateurId": "9c4d...",
+            "createdAt": "2026-01-05T09:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Type de mouvement ou sens invalide (TYPE_MOUVEMENT_INVALID / SENS_MOUVEMENT_INVALID)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 12,
+          "totalItems": 231,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Type de mouvement ou sens invalide (TYPE_MOUVEMENT_INVALID / SENS_MOUVEMENT_INVALID)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Filtre sur un lot") @RequestParam(required = false) UUID lotId,

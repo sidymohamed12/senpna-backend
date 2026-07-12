@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -72,42 +71,40 @@ public interface IStructuresSanitairesController {
       La région référencée doit être active.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Demande d'adhésion enregistrée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-          {
-            "status": 201,
-            "type": "STRUCTURE_SANITAIRE_CREATED",
-            "message": "Demande d'adhésion de la structure sanitaire enregistrée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": {
-              "id": "550e8400-e29b-41d4-a716-446655440000",
-              "code": "CS-PIKINE",
-              "nom": "Centre de santé de Pikine",
-              "type": "CENTRE_SANTE",
-              "regionId": "3e7a...",
-              "regionNom": "Dakar",
-              "praId": null,
-              "praNom": null,
-              "district": "Pikine",
-              "adresse": "Avenue Bourguiba",
-              "telephone": "+221771234567",
-              "email": "contact@cs-pikine.sn",
-              "responsableNom": "Fall",
-              "responsablePrenom": "Awa",
-              "statutAdhesion": "EN_ATTENTE_VALIDATION",
-              "motifRejet": null,
-              "actif": false,
-              "createdAt": "2024-01-01T12:00:00Z",
-              "updatedAt": "2024-01-01T12:00:00Z"
-            }
-          }
-          """))),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : code/nom/type/région/responsable manquant, code, téléphone ou email mal formé"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "409", description = "Ce code de structure sanitaire est déjà utilisé (STRUCTURE_SANITAIRE_CODE_ALREADY_USED)"),
-      @ApiResponse(responseCode = "422", description = "La région référencée est désactivée (REGION_INACTIVE)")
-  })
+  @ApiResponse(responseCode = "201", description = "Demande d'adhésion enregistrée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 201,
+        "type": "STRUCTURE_SANITAIRE_CREATED",
+        "message": "Demande d'adhésion de la structure sanitaire enregistrée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "code": "CS-PIKINE",
+          "nom": "Centre de santé de Pikine",
+          "type": "CENTRE_SANTE",
+          "regionId": "3e7a...",
+          "regionNom": "Dakar",
+          "praId": null,
+          "praNom": null,
+          "district": "Pikine",
+          "adresse": "Avenue Bourguiba",
+          "telephone": "+221771234567",
+          "email": "contact@cs-pikine.sn",
+          "responsableNom": "Fall",
+          "responsablePrenom": "Awa",
+          "statutAdhesion": "EN_ATTENTE_VALIDATION",
+          "motifRejet": null,
+          "actif": false,
+          "createdAt": "2024-01-01T12:00:00Z",
+          "updatedAt": "2024-01-01T12:00:00Z"
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : code/nom/type/région/responsable manquant, code, téléphone ou email mal formé")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "409", description = "Ce code de structure sanitaire est déjà utilisé (STRUCTURE_SANITAIRE_CODE_ALREADY_USED)")
+  @ApiResponse(responseCode = "422", description = "La région référencée est désactivée (REGION_INACTIVE)")
   @PostMapping
   ResponseEntity<Map<String, Object>> creer(@Valid @RequestBody CreateStructureSanitaireRequest request);
 
@@ -119,13 +116,11 @@ public interface IStructuresSanitairesController {
       `/activer`, `/desactiver`).
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire modifiée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire modifiée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR)")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
   @PutMapping("/{id}")
   ResponseEntity<Map<String, Object>> modifier(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id,
@@ -142,13 +137,11 @@ public interface IStructuresSanitairesController {
       e-mail.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Demande d'adhésion validée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Cette demande a déjà été traitée, validée ou rejetée (ADHESION_ALREADY_PROCESSED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Demande d'adhésion validée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Cette demande a déjà été traitée, validée ou rejetée (ADHESION_ALREADY_PROCESSED)")
   @PatchMapping("/{id}/valider-adhesion")
   ResponseEntity<Map<String, Object>> validerAdhesion(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id);
@@ -159,14 +152,12 @@ public interface IStructuresSanitairesController {
       demande encore `EN_ATTENTE_VALIDATION`.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Demande d'adhésion rejetée"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : motif manquant"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "Cette demande a déjà été traitée, validée ou rejetée (ADHESION_ALREADY_PROCESSED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Demande d'adhésion rejetée")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : motif manquant")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "Cette demande a déjà été traitée, validée ou rejetée (ADHESION_ALREADY_PROCESSED)")
   @PatchMapping("/{id}/rejeter-adhesion")
   ResponseEntity<Map<String, Object>> rejeterAdhesion(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id,
@@ -179,13 +170,11 @@ public interface IStructuresSanitairesController {
       `PATCH /{id}/valider-adhesion`. En dehors de ce cas, opération idempotente.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire activée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)"),
-      @ApiResponse(responseCode = "422", description = "L'adhésion de la structure n'est pas encore validée (STRUCTURE_SANITAIRE_ADHESION_NOT_VALIDATED)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire activée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
+  @ApiResponse(responseCode = "422", description = "L'adhésion de la structure n'est pas encore validée (STRUCTURE_SANITAIRE_ADHESION_NOT_VALIDATED)")
   @PatchMapping("/{id}/activer")
   ResponseEntity<Map<String, Object>> activer(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id);
@@ -196,12 +185,10 @@ public interface IStructuresSanitairesController {
       Opération idempotente.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire désactivée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire désactivée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
   @PatchMapping("/{id}/desactiver")
   ResponseEntity<Map<String, Object>> desactiver(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id);
@@ -213,14 +200,12 @@ public interface IStructuresSanitairesController {
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA` uniquement — contrairement aux \
       autres opérations de gestion des structures, ce rattachement, qui affecte la \
       supervision régionale, n'est pas ouvert aux rôles PRA.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire rattachée à la région"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : regionId manquant"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire ou région introuvable"),
-      @ApiResponse(responseCode = "422", description = "La région ciblée est désactivée (REGION_INACTIVE)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire rattachée à la région")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : regionId manquant")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire ou région introuvable")
+  @ApiResponse(responseCode = "422", description = "La région ciblée est désactivée (REGION_INACTIVE)")
   @PatchMapping("/{id}/region")
   ResponseEntity<Map<String, Object>> affecterRegion(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id,
@@ -232,14 +217,12 @@ public interface IStructuresSanitairesController {
 
       Rôle requis : `ADMIN_PNA` ou `GESTIONNAIRE_PNA` uniquement — même restriction que \
       pour le rattachement à une région.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire rattachée à la PRA"),
-      @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : praId manquant"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire ou entrepôt introuvable"),
-      @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE), ou est désactivé (ENTREPOT_INACTIVE)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire rattachée à la PRA")
+  @ApiResponse(responseCode = "400", description = "Corps invalide (VALIDATION_ERROR) : praId manquant")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire ou entrepôt introuvable")
+  @ApiResponse(responseCode = "422", description = "L'entrepôt ciblé n'est pas de type PRA (INVALID_ENTREPOT_TYPE), ou est désactivé (ENTREPOT_INACTIVE)")
   @PatchMapping("/{id}/pra")
   ResponseEntity<Map<String, Object>> affecterPra(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id,
@@ -250,12 +233,10 @@ public interface IStructuresSanitairesController {
       d'adhésion ou d'activité.
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Structure sanitaire récupérée"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Structure sanitaire récupérée")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Structure sanitaire introuvable (STRUCTURE_SANITAIRE_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant de la structure sanitaire") @PathVariable UUID id);
@@ -269,48 +250,46 @@ public interface IStructuresSanitairesController {
       `sortBy`/`sortDirection` pilotent le tri (défaut `createdAt`/`DESC`).
 
       Rôle requis : `ADMIN_PNA`, `GESTIONNAIRE_PNA`, `ADMIN_PRA` ou `GESTIONNAIRE_PRA`.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des structures sanitaires récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des structures sanitaires récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "STRUCTURES_SANITAIRES_LISTED",
+        "message": "Liste des structures sanitaires récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "STRUCTURES_SANITAIRES_LISTED",
-            "message": "Liste des structures sanitaires récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "code": "CS-PIKINE",
-                "nom": "Centre de santé de Pikine",
-                "type": "CENTRE_SANTE",
-                "regionId": "3e7a...",
-                "regionNom": "Dakar",
-                "praId": "8a2c...",
-                "praNom": "PRA de Dakar",
-                "district": "Pikine",
-                "adresse": "Avenue Bourguiba",
-                "telephone": "+221771234567",
-                "email": "contact@cs-pikine.sn",
-                "responsableNom": "Fall",
-                "responsablePrenom": "Awa",
-                "statutAdhesion": "VALIDEE",
-                "motifRejet": null,
-                "actif": true,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 6,
-              "totalItems": 112,
-              "first": true,
-              "last": false
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "code": "CS-PIKINE",
+            "nom": "Centre de santé de Pikine",
+            "type": "CENTRE_SANTE",
+            "regionId": "3e7a...",
+            "regionNom": "Dakar",
+            "praId": "8a2c...",
+            "praNom": "PRA de Dakar",
+            "district": "Pikine",
+            "adresse": "Avenue Bourguiba",
+            "telephone": "+221771234567",
+            "email": "contact@cs-pikine.sn",
+            "responsableNom": "Fall",
+            "responsablePrenom": "Awa",
+            "statutAdhesion": "VALIDEE",
+            "motifRejet": null,
+            "actif": true,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 6,
+          "totalItems": 112,
+          "first": true,
+          "last": false
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le code ou le nom") @RequestParam(required = false) String q,

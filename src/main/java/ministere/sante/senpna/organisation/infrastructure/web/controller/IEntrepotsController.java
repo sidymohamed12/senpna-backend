@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
@@ -48,12 +47,10 @@ public interface IEntrepotsController {
 
   @Operation(summary = "Obtenir un entrepôt", description = """
       Retourne le détail complet d'un entrepôt (PRA ou PNA centrale), actif ou non.""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Entrepôt récupéré"),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé"),
-      @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
-  })
+  @ApiResponse(responseCode = "200", description = "Entrepôt récupéré")
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
+  @ApiResponse(responseCode = "404", description = "Entrepôt introuvable (ENTREPOT_NOT_FOUND)")
   @GetMapping("/{id}")
   ResponseEntity<Map<String, Object>> obtenir(
       @Parameter(description = "Identifiant de l'entrepôt") @PathVariable UUID id);
@@ -64,41 +61,39 @@ public interface IEntrepotsController {
       filtre sur une région donnée (n'a de sens que pour les entrepôts de type `PRA`, la \
       PNA centrale n'étant rattachée à aucune région). `actif` filtre sur le statut. \
       `sortBy`/`sortDirection` pilotent le tri (défaut `createdAt`/`DESC`).""")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Liste des entrepôts récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+  @ApiResponse(responseCode = "200", description = "Liste des entrepôts récupérée", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      {
+        "status": 200,
+        "type": "ENTREPOTS_LISTED",
+        "message": "Liste des entrepôts récupérée",
+        "timestamp": "2024-01-01T12:00:00Z",
+        "results": [
           {
-            "status": 200,
-            "type": "ENTREPOTS_LISTED",
-            "message": "Liste des entrepôts récupérée",
-            "timestamp": "2024-01-01T12:00:00Z",
-            "results": [
-              {
-                "id": "550e8400-e29b-41d4-a716-446655440000",
-                "code": "PRA-DAKAR",
-                "nom": "PRA de Dakar",
-                "type": "PRA",
-                "regionId": "3e7a...",
-                "regionNom": "Dakar",
-                "adresse": "Route de Rufisque",
-                "telephone": "+221771234567",
-                "responsableUserId": "8a2c...",
-                "actif": true,
-                "createdAt": "2024-01-01T12:00:00Z",
-                "updatedAt": "2024-01-01T12:00:00Z"
-              }
-            ],
-            "pagination": {
-              "currentPage": 0,
-              "totalPages": 1,
-              "totalItems": 15,
-              "first": true,
-              "last": true
-            }
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "code": "PRA-DAKAR",
+            "nom": "PRA de Dakar",
+            "type": "PRA",
+            "regionId": "3e7a...",
+            "regionNom": "Dakar",
+            "adresse": "Route de Rufisque",
+            "telephone": "+221771234567",
+            "responsableUserId": "8a2c...",
+            "actif": true,
+            "createdAt": "2024-01-01T12:00:00Z",
+            "updatedAt": "2024-01-01T12:00:00Z"
           }
-          """))),
-      @ApiResponse(responseCode = "401", description = "JWT absent ou invalide"),
-      @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
-  })
+        ],
+        "pagination": {
+          "currentPage": 0,
+          "totalPages": 1,
+          "totalItems": 15,
+          "first": true,
+          "last": true
+        }
+      }
+      """)))
+  @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+  @ApiResponse(responseCode = "403", description = "Rôle non autorisé")
   @GetMapping
   ResponseEntity<Map<String, Object>> lister(
       @Parameter(description = "Recherche texte libre sur le code ou le nom") @RequestParam(required = false) String q,
