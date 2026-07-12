@@ -6,7 +6,7 @@
 #   docker compose --profile app up --build
 #
 # Usage courant (recommandé) :
-#   docker compose -f docker-compose.dev.yml --profile app --profile postgres up -d  # redis, adminer, app & postgres
+#   docker compose -f docker-compose.dev.yml --profile app --profile postgres up -d  .. redis, adminer, app & postgres
 #   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 # ═══════════════════════════════════════════════════════════════════════
 
