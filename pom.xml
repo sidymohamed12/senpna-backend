@@ -72,6 +72,7 @@
 			**/Q*.java,
 			**/*MapperImpl.java,
 			**/config/**,
+			**/dto/**,
 			**/*Application.java
 		</sonar.coverage.exclusions>
 
