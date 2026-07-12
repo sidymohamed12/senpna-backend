@@ -50,12 +50,21 @@ public class SecurityConfig {
         this.environment = environment;
     }
 
+    @SuppressWarnings("java:S4502")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         boolean isDevProfile = Arrays.asList(environment.getActiveProfiles()).contains("dev");
 
         http
+                /**
+                 * CSRF désactivé car cette API est stateless :
+                 * - Authentification via JWT Bearer Token dans Authorization header
+                 * - Aucun cookie d'authentification
+                 * - Aucune session HTTP serveur
+                 *
+                 * CSRF n'apporte donc pas de protection supplémentaire ici.
+                 */
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
