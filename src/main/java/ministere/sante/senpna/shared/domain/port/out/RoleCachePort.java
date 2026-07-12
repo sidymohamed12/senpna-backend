@@ -2,6 +2,7 @@ package ministere.sante.senpna.shared.domain.port.out;
 
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,6 +14,15 @@ import java.util.UUID;
  * directement d'une implémentation d'infrastructure concrète.
  */
 public interface RoleCachePort {
+    void reload();
+
+    Optional<RoleProjection> findById(UUID id);
+
+    Optional<RoleProjection> findByCode(String code);
+
+    boolean existsById(UUID id);
+
+    String getCode(UUID id);
 
     Set<RoleProjection> findAllById(Set<UUID> ids);
 }

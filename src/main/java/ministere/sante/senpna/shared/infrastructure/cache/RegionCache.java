@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Cache en mémoire des régions — chargé au démarrage puis rechargé à
@@ -33,8 +34,22 @@ public class RegionCache implements ApplicationRunner, RegionCachePort {
 
     private final RegionQueryPort regionQueryPort;
 
-    private volatile Map<UUID, RegionProjection> byId = Map.of();
-    private volatile Map<String, RegionProjection> byCode = Map.of();
+    /**
+     * Snapshot immutable contenant tous les index du cache.
+     * Les lecteurs accèdent toujours à un snapshot cohérent.
+     */
+    private record RegionIndexes(
+            Map<UUID, RegionProjection> byId,
+            Map<String, RegionProjection> byCode) {
+        static RegionIndexes empty() {
+            return new RegionIndexes(Map.of(), Map.of());
+        }
+    }
+
+    /**
+     * Référence atomique vers le snapshot courant.
+     */
+    private final AtomicReference<RegionIndexes> cache = new AtomicReference<>(RegionIndexes.empty());
 
     public RegionCache(RegionQueryPort regionQueryPort) {
         this.regionQueryPort = regionQueryPort;
@@ -46,55 +61,64 @@ public class RegionCache implements ApplicationRunner, RegionCachePort {
     }
 
     /**
-     * Recharge intégralement le cache depuis la source de vérité.
-     * Thread-safe : les maps sont remplacées atomiquement (publication
-     * via référence volatile), aucun verrou nécessaire en lecture.
+     * Recharge entièrement le cache.
+     * La publication est atomique : tous les lecteurs voient soit
+     * l'ancien snapshot, soit le nouveau, jamais un état intermédiaire.
      */
     @Override
     public synchronized void reload() {
         List<RegionProjection> regions = regionQueryPort.findAll();
 
-        Map<UUID, RegionProjection> idIndex = new HashMap<>();
-        Map<String, RegionProjection> codeIndex = new HashMap<>();
+        Map<UUID, RegionProjection> idIndex = HashMap.newHashMap(regions.size());
+        Map<String, RegionProjection> codeIndex = HashMap.newHashMap(regions.size());
+
         for (RegionProjection region : regions) {
             idIndex.put(region.id(), region);
             codeIndex.put(region.code(), region);
         }
 
-        this.byId = Collections.unmodifiableMap(idIndex);
-        this.byCode = Collections.unmodifiableMap(codeIndex);
+        cache.set(new RegionIndexes(
+                Map.copyOf(idIndex),
+                Map.copyOf(codeIndex)));
 
         log.info("[RegionCache] {} région(s) chargée(s) en cache", regions.size());
     }
 
     @Override
     public Optional<RegionProjection> findById(UUID id) {
-        return Optional.ofNullable(byId.get(id));
+        return Optional.ofNullable(cache.get().byId().get(id));
     }
 
     public Optional<RegionProjection> findByCode(String code) {
-        return Optional.ofNullable(byCode.get(code));
+        return Optional.ofNullable(cache.get().byCode().get(code));
     }
 
     @Override
     public boolean existsById(UUID id) {
-        return byId.containsKey(id);
+        return cache.get().byId().containsKey(id);
     }
 
     /**
-     * Résout un ensemble d'identifiants de région en projections — les
-     * identifiants inconnus sont silencieusement ignorés (défensif).
+     * Résout un ensemble d'identifiants de région en projections.
+     * Les identifiants inconnus sont ignorés.
      */
     @Override
     public Set<RegionProjection> findAllById(Set<UUID> ids) {
-        Set<RegionProjection> result = new HashSet<>();
+        Map<UUID, RegionProjection> byId = cache.get().byId();
+
+        Set<RegionProjection> result = HashSet.newHashSet(ids.size());
+
         for (UUID id : ids) {
-            findById(id).ifPresent(result::add);
+            RegionProjection region = byId.get(id);
+            if (region != null) {
+                result.add(region);
+            }
         }
-        return result;
+
+        return Collections.unmodifiableSet(result);
     }
 
     public int size() {
-        return byId.size();
+        return cache.get().byId().size();
     }
 }

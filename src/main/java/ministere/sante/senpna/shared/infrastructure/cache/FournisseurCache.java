@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Cache en mémoire des fournisseurs — chargé au démarrage puis rechargé à
@@ -34,7 +35,10 @@ public class FournisseurCache implements ApplicationRunner, FournisseurCachePort
 
     private final FournisseurQueryPort fournisseurQueryPort;
 
-    private volatile Map<UUID, FournisseurProjection> byId = Map.of();
+    /**
+     * Snapshot immutable du cache.
+     */
+    private final AtomicReference<Map<UUID, FournisseurProjection>> cache = new AtomicReference<>(Map.of());
 
     public FournisseurCache(FournisseurQueryPort fournisseurQueryPort) {
         this.fournisseurQueryPort = fournisseurQueryPort;
@@ -46,43 +50,51 @@ public class FournisseurCache implements ApplicationRunner, FournisseurCachePort
     }
 
     /**
-     * Recharge intégralement le cache depuis la source de vérité.
-     * Thread-safe : la map est remplacée atomiquement (publication via
-     * référence volatile), aucun verrou nécessaire en lecture.
+     * Recharge entièrement le cache.
+     * Les lecteurs voient toujours soit l'ancien snapshot,
+     * soit le nouveau, jamais un état intermédiaire.
      */
     @Override
     public synchronized void reload() {
         List<FournisseurProjection> fournisseurs = fournisseurQueryPort.findAll();
 
-        Map<UUID, FournisseurProjection> idIndex = new HashMap<>();
+        Map<UUID, FournisseurProjection> idIndex = HashMap.newHashMap(fournisseurs.size());
+
         for (FournisseurProjection fournisseur : fournisseurs) {
             idIndex.put(fournisseur.id(), fournisseur);
         }
 
-        this.byId = Collections.unmodifiableMap(idIndex);
+        cache.set(Map.copyOf(idIndex));
 
         log.info("[FournisseurCache] {} fournisseur(s) chargé(s) en cache", fournisseurs.size());
     }
 
     @Override
     public Optional<FournisseurProjection> findById(UUID id) {
-        return Optional.ofNullable(byId.get(id));
+        return Optional.ofNullable(cache.get().get(id));
     }
 
     /**
-     * Résout un ensemble d'identifiants de fournisseur en projections —
-     * les identifiants inconnus sont silencieusement ignorés (défensif).
+     * Résout un ensemble d'identifiants de fournisseur en projections.
+     * Les identifiants inconnus sont ignorés.
      */
     @Override
     public Set<FournisseurProjection> findAllById(Set<UUID> ids) {
-        Set<FournisseurProjection> result = new HashSet<>();
+        Map<UUID, FournisseurProjection> byId = cache.get();
+
+        Set<FournisseurProjection> result = HashSet.newHashSet(ids.size());
+
         for (UUID id : ids) {
-            findById(id).ifPresent(result::add);
+            FournisseurProjection fournisseur = byId.get(id);
+            if (fournisseur != null) {
+                result.add(fournisseur);
+            }
         }
-        return result;
+
+        return Collections.unmodifiableSet(result);
     }
 
     public int size() {
-        return byId.size();
+        return cache.get().size();
     }
 }

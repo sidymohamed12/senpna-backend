@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @Order(0)
@@ -29,8 +30,21 @@ public class RoleCache implements ApplicationRunner, RoleCachePort {
 
     private final RoleQueryPort roleQueryPort;
 
-    private volatile Map<UUID, RoleProjection> byId = Map.of();
-    private volatile Map<String, RoleProjection> byCode = Map.of();
+    /**
+     * Snapshot immutable contenant tous les index du cache.
+     */
+    private record RoleIndexes(
+            Map<UUID, RoleProjection> byId,
+            Map<String, RoleProjection> byCode) {
+        static RoleIndexes empty() {
+            return new RoleIndexes(Map.of(), Map.of());
+        }
+    }
+
+    /**
+     * Référence atomique vers le snapshot courant.
+     */
+    private final AtomicReference<RoleIndexes> cache = new AtomicReference<>(RoleIndexes.empty());
 
     public RoleCache(RoleQueryPort roleQueryPort) {
         this.roleQueryPort = roleQueryPort;
@@ -42,67 +56,79 @@ public class RoleCache implements ApplicationRunner, RoleCachePort {
     }
 
     /**
-     * Recharge intégralement le cache depuis la source de vérité.
-     * Thread-safe : les maps sont remplacées atomiquement (publication
-     * via référence volatile), aucun verrou nécessaire en lecture.
+     * Recharge entièrement le cache.
+     * Les lecteurs voient toujours un snapshot cohérent.
      */
+    @Override
     public synchronized void reload() {
         List<RoleProjection> roles = roleQueryPort.findAll();
 
-        Map<UUID, RoleProjection> idIndex = new HashMap<>();
-        Map<String, RoleProjection> codeIndex = new HashMap<>();
+        Map<UUID, RoleProjection> idIndex = HashMap.newHashMap(roles.size());
+        Map<String, RoleProjection> codeIndex = HashMap.newHashMap(roles.size());
+
         for (RoleProjection role : roles) {
             idIndex.put(role.id(), role);
             codeIndex.put(role.code(), role);
         }
 
-        this.byId = Collections.unmodifiableMap(idIndex);
-        this.byCode = Collections.unmodifiableMap(codeIndex);
+        cache.set(new RoleIndexes(
+                Map.copyOf(idIndex),
+                Map.copyOf(codeIndex)));
 
         log.info("[RoleCache] {} rôle(s) chargé(s) en cache", roles.size());
     }
 
+    @Override
     public Optional<RoleProjection> findById(UUID id) {
-        return Optional.ofNullable(byId.get(id));
+        return Optional.ofNullable(cache.get().byId().get(id));
     }
 
+    @Override
     public Optional<RoleProjection> findByCode(String code) {
-        return Optional.ofNullable(byCode.get(code));
+        return Optional.ofNullable(cache.get().byCode().get(code));
     }
 
+    @Override
     public boolean existsById(UUID id) {
-        return byId.containsKey(id);
+        return cache.get().byId().containsKey(id);
     }
 
     /**
      * Résout le code technique d'un rôle (utilisé pour bâtir les
-     * {@code GrantedAuthority} Spring Security).
+     * GrantedAuthority de Spring Security).
      *
      * @throws NotFoundException si l'identifiant ne correspond à aucun rôle connu
      */
+    @Override
     public String getCode(UUID id) {
         return findById(id)
                 .map(RoleProjection::code)
                 .orElseThrow(() -> new NotFoundException(
-                        "Rôle introuvable avec l'identifiant : " + id, "ROLE_NOT_FOUND"));
+                        "Rôle introuvable avec l'identifiant : " + id,
+                        "ROLE_NOT_FOUND"));
     }
 
     /**
-     * Résout un ensemble d'identifiants de rôle en projections — les
-     * identifiants inconnus sont silencieusement ignorés (défensif : un
-     * rôle a pu être retiré du référentiel sans que l'utilisateur ait
-     * encore été mis à jour).
+     * Résout un ensemble d'identifiants de rôle en projections.
+     * Les identifiants inconnus sont ignorés.
      */
     @Override
     public Set<RoleProjection> findAllById(Set<UUID> ids) {
-        Set<RoleProjection> result = new HashSet<>();
+        Map<UUID, RoleProjection> byId = cache.get().byId();
+
+        Set<RoleProjection> result = HashSet.newHashSet(ids.size());
+
         for (UUID id : ids) {
-            findById(id).ifPresent(result::add);
+            RoleProjection role = byId.get(id);
+            if (role != null) {
+                result.add(role);
+            }
         }
-        return result;
+
+        return Collections.unmodifiableSet(result);
     }
 
     public int size() {
-        return byId.size();
+        return cache.get().byId().size();
     }
 }

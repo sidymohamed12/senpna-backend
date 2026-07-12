@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Cache en mémoire des familles thérapeutiques — chargé au démarrage puis
@@ -35,7 +36,10 @@ public class FamilleCache implements ApplicationRunner, FamilleCachePort {
 
     private final FamilleQueryPort familleQueryPort;
 
-    private volatile Map<UUID, FamilleProjection> byId = Map.of();
+    /**
+     * Snapshot immutable du cache.
+     */
+    private final AtomicReference<Map<UUID, FamilleProjection>> cache = new AtomicReference<>(Map.of());
 
     public FamilleCache(FamilleQueryPort familleQueryPort) {
         this.familleQueryPort = familleQueryPort;
@@ -46,40 +50,53 @@ public class FamilleCache implements ApplicationRunner, FamilleCachePort {
         reload();
     }
 
+    /**
+     * Recharge entièrement le cache.
+     * Les lecteurs voient toujours soit l'ancien snapshot,
+     * soit le nouveau, jamais un état intermédiaire.
+     */
     @Override
     public synchronized void reload() {
         List<FamilleProjection> familles = familleQueryPort.findAll();
 
-        Map<UUID, FamilleProjection> idIndex = new HashMap<>();
+        Map<UUID, FamilleProjection> idIndex = HashMap.newHashMap(familles.size());
+
         for (FamilleProjection famille : familles) {
             idIndex.put(famille.id(), famille);
         }
 
-        this.byId = Collections.unmodifiableMap(idIndex);
+        cache.set(Map.copyOf(idIndex));
 
         log.info("[FamilleCache] {} famille(s) chargée(s) en cache", familles.size());
     }
 
     @Override
     public Optional<FamilleProjection> findById(UUID id) {
-        return Optional.ofNullable(byId.get(id));
+        return Optional.ofNullable(cache.get().get(id));
     }
 
     @Override
     public boolean existsById(UUID id) {
-        return byId.containsKey(id);
+        return cache.get().containsKey(id);
     }
 
     @Override
     public Set<FamilleProjection> findAllById(Set<UUID> ids) {
-        Set<FamilleProjection> result = new HashSet<>();
+        Map<UUID, FamilleProjection> byId = cache.get();
+
+        Set<FamilleProjection> result = HashSet.newHashSet(ids.size());
+
         for (UUID id : ids) {
-            findById(id).ifPresent(result::add);
+            FamilleProjection famille = byId.get(id);
+            if (famille != null) {
+                result.add(famille);
+            }
         }
-        return result;
+
+        return Collections.unmodifiableSet(result);
     }
 
     public int size() {
-        return byId.size();
+        return cache.get().size();
     }
 }

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Cache en mémoire des formes pharmaceutiques — chargé au démarrage puis
@@ -37,7 +38,10 @@ public class FormeCache implements ApplicationRunner, FormeCachePort {
 
     private final FormeQueryPort formeQueryPort;
 
-    private volatile Map<UUID, FormeProjection> byId = Map.of();
+    /**
+     * Snapshot immutable du cache.
+     */
+    private final AtomicReference<Map<UUID, FormeProjection>> cache = new AtomicReference<>(Map.of());
 
     public FormeCache(FormeQueryPort formeQueryPort) {
         this.formeQueryPort = formeQueryPort;
@@ -49,48 +53,56 @@ public class FormeCache implements ApplicationRunner, FormeCachePort {
     }
 
     /**
-     * Recharge intégralement le cache depuis la source de vérité.
-     * Thread-safe : la map est remplacée atomiquement (publication via
-     * référence volatile), aucun verrou nécessaire en lecture.
+     * Recharge entièrement le cache.
+     * Les lecteurs voient toujours soit l'ancien snapshot,
+     * soit le nouveau, jamais un état intermédiaire.
      */
     @Override
     public synchronized void reload() {
         List<FormeProjection> formes = formeQueryPort.findAll();
 
-        Map<UUID, FormeProjection> idIndex = new HashMap<>();
+        Map<UUID, FormeProjection> idIndex = HashMap.newHashMap(formes.size());
+
         for (FormeProjection forme : formes) {
             idIndex.put(forme.id(), forme);
         }
 
-        this.byId = Collections.unmodifiableMap(idIndex);
+        cache.set(Map.copyOf(idIndex));
 
         log.info("[FormeCache] {} forme(s) chargée(s) en cache", formes.size());
     }
 
     @Override
     public Optional<FormeProjection> findById(UUID id) {
-        return Optional.ofNullable(byId.get(id));
+        return Optional.ofNullable(cache.get().get(id));
     }
 
     @Override
     public boolean existsById(UUID id) {
-        return byId.containsKey(id);
+        return cache.get().containsKey(id);
     }
 
     /**
-     * Résout un ensemble d'identifiants de forme en projections — les
-     * identifiants inconnus sont silencieusement ignorés (défensif).
+     * Résout un ensemble d'identifiants de forme en projections.
+     * Les identifiants inconnus sont ignorés.
      */
     @Override
     public Set<FormeProjection> findAllById(Set<UUID> ids) {
-        Set<FormeProjection> result = new HashSet<>();
+        Map<UUID, FormeProjection> byId = cache.get();
+
+        Set<FormeProjection> result = HashSet.newHashSet(ids.size());
+
         for (UUID id : ids) {
-            findById(id).ifPresent(result::add);
+            FormeProjection forme = byId.get(id);
+            if (forme != null) {
+                result.add(forme);
+            }
         }
-        return result;
+
+        return Collections.unmodifiableSet(result);
     }
 
     public int size() {
-        return byId.size();
+        return cache.get().size();
     }
 }
