@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ministere.sante.senpna.media.application.dto.PresignedUrlResult;
@@ -68,124 +67,120 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class MediaController {
 
-    private final GenererPresignedUrlUseCase genererPresignedUrlUseCase;
-    private final MediaWebMapper mapper;
+        private final GenererPresignedUrlUseCase genererPresignedUrlUseCase;
+        private final MediaWebMapper mapper;
 
-    public MediaController(
-            GenererPresignedUrlUseCase genererPresignedUrlUseCase,
-            MediaWebMapper mapper) {
-        this.genererPresignedUrlUseCase = genererPresignedUrlUseCase;
-        this.mapper = mapper;
-    }
+        public MediaController(
+                        GenererPresignedUrlUseCase genererPresignedUrlUseCase,
+                        MediaWebMapper mapper) {
+                this.genererPresignedUrlUseCase = genererPresignedUrlUseCase;
+                this.mapper = mapper;
+        }
 
-    @Operation(summary = "Générer une URL pré-signée pour upload direct", description = """
-            Génère une URL sécurisée permettant au frontend d'uploader un fichier **directement**
-            vers le stockage (R2/MinIO) **sans transiter par le serveur applicatif**.
+        @Operation(summary = "Générer une URL pré-signée pour upload direct", description = """
+                        Génère une URL sécurisée permettant au frontend d'uploader un fichier **directement**
+                        vers le stockage (R2/MinIO) **sans transiter par le serveur applicatif**.
 
-            **Flux en 3 étapes :**
-            1. `POST /api/medias/presigned-url` — obtenir `uploadUrl` (valide 10 min) et `publicUrl`
-            2. `PUT {uploadUrl}` avec le fichier binaire, header `Content-Type` obligatoire — upload direct
-            3. `POST /api/actualites` avec `imageUrl = publicUrl` et `imageKey = key`
+                        **Flux en 3 étapes :**
+                        1. `POST /api/medias/presigned-url` — obtenir `uploadUrl` (valide 10 min) et `publicUrl`
+                        2. `PUT {uploadUrl}` avec le fichier binaire, header `Content-Type` obligatoire — upload direct
+                        3. `POST /api/actualites` avec `imageUrl = publicUrl` et `imageKey = key`
 
-            **Types de médias disponibles :**
-            | `mediaType`          | Formats acceptés        | Taille max |
-            |---|---|---|
-            | `ACTUALITE`      | image/jpeg, image/png, image/webp | 50 MB |
-            | `PROJET`         | image/jpeg, image/png, image/webp | 5 MB |
-            | `MEDIATHEQUE`    | image/jpeg, image/png, image/webp, image/gif, video/mp4 | 50 MB |
-            | `FICHE_DE_POSTE` | image/jpeg, image/png, image/webp | 5 MB |
-            | `CV`             | application/pdf | 5 MB |
-            | `LETTRE_DE_MOTIVATION` | application/pdf | 5 MB |
+                        **Types de médias disponibles :**
+                        | `mediaType`          | Formats acceptés        | Taille max |
+                        |---|---|---|
+                        | `ACTUALITE`      | image/jpeg, image/png, image/webp | 50 MB |
+                        | `PROJET`         | image/jpeg, image/png, image/webp | 5 MB |
+                        | `MEDIATHEQUE`    | image/jpeg, image/png, image/webp, image/gif, video/mp4 | 50 MB |
+                        | `FICHE_DE_POSTE` | image/jpeg, image/png, image/webp | 5 MB |
+                        | `CV`             | application/pdf | 5 MB |
+                        | `LETTRE_DE_MOTIVATION` | application/pdf | 5 MB |
 
-            `results` est un `PresignedUrlResponse` :
-            - `uploadUrl` — URL signée pour le PUT (expire à `expiresAt`)
-            - `publicUrl` — URL publique permanente à stocker dans l'actualité
-            - `key` — clé bucket (à passer dans `imageKey` lors de la création de l'actualité)
-            - `expiresAt` — timestamp d'expiration de `uploadUrl`
+                        `results` est un `PresignedUrlResponse` :
+                        - `uploadUrl` — URL signée pour le PUT (expire à `expiresAt`)
+                        - `publicUrl` — URL publique permanente à stocker dans l'actualité
+                        - `key` — clé bucket (à passer dans `imageKey` lors de la création de l'actualité)
+                        - `expiresAt` — timestamp d'expiration de `uploadUrl`
 
-            Rôle requis : **tout utilisateur authentifié**.
-            """)
-    @RequestBody(required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = PresignedUrlRequest.class), examples = {
-            @ExampleObject(name = "Image actualité JPEG", value = """
-                    {
-                      "mediaType": "ACTUALITE",
-                      "contentType": "image/jpeg",
-                      "tailleBytes": 2097152
-                    }
-                    """),
-            @ExampleObject(name = "Avatar utilisateur PNG", value = """
-                    {
-                      "mediaType": "AVATAR_UTILISATEUR",
-                      "contentType": "image/png",
-                      "tailleBytes": 524288
-                    }
-                    """)
-    }))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "URL pré-signée générée — valide 10 minutes", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 200,
-                      "type": "PRESIGNED_URL_GENEREE",
-                      "message": "URL d'upload générée. Valide 10 minutes. Faites un PUT sur uploadUrl avec le header Content-Type.",
-                      "timestamp": "2024-01-01T12:00:00Z",
-                      "results": {
-                        "uploadUrl": "https://r2.senpna.sn/cv/550e8400.jpg?X-Amz-Signature=abc...",
-                        "publicUrl": "https://cdn.senpna.sn/cv/550e8400-e29b-41d4-a716-446655440000.jpg",
-                        "key": "cv/550e8400-e29b-41d4-a716-446655440000.jpg",
-                        "expiresAt": "2024-01-01T12:10:00Z"
-                      }
-                    }
-                    """))),
-            @ApiResponse(responseCode = "400", description = "mediaType invalide | contentType non autorisé | taille > limite"),
-            @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
-    })
-    @PostMapping("/presigned-url")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> genererPresignedUrl(
-            @Valid @org.springframework.web.bind.annotation.RequestBody PresignedUrlRequest request) {
+                        Rôle requis : **tout utilisateur authentifié**.
+                        """)
+        @RequestBody(required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = PresignedUrlRequest.class), examples = {
+                        @ExampleObject(name = "Image actualité JPEG", value = """
+                                        {
+                                          "mediaType": "ACTUALITE",
+                                          "contentType": "image/jpeg",
+                                          "tailleBytes": 2097152
+                                        }
+                                        """),
+                        @ExampleObject(name = "Avatar utilisateur PNG", value = """
+                                        {
+                                          "mediaType": "AVATAR_UTILISATEUR",
+                                          "contentType": "image/png",
+                                          "tailleBytes": 524288
+                                        }
+                                        """)
+        }))
+        @ApiResponse(responseCode = "200", description = "URL pré-signée générée — valide 10 minutes", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                        {
+                          "status": 200,
+                          "type": "PRESIGNED_URL_GENEREE",
+                          "message": "URL d'upload générée. Valide 10 minutes. Faites un PUT sur uploadUrl avec le header Content-Type.",
+                          "timestamp": "2024-01-01T12:00:00Z",
+                          "results": {
+                            "uploadUrl": "https://r2.senpna.sn/cv/550e8400.jpg?X-Amz-Signature=abc...",
+                            "publicUrl": "https://cdn.senpna.sn/cv/550e8400-e29b-41d4-a716-446655440000.jpg",
+                            "key": "cv/550e8400-e29b-41d4-a716-446655440000.jpg",
+                            "expiresAt": "2024-01-01T12:10:00Z"
+                          }
+                        }
+                        """)))
+        @ApiResponse(responseCode = "400", description = "mediaType invalide | contentType non autorisé | taille > limite")
+        @ApiResponse(responseCode = "401", description = "JWT absent ou invalide")
+        @PostMapping("/presigned-url")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<Map<String, Object>> genererPresignedUrl(
+                        @Valid @org.springframework.web.bind.annotation.RequestBody PresignedUrlRequest request) {
 
-        PresignedUrlResult result = genererPresignedUrlUseCase.generer(
-                mapper.versCommand(request));
+                PresignedUrlResult result = genererPresignedUrlUseCase.generer(
+                                mapper.versCommand(request));
 
-        return ResponseEntity.ok(RestResponse.response(
-                HttpStatus.OK,
-                mapper.versResponse(result),
-                "PRESIGNED_URL_GENEREE",
-                "URL d'upload générée. Valide " +
-                        java.time.Duration.between(java.time.Instant.now(), result.expiresAt())
-                                .toMinutes()
-                        +
-                        " minutes. Faites un PUT sur uploadUrl avec le header Content-Type."));
-    }
+                return ResponseEntity.ok(RestResponse.response(
+                                HttpStatus.OK,
+                                mapper.versResponse(result),
+                                "PRESIGNED_URL_GENEREE",
+                                "URL d'upload générée. Valide " +
+                                                java.time.Duration.between(java.time.Instant.now(), result.expiresAt())
+                                                                .toMinutes()
+                                                +
+                                                " minutes. Faites un PUT sur uploadUrl avec le header Content-Type."));
+        }
 
-    @Operation(summary = "Générer une URL pré-signée pour upload direct (accès public)", description = """
-            Variante sans authentification de `POST /api/medias/presigned-url`, destinée aux pièces jointes
-            d'un formulaire public — à ce jour uniquement `CV` et `LETTRE_DE_MOTIVATION` (cf. formulaire de
-            postulation, `POST /api/candidatures`). Tout autre `mediaType` est refusé (403).
+        @Operation(summary = "Générer une URL pré-signée pour upload direct (accès public)", description = """
+                        Variante sans authentification de `POST /api/medias/presigned-url`, destinée aux pièces jointes
+                        d'un formulaire public — à ce jour uniquement `CV` et `LETTRE_DE_MOTIVATION` (cf. formulaire de
+                        postulation, `POST /api/candidatures`). Tout autre `mediaType` est refusé (403).
 
-            Mêmes garanties de sécurité que l'endpoint authentifié : clé générée côté serveur, Content-Type
-            et taille validés, TTL court, un seul PUT autorisé sur la clé signée.
-            """)
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "URL pré-signée générée — valide 10 minutes"),
-            @ApiResponse(responseCode = "400", description = "contentType non autorisé | taille > limite"),
-            @ApiResponse(responseCode = "403", description = "mediaType non éligible à un usage public (MEDIA_TYPE_NON_AUTORISE_PUBLIQUEMENT)")
-    })
-    @PostMapping("/presigned-url/public")
-    public ResponseEntity<Map<String, Object>> genererPresignedUrlPublic(
-            @Valid @org.springframework.web.bind.annotation.RequestBody PresignedUrlRequest request) {
+                        Mêmes garanties de sécurité que l'endpoint authentifié : clé générée côté serveur, Content-Type
+                        et taille validés, TTL court, un seul PUT autorisé sur la clé signée.
+                        """)
+        @ApiResponse(responseCode = "200", description = "URL pré-signée générée — valide 10 minutes")
+        @ApiResponse(responseCode = "400", description = "contentType non autorisé | taille > limite")
+        @ApiResponse(responseCode = "403", description = "mediaType non éligible à un usage public (MEDIA_TYPE_NON_AUTORISE_PUBLIQUEMENT)")
+        @PostMapping("/presigned-url/public")
+        public ResponseEntity<Map<String, Object>> genererPresignedUrlPublic(
+                        @Valid @org.springframework.web.bind.annotation.RequestBody PresignedUrlRequest request) {
 
-        PresignedUrlResult result = genererPresignedUrlUseCase.genererPublique(
-                mapper.versCommand(request));
+                PresignedUrlResult result = genererPresignedUrlUseCase.genererPublique(
+                                mapper.versCommand(request));
 
-        return ResponseEntity.ok(RestResponse.response(
-                HttpStatus.OK,
-                mapper.versResponse(result),
-                "PRESIGNED_URL_GENEREE",
-                "URL d'upload générée. Valide " +
-                        java.time.Duration.between(java.time.Instant.now(), result.expiresAt())
-                                .toMinutes()
-                        +
-                        " minutes. Faites un PUT sur uploadUrl avec le header Content-Type."));
-    }
+                return ResponseEntity.ok(RestResponse.response(
+                                HttpStatus.OK,
+                                mapper.versResponse(result),
+                                "PRESIGNED_URL_GENEREE",
+                                "URL d'upload générée. Valide " +
+                                                java.time.Duration.between(java.time.Instant.now(), result.expiresAt())
+                                                                .toMinutes()
+                                                +
+                                                " minutes. Faites un PUT sur uploadUrl avec le header Content-Type."));
+        }
 }
