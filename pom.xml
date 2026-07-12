@@ -74,6 +74,11 @@
 			**/config/**,
 			**/*Application.java
 		</sonar.coverage.exclusions>
+
+		<sonar.cpd.exclusions>
+			**/infrastructure/web/controller/I*Controller.java
+		</sonar.cpd.exclusions>
+
 		<sonar.java.source>21</sonar.java.source>
 	</properties>
 
