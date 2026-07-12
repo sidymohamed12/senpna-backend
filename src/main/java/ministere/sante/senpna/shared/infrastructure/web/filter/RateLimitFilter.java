@@ -77,6 +77,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final int API_LIMIT = 120;
     private static final long API_WINDOW_MS = 60_000L;
 
+    private static final String WEBHOOK_WORD = "webhooks";
+
     /**
      * Routes d'authentification soumises à la limite stricte (10 req/min par IP).
      * {@code /api/auth/resend-otp} inclus pour prévenir le spam OTP multi-comptes.
@@ -157,7 +159,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (AUTH_PATHS.contains(path))
             return "auth";
         if (path.startsWith("/webhooks/"))
-            return "webhook";
+            return WEBHOOK_WORD;
         if (path.startsWith("/api/"))
             return "api";
         return null;
@@ -166,7 +168,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private int resolveLimit(String group) {
         return switch (group) {
             case "auth" -> AUTH_LIMIT;
-            case "webhook" -> WEBHOOK_LIMIT;
+            case WEBHOOK_WORD -> WEBHOOK_LIMIT;
             default -> API_LIMIT;
         };
     }
@@ -174,7 +176,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private long resolveWindow(String group) {
         return switch (group) {
             case "auth" -> AUTH_WINDOW_MS;
-            case "webhook" -> WEBHOOK_WINDOW_MS;
+            case WEBHOOK_WORD -> WEBHOOK_WINDOW_MS;
             default -> API_WINDOW_MS;
         };
     }
