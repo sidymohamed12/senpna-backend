@@ -1,4 +1,4 @@
-package ministere.sante.senpna.organisation.application.usecase.PRA;
+package ministere.sante.senpna.organisation.application.usecase.pra;
 
 import ministere.sante.senpna.organisation.application.service.EntrepotDetailAssembler;
 import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;

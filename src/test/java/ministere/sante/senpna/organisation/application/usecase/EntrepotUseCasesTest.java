@@ -2,12 +2,12 @@ package ministere.sante.senpna.organisation.application.usecase;
 
 import ministere.sante.senpna.organisation.application.service.EntrepotDetailAssembler;
 import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;
-import ministere.sante.senpna.organisation.application.usecase.PRA.ActivatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.PRA.CreatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.PRA.DeactivatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.PRA.UpdatePraUseCaseImpl;
 import ministere.sante.senpna.organisation.application.usecase.entrepot.GetEntrepotUseCaseImpl;
 import ministere.sante.senpna.organisation.application.usecase.entrepot.ListEntrepotsUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pra.ActivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pra.CreatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pra.DeactivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pra.UpdatePraUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.ActivatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.CreatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.DeactivatePraCommand;
