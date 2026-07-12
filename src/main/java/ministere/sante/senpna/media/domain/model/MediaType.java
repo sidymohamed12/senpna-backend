@@ -17,40 +17,57 @@ import java.util.Set;
 public enum MediaType {
 
     ACTUALITE(
-            Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4"),
-            50 * 1024 * 1024L, // 50MB
+            Set.of(
+                    MimeTypes.IMAGE_JPEG,
+                    MimeTypes.IMAGE_PNG,
+                    MimeTypes.IMAGE_WEBP,
+                    MimeTypes.IMAGE_GIF,
+                    MimeTypes.VIDEO_MP4),
+            50 * 1024 * 1024L,
             "actualites/"),
 
     PROJET(
-            Set.of("image/jpeg", "image/png", "image/webp"),
-            5 * 1024 * 1024L, // 5MB
+            Set.of(
+                    MimeTypes.IMAGE_JPEG,
+                    MimeTypes.IMAGE_PNG,
+                    MimeTypes.IMAGE_WEBP),
+            5 * 1024 * 1024L,
             "projets/"),
 
     MEDIATHEQUE(
-            Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4"),
-            50 * 1024 * 1024L, // 50MB
+            Set.of(
+                    MimeTypes.IMAGE_JPEG,
+                    MimeTypes.IMAGE_PNG,
+                    MimeTypes.IMAGE_WEBP,
+                    MimeTypes.IMAGE_GIF,
+                    MimeTypes.VIDEO_MP4),
+            50 * 1024 * 1024L,
             "mediatheque/"),
 
     FICHE_DE_POSTE(
-            Set.of("application/pdf", "image/jpeg", "image/png", "image/webp"),
-            5 * 1024 * 1024L, // 5MB
+            Set.of(
+                    MimeTypes.APPLICATION_PDF,
+                    MimeTypes.IMAGE_JPEG,
+                    MimeTypes.IMAGE_PNG,
+                    MimeTypes.IMAGE_WEBP),
+            5 * 1024 * 1024L,
             "fiches-de-poste/"),
 
     CV(
             Set.of(
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-            5 * 1024 * 1024L, // 5MB
+                    MimeTypes.APPLICATION_PDF,
+                    MimeTypes.APPLICATION_MSWORD,
+                    MimeTypes.APPLICATION_DOCX),
+            5 * 1024 * 1024L,
             "cvs/",
             true),
 
     LETTRE_DE_MOTIVATION(
             Set.of(
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-            5 * 1024 * 1024L, // 5MB
+                    MimeTypes.APPLICATION_PDF,
+                    MimeTypes.APPLICATION_MSWORD,
+                    MimeTypes.APPLICATION_DOCX),
+            5 * 1024 * 1024L,
             "lettres-de-motivation/",
             true);
 
@@ -63,7 +80,10 @@ public enum MediaType {
         this(contentTypesAutorises, maxSizeBytes, prefixe, false);
     }
 
-    MediaType(Set<String> contentTypesAutorises, long maxSizeBytes, String prefixe,
+    MediaType(
+            Set<String> contentTypesAutorises,
+            long maxSizeBytes,
+            String prefixe,
             boolean utilisablePubliquement) {
         this.contentTypesAutorises = contentTypesAutorises;
         this.maxSizeBytes = maxSizeBytes;
@@ -96,8 +116,7 @@ public enum MediaType {
      * authentification via {@code POST /api/medias/presigned-url/public}
      * — strictement limité aux pièces jointes d'un formulaire public
      * (candidature : CV, lettre de motivation). Tous les autres types
-     * (contenus éditoriaux gérés par du personnel authentifié) restent
-     * exclusivement accessibles via l'endpoint authentifié standard.
+     * restent accessibles uniquement via l'endpoint authentifié.
      */
     public boolean estUtilisablePubliquement() {
         return utilisablePubliquement;
