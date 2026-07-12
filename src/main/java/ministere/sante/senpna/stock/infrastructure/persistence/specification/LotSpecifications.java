@@ -5,6 +5,7 @@ import ministere.sante.senpna.stock.infrastructure.persistence.entity.LotJpaEnti
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.LotJpaEntity_;
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.StockJpaEntity;
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.StockJpaEntity_;
+import ministere.sante.senpna.shared.infrastructure.persistence.entity.BaseJpaEntity_;
 
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -70,9 +71,9 @@ public final class LotSpecifications {
         return (root, query, cb) -> {
             Subquery<UUID> subquery = query.subquery(UUID.class);
             Root<StockJpaEntity> stockRoot = subquery.from(StockJpaEntity.class);
-            subquery.select(stockRoot.get(StockJpaEntity_.id))
+            subquery.select(stockRoot.get(BaseJpaEntity_.id))
                     .where(cb.and(
-                            cb.equal(stockRoot.get(StockJpaEntity_.lotId), root.get(LotJpaEntity_.id)),
+                            cb.equal(stockRoot.get(StockJpaEntity_.lotId), root.get(BaseJpaEntity_.id)),
                             cb.equal(stockRoot.get(StockJpaEntity_.entrepotId), entrepotId)));
             return cb.exists(subquery);
         };
