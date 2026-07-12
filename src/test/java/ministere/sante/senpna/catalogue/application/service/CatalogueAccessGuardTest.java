@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CatalogueAccessGuard")
@@ -88,7 +89,7 @@ class CatalogueAccessGuardTest {
         }
 
         private void authentifier(String... roleCodes) {
-                CurrentUser currentUser = Mockito.mock(CurrentUser.class);
+                CurrentUser currentUser = mock(CurrentUser.class);
                 Mockito.lenient().when(currentUser.getUserId()).thenReturn(ACTEUR_ID);
 
                 List<GrantedAuthority> authorities = List.of(roleCodes).stream()
