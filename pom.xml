@@ -51,9 +51,19 @@
 		     de projet réelles créées sur https://sonarcloud.io
 		     (Sonar > Administration > ... ou lors de l'import du repo).
 		     ══════════════════════════════════════ -->
-		<sonar.organization>sidymohamed12</sonar.organization>
+		<!-- <sonar.organization>sidymohamed12</sonar.organization>
 		<sonar.projectKey>sidymohamed12_senpna-backend</sonar.projectKey>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url> -->
+
+		<!-- ══════════════════════════════════════
+		     SONARQUBE AUTO-HÉBERGÉ (Community Build)
+		     Serveur local, atteint uniquement depuis la machine qui
+		     héberge aussi le self-hosted GitHub Actions runner.
+		     Pas de "sonar.organization" : ce paramètre est spécifique à
+		     SonarCloud, il n'existe pas sur un serveur auto-hébergé.
+		     ══════════════════════════════════════ -->
+		<sonar.projectKey>senpna-backend</sonar.projectKey>
+		<sonar.host.url>http://localhost:9000</sonar.host.url>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<!-- Exclut le code généré (QueryDSL Q*, MapStruct impl) et les DTO/entités du calcul de
 		couverture -->

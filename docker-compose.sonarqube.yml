@@ -1,0 +1,62 @@
+# ═══════════════════════════════════════════════════════════════════
+# SonarQube Community Build — auto-hébergé, réseau local uniquement
+#
+# Démarrage :   docker compose -f docker-compose.sonarqube.yml up -d
+# Arrêt      :   docker compose -f docker-compose.sonarqube.yml down
+# UI         :   http://localhost:9000  (login initial : admin / admin,
+#                 changement de mot de passe imposé à la première connexion)
+#
+# ⚠️ Ce fichier est volontairement séparé de docker-compose.dev.yml
+# (celui du projet senpna) pour ne pas mélanger l'infra applicative
+# avec l'infra d'outillage CI. Lancez-le une fois, il tourne en
+# permanence en arrière-plan sur la machine qui sert aussi de
+# self-hosted GitHub Actions runner.
+# ═══════════════════════════════════════════════════════════════════
+
+services:
+  sonarqube-db:
+    image: postgres:16.4-alpine
+    container_name: sonarqube-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar_change_this_password
+      POSTGRES_DB: sonarqube
+    volumes:
+      - sonarqube_db_data:/var/lib/postgresql/data
+    networks:
+      - sonarqube-net
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    restart: unless-stopped
+    depends_on:
+      - sonarqube-db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar_change_this_password
+      # Nécessaire sur Linux : SonarQube (Elasticsearch embarqué) exige
+      # cette limite mémoire virtuelle côté hôte. Si le conteneur
+      # redémarre en boucle, exécutez sur l'hôte :
+      #   sudo sysctl -w vm.max_map_count=524288
+      # (à rendre permanent dans /etc/sysctl.conf si besoin)
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - sonarqube-net
+
+networks:
+  sonarqube-net:
+    driver: bridge
+
+volumes:
+  sonarqube_db_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

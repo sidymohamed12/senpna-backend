@@ -4,12 +4,12 @@ name: CI
 # Pipeline CI — SEN PharmaFlow (senpna-backand)
 #
 # 1) build-and-analyze : compile, tests unitaires + intégration,
-#    couverture JaCoCo, analyse qualité SonarCloud (Quality Gate).
+#    couverture JaCoCo, analyse qualité SonarQube auto-hébergé (Quality Gate).
 # 2) docker             : build de l'image Docker prod, scan de
 #    vulnérabilités (Trivy), push vers GHCR (uniquement sur main).
 #
 # Secrets requis (Settings > Secrets and variables > Actions) :
-#   - SONAR_TOKEN : token SonarCloud (User Account > My Account > Security)
+#   - SONAR_TOKEN : token généré sur votre serveur SonarQube auto-hébergé (My Account > Security)
 # ═══════════════════════════════════════════════════════════════════
 
 on:
@@ -35,11 +35,16 @@ env:
 
 jobs:
   # ═════════════════════════════════════════════════════════════════
-  # JOB 1 — Build, tests, couverture, analyse SonarCloud
+  # JOB 1 — Build, tests, couverture, analyse SonarQube (auto-hébergé)
+  #
+  # ⚠️ runs-on: self-hosted — ce job DOIT tourner sur le runner installé
+  # sur la même machine que le conteneur SonarQube (http://localhost:9000
+  # n'est joignable que depuis cette machine). Un runner GitHub-hosted
+  # classique (ubuntu-latest) ne peut PAS atteindre ce serveur.
   # ═════════════════════════════════════════════════════════════════
   build-and-analyze:
-    name: Build, tests & analyse SonarCloud
-    runs-on: ubuntu-latest
+    name: Build, tests & analyse SonarQube
+    runs-on: self-hosted
 
     # Prêts pour les futurs tests d'intégration (maven-failsafe, tag "integration").
     # application-test.yml utilise H2/in-memory : ces services ne sont donc pas
@@ -73,7 +78,7 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
         with:
-          # fetch-depth 0 requis par SonarCloud pour l'analyse du "new code"
+          # fetch-depth 0 requis par SonarQube pour l'analyse du "new code"
           # et le blame git (auteur des issues).
           fetch-depth: 0
 
@@ -84,7 +89,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: maven
 
-      - name: Cache des packages SonarCloud
+      - name: Cache des packages SonarQube
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
@@ -105,30 +110,19 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      # Les secrets ne sont pas exposés aux PR venant d'un fork externe :
-      # on ne lance donc l'analyse Sonar que sur push (branches internes)
-      # ou les PR issues du même dépôt.
-      - name: Analyse SonarCloud — branche (push)
-        if: github.event_name == 'push'
+      # ⚠️ SonarQube Community Build ne supporte QUE l'analyse de la
+      # branche par défaut (pas de multi-branch ni de PR decoration —
+      # ces fonctionnalités sont réservées aux éditions payantes, ou
+      # disponibles via le plugin communautaire non-officiel
+      # mc1arke/sonarqube-community-branch-plugin si besoin plus tard).
+      # On limite donc l'analyse aux push sur main.
+      - name: Analyse SonarQube (Quality Gate)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.qualitygate.wait=true
-          -Dsonar.branch.name=${{ github.ref_name }}
-
-      - name: Analyse SonarCloud — Pull Request
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: >
-          mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -Dsonar.qualitygate.wait=true
-          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
-          -Dsonar.pullrequest.branch=${{ github.head_ref }}
-          -Dsonar.pullrequest.base=${{ github.base_ref }}
 
       - name: Upload du rapport de couverture JaCoCo
         uses: actions/upload-artifact@v4
