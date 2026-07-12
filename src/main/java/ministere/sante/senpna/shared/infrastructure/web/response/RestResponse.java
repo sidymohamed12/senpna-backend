@@ -11,6 +11,14 @@ import java.util.stream.Collectors;
 
 public final class RestResponse {
 
+    private static final String STATUS = "status";
+    private static final String TYPE = "type";
+    private static final String MESSAGE = "message";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String RESULTS = "results";
+    private static final String PAGINATION = "pagination";
+    private static final String ERRORS = "errors";
+
     private RestResponse() {
         throw new UnsupportedOperationException("Utility class — not instantiable");
     }
@@ -22,11 +30,11 @@ public final class RestResponse {
             String message) {
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", status.value());
-        body.put("type", type);
-        body.put("message", message);
-        body.put("timestamp", Instant.now().toString());
-        body.put("results", results);
+        body.put(STATUS, status.value());
+        body.put(TYPE, type);
+        body.put(MESSAGE, message);
+        body.put(TIMESTAMP, Instant.now().toString());
+        body.put(RESULTS, results);
         return body;
     }
 
@@ -49,22 +57,24 @@ public final class RestResponse {
         pagination.put("last", last);
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", status.value());
-        body.put("type", type);
-        body.put("message", message);
-        body.put("timestamp", Instant.now().toString());
-        body.put("results", results);
-        body.put("pagination", pagination);
+        body.put(STATUS, status.value());
+        body.put(TYPE, type);
+        body.put(MESSAGE, message);
+        body.put(TIMESTAMP, Instant.now().toString());
+        body.put(RESULTS, results);
+        body.put(PAGINATION, pagination);
+
         return body;
     }
 
     public static Map<String, Object> error(HttpStatus status, String message, String type) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", status.value());
-        body.put("type", type);
-        body.put("message", message);
-        body.put("timestamp", Instant.now().toString());
-        body.put("results", null);
+        body.put(STATUS, status.value());
+        body.put(TYPE, type);
+        body.put(MESSAGE, message);
+        body.put(TIMESTAMP, Instant.now().toString());
+        body.put(RESULTS, null);
+
         return body;
     }
 
@@ -75,7 +85,7 @@ public final class RestResponse {
                 "Les données envoyées sont invalides",
                 "VALIDATION_ERROR");
 
-        body.put("errors", extractFieldErrors(bindingResult));
+        body.put(ERRORS, extractFieldErrors(bindingResult));
         return body;
     }
 
@@ -86,7 +96,6 @@ public final class RestResponse {
                         fieldError -> fieldError.getDefaultMessage() != null
                                 ? fieldError.getDefaultMessage()
                                 : "Valeur invalide",
-                        (existing, duplicate) -> existing // garde la première erreur par champ
-                ));
+                        (existing, duplicate) -> existing));
     }
 }
