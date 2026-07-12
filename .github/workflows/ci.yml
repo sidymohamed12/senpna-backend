@@ -44,35 +44,13 @@ jobs:
   # ═════════════════════════════════════════════════════════════════
   build-and-analyze:
     name: Build, tests & analyse SonarQube
+    # ℹ️ Pas de "services:" (postgres/redis) ici : ce mécanisme GitHub Actions
+    # ne fonctionne que sur des runners Linux, pas sur macOS. Non bloquant
+    # actuellement (profil "test" = H2 in-memory). Si un jour un test
+    # @Tag("integration") a besoin d'un vrai Postgres/Redis, démarrez-les
+    # manuellement sur la machine du runner via docker-compose.dev.yml
+    # avant le déclenchement du workflow, ou passez ce job en runs-on: ubuntu-latest.
     runs-on: self-hosted
-
-    # Prêts pour les futurs tests d'intégration (maven-failsafe, tag "integration").
-    # application-test.yml utilise H2/in-memory : ces services ne sont donc pas
-    # encore sollicités, mais sont disponibles dès qu'un test @Tag("integration")
-    # ciblera une vraie base Postgres/Redis.
-    services:
-      postgres:
-        image: postgres:16.4-alpine
-        env:
-          POSTGRES_DB: senpna
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d senpna"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-      redis:
-        image: redis:7.4-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
 
     steps:
       - name: Checkout du code
