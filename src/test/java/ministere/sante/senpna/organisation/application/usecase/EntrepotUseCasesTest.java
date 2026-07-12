@@ -4,10 +4,10 @@ import ministere.sante.senpna.organisation.application.service.EntrepotDetailAss
 import ministere.sante.senpna.organisation.application.service.RegionScopeResolver;
 import ministere.sante.senpna.organisation.application.usecase.entrepot.GetEntrepotUseCaseImpl;
 import ministere.sante.senpna.organisation.application.usecase.entrepot.ListEntrepotsUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.pra.ActivatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.pra.CreatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.pra.DeactivatePraUseCaseImpl;
-import ministere.sante.senpna.organisation.application.usecase.pra.UpdatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pharmacieregional.ActivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pharmacieregional.CreatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pharmacieregional.DeactivatePraUseCaseImpl;
+import ministere.sante.senpna.organisation.application.usecase.pharmacieregional.UpdatePraUseCaseImpl;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.ActivatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.CreatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.DeactivatePraCommand;
