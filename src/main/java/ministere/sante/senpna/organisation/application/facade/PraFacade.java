@@ -1,5 +1,7 @@
 package ministere.sante.senpna.organisation.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.organisation.domain.command.Entrepot.ActivatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.CreatePraCommand;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.DeactivatePraCommand;
@@ -10,6 +12,7 @@ import ministere.sante.senpna.organisation.domain.port.in.pra.CreatePraUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.pra.DeactivatePraUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.pra.UpdatePraUseCase;
 
+@Component
 public class PraFacade {
 
     private final CreatePraUseCase createPraUseCase;

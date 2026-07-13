@@ -29,18 +29,21 @@ class MimeTypesTest {
 
     @Test
     @DisplayName("classe utilitaire — constructeur privé et non instanciable")
-    void constructeur_privéEtNonInstanciable() throws Exception {
+    void constructeur_priveEtNonInstanciable() throws Exception {
         Constructor<MimeTypes> constructor = MimeTypes.class.getDeclaredConstructor();
         assertThat(Modifier.isPrivate(constructor.getModifiers())).isTrue();
 
         constructor.setAccessible(true);
 
-        assertThatThrownBy(() -> {
-            try {
-                constructor.newInstance();
-            } catch (InvocationTargetException e) {
-                throw e.getCause();
-            }
-        }).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> invokeConstructor(constructor))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    private static void invokeConstructor(Constructor<MimeTypes> constructor) throws Throwable {
+        try {
+            constructor.newInstance();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
     }
 }

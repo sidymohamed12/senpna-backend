@@ -1,5 +1,7 @@
 package ministere.sante.senpna.stock.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.stock.domain.command.LotCommands.AlertePeremptionQuery;
 import ministere.sante.senpna.stock.domain.command.LotCommands.BloquerLotCommand;
 import ministere.sante.senpna.stock.domain.command.LotCommands.CreerLotCommand;
@@ -17,6 +19,7 @@ import ministere.sante.senpna.stock.domain.port.in.lot.ListLotsUseCase;
 import ministere.sante.senpna.stock.domain.port.in.lot.ListerAlertesPeremptionUseCase;
 import ministere.sante.senpna.stock.domain.port.in.lot.ModifierPrixLotUseCase;
 
+@Component
 public class LotFacade {
 
     // ── Lot ──────────────────────────────────────────────────────────────

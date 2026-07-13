@@ -1,5 +1,7 @@
 package ministere.sante.senpna.medicament.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.medicament.domain.command.FamilleCommands.ArchiveFamilleCommand;
 import ministere.sante.senpna.medicament.domain.command.FamilleCommands.CreateFamilleCommand;
 import ministere.sante.senpna.medicament.domain.command.FamilleCommands.DesarchiveFamilleCommand;
@@ -15,6 +17,7 @@ import ministere.sante.senpna.medicament.domain.port.in.famille.GetFamilleUseCas
 import ministere.sante.senpna.medicament.domain.port.in.famille.ListFamillesUseCase;
 import ministere.sante.senpna.medicament.domain.port.in.famille.UpdateFamilleUseCase;
 
+@Component
 public class FamilleFacade {
 
     private final CreateFamilleUseCase createFamilleUseCase;

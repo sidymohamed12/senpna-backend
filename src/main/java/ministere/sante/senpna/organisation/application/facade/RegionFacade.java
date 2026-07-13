@@ -1,5 +1,7 @@
 package ministere.sante.senpna.organisation.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 import ministere.sante.senpna.organisation.domain.command.RegionCommand.CreateRegionCommand;
@@ -9,6 +11,7 @@ import ministere.sante.senpna.organisation.domain.port.in.region.CreateRegionUse
 import ministere.sante.senpna.organisation.domain.port.in.region.GetRegionUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.region.ListRegionsUseCase;
 
+@Component
 public class RegionFacade {
 
     private final CreateRegionUseCase createRegionUseCase;

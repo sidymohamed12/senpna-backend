@@ -1,5 +1,7 @@
 package ministere.sante.senpna.medicament.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ArchiveConditionnementCommand;
 import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ConditionnementDetail;
 import ministere.sante.senpna.medicament.domain.command.ConditionnementCommands.ConditionnementPage;
@@ -15,6 +17,7 @@ import ministere.sante.senpna.medicament.domain.port.in.conditionnement.GetCondi
 import ministere.sante.senpna.medicament.domain.port.in.conditionnement.ListConditionnementsUseCase;
 import ministere.sante.senpna.medicament.domain.port.in.conditionnement.UpdateConditionnementUseCase;
 
+@Component
 public class ConditionnementFacade {
 
     private final CreateConditionnementUseCase createConditionnementUseCase;

@@ -21,7 +21,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -46,14 +49,16 @@ class JwtAuthenticationFilterTest {
     FilterChain filterChain;
 
     JwtService jwtService;
+    Clock clock;
     JwtAuthenticationFilter sut;
 
     @BeforeEach
     void setUp() {
+        clock = Clock.fixed(Instant.now(), ZoneOffset.UTC);
         AppProperties appProperties = new AppProperties(
                 new JwtProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(7)),
                 null, null, null, null, null);
-        jwtService = new JwtService(appProperties);
+        jwtService = new JwtService(appProperties, clock);
         sut = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenRevocationPort);
     }
 
@@ -184,9 +189,8 @@ class JwtAuthenticationFilterTest {
         @Test
         @DisplayName("authentification déjà présente dans le contexte → non écrasée")
         void authentificationDejaPresente_nonEcrasee() throws Exception {
-            org.springframework.security.authentication.UsernamePasswordAuthenticationToken dejaAuthentifie =
-                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                            "deja-authentifie", null, java.util.List.of());
+            org.springframework.security.authentication.UsernamePasswordAuthenticationToken dejaAuthentifie = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    "deja-authentifie", null, java.util.List.of());
             SecurityContextHolder.getContext().setAuthentication(dejaAuthentifie);
 
             String token = jwtService.generateAccessToken(UserFixtures.EMAIL, Map.of());

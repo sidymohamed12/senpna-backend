@@ -10,7 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -22,15 +25,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class JwtServiceTest {
 
     private static final String SECRET = "test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256!!";
+    private Clock clock;
+    private Instant now;
 
     JwtService sut;
 
     @BeforeEach
     void setUp() {
+        now = Instant.now();
+        clock = Clock.fixed(now, ZoneOffset.UTC);
+
         AppProperties appProperties = new AppProperties(
-                new JwtProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(7)),
+                new JwtProperties(
+                        SECRET,
+                        Duration.ofMinutes(15),
+                        Duration.ofDays(7)),
                 null, null, null, null, null);
-        sut = new JwtService(appProperties);
+
+        sut = new JwtService(appProperties, clock);
     }
 
     private UserDetails userDetails(String username) {
@@ -67,8 +79,9 @@ class JwtServiceTest {
             Date expiration = sut.extractExpiration(token);
 
             assertThat(expiration)
-                    .isAfter(new Date())
-                    .isCloseTo(Date.from(java.time.Instant.now().plus(Duration.ofMinutes(15))), 15_000L);
+                    .isBetween(
+                            Date.from(now.plus(Duration.ofMinutes(15)).minusSeconds(1)),
+                            Date.from(now.plus(Duration.ofMinutes(15)).plusSeconds(1)));
         }
     }
 
@@ -134,7 +147,7 @@ class JwtServiceTest {
                     new JwtProperties("une-toute-autre-cle-secrete-de-256-bits-minimum-pour-hmac!!",
                             Duration.ofMinutes(15), Duration.ofDays(7)),
                     null, null, null, null, null);
-            JwtService autreService = new JwtService(autreProperties);
+            JwtService autreService = new JwtService(autreProperties, clock);
             String tokenSigneAilleurs = autreService.generateAccessToken("alice@sante.gouv.sn", Map.of());
 
             assertThat(sut.isTokenValid(tokenSigneAilleurs, userDetails("alice@sante.gouv.sn"))).isFalse();
@@ -166,24 +179,32 @@ class JwtServiceTest {
         @Test
         @DisplayName("extractClaim() sur un token expiré lève ExpiredJwtException")
         void tokenExpire_leveException() {
-            AppProperties proprietesExpirationImmediate = new AppProperties(
-                    new JwtProperties(SECRET, Duration.ofMillis(1), Duration.ofDays(7)),
+
+            AppProperties properties = new AppProperties(
+                    new JwtProperties(
+                            SECRET,
+                            Duration.ofMinutes(15),
+                            Duration.ofDays(7)),
                     null, null, null, null, null);
-            JwtService serviceExpirationImmediate = new JwtService(proprietesExpirationImmediate);
-            String token = serviceExpirationImmediate.generateAccessToken("alice@sante.gouv.sn", Map.of());
 
-            await(50);
+            Instant creation = Instant.parse("2026-07-13T10:00:00Z");
 
-            assertThatThrownBy(() -> serviceExpirationImmediate.extractUsername(token))
+            JwtService generationService = new JwtService(
+                    properties,
+                    Clock.fixed(creation, ZoneOffset.UTC));
+
+            String token = generationService.generateAccessToken(
+                    "alice@sante.gouv.sn",
+                    Map.of());
+
+            JwtService validationService = new JwtService(
+                    properties,
+                    Clock.offset(
+                            Clock.fixed(creation, ZoneOffset.UTC),
+                            Duration.ofMinutes(16)));
+
+            assertThatThrownBy(() -> validationService.extractUsername(token))
                     .isInstanceOf(ExpiredJwtException.class);
-        }
-    }
-
-    private void await(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 }

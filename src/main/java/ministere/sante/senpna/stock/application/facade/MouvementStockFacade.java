@@ -1,5 +1,7 @@
 package ministere.sante.senpna.stock.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.GetMouvementQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.ListMouvementsQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementDetail;
@@ -7,6 +9,7 @@ import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.Mouvem
 import ministere.sante.senpna.stock.domain.port.in.mouvement.GetMouvementUseCase;
 import ministere.sante.senpna.stock.domain.port.in.mouvement.ListMouvementsUseCase;
 
+@Component
 public class MouvementStockFacade {
 
     // ── MouvementStock ───────────────────────────────────────────────────

@@ -1,5 +1,7 @@
 package ministere.sante.senpna.organisation.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotDetail;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.EntrepotPage;
 import ministere.sante.senpna.organisation.domain.command.Entrepot.GetEntrepotQuery;
@@ -7,6 +9,7 @@ import ministere.sante.senpna.organisation.domain.command.Entrepot.ListEntrepots
 import ministere.sante.senpna.organisation.domain.port.in.entrepot.GetEntrepotUseCase;
 import ministere.sante.senpna.organisation.domain.port.in.entrepot.ListEntrepotsUseCase;
 
+@Component
 public class EntrepotFacade {
 
     private final GetEntrepotUseCase getEntrepotUseCase;

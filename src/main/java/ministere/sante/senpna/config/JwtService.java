@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -22,12 +23,14 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+    private final Clock clock;
 
     private final SecretKey signingKey;
     private final AppProperties appProperties;
 
-    public JwtService(AppProperties appProperties) {
+    public JwtService(AppProperties appProperties, Clock clock) {
         this.appProperties = appProperties;
+        this.clock = clock;
         // Dérive la clé HMAC depuis le secret configuré
         this.signingKey = Keys.hmacShaKeyFor(
                 appProperties.jwt().secret().getBytes(StandardCharsets.UTF_8));
@@ -36,7 +39,7 @@ public class JwtService {
     // ── Génération ────────────────────────────────────────────────────────
 
     public String generateAccessToken(String username, Map<String, Object> extraClaims) {
-        Instant now = Instant.now();
+        Instant now = Instant.now(clock);
         Instant exp = now.plus(appProperties.jwt().accessTokenTtl());
 
         return Jwts.builder()
@@ -49,7 +52,7 @@ public class JwtService {
     }
 
     public String generateRefreshToken(String username) {
-        Instant now = Instant.now();
+        Instant now = Instant.now(clock);
         Instant exp = now.plus(appProperties.jwt().refreshTokenTtl());
 
         return Jwts.builder()
@@ -122,11 +125,12 @@ public class JwtService {
     // ── Helpers privés ────────────────────────────────────────────────────
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractExpiration(token).before(Date.from(Instant.now(clock)));
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
+                .clock(() -> Date.from(Instant.now(clock)))
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)

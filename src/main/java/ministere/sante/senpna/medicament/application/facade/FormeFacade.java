@@ -1,5 +1,7 @@
 package ministere.sante.senpna.medicament.application.facade;
 
+import org.springframework.stereotype.Component;
+
 import ministere.sante.senpna.medicament.domain.command.FormeCommands.ArchiveFormeCommand;
 import ministere.sante.senpna.medicament.domain.command.FormeCommands.CreateFormeCommand;
 import ministere.sante.senpna.medicament.domain.command.FormeCommands.DesarchiveFormeCommand;
@@ -15,6 +17,7 @@ import ministere.sante.senpna.medicament.domain.port.in.forme.GetFormeUseCase;
 import ministere.sante.senpna.medicament.domain.port.in.forme.ListFormesUseCase;
 import ministere.sante.senpna.medicament.domain.port.in.forme.UpdateFormeUseCase;
 
+@Component
 public class FormeFacade {
 
     private final CreateFormeUseCase createFormeUseCase;
