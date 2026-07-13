@@ -77,7 +77,8 @@ class EntreeStockUseCaseImplTest {
     void lotIntrouvable_leveException() {
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.entrer(commande("ENTREE_ACHAT"))).isInstanceOf(LotIntrouvableException.class);
+        var command = commande("ENTREE_ACHAT");
+        assertThatThrownBy(() -> sut.entrer(command)).isInstanceOf(LotIntrouvableException.class);
     }
 
     @Test
@@ -86,7 +87,8 @@ class EntreeStockUseCaseImplTest {
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.entrer(commande("ENTREE_ACHAT"))).isInstanceOf(EntrepotIntrouvableException.class);
+        var command = commande("ENTREE_ACHAT");
+        assertThatThrownBy(() -> sut.entrer(command)).isInstanceOf(EntrepotIntrouvableException.class);
     }
 
     @Test

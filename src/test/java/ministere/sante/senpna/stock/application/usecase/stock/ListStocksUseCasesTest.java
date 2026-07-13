@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ListStocksUseCaseImpl / ListerAlertesRuptureUseCaseImpl")
@@ -76,7 +77,7 @@ class ListStocksUseCasesTest {
 
             sut.lister(new ListStocksQuery(null, null, null, null, null, 0, 20, null, null));
 
-            org.mockito.Mockito.verify(stockRepositoryPort).search(
+            verify(stockRepositoryPort).search(
                     eq(new StockSearchCriteria(null, null, null, Boolean.TRUE, null)), any());
         }
 
@@ -88,7 +89,7 @@ class ListStocksUseCasesTest {
 
             sut.lister(new ListStocksQuery(null, null, null, null, true, 0, 20, null, null));
 
-            org.mockito.Mockito.verify(stockRepositoryPort).search(
+            verify(stockRepositoryPort).search(
                     eq(new StockSearchCriteria(null, null, null, null, Boolean.TRUE)), any());
         }
     }

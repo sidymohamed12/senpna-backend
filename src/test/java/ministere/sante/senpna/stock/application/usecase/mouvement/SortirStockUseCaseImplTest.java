@@ -77,7 +77,8 @@ class SortirStockUseCaseImplTest {
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
 
-        assertThatThrownBy(() -> sut.sortir(commande("SORTIE_TRANSFERT", false)))
+        var command = commande("SORTIE_TRANSFERT", false);
+        assertThatThrownBy(() -> sut.sortir(command))
                 .isInstanceOf(LotNonDisponibleException.class);
     }
 
@@ -104,7 +105,8 @@ class SortirStockUseCaseImplTest {
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
         when(stockRepositoryPort.findByEntrepotIdAndLotIdForUpdate(any(), any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.sortir(commande("PERTE", false)))
+        var command = commande("PERTE", false);
+        assertThatThrownBy(() -> sut.sortir(command))
                 .isInstanceOf(StockIntrouvableException.class);
     }
 

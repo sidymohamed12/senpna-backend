@@ -6,6 +6,7 @@ import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.MouvementDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.GetMouvementQuery;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.ListMouvementsQuery;
+import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementDetail;
 import ministere.sante.senpna.stock.domain.command.MouvementStockCommands.MouvementPage;
 import ministere.sante.senpna.stock.domain.exception.PorteeEntrepotInterditeException;
 import ministere.sante.senpna.stock.domain.exception.mouvement.MouvementStockIntrouvableException;
@@ -15,7 +16,6 @@ import ministere.sante.senpna.stock.domain.valueobject.LotId;
 import ministere.sante.senpna.stock.domain.valueobject.MouvementStockId;
 import ministere.sante.senpna.stock.domain.valueobject.SensMouvement;
 import ministere.sante.senpna.stock.domain.valueobject.TypeMouvement;
-import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
 import ministere.sante.senpna.medicament.domain.valueobject.MedicamentId;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 
@@ -35,6 +35,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +72,8 @@ class MouvementQueryUseCasesTest {
         void introuvable_leveException() {
             when(mouvementStockRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetMouvementQuery(UUID.randomUUID())))
+            var getMouvementQuery = new GetMouvementQuery(UUID.randomUUID());
+            assertThatThrownBy(() -> sut.obtenir(getMouvementQuery))
                     .isInstanceOf(MouvementStockIntrouvableException.class);
         }
 
@@ -79,11 +81,15 @@ class MouvementQueryUseCasesTest {
         @DisplayName("acteur national → toujours autorisé, quel que soit l'entrepôt")
         void acteurNational_toujoursAutorise() {
             MouvementStock m = mouvement(EntrepotId.generate(), EntrepotId.generate());
+            MouvementDetail detailAttendu = mock(MouvementDetail.class);
             when(mouvementStockRepositoryPort.findById(MouvementStockId.of(m.getId().getValue())))
                     .thenReturn(Optional.of(m));
             when(entrepotScopeGuard.estActeurNational()).thenReturn(true);
+            when(mouvementDetailAssembler.assembler(m)).thenReturn(detailAttendu);
 
-            sut.obtenir(new GetMouvementQuery(m.getId().getValue()));
+            var resultat = sut.obtenir(new GetMouvementQuery(m.getId().getValue()));
+
+            assertThat(resultat).isSameAs(detailAttendu);
         }
 
         @Test
@@ -91,12 +97,16 @@ class MouvementQueryUseCasesTest {
         void acteurPraImplique_autorise() {
             EntrepotId monEntrepot = EntrepotId.generate();
             MouvementStock m = mouvement(EntrepotId.generate(), monEntrepot);
+            MouvementDetail detailAttendu = mock(MouvementDetail.class);
             when(mouvementStockRepositoryPort.findById(MouvementStockId.of(m.getId().getValue())))
                     .thenReturn(Optional.of(m));
             when(entrepotScopeGuard.estActeurNational()).thenReturn(false);
             when(entrepotScopeGuard.entrepotIdCourant()).thenReturn(monEntrepot.getValue());
+            when(mouvementDetailAssembler.assembler(m)).thenReturn(detailAttendu);
 
-            sut.obtenir(new GetMouvementQuery(m.getId().getValue()));
+            var resultat = sut.obtenir(new GetMouvementQuery(m.getId().getValue()));
+
+            assertThat(resultat).isSameAs(detailAttendu);
         }
 
         @Test
@@ -108,7 +118,8 @@ class MouvementQueryUseCasesTest {
             when(entrepotScopeGuard.estActeurNational()).thenReturn(false);
             when(entrepotScopeGuard.entrepotIdCourant()).thenReturn(UUID.randomUUID());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetMouvementQuery(m.getId().getValue())))
+            var getMouvementQuery = new GetMouvementQuery(m.getId().getValue());
+            assertThatThrownBy(() -> sut.obtenir(getMouvementQuery))
                     .isInstanceOf(PorteeEntrepotInterditeException.class);
         }
     }
@@ -130,8 +141,9 @@ class MouvementQueryUseCasesTest {
         void typeInvalide_leveException() {
             when(entrepotScopeGuard.entrepotIdPourLecture(any())).thenReturn(null);
 
-            assertThatThrownBy(() -> sut.lister(new ListMouvementsQuery(null, null, null, "INEXISTANT", null,
-                    null, null, null, 0, 20, null, null))).isInstanceOf(ValidationException.class);
+            var listMouvementsQuery = new ListMouvementsQuery(null, null, null, "INEXISTANT", null, null, null, null, 0,
+                    20, null, null);
+            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(ValidationException.class);
         }
 
         @Test
@@ -139,8 +151,9 @@ class MouvementQueryUseCasesTest {
         void sensInvalide_leveException() {
             when(entrepotScopeGuard.entrepotIdPourLecture(any())).thenReturn(null);
 
-            assertThatThrownBy(() -> sut.lister(new ListMouvementsQuery(null, null, null, null, "INEXISTANT",
-                    null, null, null, 0, 20, null, null))).isInstanceOf(ValidationException.class);
+            var listMouvementsQuery = new ListMouvementsQuery(null, null, null, null, "INEXISTANT",
+                    null, null, null, 0, 20, null, null);
+            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(ValidationException.class);
         }
 
         @Test

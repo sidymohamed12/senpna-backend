@@ -88,7 +88,8 @@ class StockUseCasesTest {
         void introuvable_leveException() {
             when(stockRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetStockQuery(UUID.randomUUID())))
+            var getStockQuery = new GetStockQuery(UUID.randomUUID());
+            assertThatThrownBy(() -> sut.obtenir(getStockQuery))
                     .isInstanceOf(StockIntrouvableException.class);
         }
     }
@@ -131,8 +132,9 @@ class StockUseCasesTest {
             lot.bloquer();
             when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
 
-            assertThatThrownBy(() -> sut.reserver(
-                    new ReserverStockCommand(entrepotId.getValue(), lot.getId().getValue(), BigDecimal.TEN, null)))
+            var reserverStockCommand = new ReserverStockCommand(entrepotId.getValue(), lot.getId().getValue(),
+                    BigDecimal.TEN, null);
+            assertThatThrownBy(() -> sut.reserver(reserverStockCommand))
                     .isInstanceOf(LotNonDisponibleException.class);
         }
 
@@ -173,10 +175,10 @@ class StockUseCasesTest {
         void aucuneLigne_leveException() {
             when(stockRepositoryPort.findByEntrepotIdAndLotIdForUpdate(any(), any())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> new LibererReservationUseCaseImpl(stockRepositoryPort, stockDetailAssembler,
-                    entrepotScopeGuard).liberer(
-                            new LibererReservationCommand(entrepotId.getValue(),
-                                    lotId.getValue(), BigDecimal.TEN, null, "Motif")))
+            var sut = new LibererReservationUseCaseImpl(stockRepositoryPort, stockDetailAssembler, entrepotScopeGuard);
+            var libererReservationCommand = new LibererReservationCommand(entrepotId.getValue(), lotId.getValue(),
+                    BigDecimal.TEN, null, "Motif");
+            assertThatThrownBy(() -> sut.liberer(libererReservationCommand))
                     .isInstanceOf(StockIntrouvableException.class);
         }
     }

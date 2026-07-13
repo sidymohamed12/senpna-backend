@@ -80,7 +80,8 @@ class LotUseCasesTest {
         void introuvable_leveException() {
             when(lotRepositoryPort.findById(LotId.of(id))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.obtenir(new GetLotQuery(id))).isInstanceOf(LotIntrouvableException.class);
+            var getLotQuery = new GetLotQuery(id);
+            assertThatThrownBy(() -> sut.obtenir(getLotQuery)).isInstanceOf(LotIntrouvableException.class);
         }
     }
 

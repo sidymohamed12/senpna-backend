@@ -77,9 +77,10 @@ class LotTest {
         @Test
         @DisplayName("medicamentId null → NullPointerException")
         void creer_medicamentIdNull_leveException() {
+            LocalDate datePeremption = LocalDate.now().plusYears(1);
+
             assertThatThrownBy(
-                    () -> Lot.creer("LOT-A001", null, FOURNISSEUR_ID, null, LocalDate.now().plusYears(1), null,
-                            null))
+                    () -> Lot.creer("LOT-A001", null, FOURNISSEUR_ID, null, datePeremption, null, null))
                     .isInstanceOf(NullPointerException.class);
         }
     }

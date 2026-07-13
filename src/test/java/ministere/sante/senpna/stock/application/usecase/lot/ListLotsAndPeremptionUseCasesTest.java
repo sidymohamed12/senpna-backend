@@ -29,6 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Listes et opérations planifiées sur les lots")
@@ -57,8 +60,8 @@ class ListLotsAndPeremptionUseCasesTest {
         void statutInvalide_leveException() {
             when(entrepotScopeGuard.entrepotIdPourLecture(any())).thenReturn(null);
 
-            assertThatThrownBy(() -> sut.lister(
-                    new ListLotsQuery(null, null, null, "INEXISTANT", null, 0, 20, null, null)))
+            var listLotsQuery = new ListLotsQuery(null, null, null, "INEXISTANT", null, 0, 20, null, null);
+            assertThatThrownBy(() -> sut.lister(listLotsQuery))
                     .isInstanceOf(ValidationException.class);
         }
 
@@ -83,7 +86,7 @@ class ListLotsAndPeremptionUseCasesTest {
 
             sut.lister(new ListLotsQuery(null, null, null, null, entrepotDemande, 0, 20, null, null));
 
-            org.mockito.Mockito.verify(entrepotScopeGuard).entrepotIdPourLecture(entrepotDemande);
+            verify(entrepotScopeGuard).entrepotIdPourLecture(entrepotDemande);
         }
     }
 
@@ -101,7 +104,8 @@ class ListLotsAndPeremptionUseCasesTest {
         @Test
         @DisplayName("horizon négatif ou nul → IllegalArgumentException")
         void horizonInvalide_leveException() {
-            assertThatThrownBy(() -> sut.lister(new AlertePeremptionQuery(0, null, null, 0, 20)))
+            var alertePeremptionQuery = new AlertePeremptionQuery(0, null, null, 0, 20);
+            assertThatThrownBy(() -> sut.lister(alertePeremptionQuery))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -113,7 +117,7 @@ class ListLotsAndPeremptionUseCasesTest {
 
             sut.lister(new AlertePeremptionQuery(30, null, null, 0, 20));
 
-            org.mockito.Mockito.verify(lotRepositoryPort).findExpirantAvant(any(), any());
+            verify(lotRepositoryPort).findExpirantAvant(any(), any());
         }
     }
 
@@ -135,7 +139,7 @@ class ListLotsAndPeremptionUseCasesTest {
 
             assertThat(sut.marquerExpires()).isZero();
 
-            org.mockito.Mockito.verify(lotRepositoryPort, org.mockito.Mockito.never()).save(any());
+            verify(lotRepositoryPort, never()).save(any());
         }
 
         @Test
@@ -151,7 +155,7 @@ class ListLotsAndPeremptionUseCasesTest {
             int result = sut.marquerExpires();
 
             assertThat(result).isEqualTo(2);
-            org.mockito.Mockito.verify(lotRepositoryPort, org.mockito.Mockito.times(2)).save(any());
+            verify(lotRepositoryPort, times(2)).save(any());
         }
     }
 }

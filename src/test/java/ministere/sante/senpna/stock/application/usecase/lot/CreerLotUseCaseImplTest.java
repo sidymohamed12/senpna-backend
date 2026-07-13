@@ -29,6 +29,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CreerLotUseCaseImpl — création d'un lot")
@@ -61,10 +63,11 @@ class CreerLotUseCaseImplTest {
     @Test
     @DisplayName("vérifie que l'acteur est national AVANT toute autre opération")
     void verifieActeurNationalEnPremier() {
-        org.mockito.Mockito.doThrow(new RuntimeException("acces refuse")).when(entrepotScopeGuard)
+        doThrow(new RuntimeException("acces refuse")).when(entrepotScopeGuard)
                 .verifierActeurNational();
 
-        assertThatThrownBy(() -> sut.creer(commande())).isInstanceOf(RuntimeException.class);
+        var command = commande();
+        assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(RuntimeException.class);
 
         verify(medicamentRepositoryPort, never()).findById(any());
     }
@@ -74,28 +77,33 @@ class CreerLotUseCaseImplTest {
     void medicamentIntrouvable_leveException() {
         when(medicamentRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.creer(commande())).isInstanceOf(MedicamentIntrouvableException.class);
+        var command = commande();
+        assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(MedicamentIntrouvableException.class);
     }
 
     @Test
     @DisplayName("fournisseur introuvable → FournisseurIntrouvableException")
     void fournisseurIntrouvable_leveException() {
-        when(medicamentRepositoryPort.findById(any())).thenReturn(Optional.of(org.mockito.Mockito.mock(Medicament.class)));
+        when(medicamentRepositoryPort.findById(any())).thenReturn(Optional.of(mock(Medicament.class)));
         when(fournisseurRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.creer(commande())).isInstanceOf(FournisseurIntrouvableException.class);
+        var command = commande();
+        assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(FournisseurIntrouvableException.class);
     }
 
     @Test
     @DisplayName("numéro de lot déjà utilisé pour ce médicament → NumeroLotDejaUtiliseException")
     void numeroLotDejaUtilise_leveException() {
-        Medicament medicament = org.mockito.Mockito.mock(Medicament.class);
-        when(medicament.getId()).thenReturn(ministere.sante.senpna.medicament.domain.valueobject.MedicamentId.generate());
+        Medicament medicament = mock(Medicament.class);
+        when(medicament.getId())
+                .thenReturn(ministere.sante.senpna.medicament.domain.valueobject.MedicamentId.generate());
         when(medicamentRepositoryPort.findById(any())).thenReturn(Optional.of(medicament));
-        when(fournisseurRepositoryPort.findById(any())).thenReturn(Optional.of(org.mockito.Mockito.mock(Fournisseur.class)));
+        when(fournisseurRepositoryPort.findById(any()))
+                .thenReturn(Optional.of(mock(Fournisseur.class)));
         when(lotRepositoryPort.existsByMedicamentIdAndNumeroLotIgnoreCase(any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> sut.creer(commande())).isInstanceOf(NumeroLotDejaUtiliseException.class);
+        var command = commande();
+        assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(NumeroLotDejaUtiliseException.class);
 
         verify(lotRepositoryPort, never()).save(any());
     }
