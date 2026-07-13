@@ -79,7 +79,8 @@ class CreateGestionnaireStructureAccountUseCaseImplTest {
         when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
         when(roleQueryPort.findByCode("GESTIONNAIRE_STRUCTURE")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.creer(event())).isInstanceOf(RoleIntrouvableException.class);
+        var event = event();
+        assertThatThrownBy(() -> sut.creer(event)).isInstanceOf(RoleIntrouvableException.class);
     }
 
     @Test
@@ -96,7 +97,7 @@ class CreateGestionnaireStructureAccountUseCaseImplTest {
         sut.creer(event());
 
         verify(userAffectationRepositoryPort).affecterStructureSanitaire(any(), eq(structureId));
-        verify(accountMailPort).envoyerIdentifiantsCompte(eq("fatou.ndiaye@sante.gouv.sn"), eq("Ndiaye"),
-                eq("Fatou"), eq("Mdp@Temp1234!"));
+        verify(accountMailPort).envoyerIdentifiantsCompte("fatou.ndiaye@sante.gouv.sn", "Ndiaye", "Fatou",
+                "Mdp@Temp1234!");
     }
 }

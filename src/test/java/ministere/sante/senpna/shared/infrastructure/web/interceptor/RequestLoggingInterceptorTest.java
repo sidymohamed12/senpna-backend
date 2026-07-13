@@ -11,6 +11,7 @@ import org.springframework.web.method.HandlerMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("RequestLoggingInterceptor — logging des requêtes HTTP avec contexte MDC")
 class RequestLoggingInterceptorTest {
@@ -144,6 +145,6 @@ class RequestLoggingInterceptorTest {
     }
 
     private HandlerMethod handlerMethodMock() {
-        return org.mockito.Mockito.mock(HandlerMethod.class);
+        return mock(HandlerMethod.class);
     }
 }

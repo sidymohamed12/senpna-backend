@@ -73,8 +73,8 @@ class UpdateUserUseCaseImplTest {
     void utilisateurIntrouvable_leveException() {
         when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.modifier(
-                new UpdateUserCommand(UUID.randomUUID(), UUID.randomUUID(), "Fall", "Awa", null)))
+        var updateUserCommand = new UpdateUserCommand(UUID.randomUUID(), UUID.randomUUID(), "Fall", "Awa", null);
+        assertThatThrownBy(() -> sut.modifier(updateUserCommand))
                 .isInstanceOf(UserNotFoundException.class);
     }
 }

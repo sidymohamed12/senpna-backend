@@ -48,8 +48,8 @@ class RevokeRoleUseCaseImplTest {
         User user = UserFixtures.actif();
         when(userManagementRepositoryPort.findById(UserId.of(UserFixtures.USER_ID))).thenReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> sut.retirer(
-                new RevokeRoleCommand(UserFixtures.USER_ID, UUID.randomUUID(), UUID.randomUUID())))
+        var command = new RevokeRoleCommand(UserFixtures.USER_ID, UUID.randomUUID(), UUID.randomUUID());
+        assertThatThrownBy(() -> sut.retirer(command))
                 .isInstanceOf(RoleNonAssigneException.class);
     }
 
@@ -59,8 +59,9 @@ class RevokeRoleUseCaseImplTest {
         User user = UserFixtures.actif(); // possède exactement 1 rôle : ROLE_GESTIONNAIRE_PNA_ID
         when(userManagementRepositoryPort.findById(UserId.of(UserFixtures.USER_ID))).thenReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> sut.retirer(new RevokeRoleCommand(UserFixtures.USER_ID, UUID.randomUUID(),
-                UserFixtures.ROLE_GESTIONNAIRE_PNA_ID)))
+        var command = new RevokeRoleCommand(UserFixtures.USER_ID, UUID.randomUUID(),
+                UserFixtures.ROLE_GESTIONNAIRE_PNA_ID);
+        assertThatThrownBy(() -> sut.retirer(command))
                 .isInstanceOf(DernierRoleException.class);
     }
 

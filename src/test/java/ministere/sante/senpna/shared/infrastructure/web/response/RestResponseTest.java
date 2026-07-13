@@ -30,13 +30,19 @@ class RestResponseTest {
             Map<String, Object> body = RestResponse.response(
                     HttpStatus.OK, List.of("a", "b"), "SUCCESS", "OK");
 
-            assertThat(body.get("status")).isEqualTo(200);
-            assertThat(body.get("type")).isEqualTo("SUCCESS");
-            assertThat(body.get("message")).isEqualTo("OK");
-            assertThat(body.get("results")).isEqualTo(List.of("a", "b"));
-            assertThat(body.get("timestamp")).isInstanceOf(String.class).asString().isNotBlank();
-            assertThat(body).doesNotContainKey("pagination");
-            assertThat(body).doesNotContainKey("errors");
+            assertThat(body)
+                    .containsEntry("status", 200)
+                    .containsEntry("type", "SUCCESS")
+                    .containsEntry("message", "OK")
+                    .containsEntry("results", List.of("a", "b"))
+                    .containsKey("timestamp");
+
+            assertThat(body.get("timestamp"))
+                    .isInstanceOf(String.class)
+                    .asString()
+                    .isNotBlank();
+            assertThat(body).doesNotContainKey("pagination")
+                    .doesNotContainKey("errors");
         }
 
         @Test
@@ -68,7 +74,9 @@ class RestResponseTest {
                     .containsEntry("totalItems", 42L)
                     .containsEntry("first", false)
                     .containsEntry("last", false);
-            assertThat(body.get("results")).isEqualTo(List.of("a"));
+
+            assertThat(body)
+                    .containsEntry("results", List.of("a"));
         }
 
         @Test
@@ -94,9 +102,12 @@ class RestResponseTest {
         void construitLeCorpsErreur() {
             Map<String, Object> body = RestResponse.error(HttpStatus.NOT_FOUND, "Introuvable", "NOT_FOUND");
 
-            assertThat(body.get("status")).isEqualTo(404);
-            assertThat(body.get("type")).isEqualTo("NOT_FOUND");
-            assertThat(body.get("message")).isEqualTo("Introuvable");
+            assertThat(body)
+                    .containsEntry("status", 404)
+                    .containsEntry("type", "NOT_FOUND")
+                    .containsEntry("message", "Introuvable")
+                    .containsEntry("results", null)
+                    .containsKey("timestamp");
             assertThat(body.get("results")).isNull();
         }
     }
@@ -114,8 +125,9 @@ class RestResponseTest {
 
             Map<String, Object> body = RestResponse.validationError(bindingResult);
 
-            assertThat(body.get("status")).isEqualTo(400);
-            assertThat(body.get("type")).isEqualTo("VALIDATION_ERROR");
+            assertThat(body)
+                    .containsEntry("status", 400)
+                    .containsEntry("type", "VALIDATION_ERROR");
 
             @SuppressWarnings("unchecked")
             Map<String, String> errors = (Map<String, String>) body.get("errors");
@@ -169,13 +181,16 @@ class RestResponseTest {
 
             constructor.setAccessible(true);
 
-            assertThatThrownBy(() -> {
-                try {
-                    constructor.newInstance();
-                } catch (InvocationTargetException e) {
-                    throw e.getCause();
-                }
-            }).isInstanceOf(UnsupportedOperationException.class);
+            assertThatThrownBy(() -> invokeConstructor(constructor))
+                    .isInstanceOf(UnsupportedOperationException.class);
+        }
+    }
+
+    private static void invokeConstructor(Constructor<RestResponse> constructor) throws Throwable {
+        try {
+            constructor.newInstance();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
         }
     }
 }

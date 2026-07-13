@@ -61,8 +61,9 @@ class DeactivateUserUseCaseImplTest {
     @Test
     @DisplayName("un acteur ne peut pas se désactiver lui-même → AutoDesactivationInterditeException")
     void autoDesactivation_interdite() {
-        assertThatThrownBy(() -> sut.desactiver(
-                new DeactivateUserCommand(UserFixtures.USER_ID, UserFixtures.USER_ID)))
+
+        var desactivateUserCommand = new DeactivateUserCommand(UserFixtures.USER_ID, UserFixtures.USER_ID);
+        assertThatThrownBy(() -> sut.desactiver(desactivateUserCommand))
                 .isInstanceOf(AutoDesactivationInterditeException.class);
 
         verify(userManagementRepositoryPort, never()).findById(any());
@@ -73,7 +74,8 @@ class DeactivateUserUseCaseImplTest {
     void utilisateurIntrouvable_leveException() {
         when(userManagementRepositoryPort.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.desactiver(new DeactivateUserCommand(UUID.randomUUID(), UUID.randomUUID())))
+        var desactivateUserCommand = new DeactivateUserCommand(UUID.randomUUID(), UUID.randomUUID());
+        assertThatThrownBy(() -> sut.desactiver(desactivateUserCommand))
                 .isInstanceOf(UserNotFoundException.class);
     }
 }
