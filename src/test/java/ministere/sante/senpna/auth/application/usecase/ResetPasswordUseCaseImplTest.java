@@ -70,7 +70,8 @@ class ResetPasswordUseCaseImplTest {
         when(resetTokenPort.validerEtExtraireUserId("token")).thenReturn(UUID.randomUUID());
         when(userRepositoryPort.findById(org.mockito.ArgumentMatchers.any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.reinitialiser(new ResetPasswordCommand("token", "Mdp@2024")))
+        var resetPasswordCommand = new ResetPasswordCommand("token", "Mdp@2024");
+        assertThatThrownBy(() -> sut.reinitialiser(resetPasswordCommand))
                 .isInstanceOf(UserNotFoundException.class);
     }
 }

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("VerifyOtpUseCaseImpl — vérification du code OTP et émission du reset token")
@@ -63,7 +64,7 @@ class VerifyOtpUseCaseImplTest {
     @Test
     @DisplayName("code invalide → l'exception du service OTP se propage, aucun reset token émis")
     void codeInvalide_sePropage() {
-        org.mockito.Mockito.doThrow(new ministere.sante.senpna.auth.domain.exception.OtpInvalideException())
+        doThrow(new ministere.sante.senpna.auth.domain.exception.OtpInvalideException())
                 .when(otpService).valider(UserFixtures.EMAIL, "000000");
 
         assertThatThrownBy(() -> sut.verifier(new VerifyOtpCommand(UserFixtures.EMAIL, "000000")))
@@ -77,7 +78,8 @@ class VerifyOtpUseCaseImplTest {
     void utilisateurIntrouvable_leveException() {
         when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.verifier(new VerifyOtpCommand(UserFixtures.EMAIL, "123456")))
+        var verifyOtpCommand = new VerifyOtpCommand(UserFixtures.EMAIL, "123456");
+        assertThatThrownBy(() -> sut.verifier(verifyOtpCommand))
                 .isInstanceOf(UserNotFoundException.class);
     }
 

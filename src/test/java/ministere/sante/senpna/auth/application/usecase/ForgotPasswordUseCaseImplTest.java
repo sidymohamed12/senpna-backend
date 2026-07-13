@@ -52,7 +52,8 @@ class ForgotPasswordUseCaseImplTest {
         void utilisateurIntrouvable_leveException() {
             when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.demander(new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL)))
+            var forgotPasswordCommand = new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL);
+            assertThatThrownBy(() -> sut.demander(forgotPasswordCommand))
                     .isInstanceOf(UserNotFoundException.class);
         }
 
@@ -63,7 +64,8 @@ class ForgotPasswordUseCaseImplTest {
             when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.of(user));
             when(otpDestinationResolver.resoudre(user, OtpChannel.EMAIL)).thenReturn(UserFixtures.EMAIL);
 
-            sut.demander(new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL));
+            var forgotPasswordCommand = new ForgotPasswordCommand(UserFixtures.EMAIL, OtpChannel.EMAIL);
+            sut.demander(forgotPasswordCommand);
 
             verify(otpService).genererEtEnvoyer(UserFixtures.EMAIL, OtpChannel.EMAIL, UserFixtures.EMAIL);
         }
@@ -85,7 +87,8 @@ class ForgotPasswordUseCaseImplTest {
         void utilisateurIntrouvable_leveException() {
             when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> sut.renvoyer(new ResendOtpCommand(UserFixtures.EMAIL, OtpChannel.SMS)))
+            var resendOtpCommand = new ResendOtpCommand(UserFixtures.EMAIL, OtpChannel.SMS);
+            assertThatThrownBy(() -> sut.renvoyer(resendOtpCommand))
                     .isInstanceOf(UserNotFoundException.class);
         }
 

@@ -49,7 +49,8 @@ class MeUseCaseImplTest {
     void utilisateurIntrouvable_leveException() {
         when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sut.me(new MeQuery(UserFixtures.EMAIL)))
+        var meQuery = new MeQuery(UserFixtures.EMAIL);
+        assertThatThrownBy(() -> sut.me(meQuery))
                 .isInstanceOf(UserNotFoundException.class);
     }
 
