@@ -3,7 +3,8 @@ package ministere.sante.senpna.shared.infrastructure.cache;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,15 +98,15 @@ public class RoleCache implements ApplicationRunner, RoleCachePort {
      * Résout le code technique d'un rôle (utilisé pour bâtir les
      * GrantedAuthority de Spring Security).
      *
-     * @throws NotFoundException si l'identifiant ne correspond à aucun rôle connu
+     * @throws SenPnaException si l'identifiant ne correspond à aucun rôle connu (catégorie NOT_FOUND)
      */
     @Override
     public String getCode(UUID id) {
         return findById(id)
                 .map(RoleProjection::code)
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new SenPnaException(
                         "Rôle introuvable avec l'identifiant : " + id,
-                        "ROLE_NOT_FOUND"));
+                        "ROLE_NOT_FOUND", ErrorCategory.NOT_FOUND));
     }
 
     /**

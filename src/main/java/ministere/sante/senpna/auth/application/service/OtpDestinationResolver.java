@@ -2,7 +2,8 @@ package ministere.sante.senpna.auth.application.service;
 
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,9 @@ public class OtpDestinationResolver {
             case EMAIL -> user.getEmail().value();
             case SMS -> {
                 if (user.getTelephone() == null) {
-                    throw new BusinessRuleException(
+                    throw new SenPnaException(
                             "Aucun numéro de téléphone enregistré pour ce compte. Choisissez le canal e-mail.",
-                            "NO_PHONE_REGISTERED");
+                            "NO_PHONE_REGISTERED", ErrorCategory.BUSINESS_RULE);
                 }
                 yield user.getTelephone().value();
             }

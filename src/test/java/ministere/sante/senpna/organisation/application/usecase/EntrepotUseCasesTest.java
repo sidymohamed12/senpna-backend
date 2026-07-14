@@ -28,7 +28,7 @@ import ministere.sante.senpna.organisation.domain.port.out.RegionRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 
 import org.junit.jupiter.api.DisplayName;
@@ -113,7 +113,7 @@ class EntrepotUseCasesTest {
         void creer_sansRegionId_leveException() {
             var createPraCommand = new CreatePraCommand("PRA-X", "PRA X", null, null, null);
             assertThatThrownBy(() -> sut.creer(createPraCommand))
-                    .isInstanceOf(ValidationException.class);
+                    .isInstanceOf(SenPnaException.class);
 
             verifyNoInteractions(regionRepositoryPort, entrepotRepositoryPort);
         }

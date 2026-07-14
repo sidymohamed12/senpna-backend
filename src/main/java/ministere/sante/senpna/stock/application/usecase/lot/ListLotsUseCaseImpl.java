@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase.lot;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
@@ -62,7 +63,7 @@ public class ListLotsUseCaseImpl implements ListLotsUseCase {
         try {
             return StatutLot.valueOf(statut.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ValidationException("Statut de lot invalide : " + statut, "LOT_STATUT_INVALID");
+            throw new SenPnaException("Statut de lot invalide : " + statut, "LOT_STATUT_INVALID", ErrorCategory.VALIDATION);
         }
     }
 }

@@ -12,7 +12,8 @@ import ministere.sante.senpna.organisation.domain.port.in.pra.CreatePraUseCase;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.port.out.RegionRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +36,8 @@ public class CreatePraUseCaseImpl implements CreatePraUseCase {
     @Transactional
     public EntrepotDetail creer(CreatePraCommand command) {
         if (command.regionId() == null) {
-            throw new ValidationException("La région de rattachement est obligatoire pour une PRA",
-                    "REGION_REQUIRED");
+            throw new SenPnaException("La région de rattachement est obligatoire pour une PRA",
+                    "REGION_REQUIRED", ErrorCategory.VALIDATION);
         }
 
         Region region = regionRepositoryPort.findById(RegionId.of(command.regionId()))

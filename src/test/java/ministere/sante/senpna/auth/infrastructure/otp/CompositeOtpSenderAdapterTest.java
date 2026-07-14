@@ -1,7 +1,7 @@
 package ministere.sante.senpna.auth.infrastructure.otp;
 
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,7 +62,7 @@ class CompositeOtpSenderAdapterTest {
         CompositeOtpSenderAdapter sutSansEmail = new CompositeOtpSenderAdapter(List.of(smsSender));
 
         assertThatThrownBy(() -> sutSansEmail.send(OtpChannel.EMAIL, "dest", "code"))
-                .isInstanceOf(BusinessRuleException.class)
+                .isInstanceOf(SenPnaException.class)
                 .hasMessageContaining("EMAIL");
     }
 
@@ -72,8 +72,8 @@ class CompositeOtpSenderAdapterTest {
         CompositeOtpSenderAdapter sutVide = new CompositeOtpSenderAdapter(List.of());
 
         assertThatThrownBy(() -> sutVide.send(OtpChannel.EMAIL, "dest", "code"))
-                .isInstanceOf(BusinessRuleException.class);
+                .isInstanceOf(SenPnaException.class);
         assertThatThrownBy(() -> sutVide.send(OtpChannel.SMS, "dest", "code"))
-                .isInstanceOf(BusinessRuleException.class);
+                .isInstanceOf(SenPnaException.class);
     }
 }

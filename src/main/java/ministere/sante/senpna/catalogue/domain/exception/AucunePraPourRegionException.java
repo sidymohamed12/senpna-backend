@@ -1,6 +1,7 @@
 package ministere.sante.senpna.catalogue.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsque le catalogue régional est demandé pour une région ne
@@ -8,9 +9,9 @@ import ministere.sante.senpna.shared.domain.exception.NotFoundException;
  * l'acteur PNA consultant pour supervision) ne peut alors se voir
  * présenter aucune disponibilité.
  */
-public class AucunePraPourRegionException extends NotFoundException {
+public class AucunePraPourRegionException extends SenPnaException {
 
     public AucunePraPourRegionException() {
-        super("Aucune PRA active n'est rattachée à cette région", "PRA_NOT_FOUND_FOR_REGION");
+        super("Aucune PRA active n'est rattachée à cette région", "PRA_NOT_FOUND_FOR_REGION", ErrorCategory.NOT_FOUND);
     }
 }

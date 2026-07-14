@@ -4,7 +4,8 @@ import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableE
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.EntreeStockCommand;
@@ -84,7 +85,7 @@ public class EntreeStockUseCaseImpl implements EntreeStockUseCase {
         try {
             return TypeMouvement.valueOf(typeMouvement.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ValidationException("Type de mouvement invalide : " + typeMouvement, "TYPE_MOUVEMENT_INVALID");
+            throw new SenPnaException("Type de mouvement invalide : " + typeMouvement, "TYPE_MOUVEMENT_INVALID", ErrorCategory.VALIDATION);
         }
     }
 }

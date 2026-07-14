@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.domain.exception.lot;
 
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsqu'un acteur PRA tente de consulter ou gérer (bloquer,
@@ -9,8 +10,8 @@ import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
  * dans son entrepôt. Ne s'applique pas aux acteurs PNA (portée nationale
  * sur le catalogue des lots).
  */
-public class LotHorsPorteeException extends ForbiddenException {
+public class LotHorsPorteeException extends SenPnaException {
     public LotHorsPorteeException() {
-        super("Ce lot n'est pas présent dans le stock de votre entrepôt", "LOT_OUT_OF_SCOPE");
+        super("Ce lot n'est pas présent dans le stock de votre entrepôt", "LOT_OUT_OF_SCOPE", ErrorCategory.FORBIDDEN);
     }
 }

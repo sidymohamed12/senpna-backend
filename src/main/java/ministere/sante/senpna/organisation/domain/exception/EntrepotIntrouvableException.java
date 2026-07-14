@@ -1,9 +1,10 @@
 package ministere.sante.senpna.organisation.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
-public class EntrepotIntrouvableException extends NotFoundException {
+public class EntrepotIntrouvableException extends SenPnaException {
     public EntrepotIntrouvableException() {
-        super("Entrepôt introuvable", "ENTREPOT_NOT_FOUND");
+        super("Entrepôt introuvable", "ENTREPOT_NOT_FOUND", ErrorCategory.NOT_FOUND);
     }
 }

@@ -1,11 +1,7 @@
 package ministere.sante.senpna.shared.infrastructure.exception;
 
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
-import ministere.sante.senpna.shared.domain.exception.ConflictException;
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
-import ministere.sante.senpna.shared.domain.exception.UnauthorizedException;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -32,49 +28,60 @@ class GlobalExceptionHandlerTest {
     GlobalExceptionHandler sut = new GlobalExceptionHandler();
 
     @Nested
-    @DisplayName("exceptions métier génériques (shared)")
+    @DisplayName("exceptions métier (SenPnaException) — dispatch par ErrorCategory")
     class ExceptionsGeneriques {
 
         @Test
-        @DisplayName("UnauthorizedException → 401")
+        @DisplayName("catégorie UNAUTHORIZED → 401")
         void unauthorized_401() {
-            var response = sut.handleUnauthorized(new UnauthorizedException("msg", "TYPE"));
+            var response = sut.handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.UNAUTHORIZED));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
 
         @Test
-        @DisplayName("ForbiddenException → 403")
+        @DisplayName("catégorie FORBIDDEN → 403")
         void forbidden_403() {
-            var response = sut.handleForbidden(new ForbiddenException("msg", "TYPE"));
+            var response = sut.handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.FORBIDDEN));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         }
 
         @Test
-        @DisplayName("NotFoundException → 404")
+        @DisplayName("catégorie NOT_FOUND → 404")
         void notFound_404() {
-            var response = sut.handleNotFound(new NotFoundException("msg", "TYPE"));
+            var response = sut.handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.NOT_FOUND));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
         @Test
-        @DisplayName("BusinessRuleException → 422")
+        @DisplayName("catégorie BUSINESS_RULE → 422")
         void businessRule_422() {
-            var response = sut.handleBusinessRule(new BusinessRuleException("msg", "TYPE"));
+            var response = sut
+                    .handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.BUSINESS_RULE));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         @Test
-        @DisplayName("ConflictException → 409")
+        @DisplayName("catégorie CONFLICT → 409")
         void conflict_409() {
-            var response = sut.handleConflict(new ConflictException("msg", "TYPE"));
+            var response = sut.handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.CONFLICT));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         }
 
         @Test
-        @DisplayName("ValidationException → 400")
+        @DisplayName("catégorie VALIDATION → 400")
         void validation_400() {
-            var response = sut.handleValidation(new ValidationException("msg", "TYPE"));
+            var response = sut.handleSenPnaException(new SenPnaException("msg", "TYPE", ErrorCategory.VALIDATION));
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        @DisplayName("le corps de la réponse reporte le message et le type de l'exception")
+        void corpsReponse_reporteMessageEtType() {
+            var response = sut
+                    .handleSenPnaException(new SenPnaException("Message précis", "CODE_PRECIS", ErrorCategory.CONFLICT));
+
+            assertThat(response.getBody()).containsEntry("message", "Message précis");
+            assertThat(response.getBody()).containsEntry("type", "CODE_PRECIS");
         }
     }
 

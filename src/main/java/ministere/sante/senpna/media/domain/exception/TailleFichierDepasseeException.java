@@ -1,12 +1,13 @@
 package ministere.sante.senpna.media.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée quand la taille déclarée du fichier dépasse la limite
  * autorisée pour le type de média demandé.
  */
-public class TailleFichierDepasseeException extends ValidationException {
+public class TailleFichierDepasseeException extends SenPnaException {
 
     public TailleFichierDepasseeException(long tailleRecue, long tailleMax) {
         super(
@@ -14,7 +15,7 @@ public class TailleFichierDepasseeException extends ValidationException {
                         "Fichier trop lourd : %s déclaré, maximum autorisé : %s.",
                         formatBytes(tailleRecue),
                         formatBytes(tailleMax)),
-                "TAILLE_FICHIER_DEPASSEE");
+                "TAILLE_FICHIER_DEPASSEE", ErrorCategory.VALIDATION);
     }
 
     private static String formatBytes(long bytes) {

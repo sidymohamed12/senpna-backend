@@ -1,6 +1,7 @@
 package ministere.sante.senpna.utilisateurs.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsqu'un acteur de portée régionale (PRA) tente de gérer
@@ -10,9 +11,9 @@ import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
  * manipule des privilèges qui dépassent sa portée hiérarchique, y compris
  * envers un autre {@code ADMIN_PRA} d'une région différente.
  */
-public class GestionUtilisateurInterditeException extends ForbiddenException {
+public class GestionUtilisateurInterditeException extends SenPnaException {
     public GestionUtilisateurInterditeException() {
         super("Vous n'êtes pas autorisé à gérer ce compte : portée hiérarchique insuffisante",
-                "USER_MANAGEMENT_FORBIDDEN");
+                "USER_MANAGEMENT_FORBIDDEN", ErrorCategory.FORBIDDEN);
     }
 }

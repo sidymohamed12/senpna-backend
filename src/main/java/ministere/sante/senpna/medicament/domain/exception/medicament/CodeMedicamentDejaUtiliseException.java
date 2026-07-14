@@ -1,9 +1,10 @@
 package ministere.sante.senpna.medicament.domain.exception.medicament;
 
-import ministere.sante.senpna.shared.domain.exception.ConflictException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
-public class CodeMedicamentDejaUtiliseException extends ConflictException {
+public class CodeMedicamentDejaUtiliseException extends SenPnaException {
     public CodeMedicamentDejaUtiliseException(String code) {
-        super("Un médicament avec le code '" + code + "' existe déjà", "MEDICAMENT_CODE_ALREADY_USED");
+        super("Un médicament avec le code '" + code + "' existe déjà", "MEDICAMENT_CODE_ALREADY_USED", ErrorCategory.CONFLICT);
     }
 }

@@ -1,6 +1,6 @@
 package ministere.sante.senpna.stock.application.usecase.mouvement;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.MouvementDetailAssembler;
@@ -143,7 +143,7 @@ class MouvementQueryUseCasesTest {
 
             var listMouvementsQuery = new ListMouvementsQuery(null, null, null, "INEXISTANT", null, null, null, null, 0,
                     20, null, null);
-            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(ValidationException.class);
+            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(SenPnaException.class);
         }
 
         @Test
@@ -153,7 +153,7 @@ class MouvementQueryUseCasesTest {
 
             var listMouvementsQuery = new ListMouvementsQuery(null, null, null, null, "INEXISTANT",
                     null, null, null, 0, 20, null, null);
-            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(ValidationException.class);
+            assertThatThrownBy(() -> sut.lister(listMouvementsQuery)).isInstanceOf(SenPnaException.class);
         }
 
         @Test

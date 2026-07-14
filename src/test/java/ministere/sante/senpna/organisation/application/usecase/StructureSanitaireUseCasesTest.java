@@ -45,7 +45,7 @@ import ministere.sante.senpna.organisation.domain.valueobject.StructureSanitaire
 import ministere.sante.senpna.organisation.domain.valueobject.TypeEntrepot;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeStructureSanitaire;
 import ministere.sante.senpna.shared.domain.events.AdhesionValideeEvent;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.port.out.EventPublisherPort;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 
@@ -145,7 +145,7 @@ class StructureSanitaireUseCasesTest {
             CreateStructureSanitaireCommand command = new CreateStructureSanitaireCommand("HOP-X", "Hôpital X",
                     TypeStructureSanitaire.HOPITAL, null, null, null, null, null, "Ndiaye", "Fatou");
 
-            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(ValidationException.class);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(SenPnaException.class);
 
             verifyNoInteractions(regionRepositoryPort, structureSanitaireRepositoryPort);
         }

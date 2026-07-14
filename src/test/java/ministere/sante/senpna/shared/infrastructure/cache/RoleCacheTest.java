@@ -1,6 +1,6 @@
 package ministere.sante.senpna.shared.infrastructure.cache;
 
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
 
@@ -94,7 +94,7 @@ class RoleCacheTest {
 
             UUID inconnu = UUID.randomUUID();
             assertThatThrownBy(() -> sut.getCode(inconnu))
-                    .isInstanceOf(NotFoundException.class)
+                    .isInstanceOf(SenPnaException.class)
                     .hasMessageContaining(inconnu.toString());
         }
     }

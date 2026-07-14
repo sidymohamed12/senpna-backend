@@ -1,5 +1,6 @@
 package ministere.sante.senpna.appeloffre.domain.exception;
 
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
 import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
@@ -10,6 +11,6 @@ import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 public class OffreDejaSoumiseException extends SenPnaException {
     public OffreDejaSoumiseException() {
         super("Une offre a déjà été soumise par ce fournisseur pour cet appel d'offres",
-                "OFFRE_FOURNISSEUR_ALREADY_SUBMITTED");
+                "OFFRE_FOURNISSEUR_ALREADY_SUBMITTED", ErrorCategory.CONFLICT);
     }
 }

@@ -1,6 +1,6 @@
 package ministere.sante.senpna.stock.application.usecase.lot;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.LotDetailAssembler;
@@ -62,7 +62,7 @@ class ListLotsAndPeremptionUseCasesTest {
 
             var listLotsQuery = new ListLotsQuery(null, null, null, "INEXISTANT", null, 0, 20, null, null);
             assertThatThrownBy(() -> sut.lister(listLotsQuery))
-                    .isInstanceOf(ValidationException.class);
+                    .isInstanceOf(SenPnaException.class);
         }
 
         @Test

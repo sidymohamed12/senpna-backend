@@ -2,7 +2,8 @@ package ministere.sante.senpna.auth.infrastructure.otp;
 
 import ministere.sante.senpna.auth.domain.port.out.OtpSenderPort;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,8 @@ public class CompositeOtpSenderAdapter implements OtpSenderPort {
     public void send(OtpChannel channel, String destination, String code) {
         ChannelOtpSender sender = sendersByChannel.get(channel);
         if (sender == null) {
-            throw new BusinessRuleException("Canal OTP non supporté : " + channel, "OTP_CHANNEL_NOT_SUPPORTED");
+            throw new SenPnaException("Canal OTP non supporté : " + channel, "OTP_CHANNEL_NOT_SUPPORTED",
+                    ErrorCategory.BUSINESS_RULE);
         }
         sender.send(destination, code);
     }

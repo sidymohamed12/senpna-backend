@@ -1,6 +1,7 @@
 package ministere.sante.senpna.catalogue.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée par {@code CatalogueAccessGuard} lorsqu'un acteur tente de
@@ -13,9 +14,9 @@ import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
  * une structure sanitaire (donc à aucune région).</li>
  * </ul>
  */
-public class CatalogueAccesRefuseException extends ForbiddenException {
+public class CatalogueAccesRefuseException extends SenPnaException {
 
     public CatalogueAccesRefuseException() {
-        super("Vous n'êtes pas autorisé à consulter ce catalogue", "CATALOGUE_ACCESS_FORBIDDEN");
+        super("Vous n'êtes pas autorisé à consulter ce catalogue", "CATALOGUE_ACCESS_FORBIDDEN", ErrorCategory.FORBIDDEN);
     }
 }

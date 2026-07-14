@@ -1,5 +1,6 @@
 package ministere.sante.senpna.appeloffre.domain.exception;
 
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
 import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
@@ -10,6 +11,6 @@ import ministere.sante.senpna.shared.domain.exception.SenPnaException;
  */
 public class AccesOffreRefuseException extends SenPnaException {
     public AccesOffreRefuseException() {
-        super("Vous n'êtes pas autorisé à accéder à cette offre", "OFFRE_FOURNISSEUR_ACCESS_DENIED");
+        super("Vous n'êtes pas autorisé à accéder à cette offre", "OFFRE_FOURNISSEUR_ACCESS_DENIED", ErrorCategory.FORBIDDEN);
     }
 }

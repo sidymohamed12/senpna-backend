@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 import java.math.BigDecimal;
 
@@ -8,9 +9,9 @@ import java.math.BigDecimal;
  * Levée lorsqu'on tente de libérer ou de consommer (sortie depuis
  * réservation) une quantité supérieure à celle effectivement réservée.
  */
-public class ReservationInsuffisanteException extends BusinessRuleException {
+public class ReservationInsuffisanteException extends SenPnaException {
     public ReservationInsuffisanteException(BigDecimal reservee, BigDecimal demande) {
         super("Quantité réservée insuffisante : réservée=" + reservee + ", demandée=" + demande,
-                "RESERVATION_INSUFFICIENT");
+                "RESERVATION_INSUFFICIENT", ErrorCategory.BUSINESS_RULE);
     }
 }

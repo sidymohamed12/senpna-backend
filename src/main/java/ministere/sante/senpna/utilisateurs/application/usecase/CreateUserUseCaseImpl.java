@@ -12,7 +12,8 @@ import ministere.sante.senpna.shared.domain.valueobject.Prenom;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.utilisateurs.application.service.EntrepotAffectationResolver;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
 import ministere.sante.senpna.utilisateurs.application.service.UserDetailAssembler;
@@ -96,7 +97,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
         Set<UUID> roleIds = command.roleIds();
         if (roleIds == null || roleIds.isEmpty()) {
-            throw new ValidationException("Un utilisateur doit posséder au moins un rôle", "ROLE_REQUIRED");
+            throw new SenPnaException("Un utilisateur doit posséder au moins un rôle", "ROLE_REQUIRED", ErrorCategory.VALIDATION);
         }
 
         Set<String> codesRoles = new HashSet<>();
@@ -116,8 +117,8 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
             // Un compte espace fournisseur ne cumule aucun autre rôle
             // interne PNA/PRA — évite qu'un même compte porte à la fois
             // les habilitations fournisseur et les habilitations internes.
-            throw new ValidationException("Le rôle FOURNISSEUR ne peut pas être combiné à un autre rôle",
-                    "FOURNISSEUR_ROLE_EXCLUSIVE");
+            throw new SenPnaException("Le rôle FOURNISSEUR ne peut pas être combiné à un autre rôle",
+                    "FOURNISSEUR_ROLE_EXCLUSIVE", ErrorCategory.VALIDATION);
         }
 
         if (estCompteFournisseur) {
@@ -140,8 +141,8 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
         if (estCompteFournisseur) {
             if (command.entrepotId() != null) {
-                throw new ValidationException("Un compte FOURNISSEUR ne peut pas être affecté à un entrepôt",
-                        "ENTREPOT_NOT_APPLICABLE");
+                throw new SenPnaException("Un compte FOURNISSEUR ne peut pas être affecté à un entrepôt",
+                        "ENTREPOT_NOT_APPLICABLE", ErrorCategory.VALIDATION);
             }
             fournisseurId = command.fournisseurId();
             if (fournisseurId == null) {

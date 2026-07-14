@@ -1,12 +1,8 @@
 package ministere.sante.senpna.shared.infrastructure.exception;
 
 import jakarta.validation.ConstraintViolationException;
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
-import ministere.sante.senpna.shared.domain.exception.ConflictException;
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
-import ministere.sante.senpna.shared.domain.exception.UnauthorizedException;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.infrastructure.web.response.RestResponse;
 
 import org.slf4j.Logger;
@@ -40,12 +36,13 @@ import java.util.Map;
  * <h3>Hiérarchie de traitement (exceptions infrastructure)</h3>
  * 
  * <pre>
- * UnauthorizedException                  → 401  token invalide, credentials incorrects
- * ForbiddenException                     → 403  accès refusé (métier)
- * NotFoundException                      → 404  ressource introuvable (générique)
- * ConflictException                      → 409  conflit (générique)
- * BusinessRuleException                  → 422  règle métier (générique)
- * ValidationException                    → 400  validation (générique)
+ * SenPnaException (cf. ErrorCategory)
+ *   UNAUTHORIZED                          → 401  token invalide, credentials incorrects
+ *   FORBIDDEN                             → 403  accès refusé (métier)
+ *   NOT_FOUND                             → 404  ressource introuvable (générique)
+ *   CONFLICT                              → 409  conflit (générique)
+ *   BUSINESS_RULE                         → 422  règle métier (générique)
+ *   VALIDATION                            → 400  validation (générique)
  * MethodArgumentNotValidException        → 400  @Valid sur @RequestBody
  * ConstraintViolationException           → 400  @Validated sur @RequestParam
  * NoResourceFoundException               → 404  route inexistante
@@ -56,55 +53,45 @@ import java.util.Map;
  * AuthorizationDeniedException           → 403  Spring Security @PreAuthorize
  * Exception                              → 500  fallback inattendu
  * </pre>
+ *
+ * <p>
+ * Toutes les exceptions métier ({@code SenPnaException} et ses
+ * descendants directs) sont traitées par un unique handler qui bascule
+ * sur {@link ErrorCategory} plutôt que par un handler par sous-classe
+ * intermédiaire — cf. {@link ErrorCategory} pour le raisonnement
+ * (correction de la règle SonarQube {@code java:S110}, profondeur
+ * d'héritage). Un handler de feature scoped (via
+ * {@code @RestControllerAdvice(assignableTypes = ...)}) qui déclare son
+ * propre {@code @ExceptionHandler(XxxException.class)} reste toujours
+ * prioritaire sur celui-ci pour les contrôleurs qu'il couvre — ce
+ * changement ne modifie que le fallback générique, pas l'ordre de
+ * résolution de Spring.
+ * </p>
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
         private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-        // ── Exceptions shared/métier génériques ───────────────────────────────
+        // ── Exceptions métier — dispatch par catégorie ─────────────────────────
 
-        @ExceptionHandler(UnauthorizedException.class)
-        public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedException ex) {
+        @ExceptionHandler(SenPnaException.class)
+        public ResponseEntity<Map<String, Object>> handleSenPnaException(SenPnaException ex) {
+                HttpStatus status = toHttpStatus(ex.getCategory());
                 return ResponseEntity
-                                .status(HttpStatus.UNAUTHORIZED)
-                                .body(RestResponse.error(HttpStatus.UNAUTHORIZED, ex.getMessage(), ex.getType()));
+                                .status(status)
+                                .body(RestResponse.error(status, ex.getMessage(), ex.getType()));
         }
 
-        @ExceptionHandler(ForbiddenException.class)
-        public ResponseEntity<Map<String, Object>> handleForbidden(ForbiddenException ex) {
-                return ResponseEntity
-                                .status(HttpStatus.FORBIDDEN)
-                                .body(RestResponse.error(HttpStatus.FORBIDDEN, ex.getMessage(), ex.getType()));
-        }
-
-        @ExceptionHandler(NotFoundException.class)
-        public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException ex) {
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(RestResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), ex.getType()));
-        }
-
-        @ExceptionHandler(BusinessRuleException.class)
-        public ResponseEntity<Map<String, Object>> handleBusinessRule(BusinessRuleException ex) {
-                return ResponseEntity
-                                .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                                .body(RestResponse.error(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(),
-                                                ex.getType()));
-        }
-
-        @ExceptionHandler(ConflictException.class)
-        public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
-                return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body(RestResponse.error(HttpStatus.CONFLICT, ex.getMessage(), ex.getType()));
-        }
-
-        @ExceptionHandler(ValidationException.class)
-        public ResponseEntity<Map<String, Object>> handleValidation(ValidationException ex) {
-                return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(RestResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getType()));
+        private HttpStatus toHttpStatus(ErrorCategory category) {
+                return switch (category) {
+                        case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+                        case FORBIDDEN -> HttpStatus.FORBIDDEN;
+                        case NOT_FOUND -> HttpStatus.NOT_FOUND;
+                        case CONFLICT -> HttpStatus.CONFLICT;
+                        case BUSINESS_RULE -> HttpStatus.UNPROCESSABLE_ENTITY;
+                        case VALIDATION -> HttpStatus.BAD_REQUEST;
+                };
         }
 
         // ── Bean Validation — @Valid sur @RequestBody ──────────────────────────
@@ -249,8 +236,8 @@ public class GlobalExceptionHandler {
 
         /**
          * HTTP 403 levé par Spring Security quand {@code @PreAuthorize} échoue.
-         * Distinct de {@link ForbiddenException} : ici c'est Spring qui décide,
-         * pas le code métier.
+         * Distinct d'une {@link SenPnaException} de catégorie {@code FORBIDDEN} :
+         * ici c'est Spring qui décide, pas le code métier.
          */
         @ExceptionHandler(AuthorizationDeniedException.class)
         public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(

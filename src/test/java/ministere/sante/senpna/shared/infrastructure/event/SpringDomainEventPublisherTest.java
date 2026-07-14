@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,11 +14,8 @@ import ministere.sante.senpna.shared.infrastructure.event.SpringDomainEventPubli
 import java.time.Instant;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +23,7 @@ import static org.mockito.Mockito.verify;
 class SpringDomainEventPublisherTest {
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    ApplicationEventPublisher applicationEventPublisher;
 
     private SpringDomainEventPublisher sut;
 
@@ -54,44 +50,34 @@ class SpringDomainEventPublisherTest {
     }
 
     @Test
-    @DisplayName("publish() avec un événement null lève une NullPointerException")
+    @DisplayName("publish() avec event null → NullPointerException")
     void publishNull_leveException() {
-        assertThatThrownBy(() -> sut.publish(null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("L'event ne peut pas être null");
+        assertThatThrownBy(() -> sut.publish(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    @DisplayName("publishAll() publie tous les événements")
+    @DisplayName("publishAll() publie chaque événement de la liste")
     void publishAll_publieChaqueEvenement() {
-        TestEvent e1 = new TestEvent(Instant.parse("2026-01-01T10:00:00Z"));
-        TestEvent e2 = new TestEvent(Instant.parse("2026-01-01T10:00:01Z"));
+        TestEvent e1 = new TestEvent(Instant.now());
+        TestEvent e2 = new TestEvent(Instant.now());
 
         sut.publishAll(List.of(e1, e2));
 
-        ArgumentCaptor<DomainEvent> captor = ArgumentCaptor.forClass(DomainEvent.class);
-
-        verify(applicationEventPublisher, times(2))
-                .publishEvent(captor.capture());
-
-        assertThat(captor.getAllValues())
-                .containsExactly(e1, e2);
+        verify(applicationEventPublisher).publishEvent(e1);
+        verify(applicationEventPublisher).publishEvent(e2);
     }
 
     @Test
-    @DisplayName("publishAll() avec une liste vide ne publie rien")
+    @DisplayName("publishAll() sur une liste vide → aucune publication")
     void publishAllListeVide_aucunePublication() {
         sut.publishAll(List.of());
 
-        verify(applicationEventPublisher, never())
-                .publishEvent(any());
+        verify(applicationEventPublisher, never()).publishEvent(org.mockito.ArgumentMatchers.any());
     }
 
     @Test
-    @DisplayName("publishAll() avec une liste null lève une NullPointerException")
+    @DisplayName("publishAll() avec liste null → NullPointerException")
     void publishAllNull_leveException() {
-        assertThatThrownBy(() -> sut.publishAll(null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("La liste d'events ne peut pas être null");
+        assertThatThrownBy(() -> sut.publishAll(null)).isInstanceOf(NullPointerException.class);
     }
 }

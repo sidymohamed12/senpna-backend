@@ -1,6 +1,7 @@
 package ministere.sante.senpna.organisation.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsqu'un utilisateur rattaché à une région tente de gérer un
@@ -10,8 +11,8 @@ import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
  * organisationnelle régionale (typiquement les rôles PNA nationaux), qui
  * conservent un accès à toutes les régions.
  */
-public class AccesRegionRefuseException extends ForbiddenException {
+public class AccesRegionRefuseException extends SenPnaException {
     public AccesRegionRefuseException() {
-        super("Vous n'êtes pas autorisé à gérer les entrepôts d'une autre région", "REGION_ACCESS_DENIED");
+        super("Vous n'êtes pas autorisé à gérer les entrepôts d'une autre région", "REGION_ACCESS_DENIED", ErrorCategory.FORBIDDEN);
     }
 }

@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsqu'un acteur (PNA ou PRA) tente de consulter ou modifier une
@@ -14,9 +15,9 @@ import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
  * entrepôt.
  * </p>
  */
-public class PorteeEntrepotInterditeException extends ForbiddenException {
+public class PorteeEntrepotInterditeException extends SenPnaException {
     public PorteeEntrepotInterditeException() {
         super("Vous n'êtes pas autorisé à agir sur les données d'un autre entrepôt que le vôtre",
-                "ENTREPOT_SCOPE_FORBIDDEN");
+                "ENTREPOT_SCOPE_FORBIDDEN", ErrorCategory.FORBIDDEN);
     }
 }

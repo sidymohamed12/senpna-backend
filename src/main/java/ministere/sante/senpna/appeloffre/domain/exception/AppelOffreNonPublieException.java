@@ -1,5 +1,6 @@
 package ministere.sante.senpna.appeloffre.domain.exception;
 
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
 import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
@@ -10,6 +11,6 @@ import ministere.sante.senpna.shared.domain.exception.SenPnaException;
  */
 public class AppelOffreNonPublieException extends SenPnaException {
     public AppelOffreNonPublieException() {
-        super("Cet appel d'offres n'est pas ouvert à la soumission d'offres", "APPEL_OFFRE_NOT_PUBLISHED");
+        super("Cet appel d'offres n'est pas ouvert à la soumission d'offres", "APPEL_OFFRE_NOT_PUBLISHED", ErrorCategory.BUSINESS_RULE);
     }
 }

@@ -2,7 +2,7 @@ package ministere.sante.senpna.auth.application.service;
 
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.shared.domain.exception.BusinessRuleException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.model.User;
 
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ class OtpDestinationResolverTest {
         User user = UserFixtures.actif();
 
         assertThatThrownBy(() -> sut.resoudre(user, OtpChannel.SMS))
-                .isInstanceOf(BusinessRuleException.class)
+                .isInstanceOf(SenPnaException.class)
                 .hasMessageContaining("e-mail");
     }
 }

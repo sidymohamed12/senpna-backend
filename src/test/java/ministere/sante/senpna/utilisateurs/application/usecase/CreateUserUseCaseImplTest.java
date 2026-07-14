@@ -1,6 +1,6 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
@@ -115,7 +115,7 @@ class CreateUserUseCaseImplTest {
 
             var command = commande(Set.of(), null);
             assertThatThrownBy(() -> sut.creer(command))
-                    .isInstanceOf(ValidationException.class);
+                    .isInstanceOf(SenPnaException.class);
         }
 
         @Test
@@ -215,7 +215,7 @@ class CreateUserUseCaseImplTest {
                     .thenReturn(Optional.of(new RoleProjection(autreRoleId, "GESTIONNAIRE_PNA", "Gestionnaire")));
 
             var command = commande(Set.of(roleId, autreRoleId), null, fournisseurId);
-            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(ValidationException.class);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(SenPnaException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
         }
@@ -241,7 +241,7 @@ class CreateUserUseCaseImplTest {
             when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(true);
 
             var command = commande(Set.of(roleId), UUID.randomUUID(), fournisseurId);
-            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(ValidationException.class);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(SenPnaException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
         }

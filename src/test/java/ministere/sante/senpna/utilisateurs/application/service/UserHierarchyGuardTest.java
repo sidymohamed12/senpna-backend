@@ -1,7 +1,7 @@
 package ministere.sante.senpna.utilisateurs.application.service;
 
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.shared.domain.exception.ForbiddenException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
@@ -103,7 +103,7 @@ class UserHierarchyGuardTest {
                 var setOf = Set.of(ROLE_ADMIN_PNA_ID);
                 assertThatThrownBy(() -> sut.verifierGestionAutorisee(ACTEUR_ID, setOf))
                                 .isInstanceOf(GestionUtilisateurInterditeException.class)
-                                .isInstanceOf(ForbiddenException.class);
+                                .isInstanceOf(SenPnaException.class);
         }
 
         @Test

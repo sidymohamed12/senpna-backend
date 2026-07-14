@@ -1,6 +1,7 @@
 package ministere.sante.senpna.stock.application.usecase.mouvement;
 
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
@@ -74,7 +75,7 @@ public class ListMouvementsUseCaseImpl implements ListMouvementsUseCase {
         try {
             return TypeMouvement.valueOf(typeMouvement.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ValidationException("Type de mouvement invalide : " + typeMouvement, "TYPE_MOUVEMENT_INVALID");
+            throw new SenPnaException("Type de mouvement invalide : " + typeMouvement, "TYPE_MOUVEMENT_INVALID", ErrorCategory.VALIDATION);
         }
     }
 
@@ -85,7 +86,7 @@ public class ListMouvementsUseCaseImpl implements ListMouvementsUseCase {
         try {
             return SensMouvement.valueOf(sens.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ValidationException("Sens de mouvement invalide : " + sens, "SENS_MOUVEMENT_INVALID");
+            throw new SenPnaException("Sens de mouvement invalide : " + sens, "SENS_MOUVEMENT_INVALID", ErrorCategory.VALIDATION);
         }
     }
 }

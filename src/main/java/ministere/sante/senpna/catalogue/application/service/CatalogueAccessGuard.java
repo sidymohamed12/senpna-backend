@@ -2,7 +2,8 @@ package ministere.sante.senpna.catalogue.application.service;
 
 import ministere.sante.senpna.catalogue.domain.exception.CatalogueAccesRefuseException;
 import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.EntrepotQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
@@ -110,8 +111,8 @@ public class CatalogueAccessGuard {
      * région, quelle que soit la région demandée.</li>
      * </ul>
      *
-     * @throws ValidationException           si un acteur national ne
-     *                                       fournit aucune région
+     * @throws SenPnaException               si un acteur national ne
+     *                                       fournit aucune région (catégorie VALIDATION)
      * @throws CatalogueAccesRefuseException si un acteur non national
      *                                       n'est rattaché à aucune
      *                                       région (aucune affectation)
@@ -121,9 +122,9 @@ public class CatalogueAccessGuard {
 
         if (estActeurNational(acteurId)) {
             if (regionIdDemandee == null) {
-                throw new ValidationException(
+                throw new SenPnaException(
                         "La région est obligatoire pour consulter un catalogue régional en tant qu'acteur national",
-                        "REGION_REQUIRED");
+                        "REGION_REQUIRED", ErrorCategory.VALIDATION);
             }
             return regionIdDemandee;
         }

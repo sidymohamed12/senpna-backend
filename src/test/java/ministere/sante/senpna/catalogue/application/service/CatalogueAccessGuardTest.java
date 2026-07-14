@@ -2,7 +2,7 @@ package ministere.sante.senpna.catalogue.application.service;
 
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
 import ministere.sante.senpna.catalogue.domain.exception.CatalogueAccesRefuseException;
-import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.port.out.EntrepotQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.RoleCachePort;
@@ -142,7 +142,7 @@ class CatalogueAccessGuardTest {
                                                         "Administrateur PNA")));
 
                         assertThatThrownBy(() -> sut.resoudreRegionPourCatalogueRegional(null))
-                                        .isInstanceOf(ValidationException.class);
+                                        .isInstanceOf(SenPnaException.class);
                 }
 
                 @Test

@@ -1,6 +1,7 @@
 package ministere.sante.senpna.catalogue.domain.exception;
 
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 
 /**
  * Levée lorsque le catalogue PNA est demandé alors qu'aucun entrepôt actif
@@ -9,9 +10,9 @@ import ministere.sante.senpna.shared.domain.exception.NotFoundException;
  * par migration (cf. Javadoc {@code Entrepot}), mais traitée
  * défensivement plutôt que de propager une erreur technique opaque.
  */
-public class PnaCentraleIntrouvableException extends NotFoundException {
+public class PnaCentraleIntrouvableException extends SenPnaException {
 
     public PnaCentraleIntrouvableException() {
-        super("Aucun entrepôt PNA centrale actif n'est configuré", "PNA_CENTRALE_NOT_CONFIGURED");
+        super("Aucun entrepôt PNA centrale actif n'est configuré", "PNA_CENTRALE_NOT_CONFIGURED", ErrorCategory.NOT_FOUND);
     }
 }

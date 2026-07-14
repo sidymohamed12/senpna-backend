@@ -6,7 +6,7 @@ import ministere.sante.senpna.auth.infrastructure.persistence.mapper.UserMapper;
 import ministere.sante.senpna.auth.infrastructure.persistence.repository.RoleJpaRepository;
 import ministere.sante.senpna.auth.infrastructure.persistence.repository.UserJpaRepository;
 import ministere.sante.senpna.shared.domain.criteria.UserSearchCriteria;
-import ministere.sante.senpna.shared.domain.exception.NotFoundException;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
@@ -177,7 +177,7 @@ class AuthPersistenceAdaptersTest {
         void findNomById_inconnu_leveException() {
             var id = UUID.randomUUID();
             assertThatThrownBy(() -> roleQueryAdapter.findNomById(id))
-                    .isInstanceOf(NotFoundException.class);
+                    .isInstanceOf(SenPnaException.class);
         }
     }
 }
