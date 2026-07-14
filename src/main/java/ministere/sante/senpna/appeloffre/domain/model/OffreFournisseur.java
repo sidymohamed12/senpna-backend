@@ -1,0 +1,131 @@
+package ministere.sante.senpna.appeloffre.domain.model;
+
+import ministere.sante.senpna.appeloffre.domain.exception.TransitionStatutOffreInvalideException;
+import ministere.sante.senpna.appeloffre.domain.valueobject.AppelOffreId;
+import ministere.sante.senpna.appeloffre.domain.valueobject.OffreFournisseurId;
+import ministere.sante.senpna.appeloffre.domain.valueobject.StatutOffre;
+import ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId;
+import ministere.sante.senpna.shared.domain.model.AggregateRoot;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Offre déposée par un fournisseur en réponse à un {@link AppelOffre}.
+ *
+ * <p>
+ * Agrégat distinct d'{@link AppelOffre} — deux fournisseurs concurrents ne
+ * doivent jamais pouvoir se bloquer mutuellement en écrivant sur le même
+ * agrégat ; chaque offre a son propre cycle de vie et sa propre
+ * concurrence optimiste.
+ * </p>
+ *
+ * <h3>Invariants</h3>
+ * <ul>
+ * <li>une offre doit comporter au moins une ligne de prix ;</li>
+ * <li>seule une offre {@code SOUMISE} peut être retirée, retenue ou
+ * rejetée ;</li>
+ * <li>{@code RETENUE}, {@code REJETEE} et {@code RETIREE} sont des états
+ * terminaux.</li>
+ * </ul>
+ */
+public class OffreFournisseur extends AggregateRoot<OffreFournisseurId> {
+
+    private final AppelOffreId appelOffreId;
+    private final FournisseurId fournisseurId;
+    private String commentaire;
+    private StatutOffre statut;
+    private final List<LigneOffre> lignes;
+
+    private OffreFournisseur(OffreFournisseurId id, AppelOffreId appelOffreId, FournisseurId fournisseurId,
+            String commentaire, StatutOffre statut, List<LigneOffre> lignes, Instant createdAt, Instant updatedAt) {
+        super(id, createdAt, updatedAt);
+        this.appelOffreId = Objects.requireNonNull(appelOffreId, "L'appel d'offres référencé est obligatoire");
+        this.fournisseurId = Objects.requireNonNull(fournisseurId, "Le fournisseur est obligatoire");
+        this.commentaire = commentaire;
+        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
+        this.lignes = new ArrayList<>(Objects.requireNonNull(lignes, "Les lignes ne peuvent pas être null"));
+        if (this.lignes.isEmpty()) {
+            throw new IllegalArgumentException("Une offre doit contenir au moins une ligne de prix");
+        }
+    }
+
+    public static OffreFournisseur reconstruct(OffreFournisseurId id, AppelOffreId appelOffreId,
+            FournisseurId fournisseurId, String commentaire, StatutOffre statut, List<LigneOffre> lignes,
+            Instant createdAt, Instant updatedAt) {
+        return new OffreFournisseur(id, appelOffreId, fournisseurId, commentaire, statut, lignes, createdAt,
+                updatedAt);
+    }
+
+    public static OffreFournisseur soumettre(AppelOffreId appelOffreId, FournisseurId fournisseurId,
+            String commentaire, List<LigneOffre> lignes) {
+        Instant maintenant = Instant.now();
+        return new OffreFournisseur(OffreFournisseurId.generate(), appelOffreId, fournisseurId, commentaire,
+                StatutOffre.SOUMISE, lignes, maintenant, maintenant);
+    }
+
+    // ── Comportements métier ────────────────────────────────────────────
+
+    public void retirer() {
+        exigerStatut(StatutOffre.SOUMISE, "retirer");
+        this.statut = StatutOffre.RETIREE;
+        markUpdated();
+    }
+
+    public void retenir() {
+        exigerStatut(StatutOffre.SOUMISE, "retenir");
+        this.statut = StatutOffre.RETENUE;
+        markUpdated();
+    }
+
+    public void rejeter() {
+        exigerStatut(StatutOffre.SOUMISE, "rejeter");
+        this.statut = StatutOffre.REJETEE;
+        markUpdated();
+    }
+
+    public boolean appartientA(FournisseurId candidat) {
+        return this.fournisseurId.equals(candidat);
+    }
+
+    private void exigerStatut(StatutOffre attendu, String action) {
+        if (this.statut != attendu) {
+            throw new TransitionStatutOffreInvalideException(this.statut, action);
+        }
+    }
+
+    // ── Accesseurs ───────────────────────────────────────────────────────
+
+    public AppelOffreId getAppelOffreId() {
+        return appelOffreId;
+    }
+
+    public FournisseurId getFournisseurId() {
+        return fournisseurId;
+    }
+
+    public String getCommentaire() {
+        return commentaire;
+    }
+
+    public StatutOffre getStatut() {
+        return statut;
+    }
+
+    public List<LigneOffre> getLignes() {
+        return Collections.unmodifiableList(lignes);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+}
