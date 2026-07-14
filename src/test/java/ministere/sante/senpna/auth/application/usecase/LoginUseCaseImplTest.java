@@ -66,7 +66,7 @@ class LoginUseCaseImplTest {
         lenient().when(userRoleResolver.resoudreCodes(any())).thenReturn(ROLE_CODES);
         lenient().when(authTokenFactory.build(any(User.class), any())).thenReturn(TOKENS);
         lenient().when(userAffectationResolver.resoudre(any()))
-                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null));
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null, null));
     }
 
     // ══════════════════════════════════════════════════════════════════════

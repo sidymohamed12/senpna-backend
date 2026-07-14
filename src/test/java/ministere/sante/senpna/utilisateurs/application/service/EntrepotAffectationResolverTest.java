@@ -140,7 +140,7 @@ class EntrepotAffectationResolverTest {
         UUID entrepotFourniParErreur = UUID.randomUUID();
         when(userHierarchyGuard.estActeurNational(ACTEUR_ID)).thenReturn(false);
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
-                .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotActeur, null)));
+                .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotActeur, null, null)));
         when(entrepotQueryPort.findById(entrepotActeur)).thenReturn(
                 Optional.of(new EntrepotProjection(entrepotActeur, "PRA-THIES", "PRA Thiès", "PRA",
                         UUID.randomUUID(), true)));

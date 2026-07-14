@@ -103,7 +103,7 @@ class AuthUseCasesTest {
                     .thenReturn(Optional.of(user));
             when(userRoleResolver.resoudreCodes(any())).thenReturn(Set.of("GESTIONNAIRE_PNA"));
             when(userAffectationResolver.resoudre(user.getId().getValue()))
-                    .thenReturn(new UserAffectationView(user.getId().getValue(), entrepotId, null));
+                    .thenReturn(new UserAffectationView(user.getId().getValue(), entrepotId, null, null));
 
             UserSummary result = sut.me(new MeQuery(UserFixtures.EMAIL));
 

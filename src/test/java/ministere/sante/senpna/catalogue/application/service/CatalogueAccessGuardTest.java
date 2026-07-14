@@ -173,7 +173,7 @@ class CatalogueAccessGuardTest {
                         UUID regionStructure = UUID.randomUUID();
                         UUID structureId = UUID.randomUUID();
                         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
-                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, null, structureId)));
+                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, null, structureId, null)));
                         when(structureSanitaireQueryPort.findById(structureId)).thenReturn(Optional.of(
                                         new StructureSanitaireProjection(structureId, "HOP-X", "Hôpital X",
                                                         regionStructure, null,
@@ -198,7 +198,7 @@ class CatalogueAccessGuardTest {
                         UUID regionPra = UUID.randomUUID();
                         UUID entrepotId = UUID.randomUUID();
                         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
-                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null)));
+                                        .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null, null)));
                         when(entrepotQueryPort.findById(entrepotId)).thenReturn(Optional.of(
                                         new EntrepotProjection(entrepotId, "PRA-X", "PRA X", "PRA", regionPra, true)));
 

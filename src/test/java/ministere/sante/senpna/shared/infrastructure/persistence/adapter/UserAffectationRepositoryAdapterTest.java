@@ -58,10 +58,11 @@ class UserAffectationRepositoryAdapterTest {
         assertThat(result).isPresent();
         assertThat(result.get().entrepotId()).isNull();
         assertThat(result.get().structureSanitaireId()).isNull();
+        assertThat(result.get().fournisseurId()).isNull();
     }
 
     @Test
-    @DisplayName("affecterEntrepot() affecte l'entrepôt et efface toute structure sanitaire précédente")
+    @DisplayName("affecterEntrepot() affecte l'entrepôt et efface toute structure sanitaire ou fournisseur précédent")
     void affecterEntrepot_affecteEtEcraseStructure() {
         UUID entrepotId = UUID.randomUUID();
 
@@ -72,10 +73,11 @@ class UserAffectationRepositoryAdapterTest {
         UserAffectationView result = sut.findAffectation(UserFixtures.USER_ID).orElseThrow();
         assertThat(result.entrepotId()).isEqualTo(entrepotId);
         assertThat(result.structureSanitaireId()).isNull();
+        assertThat(result.fournisseurId()).isNull();
     }
 
     @Test
-    @DisplayName("affecterStructureSanitaire() affecte la structure et efface tout entrepôt précédent")
+    @DisplayName("affecterStructureSanitaire() affecte la structure et efface tout entrepôt ou fournisseur précédent")
     void affecterStructureSanitaire_affecteEtEcraseEntrepot() {
         sut.affecterEntrepot(UserFixtures.USER_ID, UUID.randomUUID());
         entityManager.flush();
@@ -89,12 +91,31 @@ class UserAffectationRepositoryAdapterTest {
         UserAffectationView result = sut.findAffectation(UserFixtures.USER_ID).orElseThrow();
         assertThat(result.structureSanitaireId()).isEqualTo(structureId);
         assertThat(result.entrepotId()).isNull();
+        assertThat(result.fournisseurId()).isNull();
     }
 
     @Test
-    @DisplayName("retirerAffectation() efface entrepôt ET structure sanitaire")
-    void retirerAffectation_efaceLesDeux() {
+    @DisplayName("affecterFournisseur() affecte le fournisseur et efface tout entrepôt ou structure précédent")
+    void affecterFournisseur_affecteEtEcraseEntrepotEtStructure() {
         sut.affecterEntrepot(UserFixtures.USER_ID, UUID.randomUUID());
+        entityManager.flush();
+        entityManager.clear();
+
+        UUID fournisseurId = UUID.randomUUID();
+        sut.affecterFournisseur(UserFixtures.USER_ID, fournisseurId);
+        entityManager.flush();
+        entityManager.clear();
+
+        UserAffectationView result = sut.findAffectation(UserFixtures.USER_ID).orElseThrow();
+        assertThat(result.fournisseurId()).isEqualTo(fournisseurId);
+        assertThat(result.entrepotId()).isNull();
+        assertThat(result.structureSanitaireId()).isNull();
+    }
+
+    @Test
+    @DisplayName("retirerAffectation() efface entrepôt, structure sanitaire ET fournisseur")
+    void retirerAffectation_efaceLesTrois() {
+        sut.affecterFournisseur(UserFixtures.USER_ID, UUID.randomUUID());
         entityManager.flush();
         entityManager.clear();
 
@@ -105,6 +126,7 @@ class UserAffectationRepositoryAdapterTest {
         UserAffectationView result = sut.findAffectation(UserFixtures.USER_ID).orElseThrow();
         assertThat(result.entrepotId()).isNull();
         assertThat(result.structureSanitaireId()).isNull();
+        assertThat(result.fournisseurId()).isNull();
     }
 
     @Test

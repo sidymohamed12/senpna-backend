@@ -1,10 +1,12 @@
 package ministere.sante.senpna.utilisateurs.application.usecase;
 
 import ministere.sante.senpna.shared.domain.exception.ValidationException;
+import ministere.sante.senpna.shared.domain.port.out.FournisseurCachePort;
 import ministere.sante.senpna.shared.domain.port.out.PasswordEncoderPort;
 import ministere.sante.senpna.shared.domain.port.out.RoleQueryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserAffectationRepositoryPort;
 import ministere.sante.senpna.shared.domain.port.out.UserManagementRepositoryPort;
+import ministere.sante.senpna.shared.domain.projection.FournisseurProjection;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
 import ministere.sante.senpna.utilisateurs.application.service.EntrepotAffectationResolver;
 import ministere.sante.senpna.utilisateurs.application.service.TemporaryPasswordGenerator;
@@ -15,6 +17,9 @@ import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.CreatedUs
 import ministere.sante.senpna.utilisateurs.domain.command.UserCommands.UserDetail;
 import ministere.sante.senpna.utilisateurs.domain.exception.CreationRoleReserveeException;
 import ministere.sante.senpna.utilisateurs.domain.exception.EmailDejaUtiliseException;
+import ministere.sante.senpna.utilisateurs.domain.exception.FournisseurIdRequisException;
+import ministere.sante.senpna.utilisateurs.domain.exception.FournisseurIntrouvableException;
+import ministere.sante.senpna.utilisateurs.domain.exception.GestionUtilisateurInterditeException;
 import ministere.sante.senpna.utilisateurs.domain.exception.RoleIntrouvableException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +62,8 @@ class CreateUserUseCaseImplTest {
     @Mock
     UserAffectationRepositoryPort userAffectationRepositoryPort;
     @Mock
+    FournisseurCachePort fournisseurCachePort;
+    @Mock
     UserDetailAssembler userDetailAssembler;
 
     CreateUserUseCaseImpl sut;
@@ -67,14 +75,23 @@ class CreateUserUseCaseImplTest {
     void setUp() {
         sut = new CreateUserUseCaseImpl(userManagementRepositoryPort, roleQueryPort, passwordEncoderPort,
                 temporaryPasswordGenerator, userHierarchyGuard, entrepotAffectationResolver,
-                userAffectationRepositoryPort, userDetailAssembler);
+                userAffectationRepositoryPort, fournisseurCachePort, userDetailAssembler);
         roleId = UUID.randomUUID();
         acteurId = UUID.randomUUID();
     }
 
     private CreateUserCommand commande(Set<UUID> roleIds, UUID entrepotId) {
+        return commande(roleIds, entrepotId, null);
+    }
+
+    private CreateUserCommand commande(Set<UUID> roleIds, UUID entrepotId, UUID fournisseurId) {
         return new CreateUserCommand(acteurId, "Diallo", "Mamadou", "nouveau@sante.gouv.sn", null, roleIds,
-                entrepotId);
+                entrepotId, fournisseurId);
+    }
+
+    private UserDetail mockUserDetail() {
+        return new UserDetail(UUID.randomUUID(), "Diallo", "Mamadou", "nouveau@sante.gouv.sn", null, true, Set.of(),
+                null, null, null, null, null);
     }
 
     @Nested
@@ -174,10 +191,102 @@ class CreateUserUseCaseImplTest {
 
             verify(userHierarchyGuard).verifierGestionAutorisee(acteurId, Set.of(roleId));
         }
+    }
 
-        private UserDetail mockUserDetail() {
-            return new UserDetail(UUID.randomUUID(), "Diallo", "Mamadou", "nouveau@sante.gouv.sn", null, true,
-                    Set.of(), null, null, null, null);
+    @Nested
+    @DisplayName("rôle FOURNISSEUR — provisionnement d'un compte espace fournisseur")
+    class RoleFournisseur {
+
+        UUID fournisseurId;
+
+        @BeforeEach
+        void setUp() {
+            fournisseurId = UUID.randomUUID();
+            when(userManagementRepositoryPort.existsByEmail(any())).thenReturn(false);
+            when(roleQueryPort.findById(roleId))
+                    .thenReturn(Optional.of(new RoleProjection(roleId, "FOURNISSEUR", "Fournisseur")));
+        }
+
+        @Test
+        @DisplayName("combiné à un autre rôle → ValidationException, aucun appel de garde hiérarchique")
+        void combineAvecAutreRole_leveException() {
+            UUID autreRoleId = UUID.randomUUID();
+            when(roleQueryPort.findById(autreRoleId))
+                    .thenReturn(Optional.of(new RoleProjection(autreRoleId, "GESTIONNAIRE_PNA", "Gestionnaire")));
+
+            var command = commande(Set.of(roleId, autreRoleId), null, fournisseurId);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(ValidationException.class);
+
+            verify(userManagementRepositoryPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("acteur non national → GestionUtilisateurInterditeException")
+        void acteurNonNational_leveException() {
+            when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(false);
+
+            var command = commande(Set.of(roleId), null, fournisseurId);
+            assertThatThrownBy(() -> sut.creer(command))
+                    .isInstanceOf(GestionUtilisateurInterditeException.class);
+
+            verify(userManagementRepositoryPort, never()).save(any());
+            // La hiérarchie régionale usuelle (verifierGestionAutorisee) ne s'applique pas au rôle
+            // FOURNISSEUR — c'est estActeurNational() qui tranche, jamais les deux.
+            verify(userHierarchyGuard, never()).verifierGestionAutorisee(any(), any());
+        }
+
+        @Test
+        @DisplayName("entrepotId fourni avec FOURNISSEUR → ValidationException")
+        void entrepotIdFourni_leveException() {
+            when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(true);
+
+            var command = commande(Set.of(roleId), UUID.randomUUID(), fournisseurId);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(ValidationException.class);
+
+            verify(userManagementRepositoryPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("fournisseurId absent → FournisseurIdRequisException")
+        void fournisseurIdAbsent_leveException() {
+            when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(true);
+
+            var command = commande(Set.of(roleId), null, null);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(FournisseurIdRequisException.class);
+
+            verify(userManagementRepositoryPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("fournisseur introuvable dans le cache → FournisseurIntrouvableException")
+        void fournisseurIntrouvable_leveException() {
+            when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(true);
+            when(fournisseurCachePort.findById(fournisseurId)).thenReturn(Optional.empty());
+
+            var command = commande(Set.of(roleId), null, fournisseurId);
+            assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(FournisseurIntrouvableException.class);
+
+            verify(userManagementRepositoryPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("cas nominal → affecterFournisseur() appelé, affecterEntrepot() jamais appelé")
+        void casNominal_affecteFournisseur() {
+            when(userHierarchyGuard.estActeurNational(acteurId)).thenReturn(true);
+            when(fournisseurCachePort.findById(fournisseurId))
+                    .thenReturn(Optional.of(new FournisseurProjection(fournisseurId, "Laboratoire A", true)));
+            when(temporaryPasswordGenerator.generer()).thenReturn("Mdp@Temp1234!");
+            when(passwordEncoderPort.encoder(anyString())).thenReturn("hash-encode");
+            when(userManagementRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(userDetailAssembler.assembler(any())).thenReturn(mockUserDetail());
+
+            CreatedUser result = sut.creer(commande(Set.of(roleId), null, fournisseurId));
+
+            verify(userAffectationRepositoryPort).affecterFournisseur(any(), eq(fournisseurId));
+            verify(userAffectationRepositoryPort, never()).affecterEntrepot(any(), any());
+            // Le rôle FOURNISSEUR n'exige pas d'entrepôt : le résolveur ne doit même pas être sollicité.
+            verify(entrepotAffectationResolver, never()).resoudre(any(), any(), any());
+            assertThat(result.motDePasseTemporaire()).isEqualTo("Mdp@Temp1234!");
         }
     }
 }

@@ -49,7 +49,7 @@ class ListUsersUseCaseImplTest {
         when(userManagementRepositoryPort.search(eq(new UserSearchCriteria("dia", true, null)), any()))
                 .thenReturn(pageResult);
         UserDetail detail = new UserDetail(UserFixtures.USER_ID, "N", "P", "e", null, true, java.util.Set.of(),
-                null, null, null, null);
+                null, null, null, null, null);
         when(userDetailAssembler.assembler(user)).thenReturn(detail);
 
         UserPage page = sut.lister(new ListUsersQuery("dia", true, null, 0, 20, null, null));

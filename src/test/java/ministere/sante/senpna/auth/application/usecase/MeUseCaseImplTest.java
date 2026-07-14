@@ -62,7 +62,7 @@ class MeUseCaseImplTest {
         when(userRepositoryPort.findByEmail(Email.of(UserFixtures.EMAIL))).thenReturn(Optional.of(user));
         when(userRoleResolver.resoudreCodes(user.getRoleIds())).thenReturn(Set.of("ADMIN_PNA"));
         when(userAffectationResolver.resoudre(UserFixtures.USER_ID))
-                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null));
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null, null));
 
         UserSummary summary = sut.me(new MeQuery(UserFixtures.EMAIL));
 

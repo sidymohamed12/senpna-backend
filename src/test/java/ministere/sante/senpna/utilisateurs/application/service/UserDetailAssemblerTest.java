@@ -79,16 +79,33 @@ class UserDetailAssemblerTest {
         UUID entrepotId = UUID.randomUUID();
         when(roleSummaryResolver.resoudre(user.getRoleIds())).thenReturn(Set.of());
         when(userAffectationRepositoryPort.findAffectation(UserFixtures.USER_ID))
-                .thenReturn(Optional.of(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null)));
+                .thenReturn(Optional.of(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null, null)));
 
         UserDetail detail = sut.assembler(user);
 
         assertThat(detail.entrepotId()).isEqualTo(entrepotId);
         assertThat(detail.structureSanitaireId()).isNull();
+        assertThat(detail.fournisseurId()).isNull();
     }
 
     @Test
-    @DisplayName("aucune affectation → entrepotId et structureSanitaireId null")
+    @DisplayName("affectation fournisseur présente → fournisseurId reporté, entrepotId/structureSanitaireId null")
+    void affectationFournisseurPresente_reportee() {
+        User user = UserFixtures.actif();
+        UUID fournisseurId = UUID.randomUUID();
+        when(roleSummaryResolver.resoudre(user.getRoleIds())).thenReturn(Set.of());
+        when(userAffectationRepositoryPort.findAffectation(UserFixtures.USER_ID))
+                .thenReturn(Optional.of(new UserAffectationView(UserFixtures.USER_ID, null, null, fournisseurId)));
+
+        UserDetail detail = sut.assembler(user);
+
+        assertThat(detail.fournisseurId()).isEqualTo(fournisseurId);
+        assertThat(detail.entrepotId()).isNull();
+        assertThat(detail.structureSanitaireId()).isNull();
+    }
+
+    @Test
+    @DisplayName("aucune affectation → entrepotId, structureSanitaireId et fournisseurId null")
     void aucuneAffectation_champsNull() {
         User user = UserFixtures.actif();
         when(roleSummaryResolver.resoudre(user.getRoleIds())).thenReturn(Set.of());
@@ -98,5 +115,6 @@ class UserDetailAssemblerTest {
 
         assertThat(detail.entrepotId()).isNull();
         assertThat(detail.structureSanitaireId()).isNull();
+        assertThat(detail.fournisseurId()).isNull();
     }
 }

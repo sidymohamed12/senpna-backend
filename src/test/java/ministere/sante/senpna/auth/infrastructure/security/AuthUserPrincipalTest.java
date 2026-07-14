@@ -88,12 +88,13 @@ class AuthUserPrincipalTest {
     class AffectationOrganisationnelle {
 
         @Test
-        @DisplayName("entrepotId et structureSanitaireId sont null par défaut")
+        @DisplayName("entrepotId, structureSanitaireId et fournisseurId sont null par défaut")
         void nullParDefaut() {
             AuthUserPrincipal sut = new AuthUserPrincipal(UserFixtures.actif(), Set.of());
 
             assertThat(sut.getEntrepotId()).isNull();
             assertThat(sut.getStructureSanitaireId()).isNull();
+            assertThat(sut.getFournisseurId()).isNull();
         }
 
         @Test
@@ -105,6 +106,17 @@ class AuthUserPrincipalTest {
             sut.setEntrepotId(entrepotId);
 
             assertThat(sut.getEntrepotId()).isEqualTo(entrepotId);
+        }
+
+        @Test
+        @DisplayName("fournisseurId peut être défini après construction (cf. JwtAuthenticationFilter)")
+        void fournisseurIdPeutEtreDefini() {
+            AuthUserPrincipal sut = new AuthUserPrincipal(UserFixtures.actif(), Set.of());
+            UUID fournisseurId = UUID.randomUUID();
+
+            sut.setFournisseurId(fournisseurId);
+
+            assertThat(sut.getFournisseurId()).isEqualTo(fournisseurId);
         }
     }
 

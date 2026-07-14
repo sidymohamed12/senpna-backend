@@ -50,8 +50,8 @@ class AuthTokenFactoryTest {
         User user = UserFixtures.actif();
         UUID entrepotId = UUID.randomUUID();
         when(userAffectationResolver.resoudre(UserFixtures.USER_ID))
-                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null));
-        when(tokenPort.genererAccess(eq(user), any(), eq(entrepotId), isNull())).thenReturn("access-token");
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, entrepotId, null, null));
+        when(tokenPort.genererAccess(eq(user), any(), eq(entrepotId), isNull(), isNull())).thenReturn("access-token");
         when(tokenPort.genererRefresh(user)).thenReturn("refresh-token");
 
         AuthTokens tokens = sut.build(user, Set.of("ADMIN_PNA"));
@@ -61,12 +61,28 @@ class AuthTokenFactoryTest {
     }
 
     @Test
+    @DisplayName("embarque le fournisseur résolu dans l'access token (compte espace fournisseur)")
+    void embarqueFournisseur() {
+        User user = UserFixtures.actif();
+        UUID fournisseurId = UUID.randomUUID();
+        when(userAffectationResolver.resoudre(UserFixtures.USER_ID))
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null, fournisseurId));
+        when(tokenPort.genererAccess(eq(user), any(), isNull(), isNull(), eq(fournisseurId)))
+                .thenReturn("access-token");
+        when(tokenPort.genererRefresh(user)).thenReturn("refresh-token");
+
+        AuthTokens tokens = sut.build(user, Set.of("FOURNISSEUR"));
+
+        assertThat(tokens.accessToken()).isEqualTo("access-token");
+    }
+
+    @Test
     @DisplayName("expiresInSeconds correspond au TTL configuré, converti en secondes")
     void expiresInSecondsDepuisTtlConfigure() {
         User user = UserFixtures.actif();
         when(userAffectationResolver.resoudre(any()))
-                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null));
-        when(tokenPort.genererAccess(any(), any(), any(), any())).thenReturn("access-token");
+                .thenReturn(new UserAffectationView(UserFixtures.USER_ID, null, null, null));
+        when(tokenPort.genererAccess(any(), any(), any(), any(), any())).thenReturn("access-token");
         when(tokenPort.genererRefresh(any())).thenReturn("refresh-token");
 
         AuthTokens tokens = sut.build(user, Set.of());

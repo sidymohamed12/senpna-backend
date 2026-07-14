@@ -44,7 +44,7 @@ class GetUserUseCaseImplTest {
         User user = UserFixtures.actif();
         when(userManagementRepositoryPort.findById(UserId.of(UserFixtures.USER_ID))).thenReturn(Optional.of(user));
         UserDetail detail = new UserDetail(UserFixtures.USER_ID, "N", "P", "e", null, true, java.util.Set.of(),
-                null, null, null, null);
+                null, null, null, null, null);
         when(userDetailAssembler.assembler(user)).thenReturn(detail);
 
         assertThat(sut.obtenir(new GetUserQuery(UserFixtures.USER_ID))).isSameAs(detail);

@@ -165,6 +165,25 @@ class JwtAuthenticationFilterTest {
 
             assertThat(principal.getEntrepotId()).isEqualTo(entrepotId);
         }
+
+        @Test
+        @DisplayName("affecte fournisseurId du token au principal résolu")
+        void affecteFournisseurId() throws Exception {
+            UUID fournisseurId = UUID.randomUUID();
+            String token = jwtService.generateAccessToken(UserFixtures.EMAIL,
+                    Map.of("fournisseurId", fournisseurId.toString()));
+            when(tokenRevocationPort.estInvalide(token)).thenReturn(false);
+            AuthUserPrincipal principal = principal();
+            when(userDetailsService.loadUserByUsername(UserFixtures.EMAIL)).thenReturn(principal);
+
+            MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/medicaments");
+            request.addHeader("Authorization", "Bearer " + token);
+            MockHttpServletResponse response = new MockHttpServletResponse();
+
+            sut.doFilterInternal(request, response, filterChain);
+
+            assertThat(principal.getFournisseurId()).isEqualTo(fournisseurId);
+        }
     }
 
     @Nested

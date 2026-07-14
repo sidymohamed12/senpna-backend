@@ -177,6 +177,24 @@ class JwtServiceTest {
         }
 
         @Test
+        @DisplayName("extractFournisseurId() renvoie null si le claim est absent")
+        void fournisseurIdAbsent_null() {
+            String token = sut.generateAccessToken("alice@sante.gouv.sn", Map.of());
+
+            assertThat(sut.extractFournisseurId(token)).isNull();
+        }
+
+        @Test
+        @DisplayName("extractFournisseurId() résout correctement le claim présent")
+        void fournisseurIdPresent() {
+            UUID fournisseurId = UUID.randomUUID();
+            String token = sut.generateAccessToken("alice@sante.gouv.sn",
+                    Map.of("fournisseurId", fournisseurId.toString()));
+
+            assertThat(sut.extractFournisseurId(token)).isEqualTo(fournisseurId);
+        }
+
+        @Test
         @DisplayName("extractClaim() sur un token expiré lève ExpiredJwtException")
         void tokenExpire_leveException() {
 

@@ -75,7 +75,7 @@ class UserRoleResolverTest {
         void affectationExistante_vueRenvoyee() {
             UUID userId = UUID.randomUUID();
             UUID entrepotId = UUID.randomUUID();
-            UserAffectationView vue = new UserAffectationView(userId, entrepotId, null);
+            UserAffectationView vue = new UserAffectationView(userId, entrepotId, null, null);
             when(userAffectationRepositoryPort.findAffectation(userId)).thenReturn(Optional.of(vue));
 
             assertThat(sut.resoudre(userId)).isSameAs(vue);

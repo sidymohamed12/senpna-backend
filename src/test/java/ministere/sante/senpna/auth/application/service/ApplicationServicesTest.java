@@ -93,10 +93,10 @@ class ApplicationServicesTest {
             User user = UserFixtures.actif();
             Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
             AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
-            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), null, null);
+            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), null, null, null);
 
             when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
-            when(tokenPort.genererAccess(eq(user), eq(roleCodes), any(), any())).thenReturn("access.jwt");
+            when(tokenPort.genererAccess(eq(user), eq(roleCodes), any(), any(), any())).thenReturn("access.jwt");
             when(tokenPort.genererRefresh(user)).thenReturn("refresh.jwt");
             when(appProperties.jwt()).thenReturn(jwt);
             when(jwt.accessTokenTtl()).thenReturn(Duration.ofHours(1));
@@ -115,17 +115,18 @@ class ApplicationServicesTest {
             Set<String> roleCodes = Set.of("ADMIN_PNA");
             AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
             UUID entrepotId = UUID.randomUUID();
-            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), entrepotId, null);
+            UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), entrepotId, null,
+                    null);
 
             when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
-            when(tokenPort.genererAccess(any(), any(), any(), any())).thenReturn("tok");
+            when(tokenPort.genererAccess(any(), any(), any(), any(), any())).thenReturn("tok");
             when(tokenPort.genererRefresh(any())).thenReturn("ref");
             when(appProperties.jwt()).thenReturn(jwt);
             when(jwt.accessTokenTtl()).thenReturn(Duration.ofMinutes(30));
 
             sut.build(user, roleCodes);
 
-            verify(tokenPort).genererAccess(user, roleCodes, entrepotId, null);
+            verify(tokenPort).genererAccess(user, roleCodes, entrepotId, null, null);
             verify(tokenPort).genererRefresh(user);
         }
     }

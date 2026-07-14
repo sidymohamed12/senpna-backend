@@ -52,7 +52,7 @@ class ActivateUserUseCaseImplTest {
         when(userManagementRepositoryPort.findById(UserId.of(UserFixtures.USER_ID))).thenReturn(Optional.of(user));
         when(userManagementRepositoryPort.save(user)).thenReturn(user);
         UserDetail detail = new UserDetail(UserFixtures.USER_ID, "N", "P", "e", null, true, java.util.Set.of(),
-                null, null, null, null);
+                null, null, null, null, null);
         when(userDetailAssembler.assembler(user)).thenReturn(detail);
 
         UserDetail result = sut.activer(new ActivateUserCommand(UserFixtures.USER_ID, UUID.randomUUID()));
