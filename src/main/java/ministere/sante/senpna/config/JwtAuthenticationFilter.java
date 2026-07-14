@@ -74,6 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (userDetails instanceof AuthUserPrincipal principal) {
                         principal.setEntrepotId(jwtService.extractEntrepotId(token));
                         principal.setStructureSanitaireId(jwtService.extractStructureSanitaireId(token));
+                        principal.setFournisseurId(jwtService.extractFournisseurId(token));
                     }
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

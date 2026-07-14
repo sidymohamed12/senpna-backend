@@ -103,6 +103,10 @@ public class JwtService {
         return extractUuidClaim(token, "structureSanitaireId");
     }
 
+    public UUID extractFournisseurId(String token) {
+        return extractUuidClaim(token, "fournisseurId");
+    }
+
     private UUID extractUuidClaim(String token, String claimName) {
         String value = extractClaim(token, claims -> claims.get(claimName, String.class));
         return value != null ? UUID.fromString(value) : null;
