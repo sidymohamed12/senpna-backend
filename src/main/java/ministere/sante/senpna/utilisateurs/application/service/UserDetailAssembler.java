@@ -43,6 +43,7 @@ public class UserDetailAssembler {
                 roleSummaryResolver.resoudre(user.getRoleIds()),
                 affectation.map(UserAffectationView::entrepotId).orElse(null),
                 affectation.map(UserAffectationView::structureSanitaireId).orElse(null),
+                affectation.map(UserAffectationView::fournisseurId).orElse(null),
                 user.getCreatedAt(),
                 user.getUpdatedAt());
     }

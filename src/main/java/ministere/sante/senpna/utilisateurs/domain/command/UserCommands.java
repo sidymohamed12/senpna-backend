@@ -13,7 +13,7 @@ public final class UserCommands {
         // ── Commandes ───────────────────────────────────────────────────────
 
         public record CreateUserCommand(UUID acteurId, String nom, String prenom, String email, String telephone,
-                        Set<UUID> roleIds, UUID entrepotId) {
+                        Set<UUID> roleIds, UUID entrepotId, UUID fournisseurId) {
         }
 
         public record UpdateUserCommand(UUID userId, UUID acteurId, String nom, String prenom, String telephone) {
@@ -46,8 +46,8 @@ public final class UserCommands {
         }
 
         public record UserDetail(UUID id, String nom, String prenom, String email, String telephone, boolean actif,
-                        Set<RoleSummary> roles, UUID entrepotId, UUID structureSanitaireId, Instant createdAt,
-                        Instant updatedAt) {
+                        Set<RoleSummary> roles, UUID entrepotId, UUID structureSanitaireId, UUID fournisseurId,
+                        Instant createdAt, Instant updatedAt) {
         }
 
         public record CreatedUser(UserDetail user, String motDePasseTemporaire) {

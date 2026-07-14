@@ -14,6 +14,7 @@ public record UserResponse(
                 Set<RoleSummaryResponse> roles,
                 UUID entrepotId,
                 UUID structureSanitaireId,
+                UUID fournisseurId,
                 Instant createdAt,
                 Instant updatedAt) {
 }

@@ -20,5 +20,7 @@ public record CreateUserRequest(
 
                 @NotEmpty(message = "Au moins un rôle doit être attribué") Set<UUID> roleIds,
 
-                UUID entrepotId) {
+                UUID entrepotId,
+
+                UUID fournisseurId) {
 }

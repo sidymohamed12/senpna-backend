@@ -49,7 +49,8 @@ public class UsersController implements IUsersController {
         public ResponseEntity<Map<String, Object>> creer(CreateUserRequest request) {
                 CreatedUser result = userManagementFacade.creer(new CreateUserCommand(
                                 currentUserId(), request.nom(), request.prenom(), request.email(),
-                                request.telephone(), request.roleIds(), request.entrepotId()));
+                                request.telephone(), request.roleIds(), request.entrepotId(),
+                                request.fournisseurId()));
 
                 CreatedUserResponse body = new CreatedUserResponse(toResponse(result.user()),
                                 result.motDePasseTemporaire());
@@ -140,7 +141,7 @@ public class UsersController implements IUsersController {
                                 .collect(Collectors.toUnmodifiableSet());
                 return new UserResponse(detail.id(), detail.nom(), detail.prenom(), detail.email(), detail.telephone(),
                                 detail.actif(), roles, detail.entrepotId(), detail.structureSanitaireId(),
-                                detail.createdAt(), detail.updatedAt());
+                                detail.fournisseurId(), detail.createdAt(), detail.updatedAt());
         }
 
         private RoleSummaryResponse toResponse(RoleSummary summary) {
