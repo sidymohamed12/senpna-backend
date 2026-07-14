@@ -40,7 +40,7 @@ public class AuthTokenFactory {
         UserAffectationView affectation = userAffectationResolver.resoudre(user.getId().getValue());
 
         String accessToken = tokenPort.genererAccess(user, roleCodes,
-                affectation.entrepotId(), affectation.structureSanitaireId());
+                affectation.entrepotId(), affectation.structureSanitaireId(), affectation.fournisseurId());
         String refreshToken = tokenPort.genererRefresh(user);
         long expiresInSeconds = appProperties.jwt().accessTokenTtl().toSeconds();
         return new AuthTokens(accessToken, refreshToken, expiresInSeconds);

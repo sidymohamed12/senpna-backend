@@ -32,6 +32,7 @@ public class AuthUserPrincipal implements UserDetails, CurrentUser {
     private final Set<String> roleCodes;
     private UUID entrepotId;
     private UUID structureSanitaireId;
+    private UUID fournisseurId;
 
     public AuthUserPrincipal(User user, Set<String> roleCodes) {
         this.user = user;
@@ -67,6 +68,15 @@ public class AuthUserPrincipal implements UserDetails, CurrentUser {
 
     public void setStructureSanitaireId(UUID structureSanitaireId) {
         this.structureSanitaireId = structureSanitaireId;
+    }
+
+    @Override
+    public UUID getFournisseurId() {
+        return fournisseurId;
+    }
+
+    public void setFournisseurId(UUID fournisseurId) {
+        this.fournisseurId = fournisseurId;
     }
 
     @Override

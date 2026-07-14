@@ -35,6 +35,8 @@ public interface UserAffectationRepositoryPort {
 
     void affecterStructureSanitaire(UUID userId, UUID structureSanitaireId);
 
+    void affecterFournisseur(UUID userId, UUID fournisseurId);
+
     void retirerAffectation(UUID userId);
 
     Optional<UserAffectationView> findAffectation(UUID userId);

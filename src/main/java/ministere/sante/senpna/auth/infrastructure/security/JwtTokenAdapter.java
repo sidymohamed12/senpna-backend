@@ -73,7 +73,8 @@ public class JwtTokenAdapter implements TokenPort {
     // ── Génération ────────────────────────────────────────────────────────
 
     @Override
-    public String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId) {
+    public String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId,
+            UUID fournisseurId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roleCodes);
         if (entrepotId != null) {
@@ -81,6 +82,9 @@ public class JwtTokenAdapter implements TokenPort {
         }
         if (structureSanitaireId != null) {
             claims.put("structureSanitaireId", structureSanitaireId.toString());
+        }
+        if (fournisseurId != null) {
+            claims.put("fournisseurId", fournisseurId.toString());
         }
         return jwtService.generateAccessToken(user.getEmail().value(), claims);
     }

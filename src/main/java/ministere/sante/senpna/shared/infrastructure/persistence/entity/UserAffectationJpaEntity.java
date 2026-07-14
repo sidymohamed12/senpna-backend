@@ -44,4 +44,7 @@ public class UserAffectationJpaEntity {
 
     @Column(name = "structure_sanitaire_id")
     private UUID structureSanitaireId;
+
+    @Column(name = "fournisseur_id")
+    private UUID fournisseurId;
 }

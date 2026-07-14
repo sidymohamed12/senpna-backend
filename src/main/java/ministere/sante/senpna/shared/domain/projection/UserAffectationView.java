@@ -11,5 +11,5 @@ import java.util.UUID;
  * ultérieure), via un port dédié dans {@code shared} — aucun des deux
  * modules ne dépend de l'autre pour cette donnée.
  */
-public record UserAffectationView(UUID userId, UUID entrepotId, UUID structureSanitaireId) {
+public record UserAffectationView(UUID userId, UUID entrepotId, UUID structureSanitaireId, UUID fournisseurId) {
 }

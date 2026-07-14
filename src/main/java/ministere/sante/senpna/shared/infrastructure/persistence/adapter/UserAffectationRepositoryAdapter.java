@@ -39,6 +39,12 @@ public class UserAffectationRepositoryAdapter implements UserAffectationReposito
 
     @Override
     @Transactional
+    public void affecterFournisseur(UUID userId, UUID fournisseurId) {
+        userAffectationJpaRepository.affecterFournisseur(userId, fournisseurId);
+    }
+
+    @Override
+    @Transactional
     public void retirerAffectation(UUID userId) {
         userAffectationJpaRepository.retirerAffectation(userId);
     }
@@ -51,6 +57,7 @@ public class UserAffectationRepositoryAdapter implements UserAffectationReposito
     }
 
     private UserAffectationView toView(UserAffectationJpaEntity entity) {
-        return new UserAffectationView(entity.getId(), entity.getEntrepotId(), entity.getStructureSanitaireId());
+        return new UserAffectationView(entity.getId(), entity.getEntrepotId(), entity.getStructureSanitaireId(),
+                entity.getFournisseurId());
     }
 }

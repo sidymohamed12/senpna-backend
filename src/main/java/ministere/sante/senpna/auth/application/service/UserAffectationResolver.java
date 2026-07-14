@@ -29,6 +29,6 @@ public class UserAffectationResolver {
      */
     public UserAffectationView resoudre(UUID userId) {
         return userAffectationRepositoryPort.findAffectation(userId)
-                .orElse(new UserAffectationView(userId, null, null));
+                .orElse(new UserAffectationView(userId, null, null, null));
     }
 }

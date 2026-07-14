@@ -12,11 +12,14 @@ public interface TokenPort extends TokenRevocationPort {
 
     /**
      * Génère un access token signé contenant l'email, les codes de rôle et,
-     * si l'utilisateur y est affecté, son entrepôt et/ou sa structure
-     * sanitaire ({@code entrepotId} / {@code structureSanitaireId} peuvent
-     * être {@code null}, auquel cas le claim correspondant est omis).
+     * si l'utilisateur y est affecté, son entrepôt, sa structure sanitaire
+     * et/ou son fournisseur ({@code entrepotId} / {@code structureSanitaireId}
+     * / {@code fournisseurId} peuvent être {@code null}, auquel cas le claim
+     * correspondant est omis — l'affectation est exclusive, un seul des
+     * trois est jamais renseigné à la fois).
      */
-    String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId);
+    String genererAccess(User user, Set<String> roleCodes, UUID entrepotId, UUID structureSanitaireId,
+            UUID fournisseurId);
 
     /**
      * Génère un refresh token, signé, sans claims métier (juste subject + type).

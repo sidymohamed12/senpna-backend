@@ -23,4 +23,6 @@ public interface CurrentUser {
     UUID getEntrepotId();
 
     UUID getStructureSanitaireId();
+
+    UUID getFournisseurId();
 }
