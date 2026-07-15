@@ -1,0 +1,592 @@
+### ══════════════════════════════════════════════════════════════════
+### AppelOffresController — /api/appels-offres
+### EspaceFournisseurAppelOffresController — /api/fournisseur/appels-offres
+### EspaceFournisseurOffresController — /api/fournisseur/offres
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins, et crée lui-même ses
+### deux comptes espace fournisseur (aucune migration mock dédiée pour
+### ce module — cf. V018/V013 pour les référentiels médicament/fournisseur
+### réutilisés ci-dessous).
+###
+### Prérequis : V011__insert_mock_data.sql, V013__insert_mock_fournisseurs.sql
+### ET V018__insert_mock_medicament_referentiel.sql (db/migration-dev)
+### appliquées.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+### Référentiels de démonstration réutilisés (cf. V013 / V018)
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@fournisseurPharmaSenegalId = 50000000-0000-0000-0000-000000000001
+@fournisseurMedSupplyId = 50000000-0000-0000-0000-000000000003
+@roleFournisseurId = 00000000-0000-0000-0000-000000000010
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (analyse/attribution des offres)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (pour les tests de rôle insuffisant)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0e. Login — ADMIN_PRA (pour les tests de rôle insuffisant : la PRA ne gère pas les appels d'offres)
+# @name loginAdminPra
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abdoulaye.ndoye@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### ── Provisionnement des deux comptes espace fournisseur ─────────────
+### Un compte FOURNISSEUR est un compte utilisateur normal (table users)
+### affecté à un fournisseur — cf. CreateUserUseCaseImpl. Réservé aux
+### acteurs nationaux (ADMIN_PNA) ; email unique via {{$timestamp}} pour
+### pouvoir rejouer ce fichier plusieurs fois sans 409.
+
+### 0f. POST /api/users — crée le compte espace fournisseur de Pharma Sénégal
+# @name creerCompteFournisseur1
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Pharma Sénégal",
+  "prenom": "Espace Fournisseur",
+  "email": "fournisseur1.{{$timestamp}}@pharma-senegal.sn",
+  "roleIds": ["{{roleFournisseurId}}"],
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}"
+}
+
+
+### 0g. Login — espace fournisseur Pharma Sénégal, avec le mot de passe temporaire reçu ci-dessus
+# @name loginFournisseur1
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{creerCompteFournisseur1.response.body.$.results.user.email}}",
+  "password": "{{creerCompteFournisseur1.response.body.$.results.motDePasseTemporaire}}"
+}
+
+
+### 0h. POST /api/users — crée le compte espace fournisseur de MedSupply
+# @name creerCompteFournisseur2
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "MedSupply",
+  "prenom": "Espace Fournisseur",
+  "email": "fournisseur2.{{$timestamp}}@medsupply.sn",
+  "roleIds": ["{{roleFournisseurId}}"],
+  "fournisseurId": "{{fournisseurMedSupplyId}}"
+}
+
+
+### 0i. Login — espace fournisseur MedSupply
+# @name loginFournisseur2
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{creerCompteFournisseur2.response.body.$.results.user.email}}",
+  "password": "{{creerCompteFournisseur2.response.body.$.results.motDePasseTemporaire}}"
+}
+
+
+### 0j. POST /api/users — cas d'erreur, ADMIN_PRA ne peut pas créer de compte espace fournisseur (403 attendu)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Ne devrait pas",
+  "prenom": "être créé",
+  "email": "refuse.{{$timestamp}}@test.sn",
+  "roleIds": ["{{roleFournisseurId}}"],
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}"
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### A. Création d'un appel d'offres (PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 1. POST /api/appels-offres — création nominale, deux lignes (BROUILLON attendu)
+# @name creerAO
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-TEST-{{$timestamp}}",
+  "objet": "Achat Amoxicilline et Paracétamol — test HTTP",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline 500 mg", "quantiteEstimee": 100000, "uniteBase": "Comprimé" },
+    { "medicamentId": "{{medicamentParacetamolId}}", "designation": "Paracétamol 500 mg", "quantiteEstimee": 200000, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 2. POST /api/appels-offres — cas limite, une seule ligne (créé par GESTIONNAIRE_PNA)
+# @name creerAoBrouillon
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-BROUILLON-{{$timestamp}}",
+  "objet": "Appel d'offres qui restera en brouillon (tests de visibilité)",
+  "dateCloture": "2027-02-28",
+  "lignes": [
+    { "medicamentId": "{{medicamentParacetamolId}}", "designation": "Paracétamol 500 mg", "quantiteEstimee": 50000, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 3. POST /api/appels-offres — cas d'erreur, aucune ligne (400 attendu)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-SANS-LIGNE",
+  "objet": "Sans ligne",
+  "dateCloture": "2027-01-31",
+  "lignes": []
+}
+
+
+### 4. POST /api/appels-offres — cas d'erreur, référence manquante (400 attendu)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "objet": "Sans référence",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": 10, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 5. POST /api/appels-offres — cas d'erreur, date de clôture non future (400 attendu — @Future)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-DATE-PASSEE",
+  "objet": "Date de clôture passée",
+  "dateCloture": "2020-01-01",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": 10, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 6. POST /api/appels-offres — cas d'erreur, quantité estimée négative (400 attendu)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-QUANTITE-NEGATIVE",
+  "objet": "Quantité négative",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": -5, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 7. POST /api/appels-offres — cas d'erreur, référence déjà utilisée (409 attendu)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "{{creerAO.response.body.$.results.reference}}",
+  "objet": "Référence dupliquée",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": 10, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 8. POST /api/appels-offres — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "AO-ROLE-INSUFFISANT",
+  "objet": "Ne devrait pas être créé",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": 10, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### 9. POST /api/appels-offres — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/appels-offres
+Content-Type: application/json
+
+{
+  "reference": "AO-SANS-AUTH",
+  "objet": "Sans authentification",
+  "dateCloture": "2027-01-31",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "designation": "Amoxicilline", "quantiteEstimee": 10, "uniteBase": "Comprimé" }
+  ]
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### B. Publication et consultation côté PNA
+### ══════════════════════════════════════════════════════════════════
+
+### 10. PATCH /api/appels-offres/{id}/publier — BROUILLON → PUBLIE
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 11. PATCH /api/appels-offres/{id}/publier — cas d'erreur, déjà publié (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 12. PATCH /api/appels-offres/{id}/publier — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/appels-offres/99999999-9999-9999-9999-999999999999/publier
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 13. GET /api/appels-offres/{id} — obtenir un appel d'offres (PHARMACIEN_PNA, lecture)
+GET {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 14. GET /api/appels-offres — lister, pagination par défaut
+GET {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 15. GET /api/appels-offres — filtré par statut=PUBLIE
+GET {{baseUrl}}/api/appels-offres?statut=PUBLIE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 16. GET /api/appels-offres — recherche texte + tri + pagination
+GET {{baseUrl}}/api/appels-offres?q=Amoxicilline&page=0&size=10&sortBy=reference&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 17. GET /api/appels-offres — cas d'erreur, rôle insuffisant (403 attendu — ADMIN_PRA)
+GET {{baseUrl}}/api/appels-offres
+Authorization: Bearer {{loginAdminPra.response.body.$.results.accessToken}}
+
+
+### 18. GET /api/appels-offres — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/appels-offres
+
+
+### ══════════════════════════════════════════════════════════════════
+### C. Espace fournisseur — consultation
+### ══════════════════════════════════════════════════════════════════
+
+### 19. GET /api/fournisseur/appels-offres — liste des AO ouverts à la soumission
+GET {{baseUrl}}/api/fournisseur/appels-offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/fournisseur/appels-offres — recherche texte
+GET {{baseUrl}}/api/fournisseur/appels-offres?q=Amoxicilline
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/fournisseur/appels-offres/{id} — détail d'un AO publié
+GET {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 22. GET /api/fournisseur/appels-offres/{id} — cas d'erreur, AO encore en BROUILLON → masqué (404 attendu)
+GET {{baseUrl}}/api/fournisseur/appels-offres/{{creerAoBrouillon.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/fournisseur/appels-offres/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/fournisseur/appels-offres/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/fournisseur/appels-offres — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/fournisseur/appels-offres
+
+
+### 25. GET /api/fournisseur/appels-offres — cas d'erreur, rôle insuffisant (403 attendu — un compte PNA n'a pas accès à l'espace fournisseur)
+GET {{baseUrl}}/api/fournisseur/appels-offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### ══════════════════════════════════════════════════════════════════
+### D. Soumission d'offres (espace fournisseur)
+### ══════════════════════════════════════════════════════════════════
+
+### 26. POST /api/fournisseur/appels-offres/{id}/offres — Pharma Sénégal soumet une offre sur les 2 lignes
+# @name soumettreOffre1
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "commentaire": "Offre compétitive, livraison sous 15 jours.",
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[0].id}}", "prixUnitaire": 25, "delaiLivraisonJours": 15 },
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[1].id}}", "prixUnitaire": 18, "delaiLivraisonJours": 15 }
+  ]
+}
+
+
+### 27. POST .../offres — cas d'erreur, ce fournisseur a déjà une offre SOUMISE sur cet AO (409 attendu)
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[0].id}}", "prixUnitaire": 20, "delaiLivraisonJours": 10 }
+  ]
+}
+
+
+### 28. POST .../offres — MedSupply soumet une offre concurrente sur le même AO
+# @name soumettreOffre2
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "commentaire": "Meilleur prix du marché.",
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[0].id}}", "prixUnitaire": 22, "delaiLivraisonJours": 20 },
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[1].id}}", "prixUnitaire": 16, "delaiLivraisonJours": 20 }
+  ]
+}
+
+
+### 29. POST .../offres — cas d'erreur, aucune ligne de prix (400 attendu)
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": []
+}
+
+
+### 30. POST .../offres — cas d'erreur, prix unitaire négatif ou nul (400 attendu)
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[0].id}}", "prixUnitaire": 0, "delaiLivraisonJours": 10 }
+  ]
+}
+
+
+### 31. POST .../offres — cas d'erreur, AO encore en BROUILLON → non ouvert à la soumission (422 attendu)
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAoBrouillon.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAoBrouillon.response.body.$.results.lignes[0].id}}", "prixUnitaire": 20, "delaiLivraisonJours": 10 }
+  ]
+}
+# Note : impossible de reproduire ici le cas « date de clôture dépassée »
+# (DateClotureDepasseeException, 422) — dateCloture est validée @Future
+# à la création, il n'existe donc aucun moyen de faire naître via l'API
+# un AO publié dont la clôture serait déjà passée. Ce cas est couvert par
+# SoumettreOffreUseCaseImplTest côté tests unitaires.
+
+
+### 32. POST .../offres — cas d'erreur, rôle insuffisant (403 attendu — un compte PNA n'a pas le rôle FOURNISSEUR)
+POST {{baseUrl}}/api/fournisseur/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneAppelOffreId": "{{creerAO.response.body.$.results.lignes[0].id}}", "prixUnitaire": 20, "delaiLivraisonJours": 10 }
+  ]
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### E. Mes offres (espace fournisseur)
+### ══════════════════════════════════════════════════════════════════
+
+### 33. GET /api/fournisseur/offres — liste des offres du fournisseur connecté (Pharma Sénégal)
+GET {{baseUrl}}/api/fournisseur/offres
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 34. GET /api/fournisseur/offres — filtré par statut=SOUMISE
+GET {{baseUrl}}/api/fournisseur/offres?statut=SOUMISE
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 35. GET /api/fournisseur/offres/{id} — détail de sa propre offre
+GET {{baseUrl}}/api/fournisseur/offres/{{soumettreOffre1.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 36. GET /api/fournisseur/offres/{id} — cas d'erreur, offre d'un autre fournisseur (403 attendu)
+GET {{baseUrl}}/api/fournisseur/offres/{{soumettreOffre1.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 37. GET /api/fournisseur/offres/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/fournisseur/offres/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 38. PATCH /api/fournisseur/offres/{id}/retirer — cas d'erreur, offre d'un autre fournisseur (403 attendu)
+PATCH {{baseUrl}}/api/fournisseur/offres/{{soumettreOffre1.response.body.$.results.id}}/retirer
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 39. PATCH /api/fournisseur/offres/{id}/retirer — MedSupply retire sa propre offre
+PATCH {{baseUrl}}/api/fournisseur/offres/{{soumettreOffre2.response.body.$.results.id}}/retirer
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 40. PATCH .../retirer — cas d'erreur, offre déjà retirée (422 attendu)
+PATCH {{baseUrl}}/api/fournisseur/offres/{{soumettreOffre2.response.body.$.results.id}}/retirer
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### ══════════════════════════════════════════════════════════════════
+### F. Analyse et attribution (PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 41. GET /api/appels-offres/{id}/offres — lister les offres reçues pour cet AO
+GET {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 42. GET .../offres — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA, non habilité à l'analyse)
+GET {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/offres
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 43. PATCH /api/appels-offres/offres/{offreId}/retenir — retient l'offre de Pharma Sénégal
+PATCH {{baseUrl}}/api/appels-offres/offres/{{soumettreOffre1.response.body.$.results.id}}/retenir
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 44. PATCH .../retenir — cas d'erreur, offre déjà retenue (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/offres/{{soumettreOffre1.response.body.$.results.id}}/retenir
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 45. PATCH /api/appels-offres/offres/{offreId}/rejeter — cas d'erreur, l'offre de MedSupply est déjà RETIREE (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/offres/{{soumettreOffre2.response.body.$.results.id}}/rejeter
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 46. PATCH /api/appels-offres/{id}/cloturer — PUBLIE → CLOTURE
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/cloturer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 47. PATCH .../cloturer — cas d'erreur, déjà clôturé (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/cloturer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 48. PATCH /api/appels-offres/{id}/attribuer — CLOTURE → ATTRIBUE, statue sur l'offre retenue
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/attribuer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "offresRetenuesIds": ["{{soumettreOffre1.response.body.$.results.id}}"],
+  "offresRejeteesIds": []
+}
+
+
+### 49. PATCH .../attribuer — cas d'erreur, déjà attribué (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/attribuer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "offresRetenuesIds": [],
+  "offresRejeteesIds": []
+}
+
+
+### 50. PATCH /api/appels-offres/{id}/annuler — cas d'erreur, un AO attribué ne peut plus être annulé (422 attendu)
+PATCH {{baseUrl}}/api/appels-offres/{{creerAO.response.body.$.results.id}}/annuler
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 51. PATCH /api/appels-offres/{id}/annuler — cas nominal, annule l'AO resté en BROUILLON
+PATCH {{baseUrl}}/api/appels-offres/{{creerAoBrouillon.response.body.$.results.id}}/annuler
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 52. GET /api/appels-offres — filtré par statut=ATTRIBUE, vérifie l'état final
+GET {{baseUrl}}/api/appels-offres?statut=ATTRIBUE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}

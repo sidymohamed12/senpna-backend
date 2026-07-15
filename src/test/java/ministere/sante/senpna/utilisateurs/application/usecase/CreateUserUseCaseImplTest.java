@@ -106,6 +106,8 @@ class CreateUserUseCaseImplTest {
             var command = commande(Set.of(roleId), null);
             assertThatThrownBy(() -> sut.creer(command))
                     .isInstanceOf(EmailDejaUtiliseException.class);
+
+            verify(roleQueryPort, never()).findById(any());
         }
 
         @Test
@@ -167,8 +169,8 @@ class CreateUserUseCaseImplTest {
 
             CreatedUser result = sut.creer(commande(Set.of(roleId), entrepotResolu));
 
-            verify(userAffectationRepositoryPort).affecterEntrepot(any(),
-                    org.mockito.ArgumentMatchers.eq(entrepotResolu));
+            verify(userAffectationRepositoryPort).affecterEntrepot(any(), eq(entrepotResolu));
+            verify(userAffectationRepositoryPort, never()).affecterFournisseur(any(), any());
             assertThat(result.motDePasseTemporaire()).isEqualTo("Mdp@Temp1234!");
         }
 
@@ -180,6 +182,7 @@ class CreateUserUseCaseImplTest {
             sut.creer(commande(Set.of(roleId), null));
 
             verify(userAffectationRepositoryPort, never()).affecterEntrepot(any(), any());
+            verify(userAffectationRepositoryPort, never()).affecterFournisseur(any(), any());
         }
 
         @Test
@@ -190,6 +193,18 @@ class CreateUserUseCaseImplTest {
             sut.creer(commande(Set.of(roleId), null));
 
             verify(userHierarchyGuard).verifierGestionAutorisee(acteurId, Set.of(roleId));
+            verify(userHierarchyGuard, never()).estActeurNational(any());
+        }
+
+        @Test
+        @DisplayName("mot de passe temporaire généré, haché puis renvoyé en clair au résultat")
+        void motDePasseTemporaire_genereEtHache() {
+            when(entrepotAffectationResolver.resoudre(any(), any(), any())).thenReturn(null);
+
+            CreatedUser result = sut.creer(commande(Set.of(roleId), null));
+
+            verify(passwordEncoderPort).encoder("Mdp@Temp1234!");
+            assertThat(result.motDePasseTemporaire()).isEqualTo("Mdp@Temp1234!");
         }
     }
 
@@ -218,6 +233,8 @@ class CreateUserUseCaseImplTest {
             assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(SenPnaException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
+            verify(userHierarchyGuard, never()).estActeurNational(any());
+            verify(userHierarchyGuard, never()).verifierGestionAutorisee(any(), any());
         }
 
         @Test
@@ -230,7 +247,8 @@ class CreateUserUseCaseImplTest {
                     .isInstanceOf(GestionUtilisateurInterditeException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
-            // La hiérarchie régionale usuelle (verifierGestionAutorisee) ne s'applique pas au rôle
+            // La hiérarchie régionale usuelle (verifierGestionAutorisee) ne s'applique pas
+            // au rôle
             // FOURNISSEUR — c'est estActeurNational() qui tranche, jamais les deux.
             verify(userHierarchyGuard, never()).verifierGestionAutorisee(any(), any());
         }
@@ -244,6 +262,7 @@ class CreateUserUseCaseImplTest {
             assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(SenPnaException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
+            verify(fournisseurCachePort, never()).findById(any());
         }
 
         @Test
@@ -255,6 +274,7 @@ class CreateUserUseCaseImplTest {
             assertThatThrownBy(() -> sut.creer(command)).isInstanceOf(FournisseurIdRequisException.class);
 
             verify(userManagementRepositoryPort, never()).save(any());
+            verify(fournisseurCachePort, never()).findById(any());
         }
 
         @Test
@@ -284,7 +304,8 @@ class CreateUserUseCaseImplTest {
 
             verify(userAffectationRepositoryPort).affecterFournisseur(any(), eq(fournisseurId));
             verify(userAffectationRepositoryPort, never()).affecterEntrepot(any(), any());
-            // Le rôle FOURNISSEUR n'exige pas d'entrepôt : le résolveur ne doit même pas être sollicité.
+            // Le rôle FOURNISSEUR n'exige pas d'entrepôt : le résolveur ne doit même pas
+            // être sollicité.
             verify(entrepotAffectationResolver, never()).resoudre(any(), any(), any());
             assertThat(result.motDePasseTemporaire()).isEqualTo("Mdp@Temp1234!");
         }
