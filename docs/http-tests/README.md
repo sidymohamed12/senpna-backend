@@ -30,6 +30,8 @@ encore : Marketplace → cherche "REST Client" → Install.
 | `20-projets.http`               | `ProjetsController`              | créer / modifier / cycle éditorial / lister / obtenir un projet, y compris l'accès public `/public`                                           |
 | `21-opportunites-carriere.http` | `OpportunitesCarriereController` | créer / modifier / cycle éditorial (brouillon → ouvert → en cours → clôturé) / lister / obtenir une offre, y compris l'accès public `/public` |
 | `22-candidatures.http`          | `CandidaturesController`         | soumettre une candidature (endpoint public) / lister / obtenir une candidature (back-office)                                                  |
+| `23-appels-offres.http`         | `AppelOffresController` + `EspaceFournisseurAppelOffresController` + `EspaceFournisseurOffresController` | cycle complet PNA (création → publication → clôture → attribution) et espace fournisseur (consultation, soumission d'offre, retrait) |
+| `24-commandes-achat.http`       | `CommandesAchatController` + `EspaceFournisseurCommandesAchatController` | cycle complet PNA (création → validation/rejet → réception totale/partielle) et espace fournisseur (accusé de réception, confirmation de délai, avis d'expédition, factures) |
 
 **Chaque fichier est autonome** : il contient ses propres requêtes de
 login en haut (section `0a`, `0b`...) et réutilise leurs tokens pour le
@@ -73,6 +75,13 @@ d'environnement séparé à configurer.
    `opportunites_carriere` (7 offres, tous statuts et types de contrat)
    et `candidatures` (7 candidatures) référencées dans ces deux
    fichiers.
+9. Pour `23-appels-offres.http` et `24-commandes-achat.http` : aucune
+   migration mock dédiée n'existe pour ces deux modules — les deux
+   fichiers créent eux-mêmes, à chaque exécution, les comptes espace
+   fournisseur nécessaires (rôle `FOURNISSEUR`, cf. `V031`) via
+   `POST /api/users`, avec un email unique (`{{$timestamp}}`) pour
+   rester rejouables. Seuls les référentiels médicament (`V018`) et
+   fournisseur (`V013`) sont réutilisés.
 
 ## Comment exécuter une requête
 

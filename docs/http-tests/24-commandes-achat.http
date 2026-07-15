@@ -1,0 +1,706 @@
+### ══════════════════════════════════════════════════════════════════
+### CommandesAchatController — /api/commandes-achat (+ /factures)
+### EspaceFournisseurCommandesAchatController — /api/fournisseur/commandes-achat
+### SEN PharmaFlow — compatible VS Code "REST Client" (Huachao)
+### Fichier autonome : contient ses propres logins, et crée lui-même ses
+### deux comptes espace fournisseur (aucune migration mock dédiée pour
+### ce module — cf. V018/V013 pour les référentiels médicament/fournisseur
+### réutilisés ci-dessous).
+###
+### Prérequis : V011__insert_mock_data.sql, V013__insert_mock_fournisseurs.sql
+### ET V018__insert_mock_medicament_referentiel.sql (db/migration-dev)
+### appliquées.
+### ══════════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+### Référentiels de démonstration réutilisés (cf. V013 / V018 / V009)
+@pnaCentraleId = 30000000-0000-0000-0000-000000000001
+@medicamentAmoxicillineId = 62000000-0000-0000-0000-000000000002
+@medicamentParacetamolId = 62000000-0000-0000-0000-000000000001
+@conditionnementAmoxComprimeId = 63000000-0000-0000-0000-000000000005
+@conditionnementParaComprimeId = 63000000-0000-0000-0000-000000000001
+@fournisseurPharmaSenegalId = 50000000-0000-0000-0000-000000000001
+@fournisseurMedSupplyId = 50000000-0000-0000-0000-000000000003
+@roleFournisseurId = 00000000-0000-0000-0000-000000000010
+
+
+### 0a. Login — ADMIN_PNA
+# @name loginAdminPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cheikh.ba@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0b. Login — GESTIONNAIRE_PNA
+# @name loginGestionnairePna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mamadou.diallo@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0c. Login — PHARMACIEN_PNA (validation interne, validation des factures)
+# @name loginPharmacienPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aissatou.sow@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### 0d. Login — MAGASINIER_PNA (réception ; pour les tests de rôle insuffisant sur la création)
+# @name loginMagasinierPna
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ousmane.kane@sante.gouv.sn",
+  "password": "{{password}}"
+}
+
+
+### ── Provisionnement des deux comptes espace fournisseur ─────────────
+### email unique via {{$timestamp}} pour pouvoir rejouer ce fichier
+### plusieurs fois sans 409.
+
+### 0e. POST /api/users — crée le compte espace fournisseur de Pharma Sénégal
+# @name creerCompteFournisseur1
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Pharma Sénégal",
+  "prenom": "Espace Fournisseur",
+  "email": "fournisseur1.{{$timestamp}}@pharma-senegal.sn",
+  "roleIds": ["{{roleFournisseurId}}"],
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}"
+}
+
+
+### 0f. Login — espace fournisseur Pharma Sénégal
+# @name loginFournisseur1
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{creerCompteFournisseur1.response.body.$.results.user.email}}",
+  "password": "{{creerCompteFournisseur1.response.body.$.results.motDePasseTemporaire}}"
+}
+
+
+### 0g. POST /api/users — crée le compte espace fournisseur de MedSupply (pour les tests d'accès croisé)
+# @name creerCompteFournisseur2
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "MedSupply",
+  "prenom": "Espace Fournisseur",
+  "email": "fournisseur2.{{$timestamp}}@medsupply.sn",
+  "roleIds": ["{{roleFournisseurId}}"],
+  "fournisseurId": "{{fournisseurMedSupplyId}}"
+}
+
+
+### 0h. Login — espace fournisseur MedSupply
+# @name loginFournisseur2
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{creerCompteFournisseur2.response.body.$.results.user.email}}",
+  "password": "{{creerCompteFournisseur2.response.body.$.results.motDePasseTemporaire}}"
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### A. Création d'un bon de commande d'achat (PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 1. POST /api/commandes-achat — création nominale, deux lignes, pour Pharma Sénégal
+# @name creerCommande
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-TEST-{{$timestamp}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "commentaire": "Commande de test HTTP",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 1000, "prixUnitaire": 25 },
+    { "medicamentId": "{{medicamentParacetamolId}}", "conditionnementId": "{{conditionnementParaComprimeId}}", "quantiteCommandee": 2000, "prixUnitaire": 12 }
+  ]
+}
+
+
+### 2. POST /api/commandes-achat — cas limite, une seule ligne, sans commentaire
+# @name creerCommandeRejet
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-REJET-{{$timestamp}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 500, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 3. POST /api/commandes-achat — troisième commande, dédiée aux tests d'annulation
+# @name creerCommandeAnnulee
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-ANNULEE-{{$timestamp}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentParacetamolId}}", "conditionnementId": "{{conditionnementParaComprimeId}}", "quantiteCommandee": 300, "prixUnitaire": 12 }
+  ]
+}
+
+
+### 4. POST /api/commandes-achat — quatrième commande, dédiée au test de réception partielle
+# @name creerCommandePartielle
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-PARTIELLE-{{$timestamp}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 1000, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 5. POST /api/commandes-achat — cas d'erreur, aucune ligne (400 attendu)
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-SANS-LIGNE",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": []
+}
+
+
+### 6. POST /api/commandes-achat — cas d'erreur, fournisseur manquant (400 attendu)
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-SANS-FOURNISSEUR",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 10, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 7. POST /api/commandes-achat — cas d'erreur, quantité commandée négative (400 attendu)
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-QUANTITE-NEGATIVE",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": -10, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 8. POST /api/commandes-achat — cas d'erreur, référence déjà utilisée (409 attendu)
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "{{creerCommande.response.body.$.results.reference}}",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 10, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 9. POST /api/commandes-achat — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA)
+POST {{baseUrl}}/api/commandes-achat
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "reference": "BC-ROLE-INSUFFISANT",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 10, "prixUnitaire": 25 }
+  ]
+}
+
+
+### 10. POST /api/commandes-achat — cas d'erreur, sans authentification (401 attendu)
+POST {{baseUrl}}/api/commandes-achat
+Content-Type: application/json
+
+{
+  "reference": "BC-SANS-AUTH",
+  "fournisseurId": "{{fournisseurPharmaSenegalId}}",
+  "entrepotDestinationId": "{{pnaCentraleId}}",
+  "lignes": [
+    { "medicamentId": "{{medicamentAmoxicillineId}}", "conditionnementId": "{{conditionnementAmoxComprimeId}}", "quantiteCommandee": 10, "prixUnitaire": 25 }
+  ]
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### B. Validation interne / rejet / annulation (PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 11. PATCH /api/commandes-achat/{id}/valider — EN_ATTENTE_VALIDATION → VALIDEE
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}/valider
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 12. PATCH .../valider — cas d'erreur, déjà validée (422 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}/valider
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 13. PATCH /api/commandes-achat/{id}/rejeter — la deuxième commande est rejetée, motif renseigné
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandeRejet.response.body.$.results.id}}/rejeter
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": "Prix hors marché."
+}
+
+
+### 14. PATCH .../rejeter — cas d'erreur, déjà rejetée (422 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandeRejet.response.body.$.results.id}}/rejeter
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": "Motif quelconque"
+}
+
+
+### 15. PATCH /api/commandes-achat/{id}/annuler — annule la troisième commande, encore EN_ATTENTE_VALIDATION
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandeAnnulee.response.body.$.results.id}}/annuler
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 16. PATCH .../annuler — cas d'erreur, déjà annulée (422 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandeAnnulee.response.body.$.results.id}}/annuler
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 17. PATCH /api/commandes-achat/{id}/valider — cas d'erreur, identifiant inexistant (404 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/99999999-9999-9999-9999-999999999999/valider
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 18. GET /api/commandes-achat/{id} — obtenir (MAGASINIER_PNA, lecture)
+GET {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+
+
+### 19. GET /api/commandes-achat — lister, filtré par statut=VALIDEE
+GET {{baseUrl}}/api/commandes-achat?statut=VALIDEE
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 20. GET /api/commandes-achat — recherche texte + tri + pagination
+GET {{baseUrl}}/api/commandes-achat?q=BC-TEST&page=0&size=10&sortBy=reference&sortDirection=ASC
+Authorization: Bearer {{loginGestionnairePna.response.body.$.results.accessToken}}
+
+
+### 21. GET /api/commandes-achat — cas d'erreur, sans authentification (401 attendu)
+GET {{baseUrl}}/api/commandes-achat
+
+
+### ══════════════════════════════════════════════════════════════════
+### C. Espace fournisseur — réception et traitement du bon de commande
+### ══════════════════════════════════════════════════════════════════
+
+### 22. GET /api/fournisseur/commandes-achat — liste des commandes du fournisseur connecté
+GET {{baseUrl}}/api/fournisseur/commandes-achat
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 23. GET /api/fournisseur/commandes-achat?statut=VALIDEE — filtré
+GET {{baseUrl}}/api/fournisseur/commandes-achat?statut=VALIDEE
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 24. GET /api/fournisseur/commandes-achat/{id} — détail de la commande principale
+GET {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 25. GET /api/fournisseur/commandes-achat/{id} — cas d'erreur, commande destinée à un autre fournisseur (403 attendu)
+GET {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 26. GET /api/fournisseur/commandes-achat/{id} — cas d'erreur, identifiant inexistant (404 attendu)
+GET {{baseUrl}}/api/fournisseur/commandes-achat/99999999-9999-9999-9999-999999999999
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 27. PATCH /api/fournisseur/commandes-achat/{id}/accuser-reception — accusé de réception nominal
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/accuser-reception
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 28. PATCH .../accuser-reception — cas d'erreur, commande d'un autre fournisseur (403 attendu)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/accuser-reception
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 29. PATCH /api/fournisseur/commandes-achat/{id}/confirmer-delai — VALIDEE → EN_TRANSIT
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/confirmer-delai
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "delaiJours": 10,
+  "dateLivraisonConfirmee": "2027-01-15"
+}
+
+
+### 30. PATCH .../confirmer-delai — cas d'erreur, date de livraison non future (400 attendu)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/confirmer-delai
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "delaiJours": 10,
+  "dateLivraisonConfirmee": "2020-01-01"
+}
+# Note : la commande cible étant encore EN_ATTENTE_VALIDATION à ce stade,
+# la validation @Future du corps de requête est vérifiée par Spring
+# *avant* toute règle métier — le 400 est donc bien atteint indépendamment
+# de l'état de la commande.
+
+
+### 31. PATCH .../confirmer-delai — cas d'erreur, commande pas encore VALIDEE (422 attendu)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/confirmer-delai
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "delaiJours": 10,
+  "dateLivraisonConfirmee": "2027-01-15"
+}
+
+
+### 32. PATCH .../confirmer-delai — cas d'erreur, déjà confirmé (422 attendu — la commande principale est déjà EN_TRANSIT)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/confirmer-delai
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "delaiJours": 5,
+  "dateLivraisonConfirmee": "2027-01-10"
+}
+
+
+### 33. PATCH .../avis-expedition — cas d'erreur, ligne inexistante (404 attendu — commande encore EN_TRANSIT à ce stade)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/avis-expedition
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "dateExpedition": "2026-12-20",
+  "lignes": [
+    { "ligneId": "99999999-9999-9999-9999-999999999999", "numeroLot": "LOT-X", "dateExpiration": "2028-01-01", "quantiteExpediee": 10 }
+  ]
+}
+
+
+### 34. PATCH /api/fournisseur/commandes-achat/{id}/avis-expedition — EN_TRANSIT → EXPEDIEE, lots renseignés
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/avis-expedition
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "dateExpedition": "2026-12-20",
+  "transporteur": "DHL Sénégal",
+  "numeroSuivi": "DHL-TEST-{{$timestamp}}",
+  "dateLivraisonEstimee": "2027-01-05",
+  "lignes": [
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[0].id}}", "numeroLot": "LOT-AMOX-{{$timestamp}}", "dateFabrication": "2026-01-01", "dateExpiration": "2028-01-01", "certificatAnalyseUrl": "https://cdn.senpna.sn/certificats/lot-amox.pdf", "quantiteExpediee": 1000 },
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[1].id}}", "numeroLot": "LOT-PARA-{{$timestamp}}", "dateFabrication": "2026-01-01", "dateExpiration": "2028-01-01", "certificatAnalyseUrl": "https://cdn.senpna.sn/certificats/lot-para.pdf", "quantiteExpediee": 2000 }
+  ]
+}
+
+
+### 35. PATCH .../avis-expedition — cas d'erreur, commande déjà expédiée (422 attendu)
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/avis-expedition
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "dateExpedition": "2026-12-21",
+  "lignes": [
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[0].id}}", "numeroLot": "LOT-BIS", "dateExpiration": "2028-01-01", "quantiteExpediee": 100 }
+  ]
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### D. Réception (PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 36. PATCH /api/commandes-achat/{id}/receptionner — réception totale des deux lignes → RECEPTIONNEE
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}/receptionner
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[0].id}}", "quantiteRecue": 1000, "quantiteRefusee": 0 },
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[1].id}}", "quantiteRecue": 1990, "quantiteRefusee": 10, "motifRefus": "10 plaquettes endommagées au transport" }
+  ]
+}
+
+
+### 37. PATCH .../receptionner — cas d'erreur, commande déjà totalement réceptionnée (422 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}/receptionner
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneId": "{{creerCommande.response.body.$.results.lignes[0].id}}", "quantiteRecue": 1, "quantiteRefusee": 0 }
+  ]
+}
+
+
+### 38. GET /api/commandes-achat/{id} — vérifie le statut final RECEPTIONNEE
+GET {{baseUrl}}/api/commandes-achat/{{creerCommande.response.body.$.results.id}}
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### ── Flux dédié à la réception partielle (commande n°4) ──────────────
+
+### 39. PATCH .../valider — prépare la commande n°4 pour son propre cycle complet
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/valider
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 40. PATCH .../confirmer-delai — VALIDEE → EN_TRANSIT
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/confirmer-delai
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "delaiJours": 7,
+  "dateLivraisonConfirmee": "2027-01-08"
+}
+
+
+### 41. PATCH .../avis-expedition — EN_TRANSIT → EXPEDIEE
+# @name expedierCommandePartielle
+PATCH {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/avis-expedition
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "dateExpedition": "2026-12-22",
+  "lignes": [
+    { "ligneId": "{{creerCommandePartielle.response.body.$.results.lignes[0].id}}", "numeroLot": "LOT-PARTIEL-{{$timestamp}}", "dateExpiration": "2028-01-01", "quantiteExpediee": 1000 }
+  ]
+}
+
+
+### 42. PATCH /api/commandes-achat/{id}/receptionner — réception partielle (600 / 1000) → PARTIELLEMENT_RECEPTIONNEE
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/receptionner
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneId": "{{expedierCommandePartielle.response.body.$.results.lignes[0].id}}", "quantiteRecue": 600, "quantiteRefusee": 0 }
+  ]
+}
+
+
+### 43. PATCH .../receptionner — réception complémentaire (400 restants) → RECEPTIONNEE
+PATCH {{baseUrl}}/api/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/receptionner
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "lignes": [
+    { "ligneId": "{{expedierCommandePartielle.response.body.$.results.lignes[0].id}}", "quantiteRecue": 400, "quantiteRefusee": 0 }
+  ]
+}
+
+
+### ══════════════════════════════════════════════════════════════════
+### E. Factures (soumission fournisseur, validation/paiement PNA)
+### ══════════════════════════════════════════════════════════════════
+
+### 44. POST /api/fournisseur/commandes-achat/{id}/factures — soumission nominale
+# @name soumettreFacture1
+POST {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/factures
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroFacture": "FAC-TEST-{{$timestamp}}",
+  "montant": 49000,
+  "dateEmission": "2026-12-22",
+  "dateEcheance": "2027-01-22",
+  "pieceJointeMediaId": "media-facture-test"
+}
+
+
+### 45. POST .../factures — deuxième facture, dédiée au test de rejet
+# @name soumettreFacture2
+POST {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommandePartielle.response.body.$.results.id}}/factures
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroFacture": "FAC-REJET-{{$timestamp}}",
+  "montant": 25000,
+  "dateEmission": "2026-12-22"
+}
+
+
+### 46. POST .../factures — cas d'erreur, montant négatif ou nul (400 attendu)
+POST {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/factures
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroFacture": "FAC-MONTANT-INVALIDE",
+  "montant": 0,
+  "dateEmission": "2026-12-22"
+}
+
+
+### 47. POST .../factures — cas d'erreur, numéro de facture manquant (400 attendu)
+POST {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/factures
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "montant": 1000,
+  "dateEmission": "2026-12-22"
+}
+
+
+### 48. POST .../factures — cas d'erreur, commande d'un autre fournisseur (403 attendu)
+POST {{baseUrl}}/api/fournisseur/commandes-achat/{{creerCommande.response.body.$.results.id}}/factures
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "numeroFacture": "FAC-MAUVAIS-FOURNISSEUR",
+  "montant": 1000,
+  "dateEmission": "2026-12-22"
+}
+
+
+### 49. GET /api/fournisseur/commandes-achat/factures — mes factures
+GET {{baseUrl}}/api/fournisseur/commandes-achat/factures
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 50. GET .../factures?statut=SOUMISE — filtré
+GET {{baseUrl}}/api/fournisseur/commandes-achat/factures?statut=SOUMISE
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 51. GET /api/fournisseur/commandes-achat/factures/{id} — détail
+GET {{baseUrl}}/api/fournisseur/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur1.response.body.$.results.accessToken}}
+
+
+### 52. GET .../factures/{id} — cas d'erreur, facture d'un autre fournisseur (403 attendu)
+GET {{baseUrl}}/api/fournisseur/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}
+Authorization: Bearer {{loginFournisseur2.response.body.$.results.accessToken}}
+
+
+### 53. GET /api/commandes-achat/factures — la PNA liste toutes les factures reçues
+GET {{baseUrl}}/api/commandes-achat/factures
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 54. PATCH /api/commandes-achat/factures/{id}/valider — SOUMISE → VALIDEE
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}/valider
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 55. PATCH .../valider — cas d'erreur, déjà validée (422 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}/valider
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+
+
+### 56. PATCH /api/commandes-achat/factures/{id}/payer — VALIDEE → PAYEE
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}/payer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 57. PATCH .../payer — cas d'erreur, facture non validée (422 attendu — la deuxième facture est encore SOUMISE)
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture2.response.body.$.results.id}}/payer
+Authorization: Bearer {{loginAdminPna.response.body.$.results.accessToken}}
+
+
+### 58. PATCH /api/commandes-achat/factures/{id}/rejeter — SOUMISE → REJETEE, motif renseigné
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture2.response.body.$.results.id}}/rejeter
+Authorization: Bearer {{loginPharmacienPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": "Montant incohérent avec le bon de commande."
+}
+
+
+### 59. PATCH .../rejeter — cas d'erreur, rôle insuffisant (403 attendu — MAGASINIER_PNA n'est pas habilité sur les factures)
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}/rejeter
+Authorization: Bearer {{loginMagasinierPna.response.body.$.results.accessToken}}
+Content-Type: application/json
+
+{
+  "motif": "Ne devrait pas passer"
+}
+
+
+### 60. PATCH /api/commandes-achat/factures/{id}/payer — cas d'erreur, sans authentification (401 attendu)
+PATCH {{baseUrl}}/api/commandes-achat/factures/{{soumettreFacture1.response.body.$.results.id}}/payer
