@@ -9,6 +9,7 @@ import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.Desacti
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.GetActualiteQuery;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.ListActualitesQuery;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.PublierActualiteCommand;
+import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.RemettreEnBrouillonActualiteCommand;
 import ministere.sante.senpna.actualite.domain.command.ActualiteCommands.UpdateActualiteCommand;
 import ministere.sante.senpna.actualite.domain.exception.ActualiteIntrouvableException;
 import ministere.sante.senpna.actualite.domain.exception.CategorieActualiteInvalideException;
@@ -96,7 +97,8 @@ class ActualiteUseCasesTest {
                                         userManagementRepositoryPort, commandMapper, assembler);
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID))).thenReturn(Optional.empty());
 
-                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "PROJET", "Titre", null, List.of(), List.of());
+                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "PROJET", "Titre", null,
+                                        List.of(), List.of());
                         assertThatThrownBy(() -> useCase.creer(createActualiteCommand))
                                         .isInstanceOf(UserNotFoundException.class);
 
@@ -115,7 +117,8 @@ class ActualiteUseCasesTest {
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.of(auteur));
 
-                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "INEXISTANTE", "Titre", null, List.of(), List.of());
+                        var createActualiteCommand = new CreateActualiteCommand(AUTEUR_ID, "INEXISTANTE", "Titre", null,
+                                        List.of(), List.of());
                         assertThatThrownBy(() -> useCase.creer(createActualiteCommand))
                                         .isInstanceOf(CategorieActualiteInvalideException.class);
                 }
@@ -155,7 +158,8 @@ class ActualiteUseCasesTest {
                         when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
                                         .thenReturn(Optional.empty());
 
-                        var updateActualiteCommand = new UpdateActualiteCommand(ACTUALITE_ID, "PROJET", "Titre", null, List.of(), List.of());
+                        var updateActualiteCommand = new UpdateActualiteCommand(ACTUALITE_ID, "PROJET", "Titre", null,
+                                        List.of(), List.of());
                         assertThatThrownBy(() -> useCase.modifier(updateActualiteCommand))
                                         .isInstanceOf(ActualiteIntrouvableException.class);
                 }
@@ -275,6 +279,97 @@ class ActualiteUseCasesTest {
 
                         assertThat(result.content()).hasSize(1);
                         assertThat(result.totalElements()).isEqualTo(1);
+                }
+        }
+
+        @ExtendWith(MockitoExtension.class)
+        @Nested
+        @DisplayName("obtenirPublique")
+        class ObtenirPublique {
+
+                @Mock
+                private ActualiteRepositoryPort actualiteRepositoryPort;
+
+                @Test
+                @DisplayName("retourne l'actualité publiée quand elle existe")
+                void retourneQuandExistePubliee() {
+                        GetActualitePubliqueUseCaseImpl useCase = new GetActualitePubliqueUseCaseImpl(
+                                        actualiteRepositoryPort, assembler);
+                        Actualite existante = actualiteExistante();
+                        existante.publier();
+                        when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
+                                        .thenReturn(Optional.of(existante));
+
+                        ActualiteDetail result = useCase.obtenirPublique(new GetActualiteQuery(ACTUALITE_ID));
+
+                        assertThat(result.id()).isEqualTo(ACTUALITE_ID);
+                        assertThat(result.statut()).isEqualTo("PUBLIE");
+                }
+
+                @Test
+                @DisplayName("lève ActualiteIntrouvableException quand elle existe mais n'est pas publiée")
+                void leveIntrouvableQuandNonPubliee() {
+                        GetActualitePubliqueUseCaseImpl useCase = new GetActualitePubliqueUseCaseImpl(
+                                        actualiteRepositoryPort, assembler);
+                        Actualite existante = actualiteExistante();
+                        when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
+                                        .thenReturn(Optional.of(existante));
+
+                        var getActualiteQuery = new GetActualiteQuery(ACTUALITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenirPublique(getActualiteQuery))
+                                        .isInstanceOf(ActualiteIntrouvableException.class);
+                }
+
+                @Test
+                @DisplayName("lève ActualiteIntrouvableException quand elle n'existe pas")
+                void leveIntrouvableQuandInexistante() {
+                        GetActualitePubliqueUseCaseImpl useCase = new GetActualitePubliqueUseCaseImpl(
+                                        actualiteRepositoryPort, assembler);
+                        when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
+                                        .thenReturn(Optional.empty());
+
+                        var getActualiteQuery = new GetActualiteQuery(ACTUALITE_ID);
+                        assertThatThrownBy(() -> useCase.obtenirPublique(getActualiteQuery))
+                                        .isInstanceOf(ActualiteIntrouvableException.class);
+                }
+        }
+
+        @ExtendWith(MockitoExtension.class)
+        @Nested
+        @DisplayName("remettreEnBrouillon")
+        class RemettreEnBrouillon {
+
+                @Mock
+                private ActualiteRepositoryPort actualiteRepositoryPort;
+
+                @Test
+                @DisplayName("remet en brouillon une actualité publiée")
+                void remetEnBrouillonActualitePubliee() {
+                        RemettreEnBrouillonActualiteUseCaseImpl useCase = new RemettreEnBrouillonActualiteUseCaseImpl(
+                                        actualiteRepositoryPort, assembler);
+                        Actualite existante = actualiteExistante();
+                        existante.publier();
+                        when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
+                                        .thenReturn(Optional.of(existante));
+                        when(actualiteRepositoryPort.save(any(Actualite.class))).thenAnswer(inv -> inv.getArgument(0));
+
+                        ActualiteDetail result = useCase
+                                        .remettreEnBrouillon(new RemettreEnBrouillonActualiteCommand(ACTUALITE_ID));
+
+                        assertThat(result.statut()).isEqualTo("BROUILLON");
+                }
+
+                @Test
+                @DisplayName("lève ActualiteIntrouvableException quand l'actualité n'existe pas")
+                void leveIntrouvableQuandInexistante() {
+                        RemettreEnBrouillonActualiteUseCaseImpl useCase = new RemettreEnBrouillonActualiteUseCaseImpl(
+                                        actualiteRepositoryPort, assembler);
+                        when(actualiteRepositoryPort.findById(ActualiteId.of(ACTUALITE_ID)))
+                                        .thenReturn(Optional.empty());
+
+                        var command = new RemettreEnBrouillonActualiteCommand(ACTUALITE_ID);
+                        assertThatThrownBy(() -> useCase.remettreEnBrouillon(command))
+                                        .isInstanceOf(ActualiteIntrouvableException.class);
                 }
         }
 
