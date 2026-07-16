@@ -1,5 +1,6 @@
 package ministere.sante.senpna.medicament.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.medicament.domain.valueobject.TemperatureConservation;
 import ministere.sante.senpna.medicament.infrastructure.persistence.entity.MedicamentJpaEntity;
 import ministere.sante.senpna.medicament.infrastructure.persistence.repository.MedicamentJpaRepository;
 
@@ -36,9 +37,11 @@ class MedicamentSpecificationsTest {
     @BeforeEach
     void setUp() {
         doliprane = new MedicamentJpaEntity(UUID.randomUUID(), "PARA500", "Doliprane", "Paracétamol", "500mg",
-                formeA, familleA, null, null, null, null, false, "Sanofi", null, null, true);
+                formeA, familleA, null, TemperatureConservation.AMBIANTE, null, null, false, "Sanofi", null, null,
+                true);
         amoxicillineInactif = new MedicamentJpaEntity(UUID.randomUUID(), "AMOX", "Amoxicilline", "Amoxicilline",
-                "1g", formeB, familleB, null, null, null, null, false, "Pfizer", null, null, false);
+                "1g", formeB, familleB, null, TemperatureConservation.AMBIANTE, null, null, false, "Pfizer", null,
+                null, false);
 
         medicamentJpaRepository.saveAll(List.of(doliprane, amoxicillineInactif));
     }
