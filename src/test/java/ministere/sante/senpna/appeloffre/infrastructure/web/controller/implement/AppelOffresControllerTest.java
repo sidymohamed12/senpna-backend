@@ -60,8 +60,10 @@ class AppelOffresControllerTest {
 
         @Autowired
         MockMvc mockMvc;
+
         @Autowired
         ObjectMapper objectMapper;
+
         @MockitoBean
         AppelOffreFacade appelOffreFacade;
 
