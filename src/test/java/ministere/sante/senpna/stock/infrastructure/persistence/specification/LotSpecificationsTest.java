@@ -9,7 +9,6 @@ import ministere.sante.senpna.stock.infrastructure.persistence.repository.StockJ
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -26,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Tag("integration")
 @DisplayName("LotSpecifications — filtres JPA Specification sur les lots")
 class LotSpecificationsTest {
 
@@ -69,7 +67,8 @@ class LotSpecificationsTest {
         lotJpaRepository.saveAll(List.of(lotActifA, lotBloqueA, lotActifB));
 
         creerStock(entrepot1, lotActifA.getId(), medicamentA);
-        // lotBloqueA et lotActifB n'ont volontairement aucune ligne de stock dans entrepot1
+        // lotBloqueA et lotActifB n'ont volontairement aucune ligne de stock dans
+        // entrepot1
 
         entityManager.flush();
         entityManager.clear();

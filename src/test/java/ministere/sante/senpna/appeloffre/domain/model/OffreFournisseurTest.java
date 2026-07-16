@@ -164,4 +164,20 @@ class OffreFournisseurTest {
             assertThat(offre.getStatut()).isEqualTo(StatutOffre.RETENUE);
         }
     }
+
+    @Nested
+    @DisplayName("equals() / hashCode()")
+    class EqualsHashCode {
+
+        @Test
+        @DisplayName("délègue à AggregateRoot — même identifiant → égaux, identifiants différents → non égaux")
+        void delegueAAggregateRoot() {
+            OffreFournisseur offre = offreSoumise(FournisseurId.generate());
+
+            assertThat(offre)
+                    .isNotEqualTo(offreSoumise(FournisseurId.generate()))
+                    .isNotNull()
+                    .isEqualTo(offre);
+        }
+    }
 }

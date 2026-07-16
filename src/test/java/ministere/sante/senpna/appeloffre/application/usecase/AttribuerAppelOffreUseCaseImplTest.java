@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AttribuerAppelOffreUseCaseImpl")
@@ -109,5 +110,20 @@ class AttribuerAppelOffreUseCaseImplTest {
         verify(offreFournisseurRepositoryPort).save(offreRejetee);
         org.assertj.core.api.Assertions.assertThat(offreRetenue.getStatut()).isEqualTo(StatutOffre.RETENUE);
         org.assertj.core.api.Assertions.assertThat(offreRejetee.getStatut()).isEqualTo(StatutOffre.REJETEE);
+    }
+
+    @Test
+    @DisplayName("listes d'offres null → attribue l'AO sans statuer sur aucune offre")
+    void listesNull_attribueSansStatuer() {
+        AppelOffre appelOffre = appelOffreCloture();
+        when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
+        when(appelOffreRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        sut.attribuer(new AttribuerAppelOffreCommand(appelOffre.getId().getValue(), null, null));
+
+        verify(offreFournisseurRepositoryPort, never()).findById(any());
+        verify(offreFournisseurRepositoryPort, never()).save(any());
+        org.assertj.core.api.Assertions.assertThat(appelOffre.getStatut())
+                .isEqualTo(ministere.sante.senpna.appeloffre.domain.valueobject.StatutAppelOffre.ATTRIBUE);
     }
 }

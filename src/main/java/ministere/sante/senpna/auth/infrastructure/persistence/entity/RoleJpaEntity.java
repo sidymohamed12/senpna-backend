@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "roles")
 @Getter
@@ -24,6 +26,17 @@ public class RoleJpaEntity extends BaseJpaEntity {
     private String nom;
 
     public RoleJpaEntity(String code, String nom) {
+        this.code = code;
+        this.nom = nom;
+    }
+
+    /**
+     * Constructeur avec identifiant explicite.
+     * Utile hors persistance JPA (ex: tests unitaires) où {@code @PrePersist}
+     * n'est jamais déclenché et l'id resterait sinon {@code null}.
+     */
+    public RoleJpaEntity(UUID id, String code, String nom) {
+        super(id);
         this.code = code;
         this.nom = nom;
     }

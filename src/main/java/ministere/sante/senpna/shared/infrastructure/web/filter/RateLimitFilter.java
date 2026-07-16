@@ -89,8 +89,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/auth/verify",
             "/api/auth/resend-otp",
             "/api/auth/reset-password",
-            "/api/auth/refresh",
-            "/api/auth/google");
+            "/api/auth/refresh");
 
     private final RateLimitPort rateLimitPort;
 

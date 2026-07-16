@@ -45,15 +45,6 @@
 		<jjwt.version>0.12.6</jjwt.version>
 		<jacoco.version>0.8.12</jacoco.version>
 
-		<!-- ══════════════════════════════════════
-		     SONARCLOUD
-		     ⚠️ À ADAPTER : remplacez par votre organisation et la clé
-		     de projet réelles créées sur https://sonarcloud.io
-		     (Sonar > Administration > ... ou lors de l'import du repo).
-		     ══════════════════════════════════════ -->
-		<!-- <sonar.organization>sidymohamed12</sonar.organization>
-		<sonar.projectKey>sidymohamed12_senpna-backend</sonar.projectKey>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url> -->
 
 		<!-- ══════════════════════════════════════
 		     SONARQUBE AUTO-HÉBERGÉ (Community Build)
@@ -344,34 +335,6 @@
 						<goals>
 							<goal>report</goal>
 							<goal>report-integration</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<!-- Tests d'intégration : uniquement le tag "integration" -->
-				<configuration>
-					<groups>integration</groups>
-					<!--
-					  ✅ AJOUTÉ : aucun application.yml par défaut n'existe (seulement
-					  application-{profile}.yml), donc sans profil actif, le contexte
-					  Spring des tests @SpringBootTest ne trouve aucune configuration.
-					  On force explicitement le profil "test" (H2 in-memory, pas
-					  d'infra externe requise) pour que `mvn verify` soit reproductible
-					  partout (poste local, CI) sans dépendre d'une variable d'env.
-					-->
-					<systemPropertyVariables>
-						<spring.profiles.active>test</spring.profiles.active>
-					</systemPropertyVariables>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>

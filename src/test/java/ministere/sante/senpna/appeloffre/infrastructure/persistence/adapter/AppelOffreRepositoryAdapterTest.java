@@ -13,7 +13,6 @@ import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Tag("integration")
 @Import({ AppelOffreRepositoryAdapter.class, AppelOffreMapper.class })
 @DisplayName("AppelOffreRepositoryAdapter — persistance avec H2")
 class AppelOffreRepositoryAdapterTest {
@@ -159,6 +157,35 @@ class AppelOffreRepositoryAdapterTest {
                     PageRequest.of(0, 20, null, null));
 
             assertThat(result.totalElements()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("recherche texte vide (blanche) → traitée comme absente, aucun filtrage")
+        void rechercheBlanche_traiteeCommeAbsente() {
+            PageResult<AppelOffre> result = sut.search(new AppelOffreSearchCriteria("   ", null),
+                    PageRequest.of(0, 20, null, null));
+
+            assertThat(result.totalElements()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("texte ET statut combinés → seuls les AO satisfaisant les deux critères")
+        void texteEtStatutCombines() {
+            PageResult<AppelOffre> result = sut.search(
+                    new AppelOffreSearchCriteria("Amoxicilline", StatutAppelOffre.PUBLIE),
+                    PageRequest.of(0, 20, null, null));
+
+            assertThat(result.content()).extracting(AppelOffre::getReference).containsExactly("AO-2026-0010");
+        }
+
+        @Test
+        @DisplayName("texte ET statut combinés, sans correspondance commune → aucun résultat")
+        void texteEtStatutCombines_sansCorrespondance() {
+            PageResult<AppelOffre> result = sut.search(
+                    new AppelOffreSearchCriteria("Paracétamol", StatutAppelOffre.PUBLIE),
+                    PageRequest.of(0, 20, null, null));
+
+            assertThat(result.totalElements()).isZero();
         }
 
         @Test

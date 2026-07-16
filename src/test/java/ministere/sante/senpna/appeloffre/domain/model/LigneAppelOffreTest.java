@@ -68,6 +68,26 @@ class LigneAppelOffreTest {
         LigneAppelOffre ligne1 = LigneAppelOffre.creer(MedicamentId.generate(), "A", BigDecimal.ONE, "u");
         LigneAppelOffre ligne2 = LigneAppelOffre.creer(MedicamentId.generate(), "A", BigDecimal.ONE, "u");
 
-        assertThat(ligne1).isNotEqualTo(ligne2).isEqualTo(ligne1);
+        assertThat(ligne1).isNotEqualTo(ligne2)
+                .isEqualTo(ligne1)
+                .isNotEqualTo(null)
+                .isNotEqualTo("pas une LigneAppelOffre");
+    }
+
+    @Test
+    @DisplayName("reconstruct() restaure fidèlement l'état persisté, y compris l'identifiant")
+    void reconstruct_restaureEtat() {
+        ministere.sante.senpna.appeloffre.domain.valueobject.LigneAppelOffreId id = ministere.sante.senpna.appeloffre.domain.valueobject.LigneAppelOffreId
+                .generate();
+        MedicamentId medicamentId = MedicamentId.generate();
+
+        LigneAppelOffre ligne = LigneAppelOffre.reconstruct(id, medicamentId, "Amoxicilline", BigDecimal.TEN,
+                "Comprimé");
+
+        assertThat(ligne.getId()).isEqualTo(id);
+        assertThat(ligne.getMedicamentId()).isEqualTo(medicamentId);
+        assertThat(ligne.getDesignation()).isEqualTo("Amoxicilline");
+        assertThat(ligne.getQuantiteEstimee()).isEqualByComparingTo("10");
+        assertThat(ligne.getUniteBase()).isEqualTo("Comprimé");
     }
 }

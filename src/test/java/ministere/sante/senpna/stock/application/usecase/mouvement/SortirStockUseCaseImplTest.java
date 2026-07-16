@@ -3,6 +3,8 @@ package ministere.sante.senpna.stock.application.usecase.mouvement;
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.SortieStockCommand;
@@ -126,5 +128,19 @@ class SortirStockUseCaseImplTest {
         // sortirDepuisReservation() diminue quantiteDisponible ET quantiteReservee
         assertThat(stock.getQuantiteReservee()).isEqualByComparingTo("10");
         assertThat(stock.getQuantiteDisponible()).isEqualByComparingTo("40");
+    }
+
+    @Test
+    @DisplayName("type de mouvement invalide → SenPnaException (catégorie VALIDATION)")
+    void typeMouvementInvalide_leveException() {
+        when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
+        when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
+
+        var command = commande("TYPE_INEXISTANT", false);
+        assertThatThrownBy(() -> sut.sortir(command))
+                .isInstanceOf(SenPnaException.class)
+                .satisfies(ex -> assertThat(
+                        ((SenPnaException) ex).getCategory())
+                        .isEqualTo(ErrorCategory.VALIDATION));
     }
 }

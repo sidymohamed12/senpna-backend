@@ -4,6 +4,8 @@ import ministere.sante.senpna.organisation.domain.exception.EntrepotIntrouvableE
 import ministere.sante.senpna.organisation.domain.model.Entrepot;
 import ministere.sante.senpna.organisation.domain.port.out.EntrepotRepositoryPort;
 import ministere.sante.senpna.organisation.domain.valueobject.RegionId;
+import ministere.sante.senpna.shared.domain.exception.ErrorCategory;
+import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.stock.application.service.EntrepotScopeGuard;
 import ministere.sante.senpna.stock.application.service.StockDetailAssembler;
 import ministere.sante.senpna.stock.domain.command.StockCommands.EntreeStockCommand;
@@ -123,5 +125,20 @@ class EntreeStockUseCaseImplTest {
 
         assertThat(stockExistant.getQuantiteDisponible()).isEqualByComparingTo("60");
         verify(mouvementStockRepositoryPort).save(any());
+    }
+
+    @Test
+    @DisplayName("type de mouvement invalide → SenPnaException (catégorie VALIDATION)")
+    void typeMouvementInvalide_leveException() {
+        Entrepot entrepot = Entrepot.creerPra("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111");
+        when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
+        when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
+
+        var command = commande("TYPE_INEXISTANT");
+        assertThatThrownBy(() -> sut.entrer(command))
+                .isInstanceOf(ministere.sante.senpna.shared.domain.exception.SenPnaException.class)
+                .satisfies(ex -> assertThat(
+                        ((SenPnaException) ex).getCategory())
+                        .isEqualTo(ErrorCategory.VALIDATION));
     }
 }

@@ -239,6 +239,45 @@ class AppelOffreTest {
         void brouillon_nonOuvert() {
             assertThat(appelOffreBrouillon().estOuvertALaSoumission()).isFalse();
         }
+
+        @Test
+        @DisplayName("dateClotureDepassee() → false tant que la date n'est pas dépassée")
+        void dateClotureDepassee_falseSiNonDepassee() {
+            assertThat(appelOffreBrouillon().dateClotureDepassee()).isFalse();
+        }
+
+        @Test
+        @DisplayName("dateClotureDepassee() → true une fois la date dépassée")
+        void dateClotureDepassee_trueSiDepassee() {
+            LigneAppelOffre ligne = ligne();
+            Instant maintenant = Instant.now();
+            AppelOffre expire = AppelOffre.reconstruct(AppelOffreId.generate(), "AO-1", "Objet",
+                    LocalDate.now().minusDays(1), StatutAppelOffre.PUBLIE, List.of(ligne), maintenant, maintenant);
+
+            assertThat(expire.dateClotureDepassee()).isTrue();
+            assertThat(expire.estOuvertALaSoumission()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("equals() / hashCode()")
+    class EqualsHashCode {
+
+        @Test
+        @DisplayName("délègue à AggregateRoot — même identifiant → égaux")
+        void memeIdentifiant_egaux() {
+            AppelOffre appelOffre = appelOffreBrouillon();
+            AppelOffre appelOffre2 = appelOffre;
+
+            assertThat(appelOffre).isEqualTo(appelOffre2)
+                    .hasSameHashCodeAs(appelOffre2);
+        }
+
+        @Test
+        @DisplayName("identifiants différents → non égaux")
+        void identifiantsDifferents_nonEgaux() {
+            assertThat(appelOffreBrouillon()).isNotEqualTo(appelOffreBrouillon());
+        }
     }
 
     @Nested
