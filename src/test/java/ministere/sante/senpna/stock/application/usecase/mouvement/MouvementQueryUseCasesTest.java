@@ -50,9 +50,9 @@ class MouvementQueryUseCasesTest {
     EntrepotScopeGuard entrepotScopeGuard;
 
     private MouvementStock mouvement(EntrepotId source, EntrepotId destination) {
-        return MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE, source, destination, null,
+        return MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE, source, destination, null,
                 LotId.generate(), MedicamentId.generate(), new BigDecimal("10"), "REF", "Motif",
-                UUID.randomUUID());
+                UUID.randomUUID()));
     }
 
     @Nested

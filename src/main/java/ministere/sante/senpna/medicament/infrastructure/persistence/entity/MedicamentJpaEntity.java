@@ -73,25 +73,134 @@ public class MedicamentJpaEntity extends BaseJpaEntity {
     @Column(name = "actif", nullable = false)
     private boolean actif;
 
-    public MedicamentJpaEntity(UUID id, String code, String nomCommercial, String dci, String dosage, UUID formeId,
-            UUID familleId, VoieAdministration voieAdministration, TemperatureConservation temperatureConservation,
-            String programmeSante, Integer delaiApprovisionnementJours, boolean necessiteOrdonnance,
-            String fabricant, Integer stockMinimum, Integer stockMaximum, boolean actif) {
-        super(id);
-        this.code = code;
-        this.nomCommercial = nomCommercial;
-        this.dci = dci;
-        this.dosage = dosage;
-        this.formeId = formeId;
-        this.familleId = familleId;
-        this.voieAdministration = voieAdministration;
-        this.temperatureConservation = temperatureConservation;
-        this.programmeSante = programmeSante;
-        this.delaiApprovisionnementJours = delaiApprovisionnementJours;
-        this.necessiteOrdonnance = necessiteOrdonnance;
-        this.fabricant = fabricant;
-        this.stockMinimum = stockMinimum;
-        this.stockMaximum = stockMaximum;
-        this.actif = actif;
+    private MedicamentJpaEntity(Builder builder) {
+        super(builder.id);
+        this.code = builder.code;
+        this.nomCommercial = builder.nomCommercial;
+        this.dci = builder.dci;
+        this.dosage = builder.dosage;
+        this.formeId = builder.formeId;
+        this.familleId = builder.familleId;
+        this.voieAdministration = builder.voieAdministration;
+        this.temperatureConservation = builder.temperatureConservation;
+        this.programmeSante = builder.programmeSante;
+        this.delaiApprovisionnementJours = builder.delaiApprovisionnementJours;
+        this.necessiteOrdonnance = builder.necessiteOrdonnance;
+        this.fabricant = builder.fabricant;
+        this.stockMinimum = builder.stockMinimum;
+        this.stockMaximum = builder.stockMaximum;
+        this.actif = builder.actif;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String code;
+        private String nomCommercial;
+        private String dci;
+        private String dosage;
+        private UUID formeId;
+        private UUID familleId;
+        private VoieAdministration voieAdministration;
+        private TemperatureConservation temperatureConservation;
+        private String programmeSante;
+        private Integer delaiApprovisionnementJours;
+        private boolean necessiteOrdonnance;
+        private String fabricant;
+        private Integer stockMinimum;
+        private Integer stockMaximum;
+        private boolean actif;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder code(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder nomCommercial(String nomCommercial) {
+            this.nomCommercial = nomCommercial;
+            return this;
+        }
+
+        public Builder dci(String dci) {
+            this.dci = dci;
+            return this;
+        }
+
+        public Builder dosage(String dosage) {
+            this.dosage = dosage;
+            return this;
+        }
+
+        public Builder formeId(UUID formeId) {
+            this.formeId = formeId;
+            return this;
+        }
+
+        public Builder familleId(UUID familleId) {
+            this.familleId = familleId;
+            return this;
+        }
+
+        public Builder voieAdministration(VoieAdministration voieAdministration) {
+            this.voieAdministration = voieAdministration;
+            return this;
+        }
+
+        public Builder temperatureConservation(TemperatureConservation temperatureConservation) {
+            this.temperatureConservation = temperatureConservation;
+            return this;
+        }
+
+        public Builder programmeSante(String programmeSante) {
+            this.programmeSante = programmeSante;
+            return this;
+        }
+
+        public Builder delaiApprovisionnementJours(Integer delaiApprovisionnementJours) {
+            this.delaiApprovisionnementJours = delaiApprovisionnementJours;
+            return this;
+        }
+
+        public Builder necessiteOrdonnance(boolean necessiteOrdonnance) {
+            this.necessiteOrdonnance = necessiteOrdonnance;
+            return this;
+        }
+
+        public Builder fabricant(String fabricant) {
+            this.fabricant = fabricant;
+            return this;
+        }
+
+        public Builder stockMinimum(Integer stockMinimum) {
+            this.stockMinimum = stockMinimum;
+            return this;
+        }
+
+        public Builder stockMaximum(Integer stockMaximum) {
+            this.stockMaximum = stockMaximum;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public MedicamentJpaEntity build() {
+            return new MedicamentJpaEntity(this);
+        }
+    }
+
 }

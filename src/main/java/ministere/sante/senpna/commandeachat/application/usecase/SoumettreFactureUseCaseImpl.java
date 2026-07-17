@@ -49,8 +49,8 @@ public class SoumettreFactureUseCaseImpl implements SoumettreFactureUseCase {
             throw new AccesCommandeAchatRefuseException();
         }
 
-        Facture facture = Facture.soumettre(commandeAchatId, fournisseurId, command.numeroFacture(),
-                command.montant(), command.dateEmission(), command.dateEcheance(), command.pieceJointeMediaId());
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(commandeAchatId, fournisseurId, command.numeroFacture(),
+                command.montant(), command.dateEmission(), command.dateEcheance(), command.pieceJointeMediaId()));
 
         Facture saved = factureRepositoryPort.save(facture);
         return factureDetailAssembler.assembler(saved);

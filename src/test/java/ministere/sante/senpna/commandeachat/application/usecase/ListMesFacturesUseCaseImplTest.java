@@ -49,8 +49,8 @@ class ListMesFacturesUseCaseImplTest {
         @DisplayName("transmet le fournisseur et le statut au port")
         void transmetFournisseurEtStatut() {
                 FournisseurId fournisseurId = FournisseurId.generate();
-                Facture facture = Facture.soumettre(CommandeAchatId.generate(), fournisseurId, "FAC-1", BigDecimal.TEN,
-                                LocalDate.now(), null, null);
+                Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), fournisseurId, "FAC-1", BigDecimal.TEN,
+                                LocalDate.now(), null, null));
                 when(factureRepositoryPort.findByFournisseurId(any(), any(), any()))
                                 .thenReturn(PageResult.of(List.of(facture), 0, 20, 1));
                 FactureDetail detail = new FactureDetail(facture.getId().getValue(),

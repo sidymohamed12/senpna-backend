@@ -20,8 +20,18 @@ class UserMapperTest {
     @Test
     @DisplayName("toDomain() reporte fidèlement chaque champ, téléphone absent → null")
     void toDomain_telephoneAbsent() {
-        UserJpaEntity entity = new UserJpaEntity(UserFixtures.USER_ID, "Diallo", "Mamadou",
-                UserFixtures.EMAIL, null, "hash", true, Set.of(UserFixtures.ROLE_GESTIONNAIRE_PNA_ID), 0, null);
+        UserJpaEntity entity = UserJpaEntity.builder()
+            .id(UserFixtures.USER_ID)
+            .nom("Diallo")
+            .prenom("Mamadou")
+            .email(UserFixtures.EMAIL)
+            .telephone(null)
+            .passwordHash("hash")
+            .actif(true)
+            .roleIds(Set.of(UserFixtures.ROLE_GESTIONNAIRE_PNA_ID))
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .build();
 
         Instant now = Instant.now();
         entity.setCreatedAt(now);
@@ -38,8 +48,18 @@ class UserMapperTest {
     @Test
     @DisplayName("toDomain() reporte le téléphone quand présent")
     void toDomain_telephonePresent() {
-        UserJpaEntity entity = new UserJpaEntity(UserFixtures.USER_ID, "Diallo", "Mamadou",
-                UserFixtures.EMAIL, UserFixtures.TELEPHONE, "hash", true, Set.of(), 0, null);
+        UserJpaEntity entity = UserJpaEntity.builder()
+            .id(UserFixtures.USER_ID)
+            .nom("Diallo")
+            .prenom("Mamadou")
+            .email(UserFixtures.EMAIL)
+            .telephone(UserFixtures.TELEPHONE)
+            .passwordHash("hash")
+            .actif(true)
+            .roleIds(Set.of())
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .build();
 
         Instant now = Instant.now();
         entity.setCreatedAt(now);

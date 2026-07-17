@@ -50,14 +50,22 @@ class UserTest {
             // Utilisation de noms valides (≥ 2 chars) pour que seul le null sur `nom`
             // déclenche l'exception, et non la validation de Name
             assertThatNullPointerException()
-                    .isThrownBy(() -> User.reconstruct(
-                            UserId.of(UUID.randomUUID()),
-                            null, // nom null
-                            Prenom.of("Bi"), // valide (≥ 2 chars)
-                            Email.of("a@b.sn"),
-                            null,
-                            HashedPassword.of("hash1"),
-                            true, Set.of(), 0, null, Instant.now(), Instant.now()))
+                    .isThrownBy(() -> User.builder()
+                        .id(UserId.of(UUID.randomUUID()))
+                        .nom(null)
+                        .prenom(// nom null
+                            Prenom.of("Bi"))
+                        .email(// valide (≥ 2 chars)
+                            Email.of("a@b.sn"))
+                        .telephone(null)
+                        .hashedPassword(HashedPassword.of("hash1"))
+                        .actif(true)
+                        .roleIds(Set.of())
+                        .tentativesEchecConnexion(0)
+                        .verrouilleJusqua(null)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build())
                     .withMessageContaining("nom");
         }
 
@@ -65,14 +73,22 @@ class UserTest {
         @DisplayName("lève NullPointerException si prenom est null")
         void reconstruct_prenomNull_leve_npe() {
             assertThatNullPointerException()
-                    .isThrownBy(() -> User.reconstruct(
-                            UserId.of(UUID.randomUUID()),
-                            Nom.of("Ba"), // valide (≥ 2 chars)
-                            null, // prenom null
-                            Email.of("a@b.sn"),
-                            null,
-                            HashedPassword.of("hash1"),
-                            true, Set.of(), 0, null, Instant.now(), Instant.now()))
+                    .isThrownBy(() -> User.builder()
+                        .id(UserId.of(UUID.randomUUID()))
+                        .nom(Nom.of("Ba"))
+                        .prenom(// valide (≥ 2 chars)
+                            null)
+                        .email(// prenom null
+                            Email.of("a@b.sn"))
+                        .telephone(null)
+                        .hashedPassword(HashedPassword.of("hash1"))
+                        .actif(true)
+                        .roleIds(Set.of())
+                        .tentativesEchecConnexion(0)
+                        .verrouilleJusqua(null)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build())
                     .withMessageContaining("prénom");
         }
 
@@ -80,14 +96,21 @@ class UserTest {
         @DisplayName("lève NullPointerException si email est null")
         void reconstruct_emailNull_leve_npe() {
             assertThatNullPointerException()
-                    .isThrownBy(() -> User.reconstruct(
-                            UserId.of(UUID.randomUUID()),
-                            Nom.of("Ba"),
-                            Prenom.of("Bi"),
-                            null, // email null
-                            null,
-                            HashedPassword.of("hash1"),
-                            true, Set.of(), 0, null, Instant.now(), Instant.now()))
+                    .isThrownBy(() -> User.builder()
+                        .id(UserId.of(UUID.randomUUID()))
+                        .nom(Nom.of("Ba"))
+                        .prenom(Prenom.of("Bi"))
+                        .email(null)
+                        .telephone(// email null
+                            null)
+                        .hashedPassword(HashedPassword.of("hash1"))
+                        .actif(true)
+                        .roleIds(Set.of())
+                        .tentativesEchecConnexion(0)
+                        .verrouilleJusqua(null)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build())
                     .withMessageContaining("email");
         }
 
@@ -95,14 +118,21 @@ class UserTest {
         @DisplayName("lève NullPointerException si hashedPassword est null")
         void reconstruct_passwordNull_leve_npe() {
             assertThatNullPointerException()
-                    .isThrownBy(() -> User.reconstruct(
-                            UserId.of(UUID.randomUUID()),
-                            Nom.of("Ba"),
-                            Prenom.of("Bi"),
-                            Email.of("a@b.sn"),
-                            null,
-                            null, // password null
-                            true, Set.of(), 0, null, Instant.now(), Instant.now()))
+                    .isThrownBy(() -> User.builder()
+                        .id(UserId.of(UUID.randomUUID()))
+                        .nom(Nom.of("Ba"))
+                        .prenom(Prenom.of("Bi"))
+                        .email(Email.of("a@b.sn"))
+                        .telephone(null)
+                        .hashedPassword(null)
+                        .actif(// password null
+                            true)
+                        .roleIds(Set.of())
+                        .tentativesEchecConnexion(0)
+                        .verrouilleJusqua(null)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build())
                     .withMessageContaining("mot de passe");
         }
 
@@ -110,14 +140,22 @@ class UserTest {
         @DisplayName("roleIds est une copie défensive — modifications externes n'affectent pas l'agrégat")
         void reconstruct_roleIds_copieDefensive() {
             Set<UUID> roleIds = new java.util.HashSet<>(Set.of(UUID.randomUUID()));
-            User user = User.reconstruct(
-                    UserId.of(UUID.randomUUID()),
-                    Nom.of("Ba"), // valide
-                    Prenom.of("Bi"), // valide
-                    Email.of("a@b.sn"),
-                    null,
-                    HashedPassword.of("hash1"),
-                    true, roleIds, 0, null, Instant.now(), Instant.now());
+            User user = User.builder()
+                .id(UserId.of(UUID.randomUUID()))
+                .nom(Nom.of("Ba"))
+                .prenom(// valide
+                    Prenom.of("Bi"))
+                .email(// valide
+                    Email.of("a@b.sn"))
+                .telephone(null)
+                .hashedPassword(HashedPassword.of("hash1"))
+                .actif(true)
+                .roleIds(roleIds)
+                .tentativesEchecConnexion(0)
+                .verrouilleJusqua(null)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
 
             roleIds.add(UUID.randomUUID()); // mutation externe
 
@@ -231,11 +269,20 @@ class UserTest {
         @Test
         @DisplayName("estVerrouille() retourne false si verrouilleJusqua est dans le passé")
         void estVerrouille_false_si_passe() {
-            User user = User.reconstruct(
-                    UserId.of(UserFixtures.USER_ID), Nom.of(UserFixtures.NOM), Prenom.of(UserFixtures.PRENOM),
-                    Email.of(UserFixtures.EMAIL), null, HashedPassword.of(UserFixtures.PASSWORD_HASH),
-                    true, Set.of(), 5, Instant.now().minusSeconds(1),
-                    Instant.now(), Instant.now());
+            User user = User.builder()
+                .id(UserId.of(UserFixtures.USER_ID))
+                .nom(Nom.of(UserFixtures.NOM))
+                .prenom(Prenom.of(UserFixtures.PRENOM))
+                .email(Email.of(UserFixtures.EMAIL))
+                .telephone(null)
+                .hashedPassword(HashedPassword.of(UserFixtures.PASSWORD_HASH))
+                .actif(true)
+                .roleIds(Set.of())
+                .tentativesEchecConnexion(5)
+                .verrouilleJusqua(Instant.now().minusSeconds(1))
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
 
             assertThat(user.estVerrouille()).isFalse();
         }

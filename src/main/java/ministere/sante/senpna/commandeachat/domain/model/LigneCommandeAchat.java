@@ -39,39 +39,131 @@ public class LigneCommandeAchat {
     private BigDecimal quantiteRefusee;
     private String motifRefus;
 
-    private LigneCommandeAchat(LigneCommandeAchatId id, MedicamentId medicamentId,
-            ConditionnementId conditionnementId, BigDecimal quantiteCommandee, BigDecimal prixUnitaire,
-            String numeroLot, LocalDate dateFabrication, LocalDate dateExpiration, String certificatAnalyseUrl,
-            BigDecimal quantiteExpediee, BigDecimal quantiteRecue, BigDecimal quantiteRefusee, String motifRefus) {
-        this.id = Objects.requireNonNull(id, "L'identifiant de la ligne est obligatoire");
-        this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
-        this.conditionnementId = Objects.requireNonNull(conditionnementId, "Le conditionnement est obligatoire");
-        this.quantiteCommandee = validerQuantitePositive(quantiteCommandee, "La quantité commandée");
-        this.prixUnitaire = validerQuantitePositive(prixUnitaire, "Le prix unitaire");
-        this.numeroLot = numeroLot;
-        this.dateFabrication = dateFabrication;
-        this.dateExpiration = dateExpiration;
-        this.certificatAnalyseUrl = certificatAnalyseUrl;
-        this.quantiteExpediee = quantiteExpediee;
-        this.quantiteRecue = quantiteRecue != null ? quantiteRecue : BigDecimal.ZERO;
-        this.quantiteRefusee = quantiteRefusee != null ? quantiteRefusee : BigDecimal.ZERO;
-        this.motifRefus = motifRefus;
+    private LigneCommandeAchat(Builder builder) {
+        this.id = Objects.requireNonNull(builder.id, "L'identifiant de la ligne est obligatoire");
+        this.medicamentId = Objects.requireNonNull(builder.medicamentId, "Le médicament est obligatoire");
+        this.conditionnementId = Objects.requireNonNull(builder.conditionnementId,
+                "Le conditionnement est obligatoire");
+        this.quantiteCommandee = validerQuantitePositive(builder.quantiteCommandee, "La quantité commandée");
+        this.prixUnitaire = validerQuantitePositive(builder.prixUnitaire, "Le prix unitaire");
+        this.numeroLot = builder.numeroLot;
+        this.dateFabrication = builder.dateFabrication;
+        this.dateExpiration = builder.dateExpiration;
+        this.certificatAnalyseUrl = builder.certificatAnalyseUrl;
+        this.quantiteExpediee = builder.quantiteExpediee;
+        this.quantiteRecue = builder.quantiteRecue != null ? builder.quantiteRecue : BigDecimal.ZERO;
+        this.quantiteRefusee = builder.quantiteRefusee != null ? builder.quantiteRefusee : BigDecimal.ZERO;
+        this.motifRefus = builder.motifRefus;
     }
 
-    public static LigneCommandeAchat reconstruct(LigneCommandeAchatId id, MedicamentId medicamentId,
-            ConditionnementId conditionnementId, BigDecimal quantiteCommandee, BigDecimal prixUnitaire,
-            String numeroLot, LocalDate dateFabrication, LocalDate dateExpiration, String certificatAnalyseUrl,
-            BigDecimal quantiteExpediee, BigDecimal quantiteRecue, BigDecimal quantiteRefusee, String motifRefus) {
-        return new LigneCommandeAchat(id, medicamentId, conditionnementId, quantiteCommandee, prixUnitaire,
-                numeroLot, dateFabrication, dateExpiration, certificatAnalyseUrl, quantiteExpediee, quantiteRecue,
-                quantiteRefusee, motifRefus);
-    }
-
-    public static LigneCommandeAchat creer(MedicamentId medicamentId, ConditionnementId conditionnementId,
+    /** Données nécessaires à la création d'une nouvelle ligne de commande d'achat. */
+    public record CreationCommand(MedicamentId medicamentId, ConditionnementId conditionnementId,
             BigDecimal quantiteCommandee, BigDecimal prixUnitaire) {
-        return new LigneCommandeAchat(LigneCommandeAchatId.generate(), medicamentId, conditionnementId,
-                quantiteCommandee, prixUnitaire, null, null, null, null, null, BigDecimal.ZERO, BigDecimal.ZERO,
-                null);
+    }
+
+    public static LigneCommandeAchat creer(CreationCommand command) {
+        return builder()
+                .id(LigneCommandeAchatId.generate())
+                .medicamentId(command.medicamentId())
+                .conditionnementId(command.conditionnementId())
+                .quantiteCommandee(command.quantiteCommandee())
+                .prixUnitaire(command.prixUnitaire())
+                .quantiteRecue(BigDecimal.ZERO)
+                .quantiteRefusee(BigDecimal.ZERO)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private LigneCommandeAchatId id;
+        private MedicamentId medicamentId;
+        private ConditionnementId conditionnementId;
+        private BigDecimal quantiteCommandee;
+        private BigDecimal prixUnitaire;
+        private String numeroLot;
+        private LocalDate dateFabrication;
+        private LocalDate dateExpiration;
+        private String certificatAnalyseUrl;
+        private BigDecimal quantiteExpediee;
+        private BigDecimal quantiteRecue;
+        private BigDecimal quantiteRefusee;
+        private String motifRefus;
+
+        private Builder() {
+        }
+
+        public Builder id(LigneCommandeAchatId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder medicamentId(MedicamentId medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder conditionnementId(ConditionnementId conditionnementId) {
+            this.conditionnementId = conditionnementId;
+            return this;
+        }
+
+        public Builder quantiteCommandee(BigDecimal quantiteCommandee) {
+            this.quantiteCommandee = quantiteCommandee;
+            return this;
+        }
+
+        public Builder prixUnitaire(BigDecimal prixUnitaire) {
+            this.prixUnitaire = prixUnitaire;
+            return this;
+        }
+
+        public Builder numeroLot(String numeroLot) {
+            this.numeroLot = numeroLot;
+            return this;
+        }
+
+        public Builder dateFabrication(LocalDate dateFabrication) {
+            this.dateFabrication = dateFabrication;
+            return this;
+        }
+
+        public Builder dateExpiration(LocalDate dateExpiration) {
+            this.dateExpiration = dateExpiration;
+            return this;
+        }
+
+        public Builder certificatAnalyseUrl(String certificatAnalyseUrl) {
+            this.certificatAnalyseUrl = certificatAnalyseUrl;
+            return this;
+        }
+
+        public Builder quantiteExpediee(BigDecimal quantiteExpediee) {
+            this.quantiteExpediee = quantiteExpediee;
+            return this;
+        }
+
+        public Builder quantiteRecue(BigDecimal quantiteRecue) {
+            this.quantiteRecue = quantiteRecue;
+            return this;
+        }
+
+        public Builder quantiteRefusee(BigDecimal quantiteRefusee) {
+            this.quantiteRefusee = quantiteRefusee;
+            return this;
+        }
+
+        public Builder motifRefus(String motifRefus) {
+            this.motifRefus = motifRefus;
+            return this;
+        }
+
+        public LigneCommandeAchat build() {
+            return new LigneCommandeAchat(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

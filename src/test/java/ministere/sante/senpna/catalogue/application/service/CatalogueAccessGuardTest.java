@@ -82,10 +82,20 @@ class CatalogueAccessGuardTest {
         }
 
         private User acteurAvecRoles(Set<UUID> roleIds) {
-                return User.reconstruct(UserId.of(ACTEUR_ID), Nom.of(UserFixtures.NOM), Prenom.of(UserFixtures.PRENOM),
-                                Email.of(UserFixtures.EMAIL), null, HashedPassword.of(UserFixtures.PASSWORD_HASH), true,
-                                roleIds, 0,
-                                null, Instant.now(), Instant.now());
+                return User.builder()
+                    .id(UserId.of(ACTEUR_ID))
+                    .nom(Nom.of(UserFixtures.NOM))
+                    .prenom(Prenom.of(UserFixtures.PRENOM))
+                    .email(Email.of(UserFixtures.EMAIL))
+                    .telephone(null)
+                    .hashedPassword(HashedPassword.of(UserFixtures.PASSWORD_HASH))
+                    .actif(true)
+                    .roleIds(roleIds)
+                    .tentativesEchecConnexion(0)
+                    .verrouilleJusqua(null)
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
+                    .build();
         }
 
         private void authentifier(String... roleCodes) {

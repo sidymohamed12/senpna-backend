@@ -34,10 +34,28 @@ class EntrepotSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        pnaCentral = new EntrepotJpaEntity(UUID.randomUUID(), "PNA-CENTRAL", "Pharmacie Nationale d'Approv.",
-                TypeEntrepot.PNA_CENTRAL, regionA, null, null, null, true);
-        praInactif = new EntrepotJpaEntity(UUID.randomUUID(), "PRA-DAKAR", "PRA Dakar", TypeEntrepot.PRA, regionB,
-                null, null, null, false);
+        pnaCentral = EntrepotJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("PNA-CENTRAL")
+            .nom("Pharmacie Nationale d'Approv.")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(regionA)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .build();
+        praInactif = EntrepotJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("PRA-DAKAR")
+            .nom("PRA Dakar")
+            .type(TypeEntrepot.PRA)
+            .regionId(regionB)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(false)
+            .build();
 
         entrepotJpaRepository.saveAll(List.of(pnaCentral, praInactif));
     }

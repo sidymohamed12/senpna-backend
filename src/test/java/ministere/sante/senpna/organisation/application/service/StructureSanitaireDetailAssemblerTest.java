@@ -46,11 +46,25 @@ class StructureSanitaireDetailAssemblerTest {
     }
 
     private StructureSanitaire structureAvecRegionEtPra(UUID regionId, UUID praId) {
-        return StructureSanitaire.reconstruct(StructureSanitaireId.generate(), "HOP-DKR", "Hôpital de Dakar",
-                TypeStructureSanitaire.HOPITAL, regionId != null ? RegionId.of(regionId) : null,
-                praId != null ? EntrepotId.of(praId) : null, "District", "Adresse", "+221771234567",
-                "hopital@example.com", "Diallo", "Awa", StatutAdhesion.VALIDEE, null, true, Instant.now(),
-                Instant.now());
+        return StructureSanitaire.builder()
+            .id(StructureSanitaireId.generate())
+            .code("HOP-DKR")
+            .nom("Hôpital de Dakar")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(regionId != null ? RegionId.of(regionId) : null)
+            .praId(praId != null ? EntrepotId.of(praId) : null)
+            .district("District")
+            .adresse("Adresse")
+            .telephone("+221771234567")
+            .email("hopital@example.com")
+            .responsableNom("Diallo")
+            .responsablePrenom("Awa")
+            .statutAdhesion(StatutAdhesion.VALIDEE)
+            .motifRejet(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     @Test
@@ -62,8 +76,19 @@ class StructureSanitaireDetailAssemblerTest {
 
         when(regionCachePort.findById(regionId))
                 .thenReturn(Optional.of(new RegionProjection(regionId, "DK", "Dakar", true)));
-        Entrepot pra = Entrepot.reconstruct(EntrepotId.of(praId), "PRA-DAKAR", "PRA Dakar", TypeEntrepot.PRA,
-                RegionId.of(regionId), null, null, null, true, Instant.now(), Instant.now());
+        Entrepot pra = Entrepot.builder()
+            .id(EntrepotId.of(praId))
+            .code("PRA-DAKAR")
+            .nom("PRA Dakar")
+            .type(TypeEntrepot.PRA)
+            .regionId(RegionId.of(regionId))
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(entrepotRepositoryPort.findById(EntrepotId.of(praId))).thenReturn(Optional.of(pra));
 
         StructureSanitaireDetail detail = assembler.assembler(structure);

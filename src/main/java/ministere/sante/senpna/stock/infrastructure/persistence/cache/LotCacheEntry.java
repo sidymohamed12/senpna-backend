@@ -45,17 +45,18 @@ public record LotCacheEntry(
     }
 
     public Lot toDomain() {
-        return Lot.reconstruct(
-                LotId.of(id),
-                numeroLot,
-                MedicamentId.of(medicamentId),
-                FournisseurId.of(fournisseurId),
-                dateFabrication,
-                dateExpiration,
-                prixAchat,
-                prixVente,
-                statut,
-                createdAt,
-                updatedAt);
+        return Lot.builder()
+            .id(LotId.of(id))
+            .numeroLot(numeroLot)
+            .medicamentId(MedicamentId.of(medicamentId))
+            .fournisseurId(FournisseurId.of(fournisseurId))
+            .dateFabrication(dateFabrication)
+            .dateExpiration(dateExpiration)
+            .prixAchat(prixAchat)
+            .prixVente(prixVente)
+            .statut(statut)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

@@ -49,10 +49,10 @@ class CandidatureTest {
         @Test
         @DisplayName("lettre de motivation et message complémentaire optionnels absents")
         void soumettre_succes_champsOptionnelsAbsents() {
-            Candidature candidature = Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr",
+            Candidature candidature = Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr",
                     Email.of("ibrahima.sarr@example.sn"), Phone.of("+221771112233"),
                     "https://cdn.senpna.sn/cvs/ibrahima-sarr.pdf", null, null, true, "Titre", "Entreprise",
-                    "rh@senpna.sn");
+                    "rh@senpna.sn"));
 
             assertThat(candidature.getLettreMotivationUrl()).isNull();
             assertThat(candidature.getMessageComplementaire()).isNull();
@@ -63,7 +63,7 @@ class CandidatureTest {
         void soumettre_consentementRefuse_leveException() {
             var emailOf = Email.of("fatou.diagne@example.sn");
             var phoneOf = Phone.of("+221771112233");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, false, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, false, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(ConsentementRgpdRequisException.class);
         }
 
@@ -72,7 +72,7 @@ class CandidatureTest {
         void soumettre_nomCompletVide_leveException() {
             var emailOf = Email.of("test@example.sn");
             var phoneOf = Phone.of("+221771112233");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "   ", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "   ", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -81,7 +81,7 @@ class CandidatureTest {
         void soumettre_cvManquant_leveException() {
             var emailOf = Email.of("test@example.sn");
             var phoneOf = Phone.of("+221771112233");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "", null, null, true, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -92,7 +92,7 @@ class CandidatureTest {
 
             var emailOf = Email.of("test@example.sn");
             var phoneOf = Phone.of("+221771112233");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, messageTropLong, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, messageTropLong, true, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -100,7 +100,7 @@ class CandidatureTest {
         @DisplayName("email null → NullPointerException")
         void soumettre_emailNull_leveException() {
             var phoneOf = Phone.of("+221771112233");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", null, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", null, phoneOf, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -108,16 +108,16 @@ class CandidatureTest {
         @DisplayName("téléphone null → NullPointerException")
         void soumettre_telephoneNull_leveException() {
             var emailOf = Email.of("test@example.sn");
-            assertThatThrownBy(() -> Candidature.soumettre(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, null, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn"))
+            assertThatThrownBy(() -> Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.M, "Ibrahima Sarr", emailOf, null, "https://cdn.senpna.sn/cvs/test.pdf", null, null, true, "Titre", "Entreprise", "rh@senpna.sn")))
                     .isInstanceOf(NullPointerException.class);
         }
     }
 
     private Candidature candidatureValide() {
-        return Candidature.soumettre(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne",
+        return Candidature.soumettre(new Candidature.SoumissionCommand(OPPORTUNITE_ID, Civilite.MME, "Fatou Diagne",
                 Email.of("fatou.diagne@example.sn"), Phone.of("+221771112233"),
                 "https://cdn.senpna.sn/cvs/fatou-diagne.pdf",
                 "https://cdn.senpna.sn/lettres-de-motivation/fatou-diagne.pdf",
-                "Message de motivation.", true, "Pharmacien(ne) responsable", "PNA", "rh@senpna.sn");
+                "Message de motivation.", true, "Pharmacien(ne) responsable", "PNA", "rh@senpna.sn"));
     }
 }

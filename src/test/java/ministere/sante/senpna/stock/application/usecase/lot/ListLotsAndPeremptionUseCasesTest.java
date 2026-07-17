@@ -145,10 +145,10 @@ class ListLotsAndPeremptionUseCasesTest {
         @Test
         @DisplayName("lots expirés trouvés → chacun marqué EXPIRE et sauvegardé")
         void lotsExpiresTrouves_chacunMarqueEtSauvegarde() {
-            Lot lot1 = Lot.creer("L1", MedicamentId.generate(), FournisseurId.generate(),
-                    LocalDate.now().minusMonths(6), LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN);
-            Lot lot2 = Lot.creer("L2", MedicamentId.generate(), FournisseurId.generate(),
-                    LocalDate.now().minusMonths(6), LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN);
+            Lot lot1 = Lot.creer(new Lot.CreationCommand("L1", MedicamentId.generate(), FournisseurId.generate(),
+                    LocalDate.now().minusMonths(6), LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN));
+            Lot lot2 = Lot.creer(new Lot.CreationCommand("L2", MedicamentId.generate(), FournisseurId.generate(),
+                    LocalDate.now().minusMonths(6), LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN));
             when(lotRepositoryPort.findActifsExpires()).thenReturn(List.of(lot1, lot2));
             when(lotRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 

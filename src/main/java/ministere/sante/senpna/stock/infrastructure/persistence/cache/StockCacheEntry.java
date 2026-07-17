@@ -44,16 +44,17 @@ public record StockCacheEntry(
     }
 
     public Stock toDomain() {
-        return Stock.reconstruct(
-                StockId.of(id),
-                EntrepotId.of(entrepotId),
-                LotId.of(lotId),
-                MedicamentId.of(medicamentId),
-                quantiteDisponible,
-                quantiteReservee,
-                quantiteEnCommande,
-                seuilAlerte,
-                createdAt,
-                updatedAt);
+        return Stock.builder()
+            .id(StockId.of(id))
+            .entrepotId(EntrepotId.of(entrepotId))
+            .lotId(LotId.of(lotId))
+            .medicamentId(MedicamentId.of(medicamentId))
+            .quantiteDisponible(quantiteDisponible)
+            .quantiteReservee(quantiteReservee)
+            .quantiteEnCommande(quantiteEnCommande)
+            .seuilAlerte(seuilAlerte)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

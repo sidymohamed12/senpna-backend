@@ -233,11 +233,26 @@ class MedicamentUseCasesTest {
                 void modifieQuandValide() {
                         UpdateMedicamentUseCaseImpl useCase = new UpdateMedicamentUseCaseImpl(medicamentRepositoryPort,
                                         familleRepositoryPort, formeRepositoryPort, assembler);
-                        Medicament existant = Medicament.reconstruct(MedicamentId.of(MEDICAMENT_ID), "PARA500",
-                                        "Doliprane",
-                                        "Paracétamol", "500 mg", FormeId.of(FORME_ID), FamilleId.of(FAMILLE_ID), null,
-                                        null, null,
-                                        30, false, null, 1000, 10000, true, Instant.now(), Instant.now());
+                        Medicament existant = Medicament.builder()
+                            .id(MedicamentId.of(MEDICAMENT_ID))
+                            .code("PARA500")
+                            .nomCommercial("Doliprane")
+                            .dci("Paracétamol")
+                            .dosage("500 mg")
+                            .formeId(FormeId.of(FORME_ID))
+                            .familleId(FamilleId.of(FAMILLE_ID))
+                            .voieAdministration(null)
+                            .temperatureConservation(null)
+                            .programmeSante(null)
+                            .delaiApprovisionnementJours(30)
+                            .necessiteOrdonnance(false)
+                            .fabricant(null)
+                            .stockMinimum(1000)
+                            .stockMaximum(10000)
+                            .actif(true)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(medicamentRepositoryPort.findById(MedicamentId.of(MEDICAMENT_ID)))
                                         .thenReturn(Optional.of(existant));
                         when(familleRepositoryPort.findById(FamilleId.of(FAMILLE_ID)))
@@ -271,11 +286,26 @@ class MedicamentUseCasesTest {
                         ArchiveMedicamentUseCaseImpl useCase = new ArchiveMedicamentUseCaseImpl(
                                         medicamentRepositoryPort,
                                         assembler);
-                        Medicament actif = Medicament.reconstruct(MedicamentId.of(MEDICAMENT_ID), "PARA500",
-                                        "Doliprane",
-                                        "Paracétamol", "500 mg", FormeId.of(FORME_ID), FamilleId.of(FAMILLE_ID), null,
-                                        null, null,
-                                        null, false, null, null, null, true, Instant.now(), Instant.now());
+                        Medicament actif = Medicament.builder()
+                            .id(MedicamentId.of(MEDICAMENT_ID))
+                            .code("PARA500")
+                            .nomCommercial("Doliprane")
+                            .dci("Paracétamol")
+                            .dosage("500 mg")
+                            .formeId(FormeId.of(FORME_ID))
+                            .familleId(FamilleId.of(FAMILLE_ID))
+                            .voieAdministration(null)
+                            .temperatureConservation(null)
+                            .programmeSante(null)
+                            .delaiApprovisionnementJours(null)
+                            .necessiteOrdonnance(false)
+                            .fabricant(null)
+                            .stockMinimum(null)
+                            .stockMaximum(null)
+                            .actif(true)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(medicamentRepositoryPort.findById(MedicamentId.of(MEDICAMENT_ID)))
                                         .thenReturn(Optional.of(actif));
                         when(medicamentRepositoryPort.save(any(Medicament.class)))

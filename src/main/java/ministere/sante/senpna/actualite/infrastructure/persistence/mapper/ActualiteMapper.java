@@ -19,18 +19,19 @@ public class ActualiteMapper {
                 .map(m -> ActualiteMedia.reconstruct(m.getId(), m.getType(), m.getUrl(), m.getOrdre()))
                 .toList();
 
-        return Actualite.reconstruct(
-                ActualiteId.of(entity.getId()),
-                entity.getCategorie(),
-                entity.getTitre(),
-                entity.getDescription(),
-                medias,
-                entity.getAuteurId(),
-                entity.getAuteurNom(),
-                List.copyOf(entity.getTags()),
-                entity.getStatut(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Actualite.builder()
+            .id(ActualiteId.of(entity.getId()))
+            .categorie(entity.getCategorie())
+            .titre(entity.getTitre())
+            .description(entity.getDescription())
+            .medias(medias)
+            .auteurId(entity.getAuteurId())
+            .auteurNom(entity.getAuteurNom())
+            .tags(List.copyOf(entity.getTags()))
+            .statut(entity.getStatut())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     /**
@@ -38,15 +39,16 @@ public class ActualiteMapper {
      * {@code INSERT}.
      */
     public ActualiteJpaEntity toNewEntity(Actualite actualite) {
-        ActualiteJpaEntity entity = new ActualiteJpaEntity(
-                actualite.getId().getValue(),
-                actualite.getCategorie(),
-                actualite.getTitre(),
-                actualite.getDescription(),
-                actualite.getAuteurId(),
-                actualite.getAuteurNom(),
-                actualite.getTags(),
-                actualite.getStatut());
+        ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+            .id(actualite.getId().getValue())
+            .categorie(actualite.getCategorie())
+            .titre(actualite.getTitre())
+            .description(actualite.getDescription())
+            .auteurId(actualite.getAuteurId())
+            .auteurNom(actualite.getAuteurNom())
+            .tags(actualite.getTags())
+            .statut(actualite.getStatut())
+            .build();
         entity.setCreatedAt(actualite.getCreatedAt());
         entity.setUpdatedAt(actualite.getUpdatedAt());
         entity.remplacerMedias(mapMedias(actualite));

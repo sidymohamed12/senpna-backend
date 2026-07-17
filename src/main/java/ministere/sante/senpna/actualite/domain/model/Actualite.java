@@ -30,25 +30,24 @@ public class Actualite extends AggregateRoot<ActualiteId> {
     private List<String> tags;
     private StatutActualite statut;
 
-    private Actualite(ActualiteId id, CategorieActualite categorie, String titre, String description,
-            List<ActualiteMedia> medias, UUID auteurId, String auteurNom, List<String> tags, StatutActualite statut,
-            Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.categorie = validerCategorie(categorie);
-        this.titre = validerTitre(titre);
-        this.description = validerDescription(description);
-        this.medias = validerMedias(medias);
-        this.auteurId = Objects.requireNonNull(auteurId, "L'auteur de l'actualité est obligatoire");
-        this.auteurNom = validerAuteurNom(auteurNom);
-        this.tags = validerTags(tags);
-        this.statut = statut != null ? statut : StatutActualite.BROUILLON;
+    private Actualite(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.categorie = validerCategorie(builder.categorie);
+        this.titre = validerTitre(builder.titre);
+        this.description = validerDescription(builder.description);
+        this.medias = validerMedias(builder.medias);
+        this.auteurId = Objects.requireNonNull(builder.auteurId, "L'auteur de l'actualité est obligatoire");
+        this.auteurNom = validerAuteurNom(builder.auteurNom);
+        this.tags = validerTags(builder.tags);
+        this.statut = builder.statut != null ? builder.statut : StatutActualite.BROUILLON;
     }
 
-    public static Actualite reconstruct(ActualiteId id, CategorieActualite categorie, String titre,
-            String description, List<ActualiteMedia> medias, UUID auteurId, String auteurNom, List<String> tags,
-            StatutActualite statut, Instant createdAt, Instant updatedAt) {
-        return new Actualite(id, categorie, titre, description, medias, auteurId, auteurNom, tags, statut, createdAt,
-                updatedAt);
+    /**
+     * Données nécessaires à la création d'une nouvelle actualité — évite
+     * une méthode {@code creer(...)} à rallonge.
+     */
+    public record CreationCommand(CategorieActualite categorie, String titre, String description,
+            List<ActualiteMedia> medias, UUID auteurId, String auteurNom, List<String> tags) {
     }
 
     /**
@@ -56,11 +55,102 @@ public class Actualite extends AggregateRoot<ActualiteId> {
      * la publication est une décision éditoriale explicite et distincte de la
      * saisie.
      */
-    public static Actualite creer(CategorieActualite categorie, String titre, String description,
-            List<ActualiteMedia> medias, UUID auteurId, String auteurNom, List<String> tags) {
+    public static Actualite creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new Actualite(ActualiteId.generate(), categorie, titre, description, medias, auteurId, auteurNom,
-                tags, StatutActualite.BROUILLON, maintenant, maintenant);
+        return builder()
+                .id(ActualiteId.generate())
+                .categorie(command.categorie())
+                .titre(command.titre())
+                .description(command.description())
+                .medias(command.medias())
+                .auteurId(command.auteurId())
+                .auteurNom(command.auteurNom())
+                .tags(command.tags())
+                .statut(StatutActualite.BROUILLON)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private ActualiteId id;
+        private CategorieActualite categorie;
+        private String titre;
+        private String description;
+        private List<ActualiteMedia> medias;
+        private UUID auteurId;
+        private String auteurNom;
+        private List<String> tags;
+        private StatutActualite statut;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(ActualiteId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder categorie(CategorieActualite categorie) {
+            this.categorie = categorie;
+            return this;
+        }
+
+        public Builder titre(String titre) {
+            this.titre = titre;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder medias(List<ActualiteMedia> medias) {
+            this.medias = medias;
+            return this;
+        }
+
+        public Builder auteurId(UUID auteurId) {
+            this.auteurId = auteurId;
+            return this;
+        }
+
+        public Builder auteurNom(String auteurNom) {
+            this.auteurNom = auteurNom;
+            return this;
+        }
+
+        public Builder tags(List<String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public Builder statut(StatutActualite statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Actualite build() {
+            return new Actualite(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

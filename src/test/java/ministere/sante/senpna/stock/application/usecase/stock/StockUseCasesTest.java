@@ -58,7 +58,7 @@ class StockUseCasesTest {
     void setUp() {
         entrepotId = EntrepotId.generate();
         lotId = LotId.generate();
-        stock = Stock.ouvrir(entrepotId, lotId, MedicamentId.generate(), null);
+        stock = Stock.ouvrir(new Stock.OuvertureCommand(entrepotId, lotId, MedicamentId.generate(), null));
         stock.entrer(new BigDecimal("100"));
     }
 
@@ -122,8 +122,8 @@ class StockUseCasesTest {
         void setUp() {
             sut = new ReserverStockUseCaseImpl(stockRepositoryPort, lotRepositoryPort, stockDetailAssembler,
                     entrepotScopeGuard);
-            lot = Lot.creer("LOT-1", MedicamentId.generate(), FournisseurId.generate(),
-                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+            lot = Lot.creer(new Lot.CreationCommand("LOT-1", MedicamentId.generate(), FournisseurId.generate(),
+                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
         }
 
         @Test

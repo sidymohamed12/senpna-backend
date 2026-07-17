@@ -59,13 +59,42 @@ class StructureSanitairePersistenceAdaptersUnitTest {
     UUID id = UUID.randomUUID();
     UUID regionId = UUID.randomUUID();
     UUID praId = UUID.randomUUID();
-    StructureSanitaire structure = StructureSanitaire.reconstruct(StructureSanitaireId.of(id), "HOP-DKR",
-            "Hôpital de Dakar", TypeStructureSanitaire.HOPITAL, RegionId.of(regionId), EntrepotId.of(praId), null,
-            null, null, null, null, null, StatutAdhesion.VALIDEE, null, true, java.time.Instant.now(),
-            java.time.Instant.now());
-    StructureSanitaireJpaEntity entity = new StructureSanitaireJpaEntity(id, "HOP-DKR", "Hôpital de Dakar",
-            TypeStructureSanitaire.HOPITAL, regionId, praId, null, null, null, null, null, null,
-            StatutAdhesion.VALIDEE, null, true);
+    StructureSanitaire structure = StructureSanitaire.builder()
+        .id(StructureSanitaireId.of(id))
+        .code("HOP-DKR")
+        .nom("Hôpital de Dakar")
+        .type(TypeStructureSanitaire.HOPITAL)
+        .regionId(RegionId.of(regionId))
+        .praId(EntrepotId.of(praId))
+        .district(null)
+        .adresse(null)
+        .telephone(null)
+        .email(null)
+        .responsableNom(null)
+        .responsablePrenom(null)
+        .statutAdhesion(StatutAdhesion.VALIDEE)
+        .motifRejet(null)
+        .actif(true)
+        .createdAt(java.time.Instant.now())
+        .updatedAt(java.time.Instant.now())
+        .build();
+    StructureSanitaireJpaEntity entity = StructureSanitaireJpaEntity.builder()
+        .id(id)
+        .code("HOP-DKR")
+        .nom("Hôpital de Dakar")
+        .type(TypeStructureSanitaire.HOPITAL)
+        .regionId(regionId)
+        .praId(praId)
+        .district(null)
+        .adresse(null)
+        .telephone(null)
+        .email(null)
+        .responsableNom(null)
+        .responsablePrenom(null)
+        .statutAdhesion(StatutAdhesion.VALIDEE)
+        .motifRejet(null)
+        .actif(true)
+        .build();
 
     @BeforeEach
     void setUp() {

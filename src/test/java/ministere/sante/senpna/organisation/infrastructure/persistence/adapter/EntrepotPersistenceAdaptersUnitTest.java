@@ -56,11 +56,30 @@ class EntrepotPersistenceAdaptersUnitTest {
 
     UUID id = UUID.randomUUID();
     UUID regionId = UUID.randomUUID();
-    Entrepot entrepot = Entrepot.reconstruct(EntrepotId.of(id), "PNA-CENTRAL", "Pharmacie Nationale",
-            TypeEntrepot.PNA_CENTRAL, RegionId.of(regionId), null, null, null, true, java.time.Instant.now(),
-            java.time.Instant.now());
-    EntrepotJpaEntity entity = new EntrepotJpaEntity(id, "PNA-CENTRAL", "Pharmacie Nationale",
-            TypeEntrepot.PNA_CENTRAL, regionId, null, null, null, true);
+    Entrepot entrepot = Entrepot.builder()
+        .id(EntrepotId.of(id))
+        .code("PNA-CENTRAL")
+        .nom("Pharmacie Nationale")
+        .type(TypeEntrepot.PNA_CENTRAL)
+        .regionId(RegionId.of(regionId))
+        .adresse(null)
+        .telephone(null)
+        .responsableUserId(null)
+        .actif(true)
+        .createdAt(java.time.Instant.now())
+        .updatedAt(java.time.Instant.now())
+        .build();
+    EntrepotJpaEntity entity = EntrepotJpaEntity.builder()
+        .id(id)
+        .code("PNA-CENTRAL")
+        .nom("Pharmacie Nationale")
+        .type(TypeEntrepot.PNA_CENTRAL)
+        .regionId(regionId)
+        .adresse(null)
+        .telephone(null)
+        .responsableUserId(null)
+        .actif(true)
+        .build();
 
     @BeforeEach
     void setUp() {

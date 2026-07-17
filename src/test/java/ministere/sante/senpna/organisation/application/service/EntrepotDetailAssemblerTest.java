@@ -41,9 +41,19 @@ class EntrepotDetailAssemblerTest {
     @DisplayName("résout le nom de la région via le cache quand l'entrepôt en a une")
     void assembler_avecRegion_resoutLeNom() {
         UUID regionId = UUID.randomUUID();
-        Entrepot entrepot = Entrepot.reconstruct(EntrepotId.generate(), "PNA-CENTRAL", "Pharmacie Nationale",
-                TypeEntrepot.PNA_CENTRAL, RegionId.of(regionId), "Adresse", "+221771234567", UUID.randomUUID(), true,
-                Instant.now(), Instant.now());
+        Entrepot entrepot = Entrepot.builder()
+            .id(EntrepotId.generate())
+            .code("PNA-CENTRAL")
+            .nom("Pharmacie Nationale")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(RegionId.of(regionId))
+            .adresse("Adresse")
+            .telephone("+221771234567")
+            .responsableUserId(UUID.randomUUID())
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(regionCachePort.findById(regionId))
                 .thenReturn(Optional.of(new RegionProjection(regionId, "DK", "Dakar", true)));
 
@@ -59,8 +69,19 @@ class EntrepotDetailAssemblerTest {
     @DisplayName("region introuvable dans le cache → regionNom null")
     void assembler_regionIntrouvableDansLeCache_regionNomNull() {
         UUID regionId = UUID.randomUUID();
-        Entrepot entrepot = Entrepot.reconstruct(EntrepotId.generate(), "PRA-DAKAR", "PRA Dakar", TypeEntrepot.PRA,
-                RegionId.of(regionId), null, null, null, true, Instant.now(), Instant.now());
+        Entrepot entrepot = Entrepot.builder()
+            .id(EntrepotId.generate())
+            .code("PRA-DAKAR")
+            .nom("PRA Dakar")
+            .type(TypeEntrepot.PRA)
+            .regionId(RegionId.of(regionId))
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(regionCachePort.findById(regionId)).thenReturn(Optional.empty());
 
         EntrepotDetail detail = assembler.assembler(entrepot);
@@ -71,8 +92,19 @@ class EntrepotDetailAssemblerTest {
     @Test
     @DisplayName("entrepôt sans région → regionId et regionNom null, sans appel au cache")
     void assembler_sansRegion_regionNullSansAppelCache() {
-        Entrepot entrepot = Entrepot.reconstruct(EntrepotId.generate(), "PNA-CENTRAL", "Pharmacie Nationale",
-                TypeEntrepot.PNA_CENTRAL, null, null, null, null, true, Instant.now(), Instant.now());
+        Entrepot entrepot = Entrepot.builder()
+            .id(EntrepotId.generate())
+            .code("PNA-CENTRAL")
+            .nom("Pharmacie Nationale")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(null)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
         EntrepotDetail detail = assembler.assembler(entrepot);
 

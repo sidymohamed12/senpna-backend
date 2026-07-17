@@ -43,8 +43,16 @@ class ClorerAppelOffresExpiresUseCaseImplTest {
     private AppelOffre appelOffrePublieExpire() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
         Instant maintenant = Instant.now();
-        return AppelOffre.reconstruct(AppelOffreId.generate(), "AO-1", "Objet", LocalDate.now().minusDays(1),
-                StatutAppelOffre.PUBLIE, List.of(ligne), maintenant, maintenant);
+        return AppelOffre.builder()
+            .id(AppelOffreId.generate())
+            .reference("AO-1")
+            .objet("Objet")
+            .dateCloture(LocalDate.now().minusDays(1))
+            .statut(StatutAppelOffre.PUBLIE)
+            .lignes(List.of(ligne))
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
     }
 
     @Test

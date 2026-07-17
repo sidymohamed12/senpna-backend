@@ -31,8 +31,8 @@ public class CreateProjetUseCaseImpl implements CreateProjetUseCase {
     public ProjetDetail creer(CreateProjetCommand command) {
         CategorieProjet categorie = commandMapper.versCategorie(command.categorie());
 
-        Projet projet = Projet.creer(categorie, command.nom(), command.description(), command.objectifs(),
-                command.impacts(), command.imageUrl());
+        Projet projet = Projet.creer(new Projet.CreationCommand(categorie, command.nom(), command.description(), command.objectifs(),
+                command.impacts(), command.imageUrl()));
 
         Projet saved = projetRepositoryPort.save(projet);
         return assembler.assembler(saved);

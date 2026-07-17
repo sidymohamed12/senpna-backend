@@ -40,15 +40,15 @@ class ProjetRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        Projet publieSante = Projet.creer(CategorieProjet.SANTE, "Vaccination rurale", "Desc", List.of(),
-                List.of(), null);
+        Projet publieSante = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Vaccination rurale", "Desc", List.of(),
+                List.of(), null));
         publieSante.publier();
 
-        Projet brouillonSocial = Projet.creer(CategorieProjet.SOCIAL, "Cantines scolaires", "Desc", List.of(),
-                List.of(), null);
+        Projet brouillonSocial = Projet.creer(new Projet.CreationCommand(CategorieProjet.SOCIAL, "Cantines scolaires", "Desc", List.of(),
+                List.of(), null));
 
-        Projet archiveSante = Projet.creer(CategorieProjet.SANTE, "Ancienne campagne", "Desc", List.of(),
-                List.of(), null);
+        Projet archiveSante = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Ancienne campagne", "Desc", List.of(),
+                List.of(), null));
         archiveSante.archiver();
 
         sut.save(publieSante);
@@ -117,8 +117,8 @@ class ProjetRepositoryAdapterTest {
         @Test
         @DisplayName("retrouve un projet persisté avec ses listes d'objectifs/impacts")
         void retrouveAvecListes() {
-            Projet projet = Projet.creer(CategorieProjet.INNOVATION, "Nom", "Desc", List.of("O1", "O2"),
-                    List.of("I1"), null);
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.INNOVATION, "Nom", "Desc", List.of("O1", "O2"),
+                    List.of("I1"), null));
             sut.save(projet);
             entityManager.flush();
             entityManager.clear();

@@ -23,9 +23,16 @@ class ActualiteJpaEntityTest {
                 UUID auteurId = UUID.randomUUID();
                 List<String> tags = new ArrayList<>(List.of("sante", "senegal"));
 
-                ActualiteJpaEntity entity = new ActualiteJpaEntity(id, CategorieActualite.PROJET, "Titre",
-                                "Description",
-                                auteurId, "Awa Diop", tags, StatutActualite.BROUILLON);
+                ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+                    .id(id)
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description("Description")
+                    .auteurId(auteurId)
+                    .auteurNom("Awa Diop")
+                    .tags(tags)
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 assertThat(entity.getId()).isEqualTo(id);
                 assertThat(entity.getCategorie()).isEqualTo(CategorieActualite.PROJET);
@@ -45,8 +52,16 @@ class ActualiteJpaEntityTest {
         @Test
         @DisplayName("le constructeur accepte une liste de tags null et l'initialise à une liste vide")
         void constructeur_tagsNull_listeVide() {
-                ActualiteJpaEntity entity = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.AUTRE, "Titre",
-                                null, UUID.randomUUID(), "Auteur", null, StatutActualite.BROUILLON);
+                ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.AUTRE)
+                    .titre("Titre")
+                    .description(null)
+                    .auteurId(UUID.randomUUID())
+                    .auteurNom("Auteur")
+                    .tags(null)
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 assertThat(entity.getTags()).isEmpty();
         }
@@ -54,9 +69,16 @@ class ActualiteJpaEntityTest {
         @Test
         @DisplayName("remplacerMedias() vide la collection existante puis ajoute les nouveaux médias en fixant le back-reference")
         void remplacerMedias_remplaceEtFixeBackReference() {
-                ActualiteJpaEntity entity = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                null, UUID.randomUUID(), "Auteur", List.of(), StatutActualite.BROUILLON);
+                ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description(null)
+                    .auteurId(UUID.randomUUID())
+                    .auteurNom("Auteur")
+                    .tags(List.of())
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 ActualiteMediaJpaEntity ancienMedia = new ActualiteMediaJpaEntity(UUID.randomUUID(), entity,
                                 TypeMedia.IMAGE,
@@ -78,9 +100,16 @@ class ActualiteJpaEntityTest {
         @Test
         @DisplayName("remplacerMedias(null) vide simplement la collection existante")
         void remplacerMedias_null_videLaCollection() {
-                ActualiteJpaEntity entity = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                null, UUID.randomUUID(), "Auteur", List.of(), StatutActualite.BROUILLON);
+                ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description(null)
+                    .auteurId(UUID.randomUUID())
+                    .auteurNom("Auteur")
+                    .tags(List.of())
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
                 ActualiteMediaJpaEntity media = new ActualiteMediaJpaEntity(UUID.randomUUID(), entity, TypeMedia.IMAGE,
                                 "https://cdn/1.png", 0);
                 entity.remplacerMedias(List.of(media));
@@ -95,16 +124,36 @@ class ActualiteJpaEntityTest {
         @DisplayName("equals()/hashCode() se basent sur les champs métier hors id, médias et tags")
         void equalsEtHashCode() {
                 UUID auteurId = UUID.randomUUID();
-                ActualiteJpaEntity entity1 = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                "Description", auteurId, "Auteur", List.of("a"), StatutActualite.BROUILLON);
-                ActualiteJpaEntity entity2 = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                "Description", auteurId, "Auteur", List.of("b", "c"), StatutActualite.BROUILLON);
-                ActualiteJpaEntity entityDifferente = new ActualiteJpaEntity(UUID.randomUUID(),
-                                CategorieActualite.AUTRE,
-                                "Autre titre", "Description", auteurId, "Auteur", List.of("a"),
-                                StatutActualite.BROUILLON);
+                ActualiteJpaEntity entity1 = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description("Description")
+                    .auteurId(auteurId)
+                    .auteurNom("Auteur")
+                    .tags(List.of("a"))
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
+                ActualiteJpaEntity entity2 = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description("Description")
+                    .auteurId(auteurId)
+                    .auteurNom("Auteur")
+                    .tags(List.of("b", "c"))
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
+                ActualiteJpaEntity entityDifferente = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.AUTRE)
+                    .titre("Autre titre")
+                    .description("Description")
+                    .auteurId(auteurId)
+                    .auteurNom("Auteur")
+                    .tags(List.of("a"))
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 assertThat(entity1).isEqualTo(entity1)
                                 .isNotEqualTo(null)

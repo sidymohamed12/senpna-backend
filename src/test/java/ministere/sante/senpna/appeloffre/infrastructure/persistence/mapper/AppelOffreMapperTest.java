@@ -28,8 +28,8 @@ class AppelOffreMapperTest {
     }
 
     private AppelOffre appelOffre() {
-        return AppelOffre.creer("AO-2026-0001", "Achat Amoxicilline", LocalDate.now().plusDays(10),
-                List.of(ligne()));
+        return AppelOffre.creer(new AppelOffre.CreationCommand("AO-2026-0001", "Achat Amoxicilline", LocalDate.now().plusDays(10),
+                List.of(ligne())));
     }
 
     @Test

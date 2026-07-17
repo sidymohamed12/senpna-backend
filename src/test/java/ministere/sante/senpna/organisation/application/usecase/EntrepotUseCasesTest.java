@@ -68,13 +68,35 @@ class EntrepotUseCasesTest {
     }
 
     private Entrepot praExistante() {
-        return Entrepot.reconstruct(EntrepotId.of(ENTREPOT_ID), "PRA-DAKAR", "PRA Dakar", TypeEntrepot.PRA,
-                RegionId.of(REGION_ID), null, null, null, true, Instant.now(), Instant.now());
+        return Entrepot.builder()
+            .id(EntrepotId.of(ENTREPOT_ID))
+            .code("PRA-DAKAR")
+            .nom("PRA Dakar")
+            .type(TypeEntrepot.PRA)
+            .regionId(RegionId.of(REGION_ID))
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     private Entrepot pnaCentraleExistante() {
-        return Entrepot.reconstruct(EntrepotId.of(ENTREPOT_ID), "PNA-CENTRAL", "PNA Centrale",
-                TypeEntrepot.PNA_CENTRAL, null, null, null, null, true, Instant.now(), Instant.now());
+        return Entrepot.builder()
+            .id(EntrepotId.of(ENTREPOT_ID))
+            .code("PNA-CENTRAL")
+            .nom("PNA Centrale")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(null)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     // ══════════════════════════════════════════════════════════════════════

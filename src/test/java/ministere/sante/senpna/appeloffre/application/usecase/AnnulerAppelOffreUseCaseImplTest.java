@@ -46,7 +46,7 @@ class AnnulerAppelOffreUseCaseImplTest {
     private AppelOffre appelOffre() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
 
-        return AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        return AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
     }
 
     @Test

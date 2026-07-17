@@ -28,29 +28,28 @@ public class Candidature extends AggregateRoot<CandidatureId> {
     private String messageComplementaire;
     private boolean consentementRgpd;
 
-    private Candidature(CandidatureId id, UUID opportuniteId, Civilite civilite, String nomComplet, Email email,
-            Phone telephone, String cvUrl, String lettreMotivationUrl, String messageComplementaire,
-            boolean consentementRgpd, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.opportuniteId = Objects.requireNonNull(opportuniteId, "L'opportunité ciblée est obligatoire");
-        this.civilite = Objects.requireNonNull(civilite, "La civilité est obligatoire");
-        this.nomComplet = validerNomComplet(nomComplet);
-        this.email = Objects.requireNonNull(email, "L'e-mail est obligatoire");
-        this.telephone = Objects.requireNonNull(telephone, "Le téléphone est obligatoire");
-        this.cvUrl = validerUrlObligatoire(cvUrl, "CV");
-        this.lettreMotivationUrl = validerUrlOptionnelle(lettreMotivationUrl);
-        this.messageComplementaire = validerMessage(messageComplementaire);
-        if (!consentementRgpd) {
+    private Candidature(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.opportuniteId = Objects.requireNonNull(builder.opportuniteId, "L'opportunité ciblée est obligatoire");
+        this.civilite = Objects.requireNonNull(builder.civilite, "La civilité est obligatoire");
+        this.nomComplet = validerNomComplet(builder.nomComplet);
+        this.email = Objects.requireNonNull(builder.email, "L'e-mail est obligatoire");
+        this.telephone = Objects.requireNonNull(builder.telephone, "Le téléphone est obligatoire");
+        this.cvUrl = validerUrlObligatoire(builder.cvUrl, "CV");
+        this.lettreMotivationUrl = validerUrlOptionnelle(builder.lettreMotivationUrl);
+        this.messageComplementaire = validerMessage(builder.messageComplementaire);
+        if (!builder.consentementRgpd) {
             throw new ConsentementRgpdRequisException();
         }
         this.consentementRgpd = true;
     }
 
-    public static Candidature reconstruct(CandidatureId id, UUID opportuniteId, Civilite civilite,
-            String nomComplet, Email email, Phone telephone, String cvUrl, String lettreMotivationUrl,
-            String messageComplementaire, boolean consentementRgpd, Instant createdAt, Instant updatedAt) {
-        return new Candidature(id, opportuniteId, civilite, nomComplet, email, telephone, cvUrl,
-                lettreMotivationUrl, messageComplementaire, consentementRgpd, createdAt, updatedAt);
+    /**
+     * Données nécessaires à la soumission d'une nouvelle candidature.
+     */
+    public record SoumissionCommand(UUID opportuniteId, Civilite civilite, String nomComplet, Email email,
+            Phone telephone, String cvUrl, String lettreMotivationUrl, String messageComplementaire,
+            boolean consentementRgpd, String titreOffre, String nomEntreprise, String emailContactRH) {
     }
 
     /**
@@ -60,20 +59,116 @@ public class Candidature extends AggregateRoot<CandidatureId> {
      * un échec d'envoi d'e-mail ne doit jamais faire échouer la soumission de la
      * candidature elle-même.
      */
-    public static Candidature soumettre(UUID opportuniteId, Civilite civilite, String nomComplet, Email email,
-            Phone telephone, String cvUrl, String lettreMotivationUrl, String messageComplementaire,
-            boolean consentementRgpd, String titreOffre, String nomEntreprise, String emailContactRH) {
+    public static Candidature soumettre(SoumissionCommand command) {
         Instant maintenant = Instant.now();
-        Candidature candidature = new Candidature(CandidatureId.generate(), opportuniteId, civilite, nomComplet,
-                email, telephone, cvUrl, lettreMotivationUrl, messageComplementaire, consentementRgpd, maintenant,
-                maintenant);
+        Candidature candidature = builder()
+                .id(CandidatureId.generate())
+                .opportuniteId(command.opportuniteId())
+                .civilite(command.civilite())
+                .nomComplet(command.nomComplet())
+                .email(command.email())
+                .telephone(command.telephone())
+                .cvUrl(command.cvUrl())
+                .lettreMotivationUrl(command.lettreMotivationUrl())
+                .messageComplementaire(command.messageComplementaire())
+                .consentementRgpd(command.consentementRgpd())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
 
         candidature.registerEvent(new NouvelleCandidatureEvent(
-                candidature.getId().getValue(), opportuniteId, titreOffre, nomEntreprise,
-                candidature.getNomComplet(), candidature.getEmail().value(), candidature.getTelephone().value(),
-                emailContactRH, maintenant));
+                candidature.getId().getValue(), command.opportuniteId(), command.titreOffre(),
+                command.nomEntreprise(), candidature.getNomComplet(), candidature.getEmail().value(),
+                candidature.getTelephone().value(), command.emailContactRH(), maintenant));
 
         return candidature;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private CandidatureId id;
+        private UUID opportuniteId;
+        private Civilite civilite;
+        private String nomComplet;
+        private Email email;
+        private Phone telephone;
+        private String cvUrl;
+        private String lettreMotivationUrl;
+        private String messageComplementaire;
+        private boolean consentementRgpd;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(CandidatureId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder opportuniteId(UUID opportuniteId) {
+            this.opportuniteId = opportuniteId;
+            return this;
+        }
+
+        public Builder civilite(Civilite civilite) {
+            this.civilite = civilite;
+            return this;
+        }
+
+        public Builder nomComplet(String nomComplet) {
+            this.nomComplet = nomComplet;
+            return this;
+        }
+
+        public Builder email(Email email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder telephone(Phone telephone) {
+            this.telephone = telephone;
+            return this;
+        }
+
+        public Builder cvUrl(String cvUrl) {
+            this.cvUrl = cvUrl;
+            return this;
+        }
+
+        public Builder lettreMotivationUrl(String lettreMotivationUrl) {
+            this.lettreMotivationUrl = lettreMotivationUrl;
+            return this;
+        }
+
+        public Builder messageComplementaire(String messageComplementaire) {
+            this.messageComplementaire = messageComplementaire;
+            return this;
+        }
+
+        public Builder consentementRgpd(boolean consentementRgpd) {
+            this.consentementRgpd = consentementRgpd;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Candidature build() {
+            return new Candidature(this);
+        }
     }
 
     // ── Validation ───────────────────────────────────────────────────────

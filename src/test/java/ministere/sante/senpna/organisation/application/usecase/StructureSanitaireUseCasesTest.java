@@ -87,20 +87,63 @@ class StructureSanitaireUseCasesTest {
     }
 
     private StructureSanitaire structureEnAttente() {
-        return StructureSanitaire.reconstruct(StructureSanitaireId.of(STRUCTURE_ID), "HOP-THIES", "Hôpital de Thiès",
-                TypeStructureSanitaire.HOPITAL, RegionId.of(REGION_ID), null, "Thiès", null, null, null, "Ndiaye",
-                "Fatou", StatutAdhesion.EN_ATTENTE_VALIDATION, null, false, Instant.now(), Instant.now());
+        return StructureSanitaire.builder()
+            .id(StructureSanitaireId.of(STRUCTURE_ID))
+            .code("HOP-THIES")
+            .nom("Hôpital de Thiès")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(RegionId.of(REGION_ID))
+            .praId(null)
+            .district("Thiès")
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom("Ndiaye")
+            .responsablePrenom("Fatou")
+            .statutAdhesion(StatutAdhesion.EN_ATTENTE_VALIDATION)
+            .motifRejet(null)
+            .actif(false)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     private StructureSanitaire structureValidee() {
-        return StructureSanitaire.reconstruct(StructureSanitaireId.of(STRUCTURE_ID), "HOP-THIES", "Hôpital de Thiès",
-                TypeStructureSanitaire.HOPITAL, RegionId.of(REGION_ID), null, "Thiès", null, null, null, "Ndiaye",
-                "Fatou", StatutAdhesion.VALIDEE, null, true, Instant.now(), Instant.now());
+        return StructureSanitaire.builder()
+            .id(StructureSanitaireId.of(STRUCTURE_ID))
+            .code("HOP-THIES")
+            .nom("Hôpital de Thiès")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(RegionId.of(REGION_ID))
+            .praId(null)
+            .district("Thiès")
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom("Ndiaye")
+            .responsablePrenom("Fatou")
+            .statutAdhesion(StatutAdhesion.VALIDEE)
+            .motifRejet(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     private Entrepot praActive() {
-        return Entrepot.reconstruct(EntrepotId.of(PRA_ID), "PRA-THIES", "PRA Thiès", TypeEntrepot.PRA,
-                RegionId.of(REGION_ID), null, null, null, true, Instant.now(), Instant.now());
+        return Entrepot.builder()
+            .id(EntrepotId.of(PRA_ID))
+            .code("PRA-THIES")
+            .nom("PRA Thiès")
+            .type(TypeEntrepot.PRA)
+            .regionId(RegionId.of(REGION_ID))
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -494,8 +537,19 @@ class StructureSanitaireUseCasesTest {
         @DisplayName("entrepôt de type PNA_CENTRAL → TypeEntrepotInvalideException")
         void affecter_typeInvalide_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente()));
-            Entrepot pnaCentral = Entrepot.reconstruct(EntrepotId.of(PRA_ID), "PNA-CENTRAL", "PNA Centrale",
-                    TypeEntrepot.PNA_CENTRAL, null, null, null, null, true, Instant.now(), Instant.now());
+            Entrepot pnaCentral = Entrepot.builder()
+                .id(EntrepotId.of(PRA_ID))
+                .code("PNA-CENTRAL")
+                .nom("PNA Centrale")
+                .type(TypeEntrepot.PNA_CENTRAL)
+                .regionId(null)
+                .adresse(null)
+                .telephone(null)
+                .responsableUserId(null)
+                .actif(true)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(pnaCentral));
 
             var assignStructureToPraCommand = new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID);
@@ -507,8 +561,19 @@ class StructureSanitaireUseCasesTest {
         @DisplayName("PRA inactive → EntrepotInactifException")
         void affecter_praInactive_leveException() {
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente()));
-            Entrepot praInactive = Entrepot.reconstruct(EntrepotId.of(PRA_ID), "PRA-THIES", "PRA Thiès",
-                    TypeEntrepot.PRA, RegionId.of(REGION_ID), null, null, null, false, Instant.now(), Instant.now());
+            Entrepot praInactive = Entrepot.builder()
+                .id(EntrepotId.of(PRA_ID))
+                .code("PRA-THIES")
+                .nom("PRA Thiès")
+                .type(TypeEntrepot.PRA)
+                .regionId(RegionId.of(REGION_ID))
+                .adresse(null)
+                .telephone(null)
+                .responsableUserId(null)
+                .actif(false)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(praInactive));
 
             var assignStructureToPraCommand = new AssignStructureToPraCommand(STRUCTURE_ID, PRA_ID);

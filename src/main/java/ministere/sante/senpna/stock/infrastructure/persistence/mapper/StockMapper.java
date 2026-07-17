@@ -13,29 +13,31 @@ import org.springframework.stereotype.Component;
 public class StockMapper {
 
     public Stock toDomain(StockJpaEntity entity) {
-        return Stock.reconstruct(
-                StockId.of(entity.getId()),
-                EntrepotId.of(entity.getEntrepotId()),
-                LotId.of(entity.getLotId()),
-                MedicamentId.of(entity.getMedicamentId()),
-                entity.getQuantiteDisponible(),
-                entity.getQuantiteReservee(),
-                entity.getQuantiteEnCommande(),
-                entity.getSeuilAlerte(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Stock.builder()
+            .id(StockId.of(entity.getId()))
+            .entrepotId(EntrepotId.of(entity.getEntrepotId()))
+            .lotId(LotId.of(entity.getLotId()))
+            .medicamentId(MedicamentId.of(entity.getMedicamentId()))
+            .quantiteDisponible(entity.getQuantiteDisponible())
+            .quantiteReservee(entity.getQuantiteReservee())
+            .quantiteEnCommande(entity.getQuantiteEnCommande())
+            .seuilAlerte(entity.getSeuilAlerte())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public StockJpaEntity toEntity(Stock stock) {
-        StockJpaEntity entity = new StockJpaEntity(
-                stock.getId().getValue(),
-                stock.getEntrepotId().getValue(),
-                stock.getLotId().getValue(),
-                stock.getMedicamentId().getValue(),
-                stock.getQuantiteDisponible(),
-                stock.getQuantiteReservee(),
-                stock.getQuantiteEnCommande(),
-                stock.getSeuilAlerte());
+        StockJpaEntity entity = StockJpaEntity.builder()
+            .id(stock.getId().getValue())
+            .entrepotId(stock.getEntrepotId().getValue())
+            .lotId(stock.getLotId().getValue())
+            .medicamentId(stock.getMedicamentId().getValue())
+            .quantiteDisponible(stock.getQuantiteDisponible())
+            .quantiteReservee(stock.getQuantiteReservee())
+            .quantiteEnCommande(stock.getQuantiteEnCommande())
+            .seuilAlerte(stock.getSeuilAlerte())
+            .build();
         entity.setCreatedAt(stock.getCreatedAt());
         entity.setUpdatedAt(stock.getUpdatedAt());
         return entity;

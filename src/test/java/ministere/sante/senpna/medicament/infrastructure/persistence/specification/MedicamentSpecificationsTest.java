@@ -36,12 +36,42 @@ class MedicamentSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        doliprane = new MedicamentJpaEntity(UUID.randomUUID(), "PARA500", "Doliprane", "Paracétamol", "500mg",
-                formeA, familleA, null, TemperatureConservation.AMBIANTE, null, null, false, "Sanofi", null, null,
-                true);
-        amoxicillineInactif = new MedicamentJpaEntity(UUID.randomUUID(), "AMOX", "Amoxicilline", "Amoxicilline",
-                "1g", formeB, familleB, null, TemperatureConservation.AMBIANTE, null, null, false, "Pfizer", null,
-                null, false);
+        doliprane = MedicamentJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("PARA500")
+            .nomCommercial("Doliprane")
+            .dci("Paracétamol")
+            .dosage("500mg")
+            .formeId(formeA)
+            .familleId(familleA)
+            .voieAdministration(null)
+            .temperatureConservation(TemperatureConservation.AMBIANTE)
+            .programmeSante(null)
+            .delaiApprovisionnementJours(null)
+            .necessiteOrdonnance(false)
+            .fabricant("Sanofi")
+            .stockMinimum(null)
+            .stockMaximum(null)
+            .actif(true)
+            .build();
+        amoxicillineInactif = MedicamentJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("AMOX")
+            .nomCommercial("Amoxicilline")
+            .dci("Amoxicilline")
+            .dosage("1g")
+            .formeId(formeB)
+            .familleId(familleB)
+            .voieAdministration(null)
+            .temperatureConservation(TemperatureConservation.AMBIANTE)
+            .programmeSante(null)
+            .delaiApprovisionnementJours(null)
+            .necessiteOrdonnance(false)
+            .fabricant("Pfizer")
+            .stockMinimum(null)
+            .stockMaximum(null)
+            .actif(false)
+            .build();
 
         medicamentJpaRepository.saveAll(List.of(doliprane, amoxicillineInactif));
     }

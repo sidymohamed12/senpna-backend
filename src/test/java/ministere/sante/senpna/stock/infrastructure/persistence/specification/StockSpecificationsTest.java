@@ -39,11 +39,27 @@ class StockSpecificationsTest {
     @BeforeEach
     void setUp() {
         // Disponible: 100 - 10 = 90 > 0, pas de seuil défini.
-        stockDisponible = new StockJpaEntity(UUID.randomUUID(), entrepotA, lotA, medicamentA,
-                new BigDecimal("100.0000"), new BigDecimal("10.0000"), BigDecimal.ZERO, null);
+        stockDisponible = StockJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .entrepotId(entrepotA)
+            .lotId(lotA)
+            .medicamentId(medicamentA)
+            .quantiteDisponible(new BigDecimal("100.0000"))
+            .quantiteReservee(new BigDecimal("10.0000"))
+            .quantiteEnCommande(BigDecimal.ZERO)
+            .seuilAlerte(null)
+            .build();
         // Rupture: 20 - 20 = 0 <= 0, et seuil (30) >= 0 disponible à la vente.
-        stockEnRuptureAvecSeuil = new StockJpaEntity(UUID.randomUUID(), entrepotB, lotB, medicamentB,
-                new BigDecimal("20.0000"), new BigDecimal("20.0000"), BigDecimal.ZERO, new BigDecimal("30.0000"));
+        stockEnRuptureAvecSeuil = StockJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .entrepotId(entrepotB)
+            .lotId(lotB)
+            .medicamentId(medicamentB)
+            .quantiteDisponible(new BigDecimal("20.0000"))
+            .quantiteReservee(new BigDecimal("20.0000"))
+            .quantiteEnCommande(BigDecimal.ZERO)
+            .seuilAlerte(new BigDecimal("30.0000"))
+            .build();
 
         stockJpaRepository.saveAll(List.of(stockDisponible, stockEnRuptureAvecSeuil));
     }

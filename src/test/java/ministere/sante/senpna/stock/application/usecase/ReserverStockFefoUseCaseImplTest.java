@@ -61,19 +61,29 @@ class ReserverStockFefoUseCaseImplTest {
         private ReserverStockFefoUseCaseImpl useCase;
 
         private static Lot lot(String numero, LocalDate expiration) {
-                return Lot.creer(numero, MEDICAMENT_ID, FOURNISSEUR_ID, null, expiration, null, null);
+                return Lot.creer(new Lot.CreationCommand(numero, MEDICAMENT_ID, FOURNISSEUR_ID, null, expiration, null, null));
         }
 
         private static Stock stockAvecQuantite(LotId lotId, BigDecimal quantite) {
-                Stock stock = Stock.ouvrir(ENTREPOT_ID, lotId, MEDICAMENT_ID, null);
+                Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(ENTREPOT_ID, lotId, MEDICAMENT_ID, null));
                 stock.entrer(quantite);
                 return stock;
         }
 
         private static Entrepot entrepotPra() {
-                return Entrepot.reconstruct(ENTREPOT_ID, "PRA-THIES", "PRA Thiès", TypeEntrepot.PRA,
-                                RegionId.generate(), null, null, null,
-                                true, Instant.now(), Instant.now());
+                return Entrepot.builder()
+                    .id(ENTREPOT_ID)
+                    .code("PRA-THIES")
+                    .nom("PRA Thiès")
+                    .type(TypeEntrepot.PRA)
+                    .regionId(RegionId.generate())
+                    .adresse(null)
+                    .telephone(null)
+                    .responsableUserId(null)
+                    .actif(true)
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
+                    .build();
         }
 
         @Nested

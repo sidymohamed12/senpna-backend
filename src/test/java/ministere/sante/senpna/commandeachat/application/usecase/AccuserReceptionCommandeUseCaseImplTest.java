@@ -47,10 +47,10 @@ class AccuserReceptionCommandeUseCaseImplTest {
     }
 
     private CommandeAchat commandeValidee(FournisseurId fournisseurId) {
-        LigneCommandeAchat ligne = LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(),
-                BigDecimal.TEN, BigDecimal.TEN);
-        CommandeAchat commande = CommandeAchat.creer("BC-1", fournisseurId, EntrepotId.generate(), List.of(ligne),
-                null);
+        LigneCommandeAchat ligne = LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(),
+                BigDecimal.TEN, BigDecimal.TEN));
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", fournisseurId, EntrepotId.generate(), List.of(ligne),
+                null));
         commande.validerInterne();
         return commande;
     }

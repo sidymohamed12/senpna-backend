@@ -76,16 +76,30 @@ class LotSpecificationsTest {
 
     private LotJpaEntity creerLot(String numero, UUID medicamentId, UUID fournisseurId,
             LocalDate dateExpiration, StatutLot statut) {
-        return new LotJpaEntity(
-                UUID.randomUUID(), numero, medicamentId, fournisseurId,
-                LocalDate.now().minusMonths(1), dateExpiration,
-                new BigDecimal("10.00"), new BigDecimal("15.00"), statut.name());
+        return LotJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .numeroLot(numero)
+            .medicamentId(medicamentId)
+            .fournisseurId(fournisseurId)
+            .dateFabrication(LocalDate.now().minusMonths(1))
+            .dateExpiration(dateExpiration)
+            .prixAchat(new BigDecimal("10.00"))
+            .prixVente(new BigDecimal("15.00"))
+            .statut(statut.name())
+            .build();
     }
 
     private void creerStock(UUID entrepotId, UUID lotId, UUID medicamentId) {
-        stockJpaRepository.save(new StockJpaEntity(
-                UUID.randomUUID(), entrepotId, lotId, medicamentId,
-                new BigDecimal("100.0000"), BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("10.0000")));
+        stockJpaRepository.save(StockJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .entrepotId(entrepotId)
+            .lotId(lotId)
+            .medicamentId(medicamentId)
+            .quantiteDisponible(new BigDecimal("100.0000"))
+            .quantiteReservee(BigDecimal.ZERO)
+            .quantiteEnCommande(BigDecimal.ZERO)
+            .seuilAlerte(new BigDecimal("10.0000"))
+            .build());
     }
 
     @Nested

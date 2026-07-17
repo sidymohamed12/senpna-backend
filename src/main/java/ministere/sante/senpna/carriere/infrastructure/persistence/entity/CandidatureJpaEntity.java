@@ -53,18 +53,91 @@ public class CandidatureJpaEntity extends BaseJpaEntity {
     @Column(name = "consentement_rgpd", nullable = false)
     private boolean consentementRgpd;
 
-    public CandidatureJpaEntity(UUID id, UUID opportuniteId, Civilite civilite, String nomComplet, String email,
-            String telephone, String cvUrl, String lettreMotivationUrl, String messageComplementaire,
-            boolean consentementRgpd) {
-        super(id);
-        this.opportuniteId = opportuniteId;
-        this.civilite = civilite;
-        this.nomComplet = nomComplet;
-        this.email = email;
-        this.telephone = telephone;
-        this.cvUrl = cvUrl;
-        this.lettreMotivationUrl = lettreMotivationUrl;
-        this.messageComplementaire = messageComplementaire;
-        this.consentementRgpd = consentementRgpd;
+    private CandidatureJpaEntity(Builder builder) {
+        super(builder.id);
+        this.opportuniteId = builder.opportuniteId;
+        this.civilite = builder.civilite;
+        this.nomComplet = builder.nomComplet;
+        this.email = builder.email;
+        this.telephone = builder.telephone;
+        this.cvUrl = builder.cvUrl;
+        this.lettreMotivationUrl = builder.lettreMotivationUrl;
+        this.messageComplementaire = builder.messageComplementaire;
+        this.consentementRgpd = builder.consentementRgpd;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private UUID opportuniteId;
+        private Civilite civilite;
+        private String nomComplet;
+        private String email;
+        private String telephone;
+        private String cvUrl;
+        private String lettreMotivationUrl;
+        private String messageComplementaire;
+        private boolean consentementRgpd;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder opportuniteId(UUID opportuniteId) {
+            this.opportuniteId = opportuniteId;
+            return this;
+        }
+
+        public Builder civilite(Civilite civilite) {
+            this.civilite = civilite;
+            return this;
+        }
+
+        public Builder nomComplet(String nomComplet) {
+            this.nomComplet = nomComplet;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder telephone(String telephone) {
+            this.telephone = telephone;
+            return this;
+        }
+
+        public Builder cvUrl(String cvUrl) {
+            this.cvUrl = cvUrl;
+            return this;
+        }
+
+        public Builder lettreMotivationUrl(String lettreMotivationUrl) {
+            this.lettreMotivationUrl = lettreMotivationUrl;
+            return this;
+        }
+
+        public Builder messageComplementaire(String messageComplementaire) {
+            this.messageComplementaire = messageComplementaire;
+            return this;
+        }
+
+        public Builder consentementRgpd(boolean consentementRgpd) {
+            this.consentementRgpd = consentementRgpd;
+            return this;
+        }
+
+        public CandidatureJpaEntity build() {
+            return new CandidatureJpaEntity(this);
+        }
     }
 }

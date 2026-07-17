@@ -12,29 +12,31 @@ import java.util.List;
 public class ProjetMapper {
 
     public Projet toDomain(ProjetJpaEntity entity) {
-        return Projet.reconstruct(
-                ProjetId.of(entity.getId()),
-                entity.getCategorie(),
-                entity.getNom(),
-                entity.getDescription(),
-                List.copyOf(entity.getObjectifs()),
-                List.copyOf(entity.getImpacts()),
-                entity.getImageUrl(),
-                entity.getStatut(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Projet.builder()
+            .id(ProjetId.of(entity.getId()))
+            .categorie(entity.getCategorie())
+            .nom(entity.getNom())
+            .description(entity.getDescription())
+            .objectifs(List.copyOf(entity.getObjectifs()))
+            .impacts(List.copyOf(entity.getImpacts()))
+            .imageUrl(entity.getImageUrl())
+            .statut(entity.getStatut())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public ProjetJpaEntity toEntity(Projet projet) {
-        ProjetJpaEntity entity = new ProjetJpaEntity(
-                projet.getId().getValue(),
-                projet.getCategorie(),
-                projet.getNom(),
-                projet.getDescription(),
-                projet.getObjectifs(),
-                projet.getImpacts(),
-                projet.getImageUrl(),
-                projet.getStatut());
+        ProjetJpaEntity entity = ProjetJpaEntity.builder()
+            .id(projet.getId().getValue())
+            .categorie(projet.getCategorie())
+            .nom(projet.getNom())
+            .description(projet.getDescription())
+            .objectifs(projet.getObjectifs())
+            .impacts(projet.getImpacts())
+            .imageUrl(projet.getImageUrl())
+            .statut(projet.getStatut())
+            .build();
         entity.setCreatedAt(projet.getCreatedAt());
         entity.setUpdatedAt(projet.getUpdatedAt());
         return entity;

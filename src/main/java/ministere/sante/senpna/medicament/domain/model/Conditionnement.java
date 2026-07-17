@@ -50,33 +50,120 @@ public class Conditionnement extends AggregateRoot<ConditionnementId> {
     private BigDecimal prixVente;
     private boolean actif;
 
-    private Conditionnement(ConditionnementId id, MedicamentId medicamentId, String nom, int niveau,
-            BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente,
-            boolean actif, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
-        this.nom = validerNom(nom);
-        this.niveau = validerNiveau(niveau);
-        this.quantiteUniteBase = validerQuantite(quantiteUniteBase, estUniteBase);
-        this.estUniteBase = estUniteBase;
-        validerPrix(prixAchat, prixVente);
-        this.prixAchat = prixAchat;
-        this.prixVente = prixVente;
-        this.actif = actif;
+    private Conditionnement(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.medicamentId = Objects.requireNonNull(builder.medicamentId, "Le médicament est obligatoire");
+        this.nom = validerNom(builder.nom);
+        this.niveau = validerNiveau(builder.niveau);
+        this.quantiteUniteBase = validerQuantite(builder.quantiteUniteBase, builder.estUniteBase);
+        this.estUniteBase = builder.estUniteBase;
+        validerPrix(builder.prixAchat, builder.prixVente);
+        this.prixAchat = builder.prixAchat;
+        this.prixVente = builder.prixVente;
+        this.actif = builder.actif;
     }
 
-    public static Conditionnement reconstruct(ConditionnementId id, MedicamentId medicamentId, String nom,
-            int niveau, BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat,
-            BigDecimal prixVente, boolean actif, Instant createdAt, Instant updatedAt) {
-        return new Conditionnement(id, medicamentId, nom, niveau, quantiteUniteBase, estUniteBase, prixAchat,
-                prixVente, actif, createdAt, updatedAt);
+    /** Données nécessaires à la création d'un nouveau conditionnement. */
+    public record CreationCommand(MedicamentId medicamentId, String nom, int niveau, BigDecimal quantiteUniteBase,
+            boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente) {
     }
 
-    public static Conditionnement creer(MedicamentId medicamentId, String nom, int niveau,
-            BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente) {
+    public static Conditionnement creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new Conditionnement(ConditionnementId.generate(), medicamentId, nom, niveau, quantiteUniteBase,
-                estUniteBase, prixAchat, prixVente, true, maintenant, maintenant);
+        return builder()
+                .id(ConditionnementId.generate())
+                .medicamentId(command.medicamentId())
+                .nom(command.nom())
+                .niveau(command.niveau())
+                .quantiteUniteBase(command.quantiteUniteBase())
+                .estUniteBase(command.estUniteBase())
+                .prixAchat(command.prixAchat())
+                .prixVente(command.prixVente())
+                .actif(true)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private ConditionnementId id;
+        private MedicamentId medicamentId;
+        private String nom;
+        private int niveau;
+        private BigDecimal quantiteUniteBase;
+        private boolean estUniteBase;
+        private BigDecimal prixAchat;
+        private BigDecimal prixVente;
+        private boolean actif;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(ConditionnementId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder medicamentId(MedicamentId medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder niveau(int niveau) {
+            this.niveau = niveau;
+            return this;
+        }
+
+        public Builder quantiteUniteBase(BigDecimal quantiteUniteBase) {
+            this.quantiteUniteBase = quantiteUniteBase;
+            return this;
+        }
+
+        public Builder estUniteBase(boolean estUniteBase) {
+            this.estUniteBase = estUniteBase;
+            return this;
+        }
+
+        public Builder prixAchat(BigDecimal prixAchat) {
+            this.prixAchat = prixAchat;
+            return this;
+        }
+
+        public Builder prixVente(BigDecimal prixVente) {
+            this.prixVente = prixVente;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Conditionnement build() {
+            return new Conditionnement(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

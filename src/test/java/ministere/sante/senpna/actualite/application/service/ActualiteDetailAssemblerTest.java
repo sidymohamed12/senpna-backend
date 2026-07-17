@@ -32,9 +32,19 @@ class ActualiteDetailAssemblerTest {
         Instant updatedAt = Instant.now();
         ActualiteMedia media = ActualiteMedia.reconstruct(UUID.randomUUID(), TypeMedia.IMAGE,
                 "https://cdn.example.com/image.png", 0);
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(actualiteId), CategorieActualite.PROJET, "Titre",
-                "Description", List.of(media), auteurId, "Awa Diop", List.of("santé", "projet"),
-                StatutActualite.PUBLIE, createdAt, updatedAt);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(actualiteId))
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description("Description")
+            .medias(List.of(media))
+            .auteurId(auteurId)
+            .auteurNom("Awa Diop")
+            .tags(List.of("santé", "projet"))
+            .statut(StatutActualite.PUBLIE)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
 
         ActualiteDetail detail = assembler.assembler(actualite);
 
@@ -58,9 +68,19 @@ class ActualiteDetailAssemblerTest {
     @Test
     @DisplayName("actualité sans média → liste de médias vide")
     void assembler_sansMedia_listeVide() {
-        Actualite actualite = Actualite.reconstruct(ActualiteId.generate(), CategorieActualite.EVENEMENT, "Titre",
-                "Description", List.of(), UUID.randomUUID(), "Awa Diop", List.of(), StatutActualite.BROUILLON,
-                Instant.now(), Instant.now());
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.generate())
+            .categorie(CategorieActualite.EVENEMENT)
+            .titre("Titre")
+            .description("Description")
+            .medias(List.of())
+            .auteurId(UUID.randomUUID())
+            .auteurNom("Awa Diop")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
         ActualiteDetail detail = assembler.assembler(actualite);
 

@@ -52,14 +52,41 @@ class UserAffectationUseCasesTest {
     private static final UUID STRUCTURE_ID = UUID.randomUUID();
 
     private Entrepot entrepotActif() {
-        return Entrepot.reconstruct(EntrepotId.of(ENTREPOT_ID), "PRA-DAKAR", "PRA Dakar", TypeEntrepot.PRA,
-                RegionId.generate(), null, null, null, true, Instant.now(), Instant.now());
+        return Entrepot.builder()
+            .id(EntrepotId.of(ENTREPOT_ID))
+            .code("PRA-DAKAR")
+            .nom("PRA Dakar")
+            .type(TypeEntrepot.PRA)
+            .regionId(RegionId.generate())
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     private StructureSanitaire structureValidee() {
-        return StructureSanitaire.reconstruct(StructureSanitaireId.of(STRUCTURE_ID), "HOP-X", "Hôpital X",
-                TypeStructureSanitaire.HOPITAL, RegionId.generate(), null, null, null, null, null, "Ndiaye",
-                "Fatou", StatutAdhesion.VALIDEE, null, true, Instant.now(), Instant.now());
+        return StructureSanitaire.builder()
+            .id(StructureSanitaireId.of(STRUCTURE_ID))
+            .code("HOP-X")
+            .nom("Hôpital X")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(RegionId.generate())
+            .praId(null)
+            .district(null)
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom("Ndiaye")
+            .responsablePrenom("Fatou")
+            .statutAdhesion(StatutAdhesion.VALIDEE)
+            .motifRejet(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -121,8 +148,19 @@ class UserAffectationUseCasesTest {
         @DisplayName("entrepôt inactif → EntrepotInactifException")
         void affecter_entrepotInactif_leveException() {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(true);
-            Entrepot entrepotInactif = Entrepot.reconstruct(EntrepotId.of(ENTREPOT_ID), "PRA-DAKAR", "PRA Dakar",
-                    TypeEntrepot.PRA, RegionId.generate(), null, null, null, false, Instant.now(), Instant.now());
+            Entrepot entrepotInactif = Entrepot.builder()
+                .id(EntrepotId.of(ENTREPOT_ID))
+                .code("PRA-DAKAR")
+                .nom("PRA Dakar")
+                .type(TypeEntrepot.PRA)
+                .regionId(RegionId.generate())
+                .adresse(null)
+                .telephone(null)
+                .responsableUserId(null)
+                .actif(false)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
             when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepotInactif));
 
             var assignUserToEntrepotCommand = new AssignUserToEntrepotCommand(USER_ID, ENTREPOT_ID);
@@ -175,11 +213,25 @@ class UserAffectationUseCasesTest {
         @DisplayName("adhésion non validée → StructureSanitaireNonValideeException")
         void affecter_adhesionNonValidee_leveException() {
             when(userAffectationRepositoryPort.existsUtilisateur(USER_ID)).thenReturn(true);
-            StructureSanitaire structureEnAttente = StructureSanitaire.reconstruct(
-                    StructureSanitaireId.of(STRUCTURE_ID),
-                    "HOP-X", "Hôpital X", TypeStructureSanitaire.HOPITAL, RegionId.generate(), null, null, null,
-                    null, null, "Ndiaye", "Fatou", StatutAdhesion.EN_ATTENTE_VALIDATION, null, false, Instant.now(),
-                    Instant.now());
+            StructureSanitaire structureEnAttente = StructureSanitaire.builder()
+                .id(StructureSanitaireId.of(STRUCTURE_ID))
+                .code("HOP-X")
+                .nom("Hôpital X")
+                .type(TypeStructureSanitaire.HOPITAL)
+                .regionId(RegionId.generate())
+                .praId(null)
+                .district(null)
+                .adresse(null)
+                .telephone(null)
+                .email(null)
+                .responsableNom("Ndiaye")
+                .responsablePrenom("Fatou")
+                .statutAdhesion(StatutAdhesion.EN_ATTENTE_VALIDATION)
+                .motifRejet(null)
+                .actif(false)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
             when(structureSanitaireRepositoryPort.findById(any())).thenReturn(Optional.of(structureEnAttente));
 
             var assignUserToStructureCommand = new AssignUserToStructureCommand(USER_ID, STRUCTURE_ID);

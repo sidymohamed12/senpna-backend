@@ -11,31 +11,33 @@ import org.springframework.stereotype.Component;
 public class EntrepotMapper {
 
     public Entrepot toDomain(EntrepotJpaEntity entity) {
-        return Entrepot.reconstruct(
-                EntrepotId.of(entity.getId()),
-                entity.getCode(),
-                entity.getNom(),
-                entity.getType(),
-                entity.getRegionId() != null ? RegionId.of(entity.getRegionId()) : null,
-                entity.getAdresse(),
-                entity.getTelephone(),
-                entity.getResponsableUserId(),
-                entity.isActif(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Entrepot.builder()
+            .id(EntrepotId.of(entity.getId()))
+            .code(entity.getCode())
+            .nom(entity.getNom())
+            .type(entity.getType())
+            .regionId(entity.getRegionId() != null ? RegionId.of(entity.getRegionId()) : null)
+            .adresse(entity.getAdresse())
+            .telephone(entity.getTelephone())
+            .responsableUserId(entity.getResponsableUserId())
+            .actif(entity.isActif())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public EntrepotJpaEntity toEntity(Entrepot entrepot) {
-        EntrepotJpaEntity entity = new EntrepotJpaEntity(
-                entrepot.getId().getValue(),
-                entrepot.getCode(),
-                entrepot.getNom(),
-                entrepot.getType(),
-                entrepot.getRegionId() != null ? entrepot.getRegionId().getValue() : null,
-                entrepot.getAdresse(),
-                entrepot.getTelephone(),
-                entrepot.getResponsableUserId(),
-                entrepot.isActif());
+        EntrepotJpaEntity entity = EntrepotJpaEntity.builder()
+            .id(entrepot.getId().getValue())
+            .code(entrepot.getCode())
+            .nom(entrepot.getNom())
+            .type(entrepot.getType())
+            .regionId(entrepot.getRegionId() != null ? entrepot.getRegionId().getValue() : null)
+            .adresse(entrepot.getAdresse())
+            .telephone(entrepot.getTelephone())
+            .responsableUserId(entrepot.getResponsableUserId())
+            .actif(entrepot.isActif())
+            .build();
         entity.setCreatedAt(entrepot.getCreatedAt());
         entity.setUpdatedAt(entrepot.getUpdatedAt());
         return entity;

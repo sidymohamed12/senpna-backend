@@ -19,8 +19,8 @@ class ProjetDetailAssemblerTest {
     @Test
     @DisplayName("reporte fidèlement chaque champ, catégorie et statut en String")
     void reporteChaqueChamp() {
-        Projet projet = Projet.creer(CategorieProjet.SANTE, "Vaccination rurale", "Description",
-                List.of("Objectif 1"), List.of("Impact 1"), "https://img");
+        Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Vaccination rurale", "Description",
+                List.of("Objectif 1"), List.of("Impact 1"), "https://img"));
 
         ProjetDetail detail = sut.assembler(projet);
 

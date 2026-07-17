@@ -68,23 +68,127 @@ public class StructureSanitaireJpaEntity extends BaseJpaEntity {
     @Column(name = "actif", nullable = false)
     private boolean actif;
 
-    public StructureSanitaireJpaEntity(UUID id, String code, String nom, TypeStructureSanitaire type, UUID regionId,
-            UUID praId, String district, String adresse, String telephone, String email, String responsableNom,
-            String responsablePrenom, StatutAdhesion statutAdhesion, String motifRejet, boolean actif) {
-        super(id);
-        this.code = code;
-        this.nom = nom;
-        this.type = type;
-        this.regionId = regionId;
-        this.praId = praId;
-        this.district = district;
-        this.adresse = adresse;
-        this.telephone = telephone;
-        this.email = email;
-        this.responsableNom = responsableNom;
-        this.responsablePrenom = responsablePrenom;
-        this.statutAdhesion = statutAdhesion;
-        this.motifRejet = motifRejet;
-        this.actif = actif;
+    private StructureSanitaireJpaEntity(Builder builder) {
+        super(builder.id);
+        this.code = builder.code;
+        this.nom = builder.nom;
+        this.type = builder.type;
+        this.regionId = builder.regionId;
+        this.praId = builder.praId;
+        this.district = builder.district;
+        this.adresse = builder.adresse;
+        this.telephone = builder.telephone;
+        this.email = builder.email;
+        this.responsableNom = builder.responsableNom;
+        this.responsablePrenom = builder.responsablePrenom;
+        this.statutAdhesion = builder.statutAdhesion;
+        this.motifRejet = builder.motifRejet;
+        this.actif = builder.actif;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String code;
+        private String nom;
+        private TypeStructureSanitaire type;
+        private UUID regionId;
+        private UUID praId;
+        private String district;
+        private String adresse;
+        private String telephone;
+        private String email;
+        private String responsableNom;
+        private String responsablePrenom;
+        private StatutAdhesion statutAdhesion;
+        private String motifRejet;
+        private boolean actif;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder code(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder type(TypeStructureSanitaire type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder regionId(UUID regionId) {
+            this.regionId = regionId;
+            return this;
+        }
+
+        public Builder praId(UUID praId) {
+            this.praId = praId;
+            return this;
+        }
+
+        public Builder district(String district) {
+            this.district = district;
+            return this;
+        }
+
+        public Builder adresse(String adresse) {
+            this.adresse = adresse;
+            return this;
+        }
+
+        public Builder telephone(String telephone) {
+            this.telephone = telephone;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder responsableNom(String responsableNom) {
+            this.responsableNom = responsableNom;
+            return this;
+        }
+
+        public Builder responsablePrenom(String responsablePrenom) {
+            this.responsablePrenom = responsablePrenom;
+            return this;
+        }
+
+        public Builder statutAdhesion(StatutAdhesion statutAdhesion) {
+            this.statutAdhesion = statutAdhesion;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public StructureSanitaireJpaEntity build() {
+            return new StructureSanitaireJpaEntity(this);
+        }
+    }
+
 }

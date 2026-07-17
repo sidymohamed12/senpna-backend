@@ -51,8 +51,8 @@ class ListMesOffresUseCaseImplTest {
         void transmetFournisseurEtStatut() {
                 FournisseurId fournisseurId = FournisseurId.generate();
                 LigneOffre ligne = LigneOffre.creer(LigneAppelOffreId.generate(), BigDecimal.TEN, 10);
-                OffreFournisseur offre = OffreFournisseur.soumettre(AppelOffreId.generate(), fournisseurId, null,
-                                List.of(ligne));
+                OffreFournisseur offre = OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), fournisseurId, null,
+                                List.of(ligne)));
                 when(offreFournisseurRepositoryPort.findByFournisseurId(any(), any(), any()))
                                 .thenReturn(PageResult.of(List.of(offre), 0, 20, 1));
                 OffreDetail detail = new OffreDetail(offre.getId().getValue(), UUID.randomUUID(),

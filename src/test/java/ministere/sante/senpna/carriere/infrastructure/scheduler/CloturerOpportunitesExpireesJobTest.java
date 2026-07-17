@@ -50,11 +50,11 @@ class CloturerOpportunitesExpireesJobTest {
     @Test
     @DisplayName("opportunités expirées trouvées → chacune est clôturée et sauvegardée")
     void expireesTrouvees_chacuneClotureeEtSauvegardee() {
-        OpportuniteCarriere o1 = OpportuniteCarriere.creer("T1", "E", "D", null, "L", TypeContrat.CDI,
-                LocalDate.now().plusDays(10), LocalDate.now().plusDays(1), UUID.randomUUID(), "A", null);
+        OpportuniteCarriere o1 = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T1", "E", "D", null, "L", TypeContrat.CDI,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(1), UUID.randomUUID(), "A", null));
         o1.publier();
-        OpportuniteCarriere o2 = OpportuniteCarriere.creer("T2", "E", "D", null, "L", TypeContrat.CDD,
-                LocalDate.now().plusDays(10), LocalDate.now().plusDays(1), UUID.randomUUID(), "A", null);
+        OpportuniteCarriere o2 = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T2", "E", "D", null, "L", TypeContrat.CDD,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(1), UUID.randomUUID(), "A", null));
         o2.publier();
         when(opportuniteCarriereRepositoryPort.findOuvertesExpirees(any())).thenReturn(List.of(o1, o2));
         when(opportuniteCarriereRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));

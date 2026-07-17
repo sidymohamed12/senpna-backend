@@ -37,12 +37,40 @@ class StructureSanitaireSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        hopitalValide = new StructureSanitaireJpaEntity(UUID.randomUUID(), "HOP-DKR", "Hôpital de Dakar",
-                TypeStructureSanitaire.HOPITAL, regionA, praA, null, null, null, null, null, null,
-                StatutAdhesion.VALIDEE, null, true);
-        centreInactifEnAttente = new StructureSanitaireJpaEntity(UUID.randomUUID(), "CS-THIES", "Centre de Thiès",
-                TypeStructureSanitaire.CENTRE_SANTE, regionB, praB, null, null, null, null, null, null,
-                StatutAdhesion.EN_ATTENTE_VALIDATION, null, false);
+        hopitalValide = StructureSanitaireJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("HOP-DKR")
+            .nom("Hôpital de Dakar")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(regionA)
+            .praId(praA)
+            .district(null)
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom(null)
+            .responsablePrenom(null)
+            .statutAdhesion(StatutAdhesion.VALIDEE)
+            .motifRejet(null)
+            .actif(true)
+            .build();
+        centreInactifEnAttente = StructureSanitaireJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("CS-THIES")
+            .nom("Centre de Thiès")
+            .type(TypeStructureSanitaire.CENTRE_SANTE)
+            .regionId(regionB)
+            .praId(praB)
+            .district(null)
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom(null)
+            .responsablePrenom(null)
+            .statutAdhesion(StatutAdhesion.EN_ATTENTE_VALIDATION)
+            .motifRejet(null)
+            .actif(false)
+            .build();
 
         structureSanitaireJpaRepository.saveAll(List.of(hopitalValide, centreInactifEnAttente));
     }

@@ -43,8 +43,8 @@ class GetFactureUseCaseImplTest {
     }
 
     private Facture facture(FournisseurId fournisseurId) {
-        return Facture.soumettre(CommandeAchatId.generate(), fournisseurId, "FAC-1", BigDecimal.TEN, LocalDate.now(),
-                null, null);
+        return Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), fournisseurId, "FAC-1", BigDecimal.TEN, LocalDate.now(),
+                null, null));
     }
 
     @Test

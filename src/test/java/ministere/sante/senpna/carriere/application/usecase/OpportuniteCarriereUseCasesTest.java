@@ -156,11 +156,23 @@ class OpportuniteCarriereUseCasesTest {
                 void retireFicheDePosteQuandNull() {
                         UpdateOpportuniteCarriereUseCaseImpl useCase = new UpdateOpportuniteCarriereUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, commandMapper, assembler);
-                        OpportuniteCarriere existante = OpportuniteCarriere.reconstruct(
-                                        OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre", "Entreprise", "Description",
-                                        "https://cdn.senpna.sn/fiches-de-poste/existante.pdf", "Dakar, Sénégal",
-                                        TypeContrat.CDI, null, LocalDate.now().plusDays(30), AUTEUR_ID, "Cheikh Ba",
-                                        null, StatutOpportunite.BROUILLON, Instant.now(), Instant.now());
+                        OpportuniteCarriere existante = OpportuniteCarriere.builder()
+                            .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                            .titre("Titre")
+                            .nomEntreprise("Entreprise")
+                            .description("Description")
+                            .ficheDePosteUrl("https://cdn.senpna.sn/fiches-de-poste/existante.pdf")
+                            .lieu("Dakar, Sénégal")
+                            .typeContrat(TypeContrat.CDI)
+                            .dateDebut(null)
+                            .dateLimiteCandidature(LocalDate.now().plusDays(30))
+                            .auteurId(AUTEUR_ID)
+                            .auteurNom("Cheikh Ba")
+                            .emailContact(null)
+                            .statut(StatutOpportunite.BROUILLON)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
                         when(opportuniteCarriereRepositoryPort.save(any(OpportuniteCarriere.class)))
@@ -183,11 +195,23 @@ class OpportuniteCarriereUseCasesTest {
                         UpdateOpportuniteCarriereUseCaseImpl useCase = new UpdateOpportuniteCarriereUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, commandMapper, assembler);
                         String ficheDePosteUrl = "https://cdn.senpna.sn/fiches-de-poste/existante.pdf";
-                        OpportuniteCarriere existante = OpportuniteCarriere.reconstruct(
-                                        OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre", "Entreprise", "Description",
-                                        ficheDePosteUrl, "Dakar, Sénégal", TypeContrat.CDI, null,
-                                        LocalDate.now().plusDays(30), AUTEUR_ID, "Cheikh Ba", null,
-                                        StatutOpportunite.BROUILLON, Instant.now(), Instant.now());
+                        OpportuniteCarriere existante = OpportuniteCarriere.builder()
+                            .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                            .titre("Titre")
+                            .nomEntreprise("Entreprise")
+                            .description("Description")
+                            .ficheDePosteUrl(ficheDePosteUrl)
+                            .lieu("Dakar, Sénégal")
+                            .typeContrat(TypeContrat.CDI)
+                            .dateDebut(null)
+                            .dateLimiteCandidature(LocalDate.now().plusDays(30))
+                            .auteurId(AUTEUR_ID)
+                            .auteurNom("Cheikh Ba")
+                            .emailContact(null)
+                            .statut(StatutOpportunite.BROUILLON)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
                         when(opportuniteCarriereRepositoryPort.save(any(OpportuniteCarriere.class)))
@@ -244,11 +268,23 @@ class OpportuniteCarriereUseCasesTest {
                 void publierEchoueQuandExpiree() {
                         PublierOpportuniteUseCaseImpl useCase = new PublierOpportuniteUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, assembler);
-                        OpportuniteCarriere existante = OpportuniteCarriere.reconstruct(
-                                        OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre", "Entreprise", "Description",
-                                        null, "Dakar, Sénégal", TypeContrat.CDI, null, LocalDate.now().minusDays(1),
-                                        AUTEUR_ID, "Cheikh Ba", null, StatutOpportunite.BROUILLON, Instant.now(),
-                                        Instant.now());
+                        OpportuniteCarriere existante = OpportuniteCarriere.builder()
+                            .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                            .titre("Titre")
+                            .nomEntreprise("Entreprise")
+                            .description("Description")
+                            .ficheDePosteUrl(null)
+                            .lieu("Dakar, Sénégal")
+                            .typeContrat(TypeContrat.CDI)
+                            .dateDebut(null)
+                            .dateLimiteCandidature(LocalDate.now().minusDays(1))
+                            .auteurId(AUTEUR_ID)
+                            .auteurNom("Cheikh Ba")
+                            .emailContact(null)
+                            .statut(StatutOpportunite.BROUILLON)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
 
@@ -393,11 +429,23 @@ class OpportuniteCarriereUseCasesTest {
                 void obtenirPubliqueLeveIntrouvableQuandExpiree() {
                         GetOpportuniteCarrierePubliqueUseCaseImpl useCase = new GetOpportuniteCarrierePubliqueUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, assembler);
-                        OpportuniteCarriere existante = OpportuniteCarriere.reconstruct(
-                                        OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre", "Entreprise", "Description",
-                                        null, "Dakar, Sénégal", TypeContrat.CDI, null, LocalDate.now().minusDays(1),
-                                        AUTEUR_ID, "Cheikh Ba", null, StatutOpportunite.OUVERT, Instant.now(),
-                                        Instant.now());
+                        OpportuniteCarriere existante = OpportuniteCarriere.builder()
+                            .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                            .titre("Titre")
+                            .nomEntreprise("Entreprise")
+                            .description("Description")
+                            .ficheDePosteUrl(null)
+                            .lieu("Dakar, Sénégal")
+                            .typeContrat(TypeContrat.CDI)
+                            .dateDebut(null)
+                            .dateLimiteCandidature(LocalDate.now().minusDays(1))
+                            .auteurId(AUTEUR_ID)
+                            .auteurNom("Cheikh Ba")
+                            .emailContact(null)
+                            .statut(StatutOpportunite.OUVERT)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(existante));
 
@@ -446,16 +494,29 @@ class OpportuniteCarriereUseCasesTest {
         // ── Fixtures ─────────────────────────────────────────────────────────
 
         private User auteurValide() {
-                return User.creer(Nom.of("Ba"), Prenom.of("Cheikh"), Email.of("cheikh.ba@sante.sn"), null,
+                return User.creer(new User.CreationCommand(Nom.of("Ba"), Prenom.of("Cheikh"), Email.of("cheikh.ba@sante.sn"), null,
                                 HashedPassword.of("$2a$12$abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzab"),
-                                Set.of());
+                                Set.of()));
         }
 
         private OpportuniteCarriere opportuniteExistante(StatutOpportunite statut) {
                 Instant maintenant = Instant.now();
-                return OpportuniteCarriere.reconstruct(OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre",
-                                "Entreprise", "Description", null, "Dakar, Sénégal", TypeContrat.CDI, null,
-                                LocalDate.now().plusDays(30), AUTEUR_ID, "Cheikh Ba", null, statut, maintenant,
-                                maintenant);
+                return OpportuniteCarriere.builder()
+                    .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                    .titre("Titre")
+                    .nomEntreprise("Entreprise")
+                    .description("Description")
+                    .ficheDePosteUrl(null)
+                    .lieu("Dakar, Sénégal")
+                    .typeContrat(TypeContrat.CDI)
+                    .dateDebut(null)
+                    .dateLimiteCandidature(LocalDate.now().plusDays(30))
+                    .auteurId(AUTEUR_ID)
+                    .auteurNom("Cheikh Ba")
+                    .emailContact(null)
+                    .statut(statut)
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
         }
 }

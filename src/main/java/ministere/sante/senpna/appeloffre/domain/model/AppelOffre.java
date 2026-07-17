@@ -45,32 +45,101 @@ public class AppelOffre extends AggregateRoot<AppelOffreId> {
     private StatutAppelOffre statut;
     private final List<LigneAppelOffre> lignes;
 
-    private AppelOffre(AppelOffreId id, String reference, String objet, LocalDate dateCloture,
-            StatutAppelOffre statut, List<LigneAppelOffre> lignes, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.reference = validerReference(reference);
-        this.objet = validerObjet(objet);
-        this.dateCloture = Objects.requireNonNull(dateCloture, "La date de clôture est obligatoire");
-        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
-        this.lignes = new ArrayList<>(Objects.requireNonNull(lignes, "Les lignes ne peuvent pas être null"));
+    private AppelOffre(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.reference = validerReference(builder.reference);
+        this.objet = validerObjet(builder.objet);
+        this.dateCloture = Objects.requireNonNull(builder.dateCloture, "La date de clôture est obligatoire");
+        this.statut = Objects.requireNonNull(builder.statut, "Le statut est obligatoire");
+        this.lignes = new ArrayList<>(Objects.requireNonNull(builder.lignes, "Les lignes ne peuvent pas être null"));
     }
 
-    public static AppelOffre reconstruct(AppelOffreId id, String reference, String objet, LocalDate dateCloture,
-            StatutAppelOffre statut, List<LigneAppelOffre> lignes, Instant createdAt, Instant updatedAt) {
-        return new AppelOffre(id, reference, objet, dateCloture, statut, lignes, createdAt, updatedAt);
-    }
-
-    public static AppelOffre creer(String reference, String objet, LocalDate dateCloture,
+    /** Données nécessaires à la création d'un nouvel appel d'offres. */
+    public record CreationCommand(String reference, String objet, LocalDate dateCloture,
             List<LigneAppelOffre> lignes) {
-        if (lignes == null || lignes.isEmpty()) {
+    }
+
+    public static AppelOffre creer(CreationCommand command) {
+        if (command.lignes() == null || command.lignes().isEmpty()) {
             throw new IllegalArgumentException("Un appel d'offres doit contenir au moins une ligne");
         }
-        if (!dateCloture.isAfter(LocalDate.now())) {
+        if (!command.dateCloture().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La date de clôture doit être future");
         }
         Instant maintenant = Instant.now();
-        return new AppelOffre(AppelOffreId.generate(), reference, objet, dateCloture, StatutAppelOffre.BROUILLON,
-                lignes, maintenant, maintenant);
+        return builder()
+                .id(AppelOffreId.generate())
+                .reference(command.reference())
+                .objet(command.objet())
+                .dateCloture(command.dateCloture())
+                .statut(StatutAppelOffre.BROUILLON)
+                .lignes(command.lignes())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private AppelOffreId id;
+        private String reference;
+        private String objet;
+        private LocalDate dateCloture;
+        private StatutAppelOffre statut;
+        private List<LigneAppelOffre> lignes;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(AppelOffreId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder reference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder objet(String objet) {
+            this.objet = objet;
+            return this;
+        }
+
+        public Builder dateCloture(LocalDate dateCloture) {
+            this.dateCloture = dateCloture;
+            return this;
+        }
+
+        public Builder statut(StatutAppelOffre statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder lignes(List<LigneAppelOffre> lignes) {
+            this.lignes = lignes;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public AppelOffre build() {
+            return new AppelOffre(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

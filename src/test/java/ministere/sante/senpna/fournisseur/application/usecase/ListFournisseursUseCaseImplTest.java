@@ -42,7 +42,7 @@ class ListFournisseursUseCaseImplTest {
     @Test
     @DisplayName("construit les critères à partir de la query et mappe chaque résultat")
     void construitCriteresEtMappeResultats() {
-        Fournisseur fournisseur = Fournisseur.creer("Nom", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
         when(fournisseurRepositoryPort.search(eq(new FournisseurSearchCriteria("pha", true)), any()))
                 .thenReturn(PageResult.of(List.of(fournisseur), 0, 20, 1));
         FournisseurDetail detail = new FournisseurDetail(null, "Nom", null, null, null, null, true, null, null);

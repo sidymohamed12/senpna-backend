@@ -42,7 +42,7 @@ class GetFournisseurUseCaseImplTest {
     @DisplayName("fournisseur trouvé → renvoie le détail assemblé")
     void trouve_renvoieDetail() {
         UUID id = UUID.randomUUID();
-        Fournisseur fournisseur = Fournisseur.creer("Nom", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
         when(fournisseurRepositoryPort.findById(FournisseurId.of(id))).thenReturn(Optional.of(fournisseur));
         FournisseurDetail detail = new FournisseurDetail(id, "Nom", null, null, null, null, true, null, null);
         when(fournisseurDetailAssembler.assembler(fournisseur)).thenReturn(detail);

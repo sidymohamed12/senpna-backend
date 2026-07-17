@@ -68,7 +68,7 @@ class OrganisationPersistenceAdaptersTest {
         regionAdapter.save(thies);
         regionAdapter.save(dakar);
 
-        praThies = Entrepot.creerPra("PRA-THIES", "PRA Thies", thies.getId(), "Adresse", "771111111");
+        praThies = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-THIES", "PRA Thies", thies.getId(), "Adresse", "771111111"));
         entrepotAdapter.save(praThies);
 
         entityManager.flush();
@@ -173,9 +173,9 @@ class OrganisationPersistenceAdaptersTest {
         @Test
         @DisplayName("search() filtre par région et par type")
         void search_filtreParRegionEtType() {
-            StructureSanitaire structure = StructureSanitaire.creer("PS-1", "Poste de sante 1",
+            StructureSanitaire structure = StructureSanitaire.creer(new StructureSanitaire.CreationCommand("PS-1", "Poste de sante 1",
                     TypeStructureSanitaire.POSTE_SANTE, thies.getId(), "District", "Adresse", "771111111",
-                    "ps1@sante.sn", "Ndiaye", "Fatou");
+                    "ps1@sante.sn", "Ndiaye", "Fatou"));
             structureAdapter.save(structure);
             entityManager.flush();
             entityManager.clear();
@@ -191,9 +191,9 @@ class OrganisationPersistenceAdaptersTest {
         @Test
         @DisplayName("existsByCode() détecte les codes existants")
         void existsByCode() {
-            StructureSanitaire structure = StructureSanitaire.creer("PS-2", "Poste de sante 2",
+            StructureSanitaire structure = StructureSanitaire.creer(new StructureSanitaire.CreationCommand("PS-2", "Poste de sante 2",
                     TypeStructureSanitaire.POSTE_SANTE, thies.getId(), "District", "Adresse", "771111111",
-                    "ps2@sante.sn", "Ndiaye", "Fatou");
+                    "ps2@sante.sn", "Ndiaye", "Fatou"));
             structureAdapter.save(structure);
             entityManager.flush();
             entityManager.clear();
@@ -204,9 +204,9 @@ class OrganisationPersistenceAdaptersTest {
         @Test
         @DisplayName("StructureSanitaireQueryAdapter.findById() résout la projection")
         void queryAdapter_findById() {
-            StructureSanitaire structure = StructureSanitaire.creer("PS-3", "Poste de sante 3",
+            StructureSanitaire structure = StructureSanitaire.creer(new StructureSanitaire.CreationCommand("PS-3", "Poste de sante 3",
                     TypeStructureSanitaire.POSTE_SANTE, thies.getId(), "District", "Adresse", "771111111",
-                    "ps3@sante.sn", "Ndiaye", "Fatou");
+                    "ps3@sante.sn", "Ndiaye", "Fatou"));
             structureAdapter.save(structure);
             entityManager.flush();
             entityManager.clear();

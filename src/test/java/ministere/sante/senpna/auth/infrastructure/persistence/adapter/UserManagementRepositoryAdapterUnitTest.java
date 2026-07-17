@@ -52,8 +52,18 @@ class UserManagementRepositoryAdapterUnitTest {
     UserManagementRepositoryAdapter adapter;
 
     User user = UserFixtures.actif();
-    UserJpaEntity entity = new UserJpaEntity(UserFixtures.USER_ID, UserFixtures.NOM, UserFixtures.PRENOM,
-            UserFixtures.EMAIL, null, UserFixtures.PASSWORD_HASH, true, user.getRoleIds(), 0, null);
+    UserJpaEntity entity = UserJpaEntity.builder()
+        .id(UserFixtures.USER_ID)
+        .nom(UserFixtures.NOM)
+        .prenom(UserFixtures.PRENOM)
+        .email(UserFixtures.EMAIL)
+        .telephone(null)
+        .passwordHash(UserFixtures.PASSWORD_HASH)
+        .actif(true)
+        .roleIds(user.getRoleIds())
+        .tentativesEchecConnexion(0)
+        .verrouilleJusqua(null)
+        .build();
 
     @BeforeEach
     void setUp() {

@@ -12,43 +12,45 @@ import org.springframework.stereotype.Component;
 public class StructureSanitaireMapper {
 
     public StructureSanitaire toDomain(StructureSanitaireJpaEntity entity) {
-        return StructureSanitaire.reconstruct(
-                StructureSanitaireId.of(entity.getId()),
-                entity.getCode(),
-                entity.getNom(),
-                entity.getType(),
-                entity.getRegionId() != null ? RegionId.of(entity.getRegionId()) : null,
-                entity.getPraId() != null ? EntrepotId.of(entity.getPraId()) : null,
-                entity.getDistrict(),
-                entity.getAdresse(),
-                entity.getTelephone(),
-                entity.getEmail(),
-                entity.getResponsableNom(),
-                entity.getResponsablePrenom(),
-                entity.getStatutAdhesion(),
-                entity.getMotifRejet(),
-                entity.isActif(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return StructureSanitaire.builder()
+            .id(StructureSanitaireId.of(entity.getId()))
+            .code(entity.getCode())
+            .nom(entity.getNom())
+            .type(entity.getType())
+            .regionId(entity.getRegionId() != null ? RegionId.of(entity.getRegionId()) : null)
+            .praId(entity.getPraId() != null ? EntrepotId.of(entity.getPraId()) : null)
+            .district(entity.getDistrict())
+            .adresse(entity.getAdresse())
+            .telephone(entity.getTelephone())
+            .email(entity.getEmail())
+            .responsableNom(entity.getResponsableNom())
+            .responsablePrenom(entity.getResponsablePrenom())
+            .statutAdhesion(entity.getStatutAdhesion())
+            .motifRejet(entity.getMotifRejet())
+            .actif(entity.isActif())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public StructureSanitaireJpaEntity toEntity(StructureSanitaire structure) {
-        StructureSanitaireJpaEntity entity = new StructureSanitaireJpaEntity(
-                structure.getId().getValue(),
-                structure.getCode(),
-                structure.getNom(),
-                structure.getType(),
-                structure.getRegionId() != null ? structure.getRegionId().getValue() : null,
-                structure.getPraId() != null ? structure.getPraId().getValue() : null,
-                structure.getDistrict(),
-                structure.getAdresse(),
-                structure.getTelephone(),
-                structure.getEmail(),
-                structure.getResponsableNom(),
-                structure.getResponsablePrenom(),
-                structure.getStatutAdhesion(),
-                structure.getMotifRejet(),
-                structure.isActif());
+        StructureSanitaireJpaEntity entity = StructureSanitaireJpaEntity.builder()
+            .id(structure.getId().getValue())
+            .code(structure.getCode())
+            .nom(structure.getNom())
+            .type(structure.getType())
+            .regionId(structure.getRegionId() != null ? structure.getRegionId().getValue() : null)
+            .praId(structure.getPraId() != null ? structure.getPraId().getValue() : null)
+            .district(structure.getDistrict())
+            .adresse(structure.getAdresse())
+            .telephone(structure.getTelephone())
+            .email(structure.getEmail())
+            .responsableNom(structure.getResponsableNom())
+            .responsablePrenom(structure.getResponsablePrenom())
+            .statutAdhesion(structure.getStatutAdhesion())
+            .motifRejet(structure.getMotifRejet())
+            .actif(structure.isActif())
+            .build();
         entity.setCreatedAt(structure.getCreatedAt());
         entity.setUpdatedAt(structure.getUpdatedAt());
         return entity;

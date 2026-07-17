@@ -58,9 +58,9 @@ class UpdateOpportuniteCarriereUseCaseImplTest {
     @DisplayName("modification valide → contenu mis à jour et sauvegardé")
     void modificationValide_metAJourEtSauvegarde() {
         UUID id = UUID.randomUUID();
-        OpportuniteCarriere opportunite = OpportuniteCarriere.creer("Ancien titre", "Entreprise", "Desc", null,
+        OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Ancien titre", "Entreprise", "Desc", null,
                 "Dakar", TypeContrat.CDD, LocalDate.now().plusMonths(1), LocalDate.now().plusDays(10),
-                UUID.randomUUID(), "Auteur", null);
+                UUID.randomUUID(), "Auteur", null));
         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(id)))
                 .thenReturn(Optional.of(opportunite));
         when(commandMapper.versTypeContrat("CDI")).thenReturn(TypeContrat.CDI);

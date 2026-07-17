@@ -57,7 +57,7 @@ class AttribuerAppelOffreUseCaseImplTest {
 
     private AppelOffre appelOffreCloture() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         appelOffre.publier();
         appelOffre.cloturer();
         return appelOffre;
@@ -65,7 +65,7 @@ class AttribuerAppelOffreUseCaseImplTest {
 
     private OffreFournisseur offreSoumise() {
         LigneOffre ligne = LigneOffre.creer(LigneAppelOffreId.generate(), BigDecimal.TEN, 10);
-        return OffreFournisseur.soumettre(AppelOffreId.generate(), FournisseurId.generate(), null, List.of(ligne));
+        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), FournisseurId.generate(), null, List.of(ligne)));
     }
 
     @Test

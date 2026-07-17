@@ -15,40 +15,42 @@ import org.springframework.stereotype.Component;
 public class MouvementStockMapper {
 
     public MouvementStock toDomain(MouvementStockJpaEntity entity) {
-        return MouvementStock.reconstruct(
-                MouvementStockId.of(entity.getId()),
-                TypeMouvement.valueOf(entity.getTypeMouvement()),
-                SensMouvement.valueOf(entity.getSens()),
-                entity.getEntrepotSourceId() != null ? EntrepotId.of(entity.getEntrepotSourceId()) : null,
-                entity.getEntrepotDestinationId() != null ? EntrepotId.of(entity.getEntrepotDestinationId()) : null,
-                entity.getCommandeId(),
-                LotId.of(entity.getLotId()),
-                MedicamentId.of(entity.getMedicamentId()),
-                entity.getQuantite(),
-                entity.getDateMouvement(),
-                entity.getReferenceDocument(),
-                entity.getMotif(),
-                entity.getUtilisateurId(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return MouvementStock.builder()
+            .id(MouvementStockId.of(entity.getId()))
+            .typeMouvement(TypeMouvement.valueOf(entity.getTypeMouvement()))
+            .sens(SensMouvement.valueOf(entity.getSens()))
+            .entrepotSourceId(entity.getEntrepotSourceId() != null ? EntrepotId.of(entity.getEntrepotSourceId()) : null)
+            .entrepotDestinationId(entity.getEntrepotDestinationId() != null ? EntrepotId.of(entity.getEntrepotDestinationId()) : null)
+            .commandeId(entity.getCommandeId())
+            .lotId(LotId.of(entity.getLotId()))
+            .medicamentId(MedicamentId.of(entity.getMedicamentId()))
+            .quantite(entity.getQuantite())
+            .dateMouvement(entity.getDateMouvement())
+            .referenceDocument(entity.getReferenceDocument())
+            .motif(entity.getMotif())
+            .utilisateurId(entity.getUtilisateurId())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public MouvementStockJpaEntity toEntity(MouvementStock mouvement) {
-        MouvementStockJpaEntity entity = new MouvementStockJpaEntity(
-                mouvement.getId().getValue(),
-                mouvement.getTypeMouvement().name(),
-                mouvement.getSens().name(),
-                mouvement.getEntrepotSourceId() != null ? mouvement.getEntrepotSourceId().getValue() : null,
-                mouvement.getEntrepotDestinationId() != null ? mouvement.getEntrepotDestinationId().getValue()
-                        : null,
-                mouvement.getCommandeId(),
-                mouvement.getLotId().getValue(),
-                mouvement.getMedicamentId().getValue(),
-                mouvement.getQuantite(),
-                mouvement.getDateMouvement(),
-                mouvement.getReferenceDocument(),
-                mouvement.getMotif(),
-                mouvement.getUtilisateurId());
+        MouvementStockJpaEntity entity = MouvementStockJpaEntity.builder()
+            .id(mouvement.getId().getValue())
+            .typeMouvement(mouvement.getTypeMouvement().name())
+            .sens(mouvement.getSens().name())
+            .entrepotSourceId(mouvement.getEntrepotSourceId() != null ? mouvement.getEntrepotSourceId().getValue() : null)
+            .entrepotDestinationId(mouvement.getEntrepotDestinationId() != null ? mouvement.getEntrepotDestinationId().getValue()
+                        : null)
+            .commandeId(mouvement.getCommandeId())
+            .lotId(mouvement.getLotId().getValue())
+            .medicamentId(mouvement.getMedicamentId().getValue())
+            .quantite(mouvement.getQuantite())
+            .dateMouvement(mouvement.getDateMouvement())
+            .referenceDocument(mouvement.getReferenceDocument())
+            .motif(mouvement.getMotif())
+            .utilisateurId(mouvement.getUtilisateurId())
+            .build();
         entity.setCreatedAt(mouvement.getCreatedAt());
         entity.setUpdatedAt(mouvement.getUpdatedAt());
         return entity;

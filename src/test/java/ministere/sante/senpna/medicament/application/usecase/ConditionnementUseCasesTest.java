@@ -47,10 +47,26 @@ class ConditionnementUseCasesTest {
         private static final UUID CONDITIONNEMENT_ID = UUID.randomUUID();
 
         private static Medicament medicamentActif() {
-                return Medicament.reconstruct(MedicamentId.of(MEDICAMENT_ID), "PARA500", "Doliprane", "Paracétamol",
-                                "500 mg", FormeId.generate(), FamilleId.generate(), null, null, null, null, false, null,
-                                null,
-                                null, true, Instant.now(), Instant.now());
+                return Medicament.builder()
+                    .id(MedicamentId.of(MEDICAMENT_ID))
+                    .code("PARA500")
+                    .nomCommercial("Doliprane")
+                    .dci("Paracétamol")
+                    .dosage("500 mg")
+                    .formeId(FormeId.generate())
+                    .familleId(FamilleId.generate())
+                    .voieAdministration(null)
+                    .temperatureConservation(null)
+                    .programmeSante(null)
+                    .delaiApprovisionnementJours(null)
+                    .necessiteOrdonnance(false)
+                    .fabricant(null)
+                    .stockMinimum(null)
+                    .stockMaximum(null)
+                    .actif(true)
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
+                    .build();
         }
 
         private static final ConditionnementDetailAssembler ASSEMBLER = new ConditionnementDetailAssembler();
@@ -191,11 +207,19 @@ class ConditionnementUseCasesTest {
                 void leveDerniereUniteBase() {
                         ArchiveConditionnementUseCaseImpl useCase = new ArchiveConditionnementUseCaseImpl(
                                         conditionnementRepositoryPort, ASSEMBLER);
-                        Conditionnement uniteBase = Conditionnement.reconstruct(
-                                        ConditionnementId.of(CONDITIONNEMENT_ID),
-                                        MedicamentId.of(MEDICAMENT_ID), "Comprimé", 1, BigDecimal.ONE, true, null, null,
-                                        true, Instant.now(),
-                                        Instant.now());
+                        Conditionnement uniteBase = Conditionnement.builder()
+                            .id(ConditionnementId.of(CONDITIONNEMENT_ID))
+                            .medicamentId(MedicamentId.of(MEDICAMENT_ID))
+                            .nom("Comprimé")
+                            .niveau(1)
+                            .quantiteUniteBase(BigDecimal.ONE)
+                            .estUniteBase(true)
+                            .prixAchat(null)
+                            .prixVente(null)
+                            .actif(true)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(conditionnementRepositoryPort.findById(ConditionnementId.of(CONDITIONNEMENT_ID)))
                                         .thenReturn(Optional.of(uniteBase));
                         when(conditionnementRepositoryPort.estUniqueUniteBaseActive(MedicamentId.of(MEDICAMENT_ID),
@@ -214,10 +238,19 @@ class ConditionnementUseCasesTest {
                 void archiveConditionnementNonUniteBase() {
                         ArchiveConditionnementUseCaseImpl useCase = new ArchiveConditionnementUseCaseImpl(
                                         conditionnementRepositoryPort, ASSEMBLER);
-                        Conditionnement boite = Conditionnement.reconstruct(ConditionnementId.of(CONDITIONNEMENT_ID),
-                                        MedicamentId.of(MEDICAMENT_ID), "Boîte", 2, new BigDecimal("20"), false, null,
-                                        null, true, Instant.now(),
-                                        Instant.now());
+                        Conditionnement boite = Conditionnement.builder()
+                            .id(ConditionnementId.of(CONDITIONNEMENT_ID))
+                            .medicamentId(MedicamentId.of(MEDICAMENT_ID))
+                            .nom("Boîte")
+                            .niveau(2)
+                            .quantiteUniteBase(new BigDecimal("20"))
+                            .estUniteBase(false)
+                            .prixAchat(null)
+                            .prixVente(null)
+                            .actif(true)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(conditionnementRepositoryPort.findById(ConditionnementId.of(CONDITIONNEMENT_ID)))
                                         .thenReturn(Optional.of(boite));
                         when(conditionnementRepositoryPort.save(any(Conditionnement.class)))

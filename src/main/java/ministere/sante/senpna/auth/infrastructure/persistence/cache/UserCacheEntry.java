@@ -60,18 +60,19 @@ public record UserCacheEntry(
     }
 
     public User toDomain() {
-        return User.reconstruct(
-                UserId.of(id),
-                Nom.of(nom),
-                Prenom.of(prenom),
-                Email.of(email),
-                telephone != null ? Phone.of(telephone) : null,
-                HashedPassword.of(hashedPassword),
-                actif,
-                roleIds,
-                tentativesEchecConnexion,
-                verrouilleJusqua,
-                createdAt,
-                updatedAt);
+        return User.builder()
+            .id(UserId.of(id))
+            .nom(Nom.of(nom))
+            .prenom(Prenom.of(prenom))
+            .email(Email.of(email))
+            .telephone(telephone != null ? Phone.of(telephone) : null)
+            .hashedPassword(HashedPassword.of(hashedPassword))
+            .actif(actif)
+            .roleIds(roleIds)
+            .tentativesEchecConnexion(tentativesEchecConnexion)
+            .verrouilleJusqua(verrouilleJusqua)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

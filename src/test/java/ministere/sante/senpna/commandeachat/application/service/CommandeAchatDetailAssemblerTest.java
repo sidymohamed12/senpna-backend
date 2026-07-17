@@ -26,15 +26,15 @@ class CommandeAchatDetailAssemblerTest {
     private final CommandeAchatDetailAssembler sut = new CommandeAchatDetailAssembler();
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
-                BigDecimal.valueOf(200_000));
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+                BigDecimal.valueOf(200_000)));
     }
 
     @Test
     @DisplayName("assembler() mappe tous les champs sans avis d'expédition")
     void assembler_sansAvisExpedition() {
-        CommandeAchat commande = CommandeAchat.creer("BC-1", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne()), "Com");
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne()), "Com"));
 
         CommandeAchatDetail detail = sut.assembler(commande);
 
@@ -47,8 +47,8 @@ class CommandeAchatDetailAssemblerTest {
     @Test
     @DisplayName("assembler() mappe l'avis d'expédition lorsqu'il est présent")
     void assembler_avecAvisExpedition() {
-        CommandeAchat commande = CommandeAchat.creer("BC-1", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne()), null);
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne()), null));
         commande.validerInterne();
         commande.confirmerDelaiLivraison(10, LocalDate.now().plusDays(10));
         commande.genererAvisExpedition(AvisExpedition.of(LocalDate.now(), "DHL", "T-1", null),
@@ -65,8 +65,8 @@ class CommandeAchatDetailAssemblerTest {
     @Test
     @DisplayName("assemblerResume() mappe le nombre de lignes")
     void assemblerResume_mappeNombreLignes() {
-        CommandeAchat commande = CommandeAchat.creer("BC-1", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne()), null);
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne()), null));
 
         CommandeAchatSummary summary = sut.assemblerResume(commande);
 

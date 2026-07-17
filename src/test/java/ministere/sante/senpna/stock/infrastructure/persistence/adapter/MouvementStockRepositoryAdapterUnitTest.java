@@ -60,13 +60,38 @@ class MouvementStockRepositoryAdapterUnitTest {
     UUID medicamentId = UUID.randomUUID();
     UUID entrepotDestinationId = UUID.randomUUID();
     UUID utilisateurId = UUID.randomUUID();
-    MouvementStock mouvement = MouvementStock.reconstruct(MouvementStockId.of(id), TypeMouvement.ENTREE_ACHAT,
-            SensMouvement.ENTREE, null, EntrepotId.of(entrepotDestinationId), null, LotId.of(lotId),
-            MedicamentId.of(medicamentId), BigDecimal.TEN, Instant.now(), "REF-1", null, utilisateurId,
-            Instant.now(), Instant.now());
-    MouvementStockJpaEntity entity = new MouvementStockJpaEntity(id, "ENTREE_ACHAT", "ENTREE", null,
-            entrepotDestinationId, null, lotId, medicamentId, BigDecimal.TEN, Instant.now(), "REF-1", null,
-            utilisateurId);
+    MouvementStock mouvement = MouvementStock.builder()
+        .id(MouvementStockId.of(id))
+        .typeMouvement(TypeMouvement.ENTREE_ACHAT)
+        .sens(SensMouvement.ENTREE)
+        .entrepotSourceId(null)
+        .entrepotDestinationId(EntrepotId.of(entrepotDestinationId))
+        .commandeId(null)
+        .lotId(LotId.of(lotId))
+        .medicamentId(MedicamentId.of(medicamentId))
+        .quantite(BigDecimal.TEN)
+        .dateMouvement(Instant.now())
+        .referenceDocument("REF-1")
+        .motif(null)
+        .utilisateurId(utilisateurId)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .build();
+    MouvementStockJpaEntity entity = MouvementStockJpaEntity.builder()
+        .id(id)
+        .typeMouvement("ENTREE_ACHAT")
+        .sens("ENTREE")
+        .entrepotSourceId(null)
+        .entrepotDestinationId(entrepotDestinationId)
+        .commandeId(null)
+        .lotId(lotId)
+        .medicamentId(medicamentId)
+        .quantite(BigDecimal.TEN)
+        .dateMouvement(Instant.now())
+        .referenceDocument("REF-1")
+        .motif(null)
+        .utilisateurId(utilisateurId)
+        .build();
 
     @BeforeEach
     void setUp() {

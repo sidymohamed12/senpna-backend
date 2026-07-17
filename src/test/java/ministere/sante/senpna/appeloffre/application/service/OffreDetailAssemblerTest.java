@@ -25,8 +25,8 @@ class OffreDetailAssemblerTest {
     @DisplayName("assembler() mappe tous les champs, y compris les lignes de prix")
     void assembler_mappeTousLesChamps() {
         LigneOffre ligne = LigneOffre.creer(LigneAppelOffreId.generate(), BigDecimal.valueOf(2000), 20);
-        OffreFournisseur offre = OffreFournisseur.soumettre(AppelOffreId.generate(), FournisseurId.generate(),
-                "Commentaire", List.of(ligne));
+        OffreFournisseur offre = OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), FournisseurId.generate(),
+                "Commentaire", List.of(ligne)));
 
         OffreDetail detail = sut.assembler(offre);
 

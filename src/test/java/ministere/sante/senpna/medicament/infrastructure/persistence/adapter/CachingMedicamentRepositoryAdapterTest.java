@@ -47,8 +47,8 @@ class CachingMedicamentRepositoryAdapterTest {
     }
 
     private Medicament medicament() {
-        return Medicament.creer("MED-1", "Zolpidem", "Zolpidem", "10mg", FormeId.generate(), FamilleId.generate(),
-                VoieAdministration.ORALE, null, null, null, false, "Sanofi", null, null);
+        return Medicament.creer(new Medicament.CreationCommand("MED-1", "Zolpidem", "Zolpidem", "10mg", FormeId.generate(), FamilleId.generate(),
+                VoieAdministration.ORALE, null, null, null, false, "Sanofi", null, null));
     }
 
     @Nested

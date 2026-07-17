@@ -57,11 +57,11 @@ public class CreateMedicamentUseCaseImpl implements CreateMedicamentUseCase {
             throw new FormeInactiveException();
         }
 
-        Medicament medicament = Medicament.creer(command.code(), command.nomCommercial(), command.dci(),
+        Medicament medicament = Medicament.creer(new Medicament.CreationCommand(command.code(), command.nomCommercial(), command.dci(),
                 command.dosage(), forme.getId(), famille.getId(), command.voieAdministration(),
                 command.temperatureConservation(), command.programmeSante(),
                 command.delaiApprovisionnementJours(), command.necessiteOrdonnance(), command.fabricant(),
-                command.stockMinimum(), command.stockMaximum());
+                command.stockMinimum(), command.stockMaximum()));
 
         Medicament saved = medicamentRepositoryPort.save(medicament);
         return medicamentDetailAssembler.assembler(saved);

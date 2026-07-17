@@ -55,7 +55,7 @@ class CachingProjetRepositoryAdapterTest {
         @Test
         @DisplayName("cache hit → renvoyé directement, la base n'est jamais interrogée")
         void cacheHit_pasAccesBase() {
-            Projet projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
             ProjetCacheEntry entry = ProjetCacheEntry.from(projet);
             when(cache.get(anyString(), eq(ProjetCacheEntry.class))).thenReturn(Optional.of(entry));
 
@@ -69,7 +69,7 @@ class CachingProjetRepositoryAdapterTest {
         @Test
         @DisplayName("cache miss, trouvé en base → repeuple le cache")
         void cacheMiss_repeupleCache() {
-            Projet projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
             when(cache.get(anyString(), eq(ProjetCacheEntry.class))).thenReturn(Optional.empty());
             when(delegate.findById(projet.getId())).thenReturn(Optional.of(projet));
 
@@ -84,7 +84,7 @@ class CachingProjetRepositoryAdapterTest {
         @DisplayName("cache miss, introuvable en base → vide, aucune écriture cache")
         void cacheMissEtBaseVide_pasEcritureCache() {
             when(cache.get(anyString(), eq(ProjetCacheEntry.class))).thenReturn(Optional.empty());
-            Projet projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
             when(delegate.findById(projet.getId())).thenReturn(Optional.empty());
 
             assertThat(sut.findById(projet.getId())).isEmpty();
@@ -99,7 +99,7 @@ class CachingProjetRepositoryAdapterTest {
         @Test
         @DisplayName("sauvegarde en base puis met immédiatement à jour le cache")
         void sauvegardeEtMetAJourCache() {
-            Projet projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
             when(delegate.save(projet)).thenReturn(projet);
 
             Projet result = sut.save(projet);

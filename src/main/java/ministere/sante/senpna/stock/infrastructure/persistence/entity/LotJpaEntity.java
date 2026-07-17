@@ -48,16 +48,85 @@ public class LotJpaEntity extends BaseJpaEntity {
     @Column(name = "statut", nullable = false, length = 20)
     private String statut;
 
-    public LotJpaEntity(UUID id, String numeroLot, UUID medicamentId, UUID fournisseurId, LocalDate dateFabrication,
-            LocalDate dateExpiration, BigDecimal prixAchat, BigDecimal prixVente, String statut) {
-        super(id);
-        this.numeroLot = numeroLot;
-        this.medicamentId = medicamentId;
-        this.fournisseurId = fournisseurId;
-        this.dateFabrication = dateFabrication;
-        this.dateExpiration = dateExpiration;
-        this.prixAchat = prixAchat;
-        this.prixVente = prixVente;
-        this.statut = statut;
+    private LotJpaEntity(Builder builder) {
+        super(builder.id);
+        this.numeroLot = builder.numeroLot;
+        this.medicamentId = builder.medicamentId;
+        this.fournisseurId = builder.fournisseurId;
+        this.dateFabrication = builder.dateFabrication;
+        this.dateExpiration = builder.dateExpiration;
+        this.prixAchat = builder.prixAchat;
+        this.prixVente = builder.prixVente;
+        this.statut = builder.statut;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String numeroLot;
+        private UUID medicamentId;
+        private UUID fournisseurId;
+        private LocalDate dateFabrication;
+        private LocalDate dateExpiration;
+        private BigDecimal prixAchat;
+        private BigDecimal prixVente;
+        private String statut;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder numeroLot(String numeroLot) {
+            this.numeroLot = numeroLot;
+            return this;
+        }
+
+        public Builder medicamentId(UUID medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder fournisseurId(UUID fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder dateFabrication(LocalDate dateFabrication) {
+            this.dateFabrication = dateFabrication;
+            return this;
+        }
+
+        public Builder dateExpiration(LocalDate dateExpiration) {
+            this.dateExpiration = dateExpiration;
+            return this;
+        }
+
+        public Builder prixAchat(BigDecimal prixAchat) {
+            this.prixAchat = prixAchat;
+            return this;
+        }
+
+        public Builder prixVente(BigDecimal prixVente) {
+            this.prixVente = prixVente;
+            return this;
+        }
+
+        public Builder statut(String statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public LotJpaEntity build() {
+            return new LotJpaEntity(this);
+        }
+    }
+
 }

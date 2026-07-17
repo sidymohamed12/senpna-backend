@@ -69,8 +69,8 @@ class StockCachingAdaptersTest {
         @Test
         @DisplayName("cache hit → renvoyé directement, jamais interrogé en base")
         void cacheHit_pasAccesBase() {
-            Lot lot = Lot.creer("L1", MedicamentId.generate(), FournisseurId.generate(),
-                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+            Lot lot = Lot.creer(new Lot.CreationCommand("L1", MedicamentId.generate(), FournisseurId.generate(),
+                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
             when(cache.get(anyString(), eq(LotCacheEntry.class))).thenReturn(Optional.of(LotCacheEntry.from(lot)));
 
             Optional<Lot> result = sut.findById(lot.getId());
@@ -82,8 +82,8 @@ class StockCachingAdaptersTest {
         @Test
         @DisplayName("cache miss, trouvé en base → repeuple le cache avec le TTL lot")
         void cacheMiss_repeupleCache() {
-            Lot lot = Lot.creer("L1", MedicamentId.generate(), FournisseurId.generate(),
-                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+            Lot lot = Lot.creer(new Lot.CreationCommand("L1", MedicamentId.generate(), FournisseurId.generate(),
+                    LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
             when(cache.get(anyString(), eq(LotCacheEntry.class))).thenReturn(Optional.empty());
             when(delegate.findById(lot.getId())).thenReturn(Optional.of(lot));
 
@@ -118,7 +118,7 @@ class StockCachingAdaptersTest {
         @Test
         @DisplayName("save() met en cache SOUS DEUX CLÉS : par id et par (entrepôt, lot)")
         void save_metEnCacheSousDeuxCles() {
-            Stock stock = Stock.ouvrir(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(), null);
+            Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(), null));
             when(delegate.save(stock)).thenReturn(stock);
 
             sut.save(stock);
@@ -168,9 +168,9 @@ class StockCachingAdaptersTest {
         @Test
         @DisplayName("save() met en cache le mouvement avec le TTL mouvement")
         void save_metEnCache() {
-            MouvementStock mouvement = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+            MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
                     EntrepotId.generate(), null, LotId.generate(), MedicamentId.generate(), BigDecimal.TEN, "REF",
-                    "Motif", UUID.randomUUID());
+                    "Motif", UUID.randomUUID()));
             when(delegate.save(mouvement)).thenReturn(mouvement);
 
             sut.save(mouvement);
@@ -181,9 +181,9 @@ class StockCachingAdaptersTest {
         @Test
         @DisplayName("cache hit sur findById() → jamais interrogé en base")
         void cacheHit_pasAccesBase() {
-            MouvementStock mouvement = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+            MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
                     EntrepotId.generate(), null, LotId.generate(), MedicamentId.generate(), BigDecimal.TEN, "REF",
-                    "Motif", UUID.randomUUID());
+                    "Motif", UUID.randomUUID()));
             when(cache.get(anyString(), eq(MouvementStockCacheEntry.class)))
                     .thenReturn(Optional.of(MouvementStockCacheEntry.from(mouvement)));
 

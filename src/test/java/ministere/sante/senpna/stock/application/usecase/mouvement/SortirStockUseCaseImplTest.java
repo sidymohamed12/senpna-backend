@@ -61,9 +61,9 @@ class SortirStockUseCaseImplTest {
     void setUp() {
         sut = new SortirStockUseCaseImpl(stockRepositoryPort, lotRepositoryPort, entrepotRepositoryPort,
                 mouvementStockRepositoryPort, stockDetailAssembler, entrepotScopeGuard);
-        entrepot = Entrepot.creerPra("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111");
-        lot = Lot.creer("LOT-1", MedicamentId.generate(), FournisseurId.generate(), LocalDate.now().minusMonths(1),
-                LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+        entrepot = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111"));
+        lot = Lot.creer(new Lot.CreationCommand("LOT-1", MedicamentId.generate(), FournisseurId.generate(), LocalDate.now().minusMonths(1),
+                LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
     }
 
     private SortieStockCommand commande(String type, boolean depuisReservation) {
@@ -88,7 +88,7 @@ class SortirStockUseCaseImplTest {
     @DisplayName("sortie corrective (PERTE) avec un lot bloqué → autorisée quand même")
     void sortieCorrectiveLotBloque_autorisee() {
         lot.bloquer();
-        Stock stock = Stock.ouvrir(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null);
+        Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null));
         stock.entrer(new BigDecimal("50"));
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
@@ -115,7 +115,7 @@ class SortirStockUseCaseImplTest {
     @Test
     @DisplayName("depuisReservation=true → utilise sortirDepuisReservation() au lieu de sortir()")
     void depuisReservation_utiliseMethodeAdequate() {
-        Stock stock = Stock.ouvrir(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null);
+        Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null));
         stock.entrer(new BigDecimal("50"));
         stock.reserver(new BigDecimal("20"));
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));

@@ -70,9 +70,20 @@ class RegionScopeResolverTest {
     }
 
     private User acteurAvecRoles(Set<UUID> roleIds) {
-        return User.reconstruct(UserId.of(ACTEUR_ID), Nom.of(UserFixtures.NOM), Prenom.of(UserFixtures.PRENOM),
-                Email.of(UserFixtures.EMAIL), null, HashedPassword.of(UserFixtures.PASSWORD_HASH), true, roleIds, 0,
-                null, Instant.now(), Instant.now());
+        return User.builder()
+            .id(UserId.of(ACTEUR_ID))
+            .nom(Nom.of(UserFixtures.NOM))
+            .prenom(Prenom.of(UserFixtures.PRENOM))
+            .email(Email.of(UserFixtures.EMAIL))
+            .telephone(null)
+            .hashedPassword(HashedPassword.of(UserFixtures.PASSWORD_HASH))
+            .actif(true)
+            .roleIds(roleIds)
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     @Test
@@ -100,8 +111,19 @@ class RegionScopeResolverTest {
                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
                 .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null, null)));
-        Entrepot entrepot = Entrepot.reconstruct(EntrepotId.of(entrepotId), "PRA-X", "PRA X", TypeEntrepot.PRA,
-                regionCible, null, null, null, true, Instant.now(), Instant.now());
+        Entrepot entrepot = Entrepot.builder()
+            .id(EntrepotId.of(entrepotId))
+            .code("PRA-X")
+            .nom("PRA X")
+            .type(TypeEntrepot.PRA)
+            .regionId(regionCible)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(entrepotRepositoryPort.findById(EntrepotId.of(entrepotId))).thenReturn(Optional.of(entrepot));
 
         assertThatCode(() -> sut.verifierAccesRegion(ACTEUR_ID, regionCible)).doesNotThrowAnyException();
@@ -120,8 +142,19 @@ class RegionScopeResolverTest {
                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
                 .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null, null)));
-        Entrepot entrepot = Entrepot.reconstruct(EntrepotId.of(entrepotId), "PRA-X", "PRA X", TypeEntrepot.PRA,
-                regionActeur, null, null, null, true, Instant.now(), Instant.now());
+        Entrepot entrepot = Entrepot.builder()
+            .id(EntrepotId.of(entrepotId))
+            .code("PRA-X")
+            .nom("PRA X")
+            .type(TypeEntrepot.PRA)
+            .regionId(regionActeur)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(entrepotRepositoryPort.findById(EntrepotId.of(entrepotId))).thenReturn(Optional.of(entrepot));
 
         assertThatThrownBy(() -> sut.verifierAccesRegion(ACTEUR_ID, regionCible))
@@ -150,8 +183,19 @@ class RegionScopeResolverTest {
                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
                 .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, entrepotId, null, null)));
-        Entrepot pnaCentral = Entrepot.reconstruct(EntrepotId.of(entrepotId), "PNA-CENTRAL", "PNA Centrale",
-                TypeEntrepot.PNA_CENTRAL, null, null, null, null, true, Instant.now(), Instant.now());
+        Entrepot pnaCentral = Entrepot.builder()
+            .id(EntrepotId.of(entrepotId))
+            .code("PNA-CENTRAL")
+            .nom("PNA Centrale")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(null)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(entrepotRepositoryPort.findById(EntrepotId.of(entrepotId))).thenReturn(Optional.of(pnaCentral));
 
         assertThatCode(() -> sut.verifierAccesRegion(ACTEUR_ID, RegionId.generate())).doesNotThrowAnyException();
@@ -168,9 +212,25 @@ class RegionScopeResolverTest {
                 .thenReturn(Set.of(new RoleProjection(ROLE_ADMIN_PRA_ID, "ADMIN_PRA", "Administrateur PRA")));
         when(userAffectationRepositoryPort.findAffectation(ACTEUR_ID))
                 .thenReturn(Optional.of(new UserAffectationView(ACTEUR_ID, null, structureId, null)));
-        StructureSanitaire structure = StructureSanitaire.reconstruct(StructureSanitaireId.of(structureId), "HOP-X",
-                "Hôpital X", TypeStructureSanitaire.HOPITAL, regionStructure, null, null, null, null, null,
-                "Ndiaye", "Fatou", StatutAdhesion.VALIDEE, null, true, Instant.now(), Instant.now());
+        StructureSanitaire structure = StructureSanitaire.builder()
+            .id(StructureSanitaireId.of(structureId))
+            .code("HOP-X")
+            .nom("Hôpital X")
+            .type(TypeStructureSanitaire.HOPITAL)
+            .regionId(regionStructure)
+            .praId(null)
+            .district(null)
+            .adresse(null)
+            .telephone(null)
+            .email(null)
+            .responsableNom("Ndiaye")
+            .responsablePrenom("Fatou")
+            .statutAdhesion(StatutAdhesion.VALIDEE)
+            .motifRejet(null)
+            .actif(true)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
         when(structureSanitaireRepositoryPort.findById(StructureSanitaireId.of(structureId)))
                 .thenReturn(Optional.of(structure));
 

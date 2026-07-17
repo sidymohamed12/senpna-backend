@@ -51,8 +51,8 @@ public class CreatePraUseCaseImpl implements CreatePraUseCase {
             throw new CodeEntrepotDejaUtiliseException(code);
         }
 
-        Entrepot pra = Entrepot.creerPra(command.code(), command.nom(), region.getId(), command.adresse(),
-                command.telephone());
+        Entrepot pra = Entrepot.creerPra(new Entrepot.CreationCommand(command.code(), command.nom(), region.getId(), command.adresse(),
+                command.telephone()));
 
         Entrepot saved = entrepotRepositoryPort.save(pra);
         return entrepotDetailAssembler.assembler(saved);

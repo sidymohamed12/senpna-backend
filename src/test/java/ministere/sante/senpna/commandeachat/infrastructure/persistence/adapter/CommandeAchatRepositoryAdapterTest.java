@@ -45,12 +45,12 @@ class CommandeAchatRepositoryAdapterTest {
     TestEntityManager entityManager;
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
-                BigDecimal.valueOf(200_000));
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+                BigDecimal.valueOf(200_000)));
     }
 
     private CommandeAchat nouvelleCommande(String reference, FournisseurId fournisseurId) {
-        return CommandeAchat.creer(reference, fournisseurId, EntrepotId.generate(), List.of(ligne()), "Commentaire");
+        return CommandeAchat.creer(new CommandeAchat.CreationCommand(reference, fournisseurId, EntrepotId.generate(), List.of(ligne()), "Commentaire"));
     }
 
     @Nested

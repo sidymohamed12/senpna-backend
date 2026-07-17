@@ -61,7 +61,7 @@ class UpdateFournisseurUseCaseImplTest {
     @Test
     @DisplayName("nom inchangé (insensible à la casse) → aucune vérification d'unicité")
     void nomInchange_aucuneVerificationUnicite() {
-        Fournisseur fournisseur = Fournisseur.creer("Pharma Plus", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Pharma Plus", null, null, null, null));
         when(fournisseurRepositoryPort.findById(FournisseurId.of(id))).thenReturn(Optional.of(fournisseur));
         when(fournisseurRepositoryPort.save(any())).thenReturn(fournisseur);
 
@@ -74,7 +74,7 @@ class UpdateFournisseurUseCaseImplTest {
     @Test
     @DisplayName("nouveau nom déjà utilisé par un autre fournisseur → NomFournisseurDejaUtiliseException")
     void nouveauNomDejaUtilise_leveException() {
-        Fournisseur fournisseur = Fournisseur.creer("Ancien Nom", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Ancien Nom", null, null, null, null));
         when(fournisseurRepositoryPort.findById(FournisseurId.of(id))).thenReturn(Optional.of(fournisseur));
         when(fournisseurRepositoryPort.existsByNomIgnoreCaseAndIdNot("Nouveau Nom", fournisseur.getId()))
                 .thenReturn(true);
@@ -89,7 +89,7 @@ class UpdateFournisseurUseCaseImplTest {
     @Test
     @DisplayName("modification valide → informations mises à jour, sauvegarde et cache rechargé")
     void modificationValide_metAJourEtRechargeCache() {
-        Fournisseur fournisseur = Fournisseur.creer("Ancien Nom", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Ancien Nom", null, null, null, null));
         when(fournisseurRepositoryPort.findById(FournisseurId.of(id))).thenReturn(Optional.of(fournisseur));
         when(fournisseurRepositoryPort.existsByNomIgnoreCaseAndIdNot(any(), any())).thenReturn(false);
         when(fournisseurRepositoryPort.save(fournisseur)).thenReturn(fournisseur);

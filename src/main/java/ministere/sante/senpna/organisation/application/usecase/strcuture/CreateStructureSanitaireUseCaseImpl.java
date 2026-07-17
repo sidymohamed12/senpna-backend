@@ -57,9 +57,9 @@ public class CreateStructureSanitaireUseCaseImpl implements CreateStructureSanit
             throw new CodeStructureSanitaireDejaUtiliseException(code);
         }
 
-        StructureSanitaire structure = StructureSanitaire.creer(command.code(), command.nom(), command.type(),
+        StructureSanitaire structure = StructureSanitaire.creer(new StructureSanitaire.CreationCommand(command.code(), command.nom(), command.type(),
                 region.getId(), command.district(), command.adresse(), command.telephone(), command.email(),
-                command.responsableNom(), command.responsablePrenom());
+                command.responsableNom(), command.responsablePrenom()));
 
         StructureSanitaire saved = structureSanitaireRepositoryPort.save(structure);
         return structureSanitaireDetailAssembler.assembler(saved);

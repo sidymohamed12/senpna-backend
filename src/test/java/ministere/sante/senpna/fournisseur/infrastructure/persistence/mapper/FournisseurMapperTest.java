@@ -43,7 +43,7 @@ class FournisseurMapperTest {
     @Test
     @DisplayName("toEntity() reporte fidèlement chaque champ de l'agrégat")
     void toEntity_reporteChaqueChamp() {
-        Fournisseur fournisseur = Fournisseur.creer("Pharma Plus", "Dakar", "+221771234567", "c@p.sn", "Awa");
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Pharma Plus", "Dakar", "+221771234567", "c@p.sn", "Awa"));
 
         FournisseurJpaEntity entity = sut.toEntity(fournisseur);
 
@@ -57,7 +57,7 @@ class FournisseurMapperTest {
     @Test
     @DisplayName("aller-retour toEntity() puis toDomain() préserve l'état")
     void allerRetour_preserveEtat() {
-        Fournisseur original = Fournisseur.creer("Pharma Plus", "Dakar", "+221771234567", "c@p.sn", "Awa");
+        Fournisseur original = Fournisseur.creer(new Fournisseur.CreationCommand("Pharma Plus", "Dakar", "+221771234567", "c@p.sn", "Awa"));
 
         Fournisseur restaure = sut.toDomain(sut.toEntity(original));
 

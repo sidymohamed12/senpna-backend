@@ -19,15 +19,16 @@ public class OffreFournisseurMapper {
 
     public OffreFournisseur toDomain(OffreFournisseurJpaEntity entity, List<LigneOffreJpaEntity> lignesEntity) {
         List<LigneOffre> lignes = lignesEntity.stream().map(this::toDomainLigne).toList();
-        return OffreFournisseur.reconstruct(
-                OffreFournisseurId.of(entity.getId()),
-                AppelOffreId.of(entity.getAppelOffreId()),
-                FournisseurId.of(entity.getFournisseurId()),
-                entity.getCommentaire(),
-                entity.getStatut(),
-                lignes,
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return OffreFournisseur.builder()
+            .id(OffreFournisseurId.of(entity.getId()))
+            .appelOffreId(AppelOffreId.of(entity.getAppelOffreId()))
+            .fournisseurId(FournisseurId.of(entity.getFournisseurId()))
+            .commentaire(entity.getCommentaire())
+            .statut(entity.getStatut())
+            .lignes(lignes)
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public OffreFournisseurJpaEntity toEntity(OffreFournisseur offre) {

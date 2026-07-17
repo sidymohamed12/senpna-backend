@@ -67,16 +67,78 @@ public class ActualiteJpaEntity extends BaseJpaEntity {
     @Column(name = "statut", nullable = false, length = 20)
     private StatutActualite statut;
 
-    public ActualiteJpaEntity(UUID id, CategorieActualite categorie, String titre, String description,
-            UUID auteurId, String auteurNom, List<String> tags, StatutActualite statut) {
-        super(id);
-        this.categorie = categorie;
-        this.titre = titre;
-        this.description = description;
-        this.auteurId = auteurId;
-        this.auteurNom = auteurNom;
-        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
-        this.statut = statut;
+    private ActualiteJpaEntity(Builder builder) {
+        super(builder.id);
+        this.categorie = builder.categorie;
+        this.titre = builder.titre;
+        this.description = builder.description;
+        this.auteurId = builder.auteurId;
+        this.auteurNom = builder.auteurNom;
+        this.tags = builder.tags != null ? new ArrayList<>(builder.tags) : new ArrayList<>();
+        this.statut = builder.statut;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private CategorieActualite categorie;
+        private String titre;
+        private String description;
+        private UUID auteurId;
+        private String auteurNom;
+        private List<String> tags;
+        private StatutActualite statut;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder categorie(CategorieActualite categorie) {
+            this.categorie = categorie;
+            return this;
+        }
+
+        public Builder titre(String titre) {
+            this.titre = titre;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder auteurId(UUID auteurId) {
+            this.auteurId = auteurId;
+            return this;
+        }
+
+        public Builder auteurNom(String auteurNom) {
+            this.auteurNom = auteurNom;
+            return this;
+        }
+
+        public Builder tags(List<String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public Builder statut(StatutActualite statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public ActualiteJpaEntity build() {
+            return new ActualiteJpaEntity(this);
+        }
     }
 
     /**

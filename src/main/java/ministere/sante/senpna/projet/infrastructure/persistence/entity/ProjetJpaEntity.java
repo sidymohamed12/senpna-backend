@@ -64,15 +64,77 @@ public class ProjetJpaEntity extends BaseJpaEntity {
     @Column(name = "statut", nullable = false, length = 20)
     private StatutProjet statut;
 
-    public ProjetJpaEntity(UUID id, CategorieProjet categorie, String nom, String description,
-            List<String> objectifs, List<String> impacts, String imageUrl, StatutProjet statut) {
-        super(id);
-        this.categorie = categorie;
-        this.nom = nom;
-        this.description = description;
-        this.objectifs = objectifs != null ? new ArrayList<>(objectifs) : new ArrayList<>();
-        this.impacts = impacts != null ? new ArrayList<>(impacts) : new ArrayList<>();
-        this.imageUrl = imageUrl;
-        this.statut = statut;
+    private ProjetJpaEntity(Builder builder) {
+        super(builder.id);
+        this.categorie = builder.categorie;
+        this.nom = builder.nom;
+        this.description = builder.description;
+        this.objectifs = builder.objectifs != null ? new ArrayList<>(builder.objectifs) : new ArrayList<>();
+        this.impacts = builder.impacts != null ? new ArrayList<>(builder.impacts) : new ArrayList<>();
+        this.imageUrl = builder.imageUrl;
+        this.statut = builder.statut;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private CategorieProjet categorie;
+        private String nom;
+        private String description;
+        private List<String> objectifs;
+        private List<String> impacts;
+        private String imageUrl;
+        private StatutProjet statut;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder categorie(CategorieProjet categorie) {
+            this.categorie = categorie;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder objectifs(List<String> objectifs) {
+            this.objectifs = objectifs;
+            return this;
+        }
+
+        public Builder impacts(List<String> impacts) {
+            this.impacts = impacts;
+            return this;
+        }
+
+        public Builder imageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+            return this;
+        }
+
+        public Builder statut(StatutProjet statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public ProjetJpaEntity build() {
+            return new ProjetJpaEntity(this);
+        }
     }
 }

@@ -29,13 +29,13 @@ class CommandeAchatMapperTest {
     CommandeAchatMapper sut = new CommandeAchatMapper();
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
-                BigDecimal.valueOf(200_000));
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+                BigDecimal.valueOf(200_000)));
     }
 
     private CommandeAchat commande() {
-        return CommandeAchat.creer("BC-2026-0001", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne()), "Commentaire");
+        return CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-2026-0001", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne()), "Commentaire"));
     }
 
     @Nested
@@ -100,15 +100,41 @@ class CommandeAchatMapperTest {
         @DisplayName("sans avis d'expédition (colonnes avis_* nulles) → getAvisExpedition() renvoie null")
         void toDomain_sansAvisExpedition_null() {
             UUID commandeId = UUID.randomUUID();
-            CommandeAchatJpaEntity entity = new CommandeAchatJpaEntity(commandeId, "BC-1", UUID.randomUUID(),
-                    UUID.randomUUID(), StatutCommandeAchat.EN_ATTENTE_VALIDATION, null, null, null, null, null,
-                    null, null, null, null);
+            CommandeAchatJpaEntity entity = CommandeAchatJpaEntity.builder()
+                .id(commandeId)
+                .reference("BC-1")
+                .fournisseurId(UUID.randomUUID())
+                .entrepotDestinationId(UUID.randomUUID())
+                .statut(StatutCommandeAchat.EN_ATTENTE_VALIDATION)
+                .dateAccuseReceptionFournisseur(null)
+                .delaiLivraisonConfirmeJours(null)
+                .dateLivraisonConfirmee(null)
+                .avisDateExpedition(null)
+                .avisTransporteur(null)
+                .avisNumeroSuivi(null)
+                .avisDateLivraisonEstimee(null)
+                .motifRejet(null)
+                .commentaire(null)
+                .build();
             entity.setCreatedAt(Instant.now());
             entity.setUpdatedAt(Instant.now());
 
-            LigneCommandeAchatJpaEntity ligneEntity = new LigneCommandeAchatJpaEntity(UUID.randomUUID(), commandeId,
-                    UUID.randomUUID(), UUID.randomUUID(), BigDecimal.TEN, BigDecimal.TEN, null, null, null, null,
-                    null, BigDecimal.ZERO, BigDecimal.ZERO, null);
+            LigneCommandeAchatJpaEntity ligneEntity = LigneCommandeAchatJpaEntity.builder()
+                .id(UUID.randomUUID())
+                .commandeAchatId(commandeId)
+                .medicamentId(UUID.randomUUID())
+                .conditionnementId(UUID.randomUUID())
+                .quantiteCommandee(BigDecimal.TEN)
+                .prixUnitaire(BigDecimal.TEN)
+                .numeroLot(null)
+                .dateFabrication(null)
+                .dateExpiration(null)
+                .certificatAnalyseUrl(null)
+                .quantiteExpediee(null)
+                .quantiteRecue(BigDecimal.ZERO)
+                .quantiteRefusee(BigDecimal.ZERO)
+                .motifRefus(null)
+                .build();
 
             CommandeAchat commande = sut.toDomain(entity, List.of(ligneEntity));
 
@@ -121,15 +147,41 @@ class CommandeAchatMapperTest {
         void toDomain_avecAvisExpedition_reconstruit() {
             UUID commandeId = UUID.randomUUID();
             LocalDate dateExpedition = LocalDate.now();
-            CommandeAchatJpaEntity entity = new CommandeAchatJpaEntity(commandeId, "BC-1", UUID.randomUUID(),
-                    UUID.randomUUID(), StatutCommandeAchat.EXPEDIEE, null, 10, LocalDate.now().plusDays(10),
-                    dateExpedition, "DHL", "T-1", LocalDate.now().plusDays(5), null, null);
+            CommandeAchatJpaEntity entity = CommandeAchatJpaEntity.builder()
+                .id(commandeId)
+                .reference("BC-1")
+                .fournisseurId(UUID.randomUUID())
+                .entrepotDestinationId(UUID.randomUUID())
+                .statut(StatutCommandeAchat.EXPEDIEE)
+                .dateAccuseReceptionFournisseur(null)
+                .delaiLivraisonConfirmeJours(10)
+                .dateLivraisonConfirmee(LocalDate.now().plusDays(10))
+                .avisDateExpedition(dateExpedition)
+                .avisTransporteur("DHL")
+                .avisNumeroSuivi("T-1")
+                .avisDateLivraisonEstimee(LocalDate.now().plusDays(5))
+                .motifRejet(null)
+                .commentaire(null)
+                .build();
             entity.setCreatedAt(Instant.now());
             entity.setUpdatedAt(Instant.now());
 
-            LigneCommandeAchatJpaEntity ligneEntity = new LigneCommandeAchatJpaEntity(UUID.randomUUID(), commandeId,
-                    UUID.randomUUID(), UUID.randomUUID(), BigDecimal.TEN, BigDecimal.TEN, "LOT-1", null,
-                    LocalDate.now().plusYears(1), null, BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.ZERO, null);
+            LigneCommandeAchatJpaEntity ligneEntity = LigneCommandeAchatJpaEntity.builder()
+                .id(UUID.randomUUID())
+                .commandeAchatId(commandeId)
+                .medicamentId(UUID.randomUUID())
+                .conditionnementId(UUID.randomUUID())
+                .quantiteCommandee(BigDecimal.TEN)
+                .prixUnitaire(BigDecimal.TEN)
+                .numeroLot("LOT-1")
+                .dateFabrication(null)
+                .dateExpiration(LocalDate.now().plusYears(1))
+                .certificatAnalyseUrl(null)
+                .quantiteExpediee(BigDecimal.TEN)
+                .quantiteRecue(BigDecimal.ZERO)
+                .quantiteRefusee(BigDecimal.ZERO)
+                .motifRefus(null)
+                .build();
 
             CommandeAchat commande = sut.toDomain(entity, List.of(ligneEntity));
 
@@ -143,15 +195,41 @@ class CommandeAchatMapperTest {
         void toDomain_reconstruitIdentiteEtStatut() {
             UUID commandeId = UUID.randomUUID();
             UUID fournisseurId = UUID.randomUUID();
-            CommandeAchatJpaEntity entity = new CommandeAchatJpaEntity(commandeId, "BC-2026-0099", fournisseurId,
-                    UUID.randomUUID(), StatutCommandeAchat.VALIDEE, null, null, null, null, null, null, null, null,
-                    null);
+            CommandeAchatJpaEntity entity = CommandeAchatJpaEntity.builder()
+                .id(commandeId)
+                .reference("BC-2026-0099")
+                .fournisseurId(fournisseurId)
+                .entrepotDestinationId(UUID.randomUUID())
+                .statut(StatutCommandeAchat.VALIDEE)
+                .dateAccuseReceptionFournisseur(null)
+                .delaiLivraisonConfirmeJours(null)
+                .dateLivraisonConfirmee(null)
+                .avisDateExpedition(null)
+                .avisTransporteur(null)
+                .avisNumeroSuivi(null)
+                .avisDateLivraisonEstimee(null)
+                .motifRejet(null)
+                .commentaire(null)
+                .build();
             entity.setCreatedAt(Instant.now());
             entity.setUpdatedAt(Instant.now());
 
-            LigneCommandeAchatJpaEntity ligneEntity = new LigneCommandeAchatJpaEntity(UUID.randomUUID(), commandeId,
-                    UUID.randomUUID(), UUID.randomUUID(), BigDecimal.TEN, BigDecimal.TEN, null, null, null, null,
-                    null, BigDecimal.ZERO, BigDecimal.ZERO, null);
+            LigneCommandeAchatJpaEntity ligneEntity = LigneCommandeAchatJpaEntity.builder()
+                .id(UUID.randomUUID())
+                .commandeAchatId(commandeId)
+                .medicamentId(UUID.randomUUID())
+                .conditionnementId(UUID.randomUUID())
+                .quantiteCommandee(BigDecimal.TEN)
+                .prixUnitaire(BigDecimal.TEN)
+                .numeroLot(null)
+                .dateFabrication(null)
+                .dateExpiration(null)
+                .certificatAnalyseUrl(null)
+                .quantiteExpediee(null)
+                .quantiteRecue(BigDecimal.ZERO)
+                .quantiteRefusee(BigDecimal.ZERO)
+                .motifRefus(null)
+                .build();
 
             CommandeAchat commande = sut.toDomain(entity, List.of(ligneEntity));
 

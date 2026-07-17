@@ -49,9 +49,9 @@ class LotUseCasesTest {
     @BeforeEach
     void setUp() {
         id = UUID.randomUUID();
-        lot = Lot.creer("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
+        lot = Lot.creer(new Lot.CreationCommand("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
                 LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), new BigDecimal("10.00"),
-                new BigDecimal("15.00"));
+                new BigDecimal("15.00")));
     }
 
     @Nested

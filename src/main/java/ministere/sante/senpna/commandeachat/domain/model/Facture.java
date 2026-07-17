@@ -36,36 +36,127 @@ public class Facture extends AggregateRoot<FactureId> {
     private StatutFacture statut;
     private String motifRejet;
 
-    private Facture(FactureId id, CommandeAchatId commandeAchatId, FournisseurId fournisseurId,
-            String numeroFacture, BigDecimal montant, LocalDate dateEmission, LocalDate dateEcheance,
-            String pieceJointeMediaId, StatutFacture statut, String motifRejet, Instant createdAt,
-            Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.commandeAchatId = Objects.requireNonNull(commandeAchatId, "La commande référencée est obligatoire");
-        this.fournisseurId = Objects.requireNonNull(fournisseurId, "Le fournisseur est obligatoire");
-        this.numeroFacture = validerNumeroFacture(numeroFacture);
-        this.montant = validerMontant(montant);
-        this.dateEmission = Objects.requireNonNull(dateEmission, "La date d'émission est obligatoire");
-        this.dateEcheance = dateEcheance;
-        this.pieceJointeMediaId = pieceJointeMediaId;
-        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
-        this.motifRejet = motifRejet;
+    private Facture(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.commandeAchatId = Objects.requireNonNull(builder.commandeAchatId, "La commande référencée est obligatoire");
+        this.fournisseurId = Objects.requireNonNull(builder.fournisseurId, "Le fournisseur est obligatoire");
+        this.numeroFacture = validerNumeroFacture(builder.numeroFacture);
+        this.montant = validerMontant(builder.montant);
+        this.dateEmission = Objects.requireNonNull(builder.dateEmission, "La date d'émission est obligatoire");
+        this.dateEcheance = builder.dateEcheance;
+        this.pieceJointeMediaId = builder.pieceJointeMediaId;
+        this.statut = Objects.requireNonNull(builder.statut, "Le statut est obligatoire");
+        this.motifRejet = builder.motifRejet;
     }
 
-    public static Facture reconstruct(FactureId id, CommandeAchatId commandeAchatId, FournisseurId fournisseurId,
-            String numeroFacture, BigDecimal montant, LocalDate dateEmission, LocalDate dateEcheance,
-            String pieceJointeMediaId, StatutFacture statut, String motifRejet, Instant createdAt,
-            Instant updatedAt) {
-        return new Facture(id, commandeAchatId, fournisseurId, numeroFacture, montant, dateEmission, dateEcheance,
-                pieceJointeMediaId, statut, motifRejet, createdAt, updatedAt);
-    }
-
-    public static Facture soumettre(CommandeAchatId commandeAchatId, FournisseurId fournisseurId,
+    /** Données nécessaires à la soumission d'une nouvelle facture. */
+    public record SoumissionCommand(CommandeAchatId commandeAchatId, FournisseurId fournisseurId,
             String numeroFacture, BigDecimal montant, LocalDate dateEmission, LocalDate dateEcheance,
             String pieceJointeMediaId) {
+    }
+
+    public static Facture soumettre(SoumissionCommand command) {
         Instant maintenant = Instant.now();
-        return new Facture(FactureId.generate(), commandeAchatId, fournisseurId, numeroFacture, montant,
-                dateEmission, dateEcheance, pieceJointeMediaId, StatutFacture.SOUMISE, null, maintenant, maintenant);
+        return builder()
+                .id(FactureId.generate())
+                .commandeAchatId(command.commandeAchatId())
+                .fournisseurId(command.fournisseurId())
+                .numeroFacture(command.numeroFacture())
+                .montant(command.montant())
+                .dateEmission(command.dateEmission())
+                .dateEcheance(command.dateEcheance())
+                .pieceJointeMediaId(command.pieceJointeMediaId())
+                .statut(StatutFacture.SOUMISE)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private FactureId id;
+        private CommandeAchatId commandeAchatId;
+        private FournisseurId fournisseurId;
+        private String numeroFacture;
+        private BigDecimal montant;
+        private LocalDate dateEmission;
+        private LocalDate dateEcheance;
+        private String pieceJointeMediaId;
+        private StatutFacture statut;
+        private String motifRejet;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(FactureId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder commandeAchatId(CommandeAchatId commandeAchatId) {
+            this.commandeAchatId = commandeAchatId;
+            return this;
+        }
+
+        public Builder fournisseurId(FournisseurId fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder numeroFacture(String numeroFacture) {
+            this.numeroFacture = numeroFacture;
+            return this;
+        }
+
+        public Builder montant(BigDecimal montant) {
+            this.montant = montant;
+            return this;
+        }
+
+        public Builder dateEmission(LocalDate dateEmission) {
+            this.dateEmission = dateEmission;
+            return this;
+        }
+
+        public Builder dateEcheance(LocalDate dateEcheance) {
+            this.dateEcheance = dateEcheance;
+            return this;
+        }
+
+        public Builder pieceJointeMediaId(String pieceJointeMediaId) {
+            this.pieceJointeMediaId = pieceJointeMediaId;
+            return this;
+        }
+
+        public Builder statut(StatutFacture statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Facture build() {
+            return new Facture(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

@@ -58,20 +58,32 @@ class CarrierePersistenceAdaptersTest {
 
     @BeforeEach
     void setUp() {
-        ouverteDakar = OpportuniteCarriere.creer("Developpeur Java", "Entreprise X", "Desc", null, "Dakar",
+        ouverteDakar = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Developpeur Java", "Entreprise X", "Desc", null, "Dakar",
                 TypeContrat.CDI, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                "Auteur", null);
+                "Auteur", null));
         ouverteDakar.publier();
 
-        brouillonThies = OpportuniteCarriere.creer("Comptable", "Entreprise Y", "Desc", null, "Thies",
+        brouillonThies = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Comptable", "Entreprise Y", "Desc", null, "Thies",
                 TypeContrat.CDD, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                "Auteur", null);
+                "Auteur", null));
 
-        expireeMaisOuverte = OpportuniteCarriere.reconstruct(
-                ministere.sante.senpna.carriere.domain.valueobject.OpportuniteCarriereId.generate(),
-                "Stage expire", "Entreprise Z", "Desc", null, "Dakar", TypeContrat.STAGE,
-                LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), UUID.randomUUID(), "Auteur", null,
-                StatutOpportunite.OUVERT, java.time.Instant.now(), java.time.Instant.now());
+        expireeMaisOuverte = OpportuniteCarriere.builder()
+            .id(ministere.sante.senpna.carriere.domain.valueobject.OpportuniteCarriereId.generate())
+            .titre("Stage expire")
+            .nomEntreprise("Entreprise Z")
+            .description("Desc")
+            .ficheDePosteUrl(null)
+            .lieu("Dakar")
+            .typeContrat(TypeContrat.STAGE)
+            .dateDebut(LocalDate.now().minusDays(5))
+            .dateLimiteCandidature(LocalDate.now().minusDays(1))
+            .auteurId(UUID.randomUUID())
+            .auteurNom("Auteur")
+            .emailContact(null)
+            .statut(StatutOpportunite.OUVERT)
+            .createdAt(java.time.Instant.now())
+            .updatedAt(java.time.Instant.now())
+            .build();
 
         opportuniteAdapter.save(ouverteDakar);
         opportuniteAdapter.save(brouillonThies);
@@ -136,10 +148,10 @@ class CarrierePersistenceAdaptersTest {
         @Test
         @DisplayName("filtre par opportunité et texte")
         void filtreParOpportuniteEtTexte() {
-            Candidature c1 = Candidature.soumettre(ouverteDakar.getId().getValue(), Civilite.M, "Ibra Ndiaye",
-                    Email.of("ibra@mail.sn"), Phone.of("+221771111111"), "cv", null, null, true, "T", "E", "rh@e.sn");
-            Candidature c2 = Candidature.soumettre(brouillonThies.getId().getValue(), Civilite.MME, "Awa Fall",
-                    Email.of("awa@mail.sn"), Phone.of("+221772222222"), "cv", null, null, true, "T", "E", "rh@e.sn");
+            Candidature c1 = Candidature.soumettre(new Candidature.SoumissionCommand(ouverteDakar.getId().getValue(), Civilite.M, "Ibra Ndiaye",
+                    Email.of("ibra@mail.sn"), Phone.of("+221771111111"), "cv", null, null, true, "T", "E", "rh@e.sn"));
+            Candidature c2 = Candidature.soumettre(new Candidature.SoumissionCommand(brouillonThies.getId().getValue(), Civilite.MME, "Awa Fall",
+                    Email.of("awa@mail.sn"), Phone.of("+221772222222"), "cv", null, null, true, "T", "E", "rh@e.sn"));
             candidatureAdapter.save(c1);
             candidatureAdapter.save(c2);
             entityManager.flush();

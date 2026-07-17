@@ -48,12 +48,36 @@ class MouvementStockSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        entree = new MouvementStockJpaEntity(UUID.randomUUID(), TypeMouvement.ENTREE_ACHAT.name(),
-                SensMouvement.ENTREE.name(), null, entrepotDestination, null, lotA, medicamentA, BigDecimal.TEN,
-                ilYA10Jours, "REF-1", null, utilisateurA);
-        sortie = new MouvementStockJpaEntity(UUID.randomUUID(), TypeMouvement.SORTIE_STRUCTURE.name(),
-                SensMouvement.SORTIE.name(), entrepotSource, null, null, lotB, medicamentB, BigDecimal.ONE,
-                maintenant, "REF-2", "Livraison", utilisateurB);
+        entree = MouvementStockJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .typeMouvement(TypeMouvement.ENTREE_ACHAT.name())
+            .sens(SensMouvement.ENTREE.name())
+            .entrepotSourceId(null)
+            .entrepotDestinationId(entrepotDestination)
+            .commandeId(null)
+            .lotId(lotA)
+            .medicamentId(medicamentA)
+            .quantite(BigDecimal.TEN)
+            .dateMouvement(ilYA10Jours)
+            .referenceDocument("REF-1")
+            .motif(null)
+            .utilisateurId(utilisateurA)
+            .build();
+        sortie = MouvementStockJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .typeMouvement(TypeMouvement.SORTIE_STRUCTURE.name())
+            .sens(SensMouvement.SORTIE.name())
+            .entrepotSourceId(entrepotSource)
+            .entrepotDestinationId(null)
+            .commandeId(null)
+            .lotId(lotB)
+            .medicamentId(medicamentB)
+            .quantite(BigDecimal.ONE)
+            .dateMouvement(maintenant)
+            .referenceDocument("REF-2")
+            .motif("Livraison")
+            .utilisateurId(utilisateurB)
+            .build();
 
         mouvementStockJpaRepository.saveAll(List.of(entree, sortie));
     }

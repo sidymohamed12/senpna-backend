@@ -17,15 +17,16 @@ public class AppelOffreMapper {
 
     public AppelOffre toDomain(AppelOffreJpaEntity entity, List<LigneAppelOffreJpaEntity> lignesEntity) {
         List<LigneAppelOffre> lignes = lignesEntity.stream().map(this::toDomainLigne).toList();
-        return AppelOffre.reconstruct(
-                AppelOffreId.of(entity.getId()),
-                entity.getReference(),
-                entity.getObjet(),
-                entity.getDateCloture(),
-                entity.getStatut(),
-                lignes,
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return AppelOffre.builder()
+            .id(AppelOffreId.of(entity.getId()))
+            .reference(entity.getReference())
+            .objet(entity.getObjet())
+            .dateCloture(entity.getDateCloture())
+            .statut(entity.getStatut())
+            .lignes(lignes)
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public AppelOffreJpaEntity toEntity(AppelOffre appelOffre) {

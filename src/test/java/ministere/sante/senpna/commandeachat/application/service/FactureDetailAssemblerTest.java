@@ -22,8 +22,8 @@ class FactureDetailAssemblerTest {
     @Test
     @DisplayName("assembler() mappe tous les champs")
     void assembler_mappeTousLesChamps() {
-        Facture facture = Facture.soumettre(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
-                BigDecimal.valueOf(3_500_000), LocalDate.now(), LocalDate.now().plusDays(30), "media-1");
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
+                BigDecimal.valueOf(3_500_000), LocalDate.now(), LocalDate.now().plusDays(30), "media-1"));
 
         FactureDetail detail = sut.assembler(facture);
 

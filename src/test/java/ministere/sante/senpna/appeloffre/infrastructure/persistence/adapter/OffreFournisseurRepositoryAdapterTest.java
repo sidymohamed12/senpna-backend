@@ -43,7 +43,7 @@ class OffreFournisseurRepositoryAdapterTest {
     }
 
     private OffreFournisseur nouvelleOffre(AppelOffreId appelOffreId, FournisseurId fournisseurId) {
-        return OffreFournisseur.soumettre(appelOffreId, fournisseurId, "Commentaire", List.of(ligne()));
+        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(appelOffreId, fournisseurId, "Commentaire", List.of(ligne())));
     }
 
     @Nested

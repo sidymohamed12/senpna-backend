@@ -46,7 +46,7 @@ class GetOffreUseCaseImplTest {
 
     private OffreFournisseur offre(FournisseurId fournisseurId) {
         LigneOffre ligne = LigneOffre.creer(LigneAppelOffreId.generate(), BigDecimal.TEN, 10);
-        return OffreFournisseur.soumettre(AppelOffreId.generate(), fournisseurId, null, List.of(ligne));
+        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), fournisseurId, null, List.of(ligne)));
     }
 
     @Test

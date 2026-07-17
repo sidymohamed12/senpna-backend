@@ -34,10 +34,30 @@ class UserSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        awaActive = new UserJpaEntity(UUID.randomUUID(), "Diallo", "Awa", "awa.diallo@example.com", null,
-                "hash", true, Set.of(roleAdmin), 0, null);
-        soleneInactive = new UserJpaEntity(UUID.randomUUID(), "Sow", "Solene", "solene.sow@example.com", null,
-                "hash", false, Set.of(roleGestionnaire), 0, null);
+        awaActive = UserJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .nom("Diallo")
+            .prenom("Awa")
+            .email("awa.diallo@example.com")
+            .telephone(null)
+            .passwordHash("hash")
+            .actif(true)
+            .roleIds(Set.of(roleAdmin))
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .build();
+        soleneInactive = UserJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .nom("Sow")
+            .prenom("Solene")
+            .email("solene.sow@example.com")
+            .telephone(null)
+            .passwordHash("hash")
+            .actif(false)
+            .roleIds(Set.of(roleGestionnaire))
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .build();
 
         userJpaRepository.saveAll(List.of(awaActive, soleneInactive));
     }

@@ -42,10 +42,10 @@ public class CreateOpportuniteCarriereUseCaseImpl implements CreateOpportuniteCa
         TypeContrat typeContrat = commandMapper.versTypeContrat(command.typeContrat());
         String auteurNom = auteur.getPrenom().getValue() + " " + auteur.getNom().getValue();
 
-        OpportuniteCarriere opportunite = OpportuniteCarriere.creer(
+        OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand(
                 command.titre(), command.nomEntreprise(), command.description(), command.ficheDePosteUrl(),
                 command.lieu(), typeContrat, command.dateDebut(), command.dateLimiteCandidature(),
-                command.auteurId(), auteurNom, command.emailContact());
+                command.auteurId(), auteurNom, command.emailContact()));
 
         OpportuniteCarriere saved = opportuniteCarriereRepositoryPort.save(opportunite);
 

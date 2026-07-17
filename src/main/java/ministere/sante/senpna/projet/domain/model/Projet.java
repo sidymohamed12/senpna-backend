@@ -27,30 +27,111 @@ public class Projet extends AggregateRoot<ProjetId> {
     private String imageUrl;
     private StatutProjet statut;
 
-    private Projet(ProjetId id, CategorieProjet categorie, String nom, String description, List<String> objectifs,
-            List<String> impacts, String imageUrl, StatutProjet statut, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.categorie = validerCategorie(categorie);
-        this.nom = validerNom(nom);
-        this.description = validerDescription(description);
-        this.objectifs = validerListeValeurs(objectifs, "objectif");
-        this.impacts = validerListeValeurs(impacts, "impact");
-        this.imageUrl = validerImageUrl(imageUrl);
-        this.statut = statut != null ? statut : StatutProjet.BROUILLON;
+    private Projet(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.categorie = validerCategorie(builder.categorie);
+        this.nom = validerNom(builder.nom);
+        this.description = validerDescription(builder.description);
+        this.objectifs = validerListeValeurs(builder.objectifs, "objectif");
+        this.impacts = validerListeValeurs(builder.impacts, "impact");
+        this.imageUrl = validerImageUrl(builder.imageUrl);
+        this.statut = builder.statut != null ? builder.statut : StatutProjet.BROUILLON;
     }
 
-    public static Projet reconstruct(ProjetId id, CategorieProjet categorie, String nom, String description,
-            List<String> objectifs, List<String> impacts, String imageUrl, StatutProjet statut, Instant createdAt,
-            Instant updatedAt) {
-        return new Projet(id, categorie, nom, description, objectifs, impacts, imageUrl, statut, createdAt,
-                updatedAt);
+    /** Données nécessaires à la création d'un nouveau projet. */
+    public record CreationCommand(CategorieProjet categorie, String nom, String description,
+            List<String> objectifs, List<String> impacts, String imageUrl) {
     }
 
-    public static Projet creer(CategorieProjet categorie, String nom, String description, List<String> objectifs,
-            List<String> impacts, String imageUrl) {
+    public static Projet creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new Projet(ProjetId.generate(), categorie, nom, description, objectifs, impacts, imageUrl,
-                StatutProjet.BROUILLON, maintenant, maintenant);
+        return builder()
+                .id(ProjetId.generate())
+                .categorie(command.categorie())
+                .nom(command.nom())
+                .description(command.description())
+                .objectifs(command.objectifs())
+                .impacts(command.impacts())
+                .imageUrl(command.imageUrl())
+                .statut(StatutProjet.BROUILLON)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private ProjetId id;
+        private CategorieProjet categorie;
+        private String nom;
+        private String description;
+        private List<String> objectifs;
+        private List<String> impacts;
+        private String imageUrl;
+        private StatutProjet statut;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(ProjetId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder categorie(CategorieProjet categorie) {
+            this.categorie = categorie;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder objectifs(List<String> objectifs) {
+            this.objectifs = objectifs;
+            return this;
+        }
+
+        public Builder impacts(List<String> impacts) {
+            this.impacts = impacts;
+            return this;
+        }
+
+        public Builder imageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+            return this;
+        }
+
+        public Builder statut(StatutProjet statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Projet build() {
+            return new Projet(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

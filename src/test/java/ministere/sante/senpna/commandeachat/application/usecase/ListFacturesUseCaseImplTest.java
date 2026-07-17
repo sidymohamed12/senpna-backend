@@ -47,8 +47,8 @@ class ListFacturesUseCaseImplTest {
     @Test
     @DisplayName("transmet le filtre de statut au port, assemble chaque résultat")
     void transmetFiltreStatut() {
-        Facture facture = Facture.soumettre(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
-                BigDecimal.TEN, LocalDate.now(), null, null);
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
+                BigDecimal.TEN, LocalDate.now(), null, null));
         when(factureRepositoryPort.findAll(eq(StatutFacture.SOUMISE), any()))
                 .thenReturn(PageResult.of(List.of(facture), 0, 20, 1));
         FactureDetail detail = new FactureDetail(facture.getId().getValue(), facture.getCommandeAchatId().getValue(),

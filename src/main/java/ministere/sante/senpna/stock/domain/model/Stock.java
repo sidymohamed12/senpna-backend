@@ -58,25 +58,23 @@ public class Stock extends AggregateRoot<StockId> {
     private BigDecimal quantiteEnCommande;
     private BigDecimal seuilAlerte;
 
-    private Stock(StockId id, EntrepotId entrepotId, LotId lotId, MedicamentId medicamentId,
-            BigDecimal quantiteDisponible, BigDecimal quantiteReservee, BigDecimal quantiteEnCommande,
-            BigDecimal seuilAlerte, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.entrepotId = Objects.requireNonNull(entrepotId, "L'entrepôt est obligatoire");
-        this.lotId = Objects.requireNonNull(lotId, "Le lot est obligatoire");
-        this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
-        this.quantiteDisponible = validerQuantitePositiveOuNulle(quantiteDisponible, "La quantité disponible");
-        this.quantiteReservee = validerQuantitePositiveOuNulle(quantiteReservee, "La quantité réservée");
-        this.quantiteEnCommande = validerQuantitePositiveOuNulle(quantiteEnCommande, "La quantité en commande");
-        this.seuilAlerte = seuilAlerte;
+    private Stock(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.entrepotId = Objects.requireNonNull(builder.entrepotId, "L'entrepôt est obligatoire");
+        this.lotId = Objects.requireNonNull(builder.lotId, "Le lot est obligatoire");
+        this.medicamentId = Objects.requireNonNull(builder.medicamentId, "Le médicament est obligatoire");
+        this.quantiteDisponible = validerQuantitePositiveOuNulle(builder.quantiteDisponible,
+                "La quantité disponible");
+        this.quantiteReservee = validerQuantitePositiveOuNulle(builder.quantiteReservee, "La quantité réservée");
+        this.quantiteEnCommande = validerQuantitePositiveOuNulle(builder.quantiteEnCommande,
+                "La quantité en commande");
+        this.seuilAlerte = builder.seuilAlerte;
         validerReserveeSousDisponible();
     }
 
-    public static Stock reconstruct(StockId id, EntrepotId entrepotId, LotId lotId, MedicamentId medicamentId,
-            BigDecimal quantiteDisponible, BigDecimal quantiteReservee, BigDecimal quantiteEnCommande,
-            BigDecimal seuilAlerte, Instant createdAt, Instant updatedAt) {
-        return new Stock(id, entrepotId, lotId, medicamentId, quantiteDisponible, quantiteReservee,
-                quantiteEnCommande, seuilAlerte, createdAt, updatedAt);
+    /** Données nécessaires à l'ouverture d'une nouvelle ligne de stock. */
+    public record OuvertureCommand(EntrepotId entrepotId, LotId lotId, MedicamentId medicamentId,
+            BigDecimal seuilAlerte) {
     }
 
     /**
@@ -84,11 +82,95 @@ public class Stock extends AggregateRoot<StockId> {
      * (entrepôt, lot) — appelée par {@code EntreeStockUseCase} lorsqu'aucune
      * ligne n'existe encore pour ce lot dans cet entrepôt.
      */
-    public static Stock ouvrir(EntrepotId entrepotId, LotId lotId, MedicamentId medicamentId,
-            BigDecimal seuilAlerte) {
+    public static Stock ouvrir(OuvertureCommand command) {
         Instant maintenant = Instant.now();
-        return new Stock(StockId.generate(), entrepotId, lotId, medicamentId, BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.ZERO, seuilAlerte, maintenant, maintenant);
+        return builder()
+                .id(StockId.generate())
+                .entrepotId(command.entrepotId())
+                .lotId(command.lotId())
+                .medicamentId(command.medicamentId())
+                .quantiteDisponible(BigDecimal.ZERO)
+                .quantiteReservee(BigDecimal.ZERO)
+                .quantiteEnCommande(BigDecimal.ZERO)
+                .seuilAlerte(command.seuilAlerte())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private StockId id;
+        private EntrepotId entrepotId;
+        private LotId lotId;
+        private MedicamentId medicamentId;
+        private BigDecimal quantiteDisponible;
+        private BigDecimal quantiteReservee;
+        private BigDecimal quantiteEnCommande;
+        private BigDecimal seuilAlerte;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(StockId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder entrepotId(EntrepotId entrepotId) {
+            this.entrepotId = entrepotId;
+            return this;
+        }
+
+        public Builder lotId(LotId lotId) {
+            this.lotId = lotId;
+            return this;
+        }
+
+        public Builder medicamentId(MedicamentId medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder quantiteDisponible(BigDecimal quantiteDisponible) {
+            this.quantiteDisponible = quantiteDisponible;
+            return this;
+        }
+
+        public Builder quantiteReservee(BigDecimal quantiteReservee) {
+            this.quantiteReservee = quantiteReservee;
+            return this;
+        }
+
+        public Builder quantiteEnCommande(BigDecimal quantiteEnCommande) {
+            this.quantiteEnCommande = quantiteEnCommande;
+            return this;
+        }
+
+        public Builder seuilAlerte(BigDecimal seuilAlerte) {
+            this.seuilAlerte = seuilAlerte;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Stock build() {
+            return new Stock(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

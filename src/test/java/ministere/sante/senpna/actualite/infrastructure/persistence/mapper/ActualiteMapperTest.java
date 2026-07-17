@@ -29,8 +29,16 @@ class ActualiteMapperTest {
     @Test
     @DisplayName("toDomain() convertit une entité JPA, y compris ses médias, vers le domaine")
     void toDomain_convertitEntiteEtMedias() {
-        ActualiteJpaEntity entity = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Titre",
-                "Description", AUTEUR_ID, "Awa Diop", List.of("sante"), StatutActualite.PUBLIE);
+        ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description("Description")
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Awa Diop")
+            .tags(List.of("sante"))
+            .statut(StatutActualite.PUBLIE)
+            .build();
         Instant maintenant = Instant.now();
         entity.setCreatedAt(maintenant);
         entity.setUpdatedAt(maintenant);
@@ -59,9 +67,19 @@ class ActualiteMapperTest {
     void toNewEntity_construitEntiteAvecMedias() {
         Instant maintenant = Instant.now();
         ActualiteMedia media = ActualiteMedia.reconstruct(UUID.randomUUID(), TypeMedia.VIDEO, "https://cdn/1.mp4", 0);
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.EVENEMENT,
-                "Titre", "Description", List.of(media), AUTEUR_ID, "Awa Diop", List.of("evenement"),
-                StatutActualite.BROUILLON, maintenant, maintenant);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.EVENEMENT)
+            .titre("Titre")
+            .description("Description")
+            .medias(List.of(media))
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Awa Diop")
+            .tags(List.of("evenement"))
+            .statut(StatutActualite.BROUILLON)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteJpaEntity entity = mapper.toNewEntity(actualite);
 
@@ -83,8 +101,16 @@ class ActualiteMapperTest {
     @Test
     @DisplayName("updateEntity() met à jour une entité managée existante en préservant sa collection de médias")
     void updateEntity_metAJourEntiteExistante() {
-        ActualiteJpaEntity entity = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Ancien titre",
-                "Ancienne description", AUTEUR_ID, "Ancien nom", List.of("ancien"), StatutActualite.BROUILLON);
+        ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Ancien titre")
+            .description("Ancienne description")
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Ancien nom")
+            .tags(List.of("ancien"))
+            .statut(StatutActualite.BROUILLON)
+            .build();
         Instant creation = Instant.now().minusSeconds(3600);
         entity.setCreatedAt(creation);
         entity.setUpdatedAt(creation);
@@ -92,9 +118,19 @@ class ActualiteMapperTest {
         Instant maintenant = Instant.now();
         ActualiteMedia nouveauMedia = ActualiteMedia.reconstruct(UUID.randomUUID(), TypeMedia.IMAGE,
                 "https://cdn/nouveau.png", 0);
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.PARTENARIAT,
-                "Nouveau titre", "Nouvelle description", List.of(nouveauMedia), AUTEUR_ID, "Nouveau nom",
-                List.of("nouveau"), StatutActualite.PUBLIE, creation, maintenant);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.PARTENARIAT)
+            .titre("Nouveau titre")
+            .description("Nouvelle description")
+            .medias(List.of(nouveauMedia))
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Nouveau nom")
+            .tags(List.of("nouveau"))
+            .statut(StatutActualite.PUBLIE)
+            .createdAt(creation)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteJpaEntity result = mapper.updateEntity(entity, actualite);
 
@@ -115,8 +151,19 @@ class ActualiteMapperTest {
     @DisplayName("toNewEntity() sans média produit une entité sans média")
     void toNewEntity_sansMedia() {
         Instant maintenant = Instant.now();
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.AUTRE, "Titre",
-                null, List.of(), AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON, maintenant, maintenant);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.AUTRE)
+            .titre("Titre")
+            .description(null)
+            .medias(List.of())
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteJpaEntity entity = mapper.toNewEntity(actualite);
 

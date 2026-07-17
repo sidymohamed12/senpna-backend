@@ -47,17 +47,85 @@ public class ConditionnementJpaEntity extends BaseJpaEntity {
     @Column(name = "actif", nullable = false)
     private boolean actif;
 
-    public ConditionnementJpaEntity(UUID id, UUID medicamentId, String nom, int niveau,
-            BigDecimal quantiteUniteBase, boolean estUniteBase, BigDecimal prixAchat, BigDecimal prixVente,
-            boolean actif) {
-        super(id);
-        this.medicamentId = medicamentId;
-        this.nom = nom;
-        this.niveau = niveau;
-        this.quantiteUniteBase = quantiteUniteBase;
-        this.estUniteBase = estUniteBase;
-        this.prixAchat = prixAchat;
-        this.prixVente = prixVente;
-        this.actif = actif;
+    private ConditionnementJpaEntity(Builder builder) {
+        super(builder.id);
+        this.medicamentId = builder.medicamentId;
+        this.nom = builder.nom;
+        this.niveau = builder.niveau;
+        this.quantiteUniteBase = builder.quantiteUniteBase;
+        this.estUniteBase = builder.estUniteBase;
+        this.prixAchat = builder.prixAchat;
+        this.prixVente = builder.prixVente;
+        this.actif = builder.actif;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private UUID medicamentId;
+        private String nom;
+        private int niveau;
+        private BigDecimal quantiteUniteBase;
+        private boolean estUniteBase;
+        private BigDecimal prixAchat;
+        private BigDecimal prixVente;
+        private boolean actif;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder medicamentId(UUID medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder niveau(int niveau) {
+            this.niveau = niveau;
+            return this;
+        }
+
+        public Builder quantiteUniteBase(BigDecimal quantiteUniteBase) {
+            this.quantiteUniteBase = quantiteUniteBase;
+            return this;
+        }
+
+        public Builder estUniteBase(boolean estUniteBase) {
+            this.estUniteBase = estUniteBase;
+            return this;
+        }
+
+        public Builder prixAchat(BigDecimal prixAchat) {
+            this.prixAchat = prixAchat;
+            return this;
+        }
+
+        public Builder prixVente(BigDecimal prixVente) {
+            this.prixVente = prixVente;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public ConditionnementJpaEntity build() {
+            return new ConditionnementJpaEntity(this);
+        }
+    }
+
 }

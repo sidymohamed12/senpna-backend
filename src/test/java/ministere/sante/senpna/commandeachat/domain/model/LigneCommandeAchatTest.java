@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LigneCommandeAchatTest {
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
-                BigDecimal.valueOf(200_000));
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+                BigDecimal.valueOf(200_000)));
     }
 
     @Nested
@@ -43,8 +43,8 @@ class LigneCommandeAchatTest {
             var medicamentId = MedicamentId.generate();
             var conditionnementId = ConditionnementId.generate();
 
-            assertThatThrownBy(() -> LigneCommandeAchat.creer(medicamentId, conditionnementId,
-                    BigDecimal.ZERO, BigDecimal.TEN)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
+                    BigDecimal.ZERO, BigDecimal.TEN))).isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
@@ -54,8 +54,8 @@ class LigneCommandeAchatTest {
             var medicamentId = MedicamentId.generate();
             var conditionnementId = ConditionnementId.generate();
 
-            assertThatThrownBy(() -> LigneCommandeAchat.creer(medicamentId, conditionnementId,
-                    BigDecimal.TEN, BigDecimal.ZERO)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
+                    BigDecimal.TEN, BigDecimal.ZERO))).isInstanceOf(IllegalArgumentException.class);
         }
     }
 

@@ -56,11 +56,28 @@ class StockRepositoryAdapterUnitTest {
     UUID entrepotId = UUID.randomUUID();
     UUID lotId = UUID.randomUUID();
     UUID medicamentId = UUID.randomUUID();
-    Stock stock = Stock.reconstruct(StockId.of(id), EntrepotId.of(entrepotId), LotId.of(lotId),
-            MedicamentId.of(medicamentId), new BigDecimal("100.0000"), BigDecimal.ZERO, BigDecimal.ZERO,
-            new BigDecimal("10.0000"), java.time.Instant.now(), java.time.Instant.now());
-    StockJpaEntity entity = new StockJpaEntity(id, entrepotId, lotId, medicamentId, new BigDecimal("100.0000"),
-            BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("10.0000"));
+    Stock stock = Stock.builder()
+        .id(StockId.of(id))
+        .entrepotId(EntrepotId.of(entrepotId))
+        .lotId(LotId.of(lotId))
+        .medicamentId(MedicamentId.of(medicamentId))
+        .quantiteDisponible(new BigDecimal("100.0000"))
+        .quantiteReservee(BigDecimal.ZERO)
+        .quantiteEnCommande(BigDecimal.ZERO)
+        .seuilAlerte(new BigDecimal("10.0000"))
+        .createdAt(java.time.Instant.now())
+        .updatedAt(java.time.Instant.now())
+        .build();
+    StockJpaEntity entity = StockJpaEntity.builder()
+        .id(id)
+        .entrepotId(entrepotId)
+        .lotId(lotId)
+        .medicamentId(medicamentId)
+        .quantiteDisponible(new BigDecimal("100.0000"))
+        .quantiteReservee(BigDecimal.ZERO)
+        .quantiteEnCommande(BigDecimal.ZERO)
+        .seuilAlerte(new BigDecimal("10.0000"))
+        .build();
 
     @BeforeEach
     void setUp() {

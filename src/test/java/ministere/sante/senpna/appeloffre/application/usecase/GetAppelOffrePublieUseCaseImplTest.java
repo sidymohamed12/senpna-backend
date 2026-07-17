@@ -44,7 +44,7 @@ class GetAppelOffrePublieUseCaseImplTest {
     @DisplayName("appel d'offres en BROUILLON → AppelOffreIntrouvableException (masqué au fournisseur)")
     void brouillon_masqueAuFournisseur() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
 
         var query = new GetAppelOffreQuery(appelOffre.getId().getValue());
@@ -55,7 +55,7 @@ class GetAppelOffrePublieUseCaseImplTest {
     @DisplayName("appel d'offres PUBLIE → visible")
     void publie_visible() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         appelOffre.publier();
         when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
 

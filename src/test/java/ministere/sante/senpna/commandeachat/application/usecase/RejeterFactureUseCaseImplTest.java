@@ -42,8 +42,8 @@ class RejeterFactureUseCaseImplTest {
     @Test
     @DisplayName("cas nominal → REJETEE avec motif enregistré")
     void casNominal_passeRejetee() {
-        Facture facture = Facture.soumettre(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
-                BigDecimal.TEN, LocalDate.now(), null, null);
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
+                BigDecimal.TEN, LocalDate.now(), null, null));
         when(factureRepositoryPort.findById(facture.getId())).thenReturn(Optional.of(facture));
         when(factureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 

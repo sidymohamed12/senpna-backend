@@ -76,8 +76,8 @@ class MedicamentPersistenceAdaptersTest {
         familleAdapter.save(famille);
         formeAdapter.save(forme);
 
-        medicament = Medicament.creer("MED-1", "Zolpidem", "Zolpidem", "10mg", forme.getId(), famille.getId(),
-                VoieAdministration.ORALE, null, null, null, false, "Sanofi", null, null);
+        medicament = Medicament.creer(new Medicament.CreationCommand("MED-1", "Zolpidem", "Zolpidem", "10mg", forme.getId(), famille.getId(),
+                VoieAdministration.ORALE, null, null, null, false, "Sanofi", null, null));
         medicamentAdapter.save(medicament);
 
         entityManager.flush();
@@ -177,8 +177,8 @@ class MedicamentPersistenceAdaptersTest {
         @Test
         @DisplayName("search() filtre par médicament, existsUniteBaseByMedicamentId() détecte l'unité de base")
         void search_etExistsUniteBase() {
-            Conditionnement c = Conditionnement.creer(medicament.getId(), "Boite de 10", 1, BigDecimal.ONE, true,
-                    BigDecimal.TEN, new BigDecimal("15"));
+            Conditionnement c = Conditionnement.creer(new Conditionnement.CreationCommand(medicament.getId(), "Boite de 10", 1, BigDecimal.ONE, true,
+                    BigDecimal.TEN, new BigDecimal("15")));
             conditionnementAdapter.save(c);
             entityManager.flush();
             entityManager.clear();
@@ -194,8 +194,8 @@ class MedicamentPersistenceAdaptersTest {
         @Test
         @DisplayName("findAllVendablesByMedicamentIdIn() (query) renvoie une projection par conditionnement actif")
         void queryAdapter_findAllVendables() {
-            Conditionnement c = Conditionnement.creer(medicament.getId(), "Boite de 10", 1, BigDecimal.ONE, true,
-                    BigDecimal.TEN, new BigDecimal("15"));
+            Conditionnement c = Conditionnement.creer(new Conditionnement.CreationCommand(medicament.getId(), "Boite de 10", 1, BigDecimal.ONE, true,
+                    BigDecimal.TEN, new BigDecimal("15")));
             conditionnementAdapter.save(c);
             entityManager.flush();
             entityManager.clear();

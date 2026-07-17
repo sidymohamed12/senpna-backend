@@ -16,8 +16,8 @@ class FournisseurDetailAssemblerTest {
     @Test
     @DisplayName("reporte fidèlement chaque champ de l'agrégat")
     void reporteChaqueChamp() {
-        Fournisseur fournisseur = Fournisseur.creer("Pharma Plus", "Dakar", "+221771234567",
-                "contact@pharmaplus.sn", "Awa Fall");
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Pharma Plus", "Dakar", "+221771234567",
+                "contact@pharmaplus.sn", "Awa Fall"));
 
         FournisseurDetail detail = sut.assembler(fournisseur);
 

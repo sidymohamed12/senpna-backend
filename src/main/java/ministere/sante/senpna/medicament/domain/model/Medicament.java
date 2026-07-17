@@ -51,50 +51,180 @@ public class Medicament extends AggregateRoot<MedicamentId> {
     private Integer stockMaximum;
     private boolean actif;
 
-    private Medicament(MedicamentId id, String code, String nomCommercial, String dci, String dosage,
-            FormeId formeId, FamilleId familleId, VoieAdministration voieAdministration,
-            TemperatureConservation temperatureConservation, String programmeSante,
-            Integer delaiApprovisionnementJours, boolean necessiteOrdonnance, String fabricant,
-            Integer stockMinimum, Integer stockMaximum, boolean actif, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.code = validerCode(code);
-        this.nomCommercial = validerNomCommercial(nomCommercial);
-        this.dci = validerDci(dci);
-        this.dosage = validerDosage(dosage);
-        this.formeId = Objects.requireNonNull(formeId, "La forme pharmaceutique est obligatoire");
-        this.familleId = Objects.requireNonNull(familleId, "La famille thérapeutique est obligatoire");
-        this.voieAdministration = voieAdministration;
-        this.temperatureConservation = temperatureConservation != null ? temperatureConservation
+    private Medicament(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.code = validerCode(builder.code);
+        this.nomCommercial = validerNomCommercial(builder.nomCommercial);
+        this.dci = validerDci(builder.dci);
+        this.dosage = validerDosage(builder.dosage);
+        this.formeId = Objects.requireNonNull(builder.formeId, "La forme pharmaceutique est obligatoire");
+        this.familleId = Objects.requireNonNull(builder.familleId, "La famille thérapeutique est obligatoire");
+        this.voieAdministration = builder.voieAdministration;
+        this.temperatureConservation = builder.temperatureConservation != null ? builder.temperatureConservation
                 : TemperatureConservation.AMBIANTE;
-        this.programmeSante = validerProgrammeSante(programmeSante);
-        this.delaiApprovisionnementJours = validerDelai(delaiApprovisionnementJours);
-        this.necessiteOrdonnance = necessiteOrdonnance;
-        this.fabricant = validerFabricant(fabricant);
-        validerSeuils(stockMinimum, stockMaximum);
-        this.stockMinimum = stockMinimum;
-        this.stockMaximum = stockMaximum;
-        this.actif = actif;
+        this.programmeSante = validerProgrammeSante(builder.programmeSante);
+        this.delaiApprovisionnementJours = validerDelai(builder.delaiApprovisionnementJours);
+        this.necessiteOrdonnance = builder.necessiteOrdonnance;
+        this.fabricant = validerFabricant(builder.fabricant);
+        validerSeuils(builder.stockMinimum, builder.stockMaximum);
+        this.stockMinimum = builder.stockMinimum;
+        this.stockMaximum = builder.stockMaximum;
+        this.actif = builder.actif;
     }
 
-    public static Medicament reconstruct(MedicamentId id, String code, String nomCommercial, String dci,
-            String dosage, FormeId formeId, FamilleId familleId, VoieAdministration voieAdministration,
-            TemperatureConservation temperatureConservation, String programmeSante,
-            Integer delaiApprovisionnementJours, boolean necessiteOrdonnance, String fabricant,
-            Integer stockMinimum, Integer stockMaximum, boolean actif, Instant createdAt, Instant updatedAt) {
-        return new Medicament(id, code, nomCommercial, dci, dosage, formeId, familleId, voieAdministration,
-                temperatureConservation, programmeSante, delaiApprovisionnementJours, necessiteOrdonnance, fabricant,
-                stockMinimum, stockMaximum, actif, createdAt, updatedAt);
-    }
-
-    public static Medicament creer(String code, String nomCommercial, String dci, String dosage, FormeId formeId,
+    /** Données nécessaires à la création d'un nouveau médicament. */
+    public record CreationCommand(String code, String nomCommercial, String dci, String dosage, FormeId formeId,
             FamilleId familleId, VoieAdministration voieAdministration,
             TemperatureConservation temperatureConservation, String programmeSante,
             Integer delaiApprovisionnementJours, boolean necessiteOrdonnance, String fabricant,
             Integer stockMinimum, Integer stockMaximum) {
+    }
+
+    public static Medicament creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new Medicament(MedicamentId.generate(), code, nomCommercial, dci, dosage, formeId, familleId,
-                voieAdministration, temperatureConservation, programmeSante, delaiApprovisionnementJours,
-                necessiteOrdonnance, fabricant, stockMinimum, stockMaximum, true, maintenant, maintenant);
+        return builder()
+                .id(MedicamentId.generate())
+                .code(command.code())
+                .nomCommercial(command.nomCommercial())
+                .dci(command.dci())
+                .dosage(command.dosage())
+                .formeId(command.formeId())
+                .familleId(command.familleId())
+                .voieAdministration(command.voieAdministration())
+                .temperatureConservation(command.temperatureConservation())
+                .programmeSante(command.programmeSante())
+                .delaiApprovisionnementJours(command.delaiApprovisionnementJours())
+                .necessiteOrdonnance(command.necessiteOrdonnance())
+                .fabricant(command.fabricant())
+                .stockMinimum(command.stockMinimum())
+                .stockMaximum(command.stockMaximum())
+                .actif(true)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private MedicamentId id;
+        private String code;
+        private String nomCommercial;
+        private String dci;
+        private String dosage;
+        private FormeId formeId;
+        private FamilleId familleId;
+        private VoieAdministration voieAdministration;
+        private TemperatureConservation temperatureConservation;
+        private String programmeSante;
+        private Integer delaiApprovisionnementJours;
+        private boolean necessiteOrdonnance;
+        private String fabricant;
+        private Integer stockMinimum;
+        private Integer stockMaximum;
+        private boolean actif;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(MedicamentId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder code(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder nomCommercial(String nomCommercial) {
+            this.nomCommercial = nomCommercial;
+            return this;
+        }
+
+        public Builder dci(String dci) {
+            this.dci = dci;
+            return this;
+        }
+
+        public Builder dosage(String dosage) {
+            this.dosage = dosage;
+            return this;
+        }
+
+        public Builder formeId(FormeId formeId) {
+            this.formeId = formeId;
+            return this;
+        }
+
+        public Builder familleId(FamilleId familleId) {
+            this.familleId = familleId;
+            return this;
+        }
+
+        public Builder voieAdministration(VoieAdministration voieAdministration) {
+            this.voieAdministration = voieAdministration;
+            return this;
+        }
+
+        public Builder temperatureConservation(TemperatureConservation temperatureConservation) {
+            this.temperatureConservation = temperatureConservation;
+            return this;
+        }
+
+        public Builder programmeSante(String programmeSante) {
+            this.programmeSante = programmeSante;
+            return this;
+        }
+
+        public Builder delaiApprovisionnementJours(Integer delaiApprovisionnementJours) {
+            this.delaiApprovisionnementJours = delaiApprovisionnementJours;
+            return this;
+        }
+
+        public Builder necessiteOrdonnance(boolean necessiteOrdonnance) {
+            this.necessiteOrdonnance = necessiteOrdonnance;
+            return this;
+        }
+
+        public Builder fabricant(String fabricant) {
+            this.fabricant = fabricant;
+            return this;
+        }
+
+        public Builder stockMinimum(Integer stockMinimum) {
+            this.stockMinimum = stockMinimum;
+            return this;
+        }
+
+        public Builder stockMaximum(Integer stockMaximum) {
+            this.stockMaximum = stockMaximum;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Medicament build() {
+            return new Medicament(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

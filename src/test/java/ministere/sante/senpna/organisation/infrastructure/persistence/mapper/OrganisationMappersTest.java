@@ -42,7 +42,7 @@ class OrganisationMappersTest {
     @DisplayName("EntrepotMapper : aller-retour préserve l'état, y compris la région")
     void entrepotMapper_allerRetourPreserveEtatAvecRegion() {
         RegionId regionId = RegionId.generate();
-        Entrepot original = Entrepot.creerPra("PRA-THIES", "PRA Thies", regionId, "Adresse", "771234567");
+        Entrepot original = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-THIES", "PRA Thies", regionId, "Adresse", "771234567"));
 
         EntrepotJpaEntity entity = entrepotMapper.toEntity(original);
         Entrepot restaure = entrepotMapper.toDomain(entity);
@@ -55,8 +55,17 @@ class OrganisationMappersTest {
     @Test
     @DisplayName("EntrepotMapper : regionId absent (PNA central) → toEntity()/toDomain() gèrent le null")
     void entrepotMapper_regionIdAbsent_gereLeNull() {
-        EntrepotJpaEntity entity = new EntrepotJpaEntity(UUID.randomUUID(), "PNA-CENTRAL", "PNA Central",
-                TypeEntrepot.PNA_CENTRAL, null, null, null, null, true);
+        EntrepotJpaEntity entity = EntrepotJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .code("PNA-CENTRAL")
+            .nom("PNA Central")
+            .type(TypeEntrepot.PNA_CENTRAL)
+            .regionId(null)
+            .adresse(null)
+            .telephone(null)
+            .responsableUserId(null)
+            .actif(true)
+            .build();
 
         Instant now = Instant.now();
         entity.setCreatedAt(now);
@@ -71,9 +80,9 @@ class OrganisationMappersTest {
     @Test
     @DisplayName("StructureSanitaireMapper : aller-retour préserve l'état")
     void structureSanitaireMapper_allerRetourPreserveEtat() {
-        StructureSanitaire original = StructureSanitaire.creer("PS-FANN", "Poste de sante Fann",
+        StructureSanitaire original = StructureSanitaire.creer(new StructureSanitaire.CreationCommand("PS-FANN", "Poste de sante Fann",
                 TypeStructureSanitaire.POSTE_SANTE, RegionId.generate(), "District Nord", "Adresse",
-                "771234567", "ps@sante.sn", "Ndiaye", "Fatou");
+                "771234567", "ps@sante.sn", "Ndiaye", "Fatou"));
 
         StructureSanitaireJpaEntity entity = structureSanitaireMapper.toEntity(original);
         StructureSanitaire restaure = structureSanitaireMapper.toDomain(entity);

@@ -26,8 +26,8 @@ class ActualiteTest {
         @Test
         @DisplayName("crée une actualité en BROUILLON par défaut")
         void creer_succes_statutBrouillon() {
-            Actualite actualite = Actualite.creer(CategorieActualite.VIE_ASSOCIATIVE, "Journée de sensibilisation",
-                    "Une belle journée", List.of(), AUTEUR_ID, "Awa Diop", List.of("sante", "senegal"));
+            Actualite actualite = Actualite.creer(new Actualite.CreationCommand(CategorieActualite.VIE_ASSOCIATIVE, "Journée de sensibilisation",
+                    "Une belle journée", List.of(), AUTEUR_ID, "Awa Diop", List.of("sante", "senegal")));
 
             assertThat(actualite.getStatut()).isEqualTo(StatutActualite.BROUILLON);
             assertThat(actualite.getTitre()).isEqualTo("Journée de sensibilisation");
@@ -39,8 +39,8 @@ class ActualiteTest {
         @Test
         @DisplayName("titre vide → IllegalArgumentException")
         void creer_titreVide_leveException() {
-            assertThatThrownBy(() -> Actualite.creer(CategorieActualite.PROJET, "   ", null, List.of(), AUTEUR_ID,
-                    "Awa Diop", List.of()))
+            assertThatThrownBy(() -> Actualite.creer(new Actualite.CreationCommand(CategorieActualite.PROJET, "   ", null, List.of(), AUTEUR_ID,
+                    "Awa Diop", List.of())))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -49,16 +49,16 @@ class ActualiteTest {
         void creer_descriptionTropLongue_leveException() {
             String descriptionTropLongue = "a".repeat(701);
 
-            assertThatThrownBy(() -> Actualite.creer(CategorieActualite.PROJET, "Titre", descriptionTropLongue,
-                    List.of(), AUTEUR_ID, "Awa Diop", List.of()))
+            assertThatThrownBy(() -> Actualite.creer(new Actualite.CreationCommand(CategorieActualite.PROJET, "Titre", descriptionTropLongue,
+                    List.of(), AUTEUR_ID, "Awa Diop", List.of())))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("catégorie null → NullPointerException")
         void creer_categorieNulle_leveException() {
-            assertThatThrownBy(() -> Actualite.creer(null, "Titre", null, List.of(), AUTEUR_ID, "Awa Diop",
-                    List.of()))
+            assertThatThrownBy(() -> Actualite.creer(new Actualite.CreationCommand(null, "Titre", null, List.of(), AUTEUR_ID, "Awa Diop",
+                    List.of())))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -69,8 +69,8 @@ class ActualiteTest {
                     .mapToObj(i -> ActualiteMedia.creer(TypeMedia.IMAGE, "https://cdn.senpna.sn/img-" + i + ".jpg", i))
                     .toList();
 
-            assertThatThrownBy(() -> Actualite.creer(CategorieActualite.PROJET, "Titre", null, medias, AUTEUR_ID,
-                    "Awa Diop", List.of()))
+            assertThatThrownBy(() -> Actualite.creer(new Actualite.CreationCommand(CategorieActualite.PROJET, "Titre", null, medias, AUTEUR_ID,
+                    "Awa Diop", List.of())))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -157,7 +157,7 @@ class ActualiteTest {
     }
 
     private Actualite actualiteBrouillon() {
-        return Actualite.creer(CategorieActualite.VIE_ASSOCIATIVE, "Titre", "Description", List.of(), AUTEUR_ID,
-                "Awa Diop", List.of());
+        return Actualite.creer(new Actualite.CreationCommand(CategorieActualite.VIE_ASSOCIATIVE, "Titre", "Description", List.of(), AUTEUR_ID,
+                "Awa Diop", List.of()));
     }
 }

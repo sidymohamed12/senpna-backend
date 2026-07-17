@@ -29,8 +29,8 @@ class OffreFournisseurMapperTest {
     }
 
     private OffreFournisseur offre() {
-        return OffreFournisseur.soumettre(AppelOffreId.generate(), FournisseurId.generate(), "Commentaire",
-                List.of(ligne()));
+        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), FournisseurId.generate(), "Commentaire",
+                List.of(ligne())));
     }
 
     @Test

@@ -55,8 +55,8 @@ class MedicamentMappersTest {
     @Test
     @DisplayName("MedicamentMapper : aller-retour préserve l'état")
     void medicamentMapper_allerRetour() {
-        Medicament original = Medicament.creer("MED-1", "Zolpidem", "Zolpidem", "10mg", FormeId.generate(),
-                FamilleId.generate(), VoieAdministration.ORALE, null, null, null, true, "Sanofi", null, null);
+        Medicament original = Medicament.creer(new Medicament.CreationCommand("MED-1", "Zolpidem", "Zolpidem", "10mg", FormeId.generate(),
+                FamilleId.generate(), VoieAdministration.ORALE, null, null, null, true, "Sanofi", null, null));
 
         MedicamentJpaEntity entity = medicamentMapper.toEntity(original);
         Medicament restaure = medicamentMapper.toDomain(entity);
@@ -70,8 +70,8 @@ class MedicamentMappersTest {
     @Test
     @DisplayName("ConditionnementMapper : aller-retour préserve l'état")
     void conditionnementMapper_allerRetour() {
-        Conditionnement original = Conditionnement.creer(MedicamentId.generate(), "Boite de 10", 1,
-                BigDecimal.ONE, true, BigDecimal.TEN, new BigDecimal("15"));
+        Conditionnement original = Conditionnement.creer(new Conditionnement.CreationCommand(MedicamentId.generate(), "Boite de 10", 1,
+                BigDecimal.ONE, true, BigDecimal.TEN, new BigDecimal("15")));
 
         ConditionnementJpaEntity entity = conditionnementMapper.toEntity(original);
         Conditionnement restaure = conditionnementMapper.toDomain(entity);

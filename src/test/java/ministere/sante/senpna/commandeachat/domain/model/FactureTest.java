@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class FactureTest {
 
     private Facture facture(FournisseurId fournisseurId) {
-        return Facture.soumettre(CommandeAchatId.generate(), fournisseurId, "FAC-2026-0001",
-                BigDecimal.valueOf(3_500_000), LocalDate.now(), LocalDate.now().plusDays(30), "media-1");
+        return Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), fournisseurId, "FAC-2026-0001",
+                BigDecimal.valueOf(3_500_000), LocalDate.now(), LocalDate.now().plusDays(30), "media-1"));
     }
 
     @Nested
@@ -46,8 +46,8 @@ class FactureTest {
             var commandeAchatId = CommandeAchatId.generate();
             var now = LocalDate.now();
 
-            assertThatThrownBy(() -> Facture.soumettre(commandeAchatId, fournisseurId,
-                    "FAC-1", BigDecimal.ZERO, now, null, null))
+            assertThatThrownBy(() -> Facture.soumettre(new Facture.SoumissionCommand(commandeAchatId, fournisseurId,
+                    "FAC-1", BigDecimal.ZERO, now, null, null)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -59,8 +59,8 @@ class FactureTest {
             var commandeAchatId = CommandeAchatId.generate();
             var now = LocalDate.now();
 
-            assertThatThrownBy(() -> Facture.soumettre(commandeAchatId, fournisseurId, "   ",
-                    BigDecimal.TEN, now, null, null)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> Facture.soumettre(new Facture.SoumissionCommand(commandeAchatId, fournisseurId, "   ",
+                    BigDecimal.TEN, now, null, null))).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -151,9 +151,20 @@ class FactureTest {
             Instant maintenant = Instant.now();
             FactureId id = FactureId.generate();
 
-            Facture facture = Facture.reconstruct(id, CommandeAchatId.generate(), FournisseurId.generate(),
-                    "FAC-2026-0099", BigDecimal.TEN, LocalDate.now(), null, null, StatutFacture.PAYEE, null,
-                    maintenant, maintenant);
+            Facture facture = Facture.builder()
+                .id(id)
+                .commandeAchatId(CommandeAchatId.generate())
+                .fournisseurId(FournisseurId.generate())
+                .numeroFacture("FAC-2026-0099")
+                .montant(BigDecimal.TEN)
+                .dateEmission(LocalDate.now())
+                .dateEcheance(null)
+                .pieceJointeMediaId(null)
+                .statut(StatutFacture.PAYEE)
+                .motifRejet(null)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
 
             assertThat(facture.getId()).isEqualTo(id);
             assertThat(facture.getStatut()).isEqualTo(StatutFacture.PAYEE);

@@ -35,8 +35,8 @@ public class CreateAppelOffreUseCaseImpl implements CreateAppelOffreUseCase {
 
         java.util.List<LigneAppelOffre> lignes = command.lignes().stream().map(this::toLigne).toList();
 
-        AppelOffre appelOffre = AppelOffre.creer(command.reference(), command.objet(), command.dateCloture(),
-                lignes);
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand(command.reference(), command.objet(), command.dateCloture(),
+                lignes));
 
         AppelOffre saved = appelOffreRepositoryPort.save(appelOffre);
         return appelOffreDetailAssembler.assembler(saved);

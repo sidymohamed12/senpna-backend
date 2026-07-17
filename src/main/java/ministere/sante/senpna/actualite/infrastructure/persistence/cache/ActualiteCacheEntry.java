@@ -66,17 +66,18 @@ public record ActualiteCacheEntry(
     }
 
     public Actualite toDomain() {
-        return Actualite.reconstruct(
-                ActualiteId.of(id),
-                categorie,
-                titre,
-                description,
-                medias.stream().map(MediaEntry::toDomain).toList(),
-                auteurId,
-                auteurNom,
-                tags,
-                statut,
-                createdAt,
-                updatedAt);
+        return Actualite.builder()
+            .id(ActualiteId.of(id))
+            .categorie(categorie)
+            .titre(titre)
+            .description(description)
+            .medias(medias.stream().map(MediaEntry::toDomain).toList())
+            .auteurId(auteurId)
+            .auteurNom(auteurNom)
+            .tags(tags)
+            .statut(statut)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

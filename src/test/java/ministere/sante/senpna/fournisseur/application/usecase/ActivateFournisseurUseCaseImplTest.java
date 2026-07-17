@@ -48,7 +48,7 @@ class ActivateFournisseurUseCaseImplTest {
     @DisplayName("active le fournisseur, sauvegarde et recharge le cache")
     void active_sauvegardeEtRechargeCache() {
         UUID id = UUID.randomUUID();
-        Fournisseur fournisseur = Fournisseur.creer("Nom", null, null, null, null);
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
         fournisseur.desactiver();
         when(fournisseurRepositoryPort.findById(FournisseurId.of(id))).thenReturn(Optional.of(fournisseur));
         when(fournisseurRepositoryPort.save(fournisseur)).thenReturn(fournisseur);

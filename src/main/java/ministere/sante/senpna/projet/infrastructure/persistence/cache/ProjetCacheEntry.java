@@ -43,16 +43,17 @@ public record ProjetCacheEntry(
     }
 
     public Projet toDomain() {
-        return Projet.reconstruct(
-                ProjetId.of(id),
-                categorie,
-                nom,
-                description,
-                objectifs,
-                impacts,
-                imageUrl,
-                statut,
-                createdAt,
-                updatedAt);
+        return Projet.builder()
+            .id(ProjetId.of(id))
+            .categorie(categorie)
+            .nom(nom)
+            .description(description)
+            .objectifs(objectifs)
+            .impacts(impacts)
+            .imageUrl(imageUrl)
+            .statut(statut)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

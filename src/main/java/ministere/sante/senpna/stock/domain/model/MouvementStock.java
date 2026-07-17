@@ -50,33 +50,28 @@ public class MouvementStock extends AggregateRoot<MouvementStockId> {
     private String motif;
     private UUID utilisateurId;
 
-    private MouvementStock(MouvementStockId id, TypeMouvement typeMouvement, SensMouvement sens,
-            EntrepotId entrepotSourceId, EntrepotId entrepotDestinationId, UUID commandeId, LotId lotId,
-            MedicamentId medicamentId, BigDecimal quantite, Instant dateMouvement, String referenceDocument,
-            String motif, UUID utilisateurId, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.typeMouvement = Objects.requireNonNull(typeMouvement, "Le type de mouvement est obligatoire");
-        this.sens = Objects.requireNonNull(sens, "Le sens du mouvement est obligatoire");
-        this.lotId = Objects.requireNonNull(lotId, "Le lot est obligatoire");
-        this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
-        this.quantite = validerQuantite(quantite);
-        this.utilisateurId = Objects.requireNonNull(utilisateurId, "L'utilisateur responsable est obligatoire");
-        this.dateMouvement = dateMouvement != null ? dateMouvement : Instant.now();
-        this.entrepotSourceId = entrepotSourceId;
-        this.entrepotDestinationId = entrepotDestinationId;
-        this.commandeId = commandeId;
-        this.referenceDocument = validerLongueur(referenceDocument, REFERENCE_MAX_LENGTH, "La référence document");
-        this.motif = validerLongueur(motif, MOTIF_MAX_LENGTH, "Le motif");
+    private MouvementStock(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.typeMouvement = Objects.requireNonNull(builder.typeMouvement, "Le type de mouvement est obligatoire");
+        this.sens = Objects.requireNonNull(builder.sens, "Le sens du mouvement est obligatoire");
+        this.lotId = Objects.requireNonNull(builder.lotId, "Le lot est obligatoire");
+        this.medicamentId = Objects.requireNonNull(builder.medicamentId, "Le médicament est obligatoire");
+        this.quantite = validerQuantite(builder.quantite);
+        this.utilisateurId = Objects.requireNonNull(builder.utilisateurId, "L'utilisateur responsable est obligatoire");
+        this.dateMouvement = builder.dateMouvement != null ? builder.dateMouvement : Instant.now();
+        this.entrepotSourceId = builder.entrepotSourceId;
+        this.entrepotDestinationId = builder.entrepotDestinationId;
+        this.commandeId = builder.commandeId;
+        this.referenceDocument = validerLongueur(builder.referenceDocument, REFERENCE_MAX_LENGTH,
+                "La référence document");
+        this.motif = validerLongueur(builder.motif, MOTIF_MAX_LENGTH, "Le motif");
         validerEntrepots();
     }
 
-    public static MouvementStock reconstruct(MouvementStockId id, TypeMouvement typeMouvement, SensMouvement sens,
-            EntrepotId entrepotSourceId, EntrepotId entrepotDestinationId, UUID commandeId, LotId lotId,
-            MedicamentId medicamentId, BigDecimal quantite, Instant dateMouvement, String referenceDocument,
-            String motif, UUID utilisateurId, Instant createdAt, Instant updatedAt) {
-        return new MouvementStock(id, typeMouvement, sens, entrepotSourceId, entrepotDestinationId, commandeId,
-                lotId, medicamentId, quantite, dateMouvement, referenceDocument, motif, utilisateurId, createdAt,
-                updatedAt);
+    /** Données nécessaires à l'enregistrement d'un nouveau mouvement de stock. */
+    public record CreationCommand(TypeMouvement typeMouvement, SensMouvement sens, EntrepotId entrepotSourceId,
+            EntrepotId entrepotDestinationId, UUID commandeId, LotId lotId, MedicamentId medicamentId,
+            BigDecimal quantite, String referenceDocument, String motif, UUID utilisateurId) {
     }
 
     /**
@@ -91,13 +86,130 @@ public class MouvementStock extends AggregateRoot<MouvementStockId> {
      * exige à la fois un entrepôt source et un entrepôt destination.</li>
      * </ul>
      */
-    public static MouvementStock creer(TypeMouvement typeMouvement, SensMouvement sens, EntrepotId entrepotSourceId,
-            EntrepotId entrepotDestinationId, UUID commandeId, LotId lotId, MedicamentId medicamentId,
-            BigDecimal quantite, String referenceDocument, String motif, UUID utilisateurId) {
+    public static MouvementStock creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new MouvementStock(MouvementStockId.generate(), typeMouvement, sens, entrepotSourceId,
-                entrepotDestinationId, commandeId, lotId, medicamentId, quantite, maintenant, referenceDocument,
-                motif, utilisateurId, maintenant, maintenant);
+        return builder()
+                .id(MouvementStockId.generate())
+                .typeMouvement(command.typeMouvement())
+                .sens(command.sens())
+                .entrepotSourceId(command.entrepotSourceId())
+                .entrepotDestinationId(command.entrepotDestinationId())
+                .commandeId(command.commandeId())
+                .lotId(command.lotId())
+                .medicamentId(command.medicamentId())
+                .quantite(command.quantite())
+                .dateMouvement(maintenant)
+                .referenceDocument(command.referenceDocument())
+                .motif(command.motif())
+                .utilisateurId(command.utilisateurId())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private MouvementStockId id;
+        private TypeMouvement typeMouvement;
+        private SensMouvement sens;
+        private EntrepotId entrepotSourceId;
+        private EntrepotId entrepotDestinationId;
+        private UUID commandeId;
+        private LotId lotId;
+        private MedicamentId medicamentId;
+        private BigDecimal quantite;
+        private Instant dateMouvement;
+        private String referenceDocument;
+        private String motif;
+        private UUID utilisateurId;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(MouvementStockId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder typeMouvement(TypeMouvement typeMouvement) {
+            this.typeMouvement = typeMouvement;
+            return this;
+        }
+
+        public Builder sens(SensMouvement sens) {
+            this.sens = sens;
+            return this;
+        }
+
+        public Builder entrepotSourceId(EntrepotId entrepotSourceId) {
+            this.entrepotSourceId = entrepotSourceId;
+            return this;
+        }
+
+        public Builder entrepotDestinationId(EntrepotId entrepotDestinationId) {
+            this.entrepotDestinationId = entrepotDestinationId;
+            return this;
+        }
+
+        public Builder commandeId(UUID commandeId) {
+            this.commandeId = commandeId;
+            return this;
+        }
+
+        public Builder lotId(LotId lotId) {
+            this.lotId = lotId;
+            return this;
+        }
+
+        public Builder medicamentId(MedicamentId medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder quantite(BigDecimal quantite) {
+            this.quantite = quantite;
+            return this;
+        }
+
+        public Builder dateMouvement(Instant dateMouvement) {
+            this.dateMouvement = dateMouvement;
+            return this;
+        }
+
+        public Builder referenceDocument(String referenceDocument) {
+            this.referenceDocument = referenceDocument;
+            return this;
+        }
+
+        public Builder motif(String motif) {
+            this.motif = motif;
+            return this;
+        }
+
+        public Builder utilisateurId(UUID utilisateurId) {
+            this.utilisateurId = utilisateurId;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public MouvementStock build() {
+            return new MouvementStock(this);
+        }
     }
 
     // ── Validation ───────────────────────────────────────────────────────

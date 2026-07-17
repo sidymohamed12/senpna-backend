@@ -51,11 +51,11 @@ class ListCommandeAchatUseCaseImplTest {
         @Test
         @DisplayName("transmet la recherche et le statut demandés au critère de recherche")
         void transmetCritereTelQuel() {
-                LigneCommandeAchat ligne = LigneCommandeAchat.creer(MedicamentId.generate(),
+                LigneCommandeAchat ligne = LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(),
                                 ConditionnementId.generate(),
-                                BigDecimal.TEN, BigDecimal.TEN);
-                CommandeAchat commande = CommandeAchat.creer("BC-1", FournisseurId.generate(), EntrepotId.generate(),
-                                List.of(ligne), null);
+                                BigDecimal.TEN, BigDecimal.TEN));
+                CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", FournisseurId.generate(), EntrepotId.generate(),
+                                List.of(ligne), null));
                 when(commandeAchatRepositoryPort.search(any(), any()))
                                 .thenReturn(PageResult.of(List.of(commande), 0, 20, 1));
                 CommandeAchatSummary summary = new CommandeAchatSummary(commande.getId().getValue(), "BC-1",

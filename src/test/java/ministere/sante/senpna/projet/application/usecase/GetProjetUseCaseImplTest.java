@@ -35,7 +35,7 @@ class GetProjetUseCaseImplTest {
     ProjetDetailAssembler assembler;
 
     private Projet projet(boolean publie) {
-        Projet p = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+        Projet p = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
         if (publie) {
             p.publier();
         }

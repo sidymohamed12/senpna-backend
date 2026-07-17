@@ -15,33 +15,35 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public User toDomain(UserJpaEntity entity) {
-        return User.reconstruct(
-                UserId.of(entity.getId()),
-                Nom.of(entity.getNom()),
-                Prenom.of(entity.getPrenom()),
-                Email.of(entity.getEmail()),
-                entity.getTelephone() != null ? Phone.of(entity.getTelephone()) : null,
-                HashedPassword.of(entity.getPasswordHash()),
-                entity.isActif(),
-                entity.getRoleIds(),
-                entity.getTentativesEchecConnexion(),
-                entity.getVerrouilleJusqua(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return User.builder()
+            .id(UserId.of(entity.getId()))
+            .nom(Nom.of(entity.getNom()))
+            .prenom(Prenom.of(entity.getPrenom()))
+            .email(Email.of(entity.getEmail()))
+            .telephone(entity.getTelephone() != null ? Phone.of(entity.getTelephone()) : null)
+            .hashedPassword(HashedPassword.of(entity.getPasswordHash()))
+            .actif(entity.isActif())
+            .roleIds(entity.getRoleIds())
+            .tentativesEchecConnexion(entity.getTentativesEchecConnexion())
+            .verrouilleJusqua(entity.getVerrouilleJusqua())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public UserJpaEntity toEntity(User user) {
-        UserJpaEntity entity = new UserJpaEntity(
-                user.getId().getValue(),
-                user.getNom().getValue(),
-                user.getPrenom().getValue(),
-                user.getEmail().value(),
-                user.getTelephone() != null ? user.getTelephone().value() : null,
-                user.getHashedPassword().value(),
-                user.isActif(),
-                user.getRoleIds(),
-                user.getTentativesEchecConnexion(),
-                user.getVerrouilleJusqua());
+        UserJpaEntity entity = UserJpaEntity.builder()
+            .id(user.getId().getValue())
+            .nom(user.getNom().getValue())
+            .prenom(user.getPrenom().getValue())
+            .email(user.getEmail().value())
+            .telephone(user.getTelephone() != null ? user.getTelephone().value() : null)
+            .passwordHash(user.getHashedPassword().value())
+            .actif(user.isActif())
+            .roleIds(user.getRoleIds())
+            .tentativesEchecConnexion(user.getTentativesEchecConnexion())
+            .verrouilleJusqua(user.getVerrouilleJusqua())
+            .build();
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
         return entity;

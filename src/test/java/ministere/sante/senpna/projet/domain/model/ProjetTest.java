@@ -22,9 +22,9 @@ class ProjetTest {
         @Test
         @DisplayName("crée un projet en BROUILLON par défaut")
         void creer_succes_statutBrouillon() {
-            Projet projet = Projet.creer(CategorieProjet.SANTE, "Accès aux soins ruraux",
+            Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Accès aux soins ruraux",
                     "Amélioration de l'accès aux médicaments essentiels", List.of("Réduire les ruptures"),
-                    List.of("+20% de disponibilité"), "https://cdn.senpna.sn/projets/soins-ruraux.jpg");
+                    List.of("+20% de disponibilité"), "https://cdn.senpna.sn/projets/soins-ruraux.jpg"));
 
             assertThat(projet.getStatut()).isEqualTo(StatutProjet.BROUILLON);
             assertThat(projet.getNom()).isEqualTo("Accès aux soins ruraux");
@@ -36,7 +36,7 @@ class ProjetTest {
         @Test
         @DisplayName("nom vide → IllegalArgumentException")
         void creer_nomVide_leveException() {
-            assertThatThrownBy(() -> Projet.creer(CategorieProjet.SOCIAL, "   ", null, List.of(), List.of(), null))
+            assertThatThrownBy(() -> Projet.creer(new Projet.CreationCommand(CategorieProjet.SOCIAL, "   ", null, List.of(), List.of(), null)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -45,15 +45,15 @@ class ProjetTest {
         void creer_descriptionTropLongue_leveException() {
             String descriptionTropLongue = "a".repeat(701);
 
-            assertThatThrownBy(() -> Projet.creer(CategorieProjet.SOCIAL, "Nom", descriptionTropLongue, List.of(),
-                    List.of(), null))
+            assertThatThrownBy(() -> Projet.creer(new Projet.CreationCommand(CategorieProjet.SOCIAL, "Nom", descriptionTropLongue, List.of(),
+                    List.of(), null)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("catégorie null → NullPointerException")
         void creer_categorieNulle_leveException() {
-            assertThatThrownBy(() -> Projet.creer(null, "Nom", null, List.of(), List.of(), null))
+            assertThatThrownBy(() -> Projet.creer(new Projet.CreationCommand(null, "Nom", null, List.of(), List.of(), null)))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -65,7 +65,7 @@ class ProjetTest {
                     .toList();
 
             assertThatThrownBy(
-                    () -> Projet.creer(CategorieProjet.INNOVATION, "Nom", null, objectifs, List.of(), null))
+                    () -> Projet.creer(new Projet.CreationCommand(CategorieProjet.INNOVATION, "Nom", null, objectifs, List.of(), null)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -163,6 +163,6 @@ class ProjetTest {
     }
 
     private Projet projetBrouillon() {
-        return Projet.creer(CategorieProjet.SANTE, "Nom", "Description", List.of(), List.of(), null);
+        return Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Description", List.of(), List.of(), null));
     }
 }

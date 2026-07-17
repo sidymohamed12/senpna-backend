@@ -21,9 +21,9 @@ class FactureMapperTest {
     FactureMapper sut = new FactureMapper();
 
     private Facture facture() {
-        return Facture.soumettre(ministere.sante.senpna.commandeachat.domain.valueobject.CommandeAchatId.generate(),
+        return Facture.soumettre(new Facture.SoumissionCommand(ministere.sante.senpna.commandeachat.domain.valueobject.CommandeAchatId.generate(),
                 FournisseurId.generate(), "FAC-2026-0001", BigDecimal.valueOf(3_500_000), LocalDate.now(),
-                LocalDate.now().plusDays(30), "media-1");
+                LocalDate.now().plusDays(30), "media-1"));
     }
 
     @Test
@@ -52,9 +52,18 @@ class FactureMapperTest {
         Instant createdAt = Instant.now().minusSeconds(3600);
         Instant updatedAt = Instant.now();
 
-        FactureJpaEntity entity = new FactureJpaEntity(factureId, commandeAchatId, fournisseurId, "FAC-2026-0099",
-                BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(15), "media-2", StatutFacture.VALIDEE,
-                null);
+        FactureJpaEntity entity = FactureJpaEntity.builder()
+            .id(factureId)
+            .commandeAchatId(commandeAchatId)
+            .fournisseurId(fournisseurId)
+            .numeroFacture("FAC-2026-0099")
+            .montant(BigDecimal.TEN)
+            .dateEmission(LocalDate.now())
+            .dateEcheance(LocalDate.now().plusDays(15))
+            .pieceJointeMediaId("media-2")
+            .statut(StatutFacture.VALIDEE)
+            .motifRejet(null)
+            .build();
         entity.setCreatedAt(createdAt);
         entity.setUpdatedAt(updatedAt);
 
@@ -72,9 +81,18 @@ class FactureMapperTest {
     @Test
     @DisplayName("toDomain() reporte le motif de rejet quand présent")
     void toDomain_reporteMotifRejet() {
-        FactureJpaEntity entity = new FactureJpaEntity(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                "FAC-1", BigDecimal.TEN, LocalDate.now(), null, null, StatutFacture.REJETEE,
-                "Montant incohérent");
+        FactureJpaEntity entity = FactureJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .commandeAchatId(UUID.randomUUID())
+            .fournisseurId(UUID.randomUUID())
+            .numeroFacture("FAC-1")
+            .montant(BigDecimal.TEN)
+            .dateEmission(LocalDate.now())
+            .dateEcheance(null)
+            .pieceJointeMediaId(null)
+            .statut(StatutFacture.REJETEE)
+            .motifRejet("Montant incohérent")
+            .build();
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());
 

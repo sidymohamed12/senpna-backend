@@ -45,8 +45,8 @@ class ConditionnementQueryUseCasesTest {
         ConditionnementDetailAssembler assembler = new ConditionnementDetailAssembler();
 
         private Conditionnement conditionnement() {
-                return Conditionnement.creer(MedicamentId.generate(), "Boite de 10", 1, BigDecimal.ONE, true,
-                                BigDecimal.TEN, BigDecimal.TEN);
+                return Conditionnement.creer(new Conditionnement.CreationCommand(MedicamentId.generate(), "Boite de 10", 1, BigDecimal.ONE, true,
+                                BigDecimal.TEN, BigDecimal.TEN));
         }
 
         @Nested

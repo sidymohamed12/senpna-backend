@@ -32,9 +32,9 @@ class StockMappersTest {
     @Test
     @DisplayName("LotMapper : aller-retour préserve l'état")
     void lotMapper_allerRetourPreserveEtat() {
-        Lot original = Lot.creer("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
+        Lot original = Lot.creer(new Lot.CreationCommand("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
                 LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), new BigDecimal("10.00"),
-                new BigDecimal("15.00"));
+                new BigDecimal("15.00")));
 
         LotJpaEntity entity = lotMapper.toEntity(original);
         Lot restaure = lotMapper.toDomain(entity);
@@ -47,8 +47,8 @@ class StockMappersTest {
     @Test
     @DisplayName("StockMapper : aller-retour préserve l'état, y compris les quantités")
     void stockMapper_allerRetourPreserveEtat() {
-        Stock original = Stock.ouvrir(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(),
-                new BigDecimal("10"));
+        Stock original = Stock.ouvrir(new Stock.OuvertureCommand(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(),
+                new BigDecimal("10")));
         original.entrer(new BigDecimal("100"));
         original.reserver(new BigDecimal("20"));
 
@@ -63,9 +63,9 @@ class StockMappersTest {
     @Test
     @DisplayName("MouvementStockMapper : aller-retour préserve l'état, entrepôt source null géré")
     void mouvementStockMapper_allerRetourAvecEntrepotSourceNull() {
-        MouvementStock original = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+        MouvementStock original = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
                 EntrepotId.generate(), null, LotId.generate(), MedicamentId.generate(), new BigDecimal("50"),
-                "REF-1", "Motif", UUID.randomUUID());
+                "REF-1", "Motif", UUID.randomUUID()));
 
         MouvementStockJpaEntity entity = mouvementStockMapper.toEntity(original);
         MouvementStock restaure = mouvementStockMapper.toDomain(entity);

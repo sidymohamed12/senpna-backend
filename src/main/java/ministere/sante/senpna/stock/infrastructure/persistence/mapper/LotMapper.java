@@ -13,31 +13,33 @@ import org.springframework.stereotype.Component;
 public class LotMapper {
 
     public Lot toDomain(LotJpaEntity entity) {
-        return Lot.reconstruct(
-                LotId.of(entity.getId()),
-                entity.getNumeroLot(),
-                MedicamentId.of(entity.getMedicamentId()),
-                FournisseurId.of(entity.getFournisseurId()),
-                entity.getDateFabrication(),
-                entity.getDateExpiration(),
-                entity.getPrixAchat(),
-                entity.getPrixVente(),
-                StatutLot.valueOf(entity.getStatut()),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Lot.builder()
+            .id(LotId.of(entity.getId()))
+            .numeroLot(entity.getNumeroLot())
+            .medicamentId(MedicamentId.of(entity.getMedicamentId()))
+            .fournisseurId(FournisseurId.of(entity.getFournisseurId()))
+            .dateFabrication(entity.getDateFabrication())
+            .dateExpiration(entity.getDateExpiration())
+            .prixAchat(entity.getPrixAchat())
+            .prixVente(entity.getPrixVente())
+            .statut(StatutLot.valueOf(entity.getStatut()))
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public LotJpaEntity toEntity(Lot lot) {
-        LotJpaEntity entity = new LotJpaEntity(
-                lot.getId().getValue(),
-                lot.getNumeroLot(),
-                lot.getMedicamentId().getValue(),
-                lot.getFournisseurId().getValue(),
-                lot.getDateFabrication(),
-                lot.getDateExpiration(),
-                lot.getPrixAchat(),
-                lot.getPrixVente(),
-                lot.getStatut().name());
+        LotJpaEntity entity = LotJpaEntity.builder()
+            .id(lot.getId().getValue())
+            .numeroLot(lot.getNumeroLot())
+            .medicamentId(lot.getMedicamentId().getValue())
+            .fournisseurId(lot.getFournisseurId().getValue())
+            .dateFabrication(lot.getDateFabrication())
+            .dateExpiration(lot.getDateExpiration())
+            .prixAchat(lot.getPrixAchat())
+            .prixVente(lot.getPrixVente())
+            .statut(lot.getStatut().name())
+            .build();
         entity.setCreatedAt(lot.getCreatedAt());
         entity.setUpdatedAt(lot.getUpdatedAt());
         return entity;

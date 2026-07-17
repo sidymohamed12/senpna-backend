@@ -43,8 +43,8 @@ class OpportuniteTransitionUseCasesTest {
     @BeforeEach
     void setUp() {
         id = UUID.randomUUID();
-        opportunite = OpportuniteCarriere.creer("Titre", "Entreprise", "Desc", null, "Dakar", TypeContrat.CDI,
-                LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(), "Auteur", null);
+        opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Titre", "Entreprise", "Desc", null, "Dakar", TypeContrat.CDI,
+                LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(), "Auteur", null));
     }
 
     @Nested

@@ -57,12 +57,30 @@ class ConditionnementPersistenceAdaptersUnitTest {
 
         UUID id = UUID.randomUUID();
         UUID medicamentId = UUID.randomUUID();
-        Conditionnement conditionnement = Conditionnement.reconstruct(ConditionnementId.of(id),
-                        MedicamentId.of(medicamentId), "Boîte de 20", 1, BigDecimal.TEN, false, BigDecimal.valueOf(500),
-                        BigDecimal.valueOf(750), true, java.time.Instant.now(), java.time.Instant.now());
-        ConditionnementJpaEntity entity = new ConditionnementJpaEntity(id, medicamentId, "Boîte de 20", 1,
-                        BigDecimal.TEN,
-                        false, BigDecimal.valueOf(500), BigDecimal.valueOf(750), true);
+        Conditionnement conditionnement = Conditionnement.builder()
+            .id(ConditionnementId.of(id))
+            .medicamentId(MedicamentId.of(medicamentId))
+            .nom("Boîte de 20")
+            .niveau(1)
+            .quantiteUniteBase(BigDecimal.TEN)
+            .estUniteBase(false)
+            .prixAchat(BigDecimal.valueOf(500))
+            .prixVente(BigDecimal.valueOf(750))
+            .actif(true)
+            .createdAt(java.time.Instant.now())
+            .updatedAt(java.time.Instant.now())
+            .build();
+        ConditionnementJpaEntity entity = ConditionnementJpaEntity.builder()
+            .id(id)
+            .medicamentId(medicamentId)
+            .nom("Boîte de 20")
+            .niveau(1)
+            .quantiteUniteBase(BigDecimal.TEN)
+            .estUniteBase(false)
+            .prixAchat(BigDecimal.valueOf(500))
+            .prixVente(BigDecimal.valueOf(750))
+            .actif(true)
+            .build();
 
         @BeforeEach
         void setUp() {

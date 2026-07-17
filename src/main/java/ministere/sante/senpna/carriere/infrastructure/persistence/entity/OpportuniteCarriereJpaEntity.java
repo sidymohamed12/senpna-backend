@@ -65,22 +65,112 @@ public class OpportuniteCarriereJpaEntity extends BaseJpaEntity {
     @Column(name = "statut", nullable = false, length = 20)
     private StatutOpportunite statut;
 
-    public OpportuniteCarriereJpaEntity(UUID id, String titre, String nomEntreprise, String description,
-            String ficheDePosteUrl, String lieu, TypeContrat typeContrat, LocalDate dateDebut,
-            LocalDate dateLimiteCandidature, UUID auteurId, String auteurNom, String emailContact,
-            StatutOpportunite statut) {
-        super(id);
-        this.titre = titre;
-        this.nomEntreprise = nomEntreprise;
-        this.description = description;
-        this.ficheDePosteUrl = ficheDePosteUrl;
-        this.lieu = lieu;
-        this.typeContrat = typeContrat;
-        this.dateDebut = dateDebut;
-        this.dateLimiteCandidature = dateLimiteCandidature;
-        this.auteurId = auteurId;
-        this.auteurNom = auteurNom;
-        this.emailContact = emailContact;
-        this.statut = statut;
+    private OpportuniteCarriereJpaEntity(Builder builder) {
+        super(builder.id);
+        this.titre = builder.titre;
+        this.nomEntreprise = builder.nomEntreprise;
+        this.description = builder.description;
+        this.ficheDePosteUrl = builder.ficheDePosteUrl;
+        this.lieu = builder.lieu;
+        this.typeContrat = builder.typeContrat;
+        this.dateDebut = builder.dateDebut;
+        this.dateLimiteCandidature = builder.dateLimiteCandidature;
+        this.auteurId = builder.auteurId;
+        this.auteurNom = builder.auteurNom;
+        this.emailContact = builder.emailContact;
+        this.statut = builder.statut;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String titre;
+        private String nomEntreprise;
+        private String description;
+        private String ficheDePosteUrl;
+        private String lieu;
+        private TypeContrat typeContrat;
+        private LocalDate dateDebut;
+        private LocalDate dateLimiteCandidature;
+        private UUID auteurId;
+        private String auteurNom;
+        private String emailContact;
+        private StatutOpportunite statut;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder titre(String titre) {
+            this.titre = titre;
+            return this;
+        }
+
+        public Builder nomEntreprise(String nomEntreprise) {
+            this.nomEntreprise = nomEntreprise;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder ficheDePosteUrl(String ficheDePosteUrl) {
+            this.ficheDePosteUrl = ficheDePosteUrl;
+            return this;
+        }
+
+        public Builder lieu(String lieu) {
+            this.lieu = lieu;
+            return this;
+        }
+
+        public Builder typeContrat(TypeContrat typeContrat) {
+            this.typeContrat = typeContrat;
+            return this;
+        }
+
+        public Builder dateDebut(LocalDate dateDebut) {
+            this.dateDebut = dateDebut;
+            return this;
+        }
+
+        public Builder dateLimiteCandidature(LocalDate dateLimiteCandidature) {
+            this.dateLimiteCandidature = dateLimiteCandidature;
+            return this;
+        }
+
+        public Builder auteurId(UUID auteurId) {
+            this.auteurId = auteurId;
+            return this;
+        }
+
+        public Builder auteurNom(String auteurNom) {
+            this.auteurNom = auteurNom;
+            return this;
+        }
+
+        public Builder emailContact(String emailContact) {
+            this.emailContact = emailContact;
+            return this;
+        }
+
+        public Builder statut(StatutOpportunite statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public OpportuniteCarriereJpaEntity build() {
+            return new OpportuniteCarriereJpaEntity(this);
+        }
     }
 }

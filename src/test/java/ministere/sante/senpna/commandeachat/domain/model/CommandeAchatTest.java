@@ -28,13 +28,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CommandeAchatTest {
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
-                BigDecimal.valueOf(200_000));
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+                BigDecimal.valueOf(200_000)));
     }
 
     private CommandeAchat commandeEnAttente() {
-        return CommandeAchat.creer("BC-2026-0001", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne()), "Commentaire");
+        return CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-2026-0001", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne()), "Commentaire"));
     }
 
     private CommandeAchat commandeValidee() {
@@ -78,8 +78,8 @@ class CommandeAchatTest {
 
             var fournisseurId = FournisseurId.generate();
             var entrepotId = EntrepotId.generate();
-            assertThatThrownBy(() -> CommandeAchat.creer("BC-1", fournisseurId, entrepotId,
-                    List.of(), null)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", fournisseurId, entrepotId,
+                    List.of(), null))).isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
@@ -90,8 +90,8 @@ class CommandeAchatTest {
             var fournisseurId = FournisseurId.generate();
             var entrepotId = EntrepotId.generate();
             var listLigne = List.of(ligne());
-            assertThatThrownBy(() -> CommandeAchat.creer(refTropLongue, fournisseurId,
-                    entrepotId, listLigne, null)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> CommandeAchat.creer(new CommandeAchat.CreationCommand(refTropLongue, fournisseurId,
+                    entrepotId, listLigne, null))).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -371,8 +371,8 @@ class CommandeAchatTest {
         @DisplayName("même fournisseur → true")
         void memeFournisseur_true() {
             FournisseurId fournisseurId = FournisseurId.generate();
-            CommandeAchat commande = CommandeAchat.creer("BC-1", fournisseurId, EntrepotId.generate(),
-                    List.of(ligne()), null);
+            CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", fournisseurId, EntrepotId.generate(),
+                    List.of(ligne()), null));
 
             assertThat(commande.appartientA(fournisseurId)).isTrue();
         }
@@ -398,9 +398,22 @@ class CommandeAchatTest {
             FournisseurId fournisseurId = FournisseurId.generate();
             EntrepotId entrepotId = EntrepotId.generate();
 
-            CommandeAchat commande = CommandeAchat.reconstruct(id, "BC-2026-0099", fournisseurId, entrepotId,
-                    StatutCommandeAchat.VALIDEE, List.of(ligne()), null, null, null, null, null, "Com", maintenant,
-                    maintenant);
+            CommandeAchat commande = CommandeAchat.builder()
+                .id(id)
+                .reference("BC-2026-0099")
+                .fournisseurId(fournisseurId)
+                .entrepotDestinationId(entrepotId)
+                .statut(StatutCommandeAchat.VALIDEE)
+                .lignes(List.of(ligne()))
+                .dateAccuseReceptionFournisseur(null)
+                .delaiLivraisonConfirmeJours(null)
+                .dateLivraisonConfirmee(null)
+                .avisExpedition(null)
+                .motifRejet(null)
+                .commentaire("Com")
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
 
             assertThat(commande.getId()).isEqualTo(id);
             assertThat(commande.getFournisseurId()).isEqualTo(fournisseurId);

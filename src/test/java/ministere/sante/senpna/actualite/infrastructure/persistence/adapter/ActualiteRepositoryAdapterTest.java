@@ -59,8 +59,16 @@ class ActualiteRepositoryAdapterTest {
     @Test
     @DisplayName("findById() retourne l'actualité mappée quand l'entité existe")
     void findById_existe() {
-        ActualiteJpaEntity entity = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Titre", null,
-                AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON);
+        ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description(null)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .build();
         Actualite actualite = actualiteExistante();
         when(actualiteJpaRepository.findById(ACTUALITE_ID)).thenReturn(Optional.of(entity));
         when(actualiteMapper.toDomain(entity)).thenReturn(actualite);
@@ -84,10 +92,26 @@ class ActualiteRepositoryAdapterTest {
     @DisplayName("save() met à jour l'entité managée existante quand elle est déjà présente en base")
     void save_entiteExistante_metAJour() {
         Actualite actualite = actualiteExistante();
-        ActualiteJpaEntity entiteExistante = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET,
-                "Ancien titre", null, AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON);
-        ActualiteJpaEntity entiteMiseAJour = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Titre",
-                null, AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON);
+        ActualiteJpaEntity entiteExistante = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Ancien titre")
+            .description(null)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .build();
+        ActualiteJpaEntity entiteMiseAJour = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description(null)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .build();
 
         when(actualiteJpaRepository.findById(ACTUALITE_ID)).thenReturn(Optional.of(entiteExistante));
         when(actualiteMapper.updateEntity(entiteExistante, actualite)).thenReturn(entiteMiseAJour);
@@ -105,8 +129,16 @@ class ActualiteRepositoryAdapterTest {
     @DisplayName("save() crée une nouvelle entité quand aucune entité managée n'existe encore")
     void save_entiteInexistante_creeNouvelle() {
         Actualite actualite = actualiteExistante();
-        ActualiteJpaEntity nouvelleEntite = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Titre",
-                null, AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON);
+        ActualiteJpaEntity nouvelleEntite = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description(null)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .build();
 
         when(actualiteJpaRepository.findById(ACTUALITE_ID)).thenReturn(Optional.empty());
         when(actualiteMapper.toNewEntity(actualite)).thenReturn(nouvelleEntite);
@@ -130,8 +162,16 @@ class ActualiteRepositoryAdapterTest {
         when(pageRequest.sortBy()).thenReturn("titre");
         when(pageRequest.direction()).thenReturn(PageRequest.SortDirection.ASC);
 
-        ActualiteJpaEntity entity = new ActualiteJpaEntity(ACTUALITE_ID, CategorieActualite.PROJET, "Titre", null,
-                AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON);
+        ActualiteJpaEntity entity = ActualiteJpaEntity.builder()
+            .id(ACTUALITE_ID)
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description(null)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .build();
         Page<ActualiteJpaEntity> page = new PageImpl<>(List.of(entity),
                 org.springframework.data.domain.PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "titre")), 1);
         when(actualiteJpaRepository.findAll(
@@ -185,7 +225,18 @@ class ActualiteRepositoryAdapterTest {
 
     private Actualite actualiteExistante() {
         Instant maintenant = Instant.now();
-        return Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.PROJET, "Titre", null,
-                List.of(), AUTEUR_ID, "Auteur", List.of(), StatutActualite.BROUILLON, maintenant, maintenant);
+        return Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description(null)
+            .medias(List.of())
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Auteur")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
     }
 }

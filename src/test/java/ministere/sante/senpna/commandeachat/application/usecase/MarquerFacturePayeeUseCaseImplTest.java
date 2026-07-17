@@ -44,8 +44,8 @@ class MarquerFacturePayeeUseCaseImplTest {
     @Test
     @DisplayName("depuis VALIDEE → PAYEE")
     void depuisValidee_passePayee() {
-        Facture facture = Facture.soumettre(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
-                BigDecimal.TEN, LocalDate.now(), null, null);
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
+                BigDecimal.TEN, LocalDate.now(), null, null));
         facture.valider();
         when(factureRepositoryPort.findById(facture.getId())).thenReturn(Optional.of(facture));
         when(factureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -58,8 +58,8 @@ class MarquerFacturePayeeUseCaseImplTest {
     @Test
     @DisplayName("depuis SOUMISE (non validée) → TransitionStatutFactureInvalideException")
     void depuisSoumise_leveException() {
-        Facture facture = Facture.soumettre(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
-                BigDecimal.TEN, LocalDate.now(), null, null);
+        Facture facture = Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), FournisseurId.generate(), "FAC-1",
+                BigDecimal.TEN, LocalDate.now(), null, null));
         when(factureRepositoryPort.findById(facture.getId())).thenReturn(Optional.of(facture));
 
         var command = new MarquerFacturePayeeCommand(facture.getId().getValue());

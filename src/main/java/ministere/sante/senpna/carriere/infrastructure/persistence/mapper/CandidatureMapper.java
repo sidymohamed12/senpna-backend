@@ -12,19 +12,20 @@ import org.springframework.stereotype.Component;
 public class CandidatureMapper {
 
     public Candidature toDomain(CandidatureJpaEntity entity) {
-        return Candidature.reconstruct(
-                CandidatureId.of(entity.getId()),
-                entity.getOpportuniteId(),
-                entity.getCivilite(),
-                entity.getNomComplet(),
-                Email.of(entity.getEmail()),
-                Phone.of(entity.getTelephone()),
-                entity.getCvUrl(),
-                entity.getLettreMotivationUrl(),
-                entity.getMessageComplementaire(),
-                entity.isConsentementRgpd(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Candidature.builder()
+            .id(CandidatureId.of(entity.getId()))
+            .opportuniteId(entity.getOpportuniteId())
+            .civilite(entity.getCivilite())
+            .nomComplet(entity.getNomComplet())
+            .email(Email.of(entity.getEmail()))
+            .telephone(Phone.of(entity.getTelephone()))
+            .cvUrl(entity.getCvUrl())
+            .lettreMotivationUrl(entity.getLettreMotivationUrl())
+            .messageComplementaire(entity.getMessageComplementaire())
+            .consentementRgpd(entity.isConsentementRgpd())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     /**
@@ -32,17 +33,18 @@ public class CandidatureMapper {
      * {@code updateEntity}, uniquement une création.
      */
     public CandidatureJpaEntity toNewEntity(Candidature candidature) {
-        CandidatureJpaEntity entity = new CandidatureJpaEntity(
-                candidature.getId().getValue(),
-                candidature.getOpportuniteId(),
-                candidature.getCivilite(),
-                candidature.getNomComplet(),
-                candidature.getEmail().value(),
-                candidature.getTelephone().value(),
-                candidature.getCvUrl(),
-                candidature.getLettreMotivationUrl(),
-                candidature.getMessageComplementaire(),
-                candidature.isConsentementRgpd());
+        CandidatureJpaEntity entity = CandidatureJpaEntity.builder()
+            .id(candidature.getId().getValue())
+            .opportuniteId(candidature.getOpportuniteId())
+            .civilite(candidature.getCivilite())
+            .nomComplet(candidature.getNomComplet())
+            .email(candidature.getEmail().value())
+            .telephone(candidature.getTelephone().value())
+            .cvUrl(candidature.getCvUrl())
+            .lettreMotivationUrl(candidature.getLettreMotivationUrl())
+            .messageComplementaire(candidature.getMessageComplementaire())
+            .consentementRgpd(candidature.isConsentementRgpd())
+            .build();
         entity.setCreatedAt(candidature.getCreatedAt());
         entity.setUpdatedAt(candidature.getUpdatedAt());
         return entity;

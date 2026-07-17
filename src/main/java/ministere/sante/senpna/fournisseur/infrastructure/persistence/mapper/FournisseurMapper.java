@@ -10,16 +10,17 @@ import org.springframework.stereotype.Component;
 public class FournisseurMapper {
 
     public Fournisseur toDomain(FournisseurJpaEntity entity) {
-        return Fournisseur.reconstruct(
-                FournisseurId.of(entity.getId()),
-                entity.getNom(),
-                entity.getAdresse(),
-                entity.getTelephone(),
-                entity.getEmail(),
-                entity.getContactPrincipal(),
-                entity.isActif(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Fournisseur.builder()
+            .id(FournisseurId.of(entity.getId()))
+            .nom(entity.getNom())
+            .adresse(entity.getAdresse())
+            .telephone(entity.getTelephone())
+            .email(entity.getEmail())
+            .contactPrincipal(entity.getContactPrincipal())
+            .actif(entity.isActif())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public FournisseurJpaEntity toEntity(Fournisseur fournisseur) {

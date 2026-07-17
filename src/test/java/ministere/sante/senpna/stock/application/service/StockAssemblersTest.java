@@ -28,9 +28,9 @@ class StockAssemblersTest {
     @Test
     @DisplayName("LotDetailAssembler reporte fidèlement chaque champ, y compris les indicateurs dérivés")
     void lotDetailAssembler_reporteChaqueChamp() {
-        Lot lot = Lot.creer("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
+        Lot lot = Lot.creer(new Lot.CreationCommand("LOT-001", MedicamentId.generate(), FournisseurId.generate(),
                 LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), new BigDecimal("10.00"),
-                new BigDecimal("15.00"));
+                new BigDecimal("15.00")));
 
         LotDetail detail = new LotDetailAssembler().assembler(lot);
 
@@ -43,8 +43,8 @@ class StockAssemblersTest {
     @Test
     @DisplayName("StockDetailAssembler reporte fidèlement chaque champ, y compris les indicateurs de rupture")
     void stockDetailAssembler_reporteChaqueChamp() {
-        Stock stock = Stock.ouvrir(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(),
-                new BigDecimal("10"));
+        Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(EntrepotId.generate(), LotId.generate(), MedicamentId.generate(),
+                new BigDecimal("10")));
         stock.entrer(new BigDecimal("100"));
         stock.reserver(new BigDecimal("20"));
 
@@ -59,9 +59,9 @@ class StockAssemblersTest {
     @Test
     @DisplayName("MouvementDetailAssembler gère un entrepôt source/destination null")
     void mouvementDetailAssembler_gereEntrepotNull() {
-        MouvementStock mouvement = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+        MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
                 EntrepotId.generate(), null, LotId.generate(), MedicamentId.generate(), new BigDecimal("50"),
-                "REF-1", "Motif", UUID.randomUUID());
+                "REF-1", "Motif", UUID.randomUUID()));
 
         MouvementDetail detail = new MouvementDetailAssembler().assembler(mouvement);
 

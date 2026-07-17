@@ -73,10 +73,10 @@ class ActualiteUseCasesTest {
                         CreateActualiteUseCaseImpl useCase = new CreateActualiteUseCaseImpl(actualiteRepositoryPort,
                                         userManagementRepositoryPort, commandMapper, assembler);
 
-                        User auteur = User.creer(Nom.of("Diop"), Prenom.of("Awa"), Email.of("awa.diop@sante.sn"), null,
+                        User auteur = User.creer(new User.CreationCommand(Nom.of("Diop"), Prenom.of("Awa"), Email.of("awa.diop@sante.sn"), null,
                                         HashedPassword.of(
                                                         "$2a$12$abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzab"),
-                                        java.util.Set.of());
+                                        java.util.Set.of()));
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.of(auteur));
                         when(actualiteRepositoryPort.save(any(Actualite.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -110,10 +110,10 @@ class ActualiteUseCasesTest {
                 void leveExceptionQuandCategorieInvalide() {
                         CreateActualiteUseCaseImpl useCase = new CreateActualiteUseCaseImpl(actualiteRepositoryPort,
                                         userManagementRepositoryPort, commandMapper, assembler);
-                        User auteur = User.creer(Nom.of("Diop"), Prenom.of("Awa"), Email.of("awa.diop@sante.sn"), null,
+                        User auteur = User.creer(new User.CreationCommand(Nom.of("Diop"), Prenom.of("Awa"), Email.of("awa.diop@sante.sn"), null,
                                         HashedPassword.of(
                                                         "$2a$12$abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzab"),
-                                        java.util.Set.of());
+                                        java.util.Set.of()));
                         when(userManagementRepositoryPort.findById(UserId.of(AUTEUR_ID)))
                                         .thenReturn(Optional.of(auteur));
 
@@ -375,9 +375,18 @@ class ActualiteUseCasesTest {
 
         private Actualite actualiteExistante() {
                 Instant maintenant = Instant.now();
-                return Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.PROJET, "Titre",
-                                "Description", List.of(), AUTEUR_ID, "Awa Diop", List.of(), StatutActualite.BROUILLON,
-                                maintenant,
-                                maintenant);
+                return Actualite.builder()
+                    .id(ActualiteId.of(ACTUALITE_ID))
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description("Description")
+                    .medias(List.of())
+                    .auteurId(AUTEUR_ID)
+                    .auteurNom("Awa Diop")
+                    .tags(List.of())
+                    .statut(StatutActualite.BROUILLON)
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
         }
 }

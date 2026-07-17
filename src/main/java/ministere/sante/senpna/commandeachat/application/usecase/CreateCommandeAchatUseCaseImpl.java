@@ -44,15 +44,15 @@ public class CreateCommandeAchatUseCaseImpl implements CreateCommandeAchatUseCas
 
         List<LigneCommandeAchat> lignes = command.lignes().stream().map(this::toLigne).toList();
 
-        CommandeAchat commande = CommandeAchat.creer(command.reference(), FournisseurId.of(command.fournisseurId()),
-                EntrepotId.of(command.entrepotDestinationId()), lignes, command.commentaire());
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand(command.reference(), FournisseurId.of(command.fournisseurId()),
+                EntrepotId.of(command.entrepotDestinationId()), lignes, command.commentaire()));
 
         CommandeAchat saved = commandeAchatRepositoryPort.save(commande);
         return commandeAchatDetailAssembler.assembler(saved);
     }
 
     private LigneCommandeAchat toLigne(LigneCommandeAchatInput input) {
-        return LigneCommandeAchat.creer(MedicamentId.of(input.medicamentId()),
-                ConditionnementId.of(input.conditionnementId()), input.quantiteCommandee(), input.prixUnitaire());
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.of(input.medicamentId()),
+                ConditionnementId.of(input.conditionnementId()), input.quantiteCommandee(), input.prixUnitaire()));
     }
 }

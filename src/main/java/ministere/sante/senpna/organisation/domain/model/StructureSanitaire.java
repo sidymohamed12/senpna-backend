@@ -61,33 +61,29 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
     private String motifRejet;
     private boolean actif;
 
-    private StructureSanitaire(StructureSanitaireId id, String code, String nom, TypeStructureSanitaire type,
-            RegionId regionId, EntrepotId praId, String district, String adresse, String telephone, String email,
-            String responsableNom, String responsablePrenom, StatutAdhesion statutAdhesion, String motifRejet,
-            boolean actif, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.code = validerCode(code);
-        this.nom = validerNom(nom);
-        this.type = Objects.requireNonNull(type, "Le type de structure sanitaire ne peut pas être null");
-        this.regionId = regionId;
-        this.praId = praId;
-        this.district = district;
-        this.adresse = adresse;
-        this.telephone = telephone;
-        this.email = email;
-        this.responsableNom = responsableNom;
-        this.responsablePrenom = responsablePrenom;
-        this.statutAdhesion = Objects.requireNonNull(statutAdhesion, "Le statut d'adhésion ne peut pas être null");
-        this.motifRejet = motifRejet;
-        this.actif = actif;
+    private StructureSanitaire(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.code = validerCode(builder.code);
+        this.nom = validerNom(builder.nom);
+        this.type = Objects.requireNonNull(builder.type, "Le type de structure sanitaire ne peut pas être null");
+        this.regionId = builder.regionId;
+        this.praId = builder.praId;
+        this.district = builder.district;
+        this.adresse = builder.adresse;
+        this.telephone = builder.telephone;
+        this.email = builder.email;
+        this.responsableNom = builder.responsableNom;
+        this.responsablePrenom = builder.responsablePrenom;
+        this.statutAdhesion = Objects.requireNonNull(builder.statutAdhesion,
+                "Le statut d'adhésion ne peut pas être null");
+        this.motifRejet = builder.motifRejet;
+        this.actif = builder.actif;
     }
 
-    public static StructureSanitaire reconstruct(StructureSanitaireId id, String code, String nom,
-            TypeStructureSanitaire type, RegionId regionId, EntrepotId praId, String district, String adresse,
-            String telephone, String email, String responsableNom, String responsablePrenom,
-            StatutAdhesion statutAdhesion, String motifRejet, boolean actif, Instant createdAt, Instant updatedAt) {
-        return new StructureSanitaire(id, code, nom, type, regionId, praId, district, adresse, telephone, email,
-                responsableNom, responsablePrenom, statutAdhesion, motifRejet, actif, createdAt, updatedAt);
+    /** Données nécessaires à la création d'une nouvelle demande d'adhésion. */
+    public record CreationCommand(String code, String nom, TypeStructureSanitaire type, RegionId regionId,
+            String district, String adresse, String telephone, String email, String responsableNom,
+            String responsablePrenom) {
     }
 
     /**
@@ -96,16 +92,145 @@ public class StructureSanitaire extends AggregateRoot<StructureSanitaireId> {
      * précise, ni active tant que la demande n'a pas été validée
      * (cf. {@link #validerAdhesion()}).
      */
-    public static StructureSanitaire creer(String code, String nom, TypeStructureSanitaire type, RegionId regionId,
-            String district, String adresse, String telephone, String email, String responsableNom,
-            String responsablePrenom) {
-        Objects.requireNonNull(regionId, "La région est obligatoire pour une demande d'adhésion");
-        Objects.requireNonNull(responsableNom, "Le nom du responsable est obligatoire");
-        Objects.requireNonNull(responsablePrenom, "Le prénom du responsable est obligatoire");
+    public static StructureSanitaire creer(CreationCommand command) {
+        Objects.requireNonNull(command.regionId(), "La région est obligatoire pour une demande d'adhésion");
+        Objects.requireNonNull(command.responsableNom(), "Le nom du responsable est obligatoire");
+        Objects.requireNonNull(command.responsablePrenom(), "Le prénom du responsable est obligatoire");
         Instant maintenant = Instant.now();
-        return new StructureSanitaire(StructureSanitaireId.generate(), code, nom, type, regionId, null, district,
-                adresse, telephone, email, responsableNom, responsablePrenom, StatutAdhesion.EN_ATTENTE_VALIDATION,
-                null, false, maintenant, maintenant);
+        return builder()
+                .id(StructureSanitaireId.generate())
+                .code(command.code())
+                .nom(command.nom())
+                .type(command.type())
+                .regionId(command.regionId())
+                .district(command.district())
+                .adresse(command.adresse())
+                .telephone(command.telephone())
+                .email(command.email())
+                .responsableNom(command.responsableNom())
+                .responsablePrenom(command.responsablePrenom())
+                .statutAdhesion(StatutAdhesion.EN_ATTENTE_VALIDATION)
+                .actif(false)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private StructureSanitaireId id;
+        private String code;
+        private String nom;
+        private TypeStructureSanitaire type;
+        private RegionId regionId;
+        private EntrepotId praId;
+        private String district;
+        private String adresse;
+        private String telephone;
+        private String email;
+        private String responsableNom;
+        private String responsablePrenom;
+        private StatutAdhesion statutAdhesion;
+        private String motifRejet;
+        private boolean actif;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(StructureSanitaireId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder code(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder type(TypeStructureSanitaire type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder regionId(RegionId regionId) {
+            this.regionId = regionId;
+            return this;
+        }
+
+        public Builder praId(EntrepotId praId) {
+            this.praId = praId;
+            return this;
+        }
+
+        public Builder district(String district) {
+            this.district = district;
+            return this;
+        }
+
+        public Builder adresse(String adresse) {
+            this.adresse = adresse;
+            return this;
+        }
+
+        public Builder telephone(String telephone) {
+            this.telephone = telephone;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder responsableNom(String responsableNom) {
+            this.responsableNom = responsableNom;
+            return this;
+        }
+
+        public Builder responsablePrenom(String responsablePrenom) {
+            this.responsablePrenom = responsablePrenom;
+            return this;
+        }
+
+        public Builder statutAdhesion(StatutAdhesion statutAdhesion) {
+            this.statutAdhesion = statutAdhesion;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public StructureSanitaire build() {
+            return new StructureSanitaire(this);
+        }
     }
 
     // ── Cycle de vie de l'adhésion ──────────────────────────────────────

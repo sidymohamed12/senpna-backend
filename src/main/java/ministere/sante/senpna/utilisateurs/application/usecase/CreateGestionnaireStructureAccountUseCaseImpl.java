@@ -77,13 +77,13 @@ public class CreateGestionnaireStructureAccountUseCaseImpl implements CreateGest
         String motDePasseTemporaire = temporaryPasswordGenerator.generer();
         HashedPassword hashedPassword = HashedPassword.of(passwordEncoderPort.encoder(motDePasseTemporaire));
 
-        User user = User.creer(
+        User user = User.creer(new User.CreationCommand(
                 Nom.of(event.responsableNom()),
                 Prenom.of(event.responsablePrenom()),
                 email,
                 null,
                 hashedPassword,
-                Set.of(role.id()));
+                Set.of(role.id())));
 
         User saved = userManagementRepositoryPort.save(user);
 

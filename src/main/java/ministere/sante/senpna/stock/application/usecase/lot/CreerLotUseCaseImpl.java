@@ -64,8 +64,8 @@ public class CreerLotUseCaseImpl implements CreerLotUseCase {
             throw new NumeroLotDejaUtiliseException(command.numeroLot());
         }
 
-        Lot lot = Lot.creer(command.numeroLot(), medicament.getId(), fournisseur.getId(), command.dateFabrication(),
-                command.dateExpiration(), command.prixAchat(), command.prixVente());
+        Lot lot = Lot.creer(new Lot.CreationCommand(command.numeroLot(), medicament.getId(), fournisseur.getId(), command.dateFabrication(),
+                command.dateExpiration(), command.prixAchat(), command.prixVente()));
 
         Lot saved = lotRepositoryPort.save(lot);
         return lotDetailAssembler.assembler(saved);

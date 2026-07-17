@@ -177,11 +177,23 @@ class CandidatureUseCasesTest {
                         SoumettreCandidatureUseCaseImpl useCase = new SoumettreCandidatureUseCaseImpl(
                                         opportuniteCarriereRepositoryPort, candidatureRepositoryPort,
                                         userManagementRepositoryPort, commandMapper, assembler, eventPublisherPort);
-                        OpportuniteCarriere offre = OpportuniteCarriere.reconstruct(
-                                        OpportuniteCarriereId.of(OPPORTUNITE_ID), "Titre", "Entreprise", "Description",
-                                        null, "Dakar, Sénégal", TypeContrat.CDI, null, LocalDate.now().minusDays(1),
-                                        AUTEUR_ID, "Cheikh Ba", null, StatutOpportunite.OUVERT, Instant.now(),
-                                        Instant.now());
+                        OpportuniteCarriere offre = OpportuniteCarriere.builder()
+                            .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                            .titre("Titre")
+                            .nomEntreprise("Entreprise")
+                            .description("Description")
+                            .ficheDePosteUrl(null)
+                            .lieu("Dakar, Sénégal")
+                            .typeContrat(TypeContrat.CDI)
+                            .dateDebut(null)
+                            .dateLimiteCandidature(LocalDate.now().minusDays(1))
+                            .auteurId(AUTEUR_ID)
+                            .auteurNom("Cheikh Ba")
+                            .emailContact(null)
+                            .statut(StatutOpportunite.OUVERT)
+                            .createdAt(Instant.now())
+                            .updatedAt(Instant.now())
+                            .build();
                         when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(OPPORTUNITE_ID)))
                                         .thenReturn(Optional.of(offre));
 
@@ -278,24 +290,46 @@ class CandidatureUseCasesTest {
 
         private OpportuniteCarriere offreExistante(StatutOpportunite statut, String emailContact) {
                 Instant maintenant = Instant.now();
-                return OpportuniteCarriere.reconstruct(OpportuniteCarriereId.of(OPPORTUNITE_ID),
-                                "Pharmacien(ne) responsable", "PNA", "Description", null, "Dakar, Sénégal",
-                                TypeContrat.CDI, null, LocalDate.now().plusDays(30), AUTEUR_ID, "Cheikh Ba",
-                                emailContact, statut, maintenant, maintenant);
+                return OpportuniteCarriere.builder()
+                    .id(OpportuniteCarriereId.of(OPPORTUNITE_ID))
+                    .titre("Pharmacien(ne) responsable")
+                    .nomEntreprise("PNA")
+                    .description("Description")
+                    .ficheDePosteUrl(null)
+                    .lieu("Dakar, Sénégal")
+                    .typeContrat(TypeContrat.CDI)
+                    .dateDebut(null)
+                    .dateLimiteCandidature(LocalDate.now().plusDays(30))
+                    .auteurId(AUTEUR_ID)
+                    .auteurNom("Cheikh Ba")
+                    .emailContact(emailContact)
+                    .statut(statut)
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
         }
 
         private User auteurValide() {
-                return User.creer(Nom.of("Ba"), Prenom.of("Cheikh"), Email.of("cheikh.ba@sante.sn"), null,
+                return User.creer(new User.CreationCommand(Nom.of("Ba"), Prenom.of("Cheikh"), Email.of("cheikh.ba@sante.sn"), null,
                                 HashedPassword.of("$2a$12$abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzab"),
-                                Set.of());
+                                Set.of()));
         }
 
         private Candidature candidatureExistante() {
                 Instant maintenant = Instant.now();
-                return Candidature.reconstruct(CandidatureId.of(CANDIDATURE_ID), OPPORTUNITE_ID,
-                                Civilite.MME, "Fatou Diagne",
-                                Email.of("fatou.diagne@example.sn"), Phone.of("+221771112233"),
-                                "https://cdn.senpna.sn/cvs/fatou-diagne.pdf", null, null, true, maintenant,
-                                maintenant);
+                return Candidature.builder()
+                    .id(CandidatureId.of(CANDIDATURE_ID))
+                    .opportuniteId(OPPORTUNITE_ID)
+                    .civilite(Civilite.MME)
+                    .nomComplet("Fatou Diagne")
+                    .email(Email.of("fatou.diagne@example.sn"))
+                    .telephone(Phone.of("+221771112233"))
+                    .cvUrl("https://cdn.senpna.sn/cvs/fatou-diagne.pdf")
+                    .lettreMotivationUrl(null)
+                    .messageComplementaire(null)
+                    .consentementRgpd(true)
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
         }
 }

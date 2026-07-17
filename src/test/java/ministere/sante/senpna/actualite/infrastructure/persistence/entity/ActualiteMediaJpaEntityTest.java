@@ -19,9 +19,16 @@ class ActualiteMediaJpaEntityTest {
         @DisplayName("le constructeur renseigne tous les champs, y compris le lien vers l'actualité parente")
         void constructeur_renseigneTousLesChamps() {
                 UUID id = UUID.randomUUID();
-                ActualiteJpaEntity actualite = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                null, UUID.randomUUID(), "Auteur", List.of(), StatutActualite.BROUILLON);
+                ActualiteJpaEntity actualite = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description(null)
+                    .auteurId(UUID.randomUUID())
+                    .auteurNom("Auteur")
+                    .tags(List.of())
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 ActualiteMediaJpaEntity media = new ActualiteMediaJpaEntity(id, actualite, TypeMedia.IMAGE,
                                 "https://cdn/1.png", 3);
@@ -38,9 +45,16 @@ class ActualiteMediaJpaEntityTest {
         void setActualite_excluDeEqualsEtHashCode() {
                 ActualiteMediaJpaEntity media1 = new ActualiteMediaJpaEntity(UUID.randomUUID(), null, TypeMedia.VIDEO,
                                 "https://cdn/1.mp4", 0);
-                ActualiteJpaEntity actualite = new ActualiteJpaEntity(UUID.randomUUID(), CategorieActualite.PROJET,
-                                "Titre",
-                                null, UUID.randomUUID(), "Auteur", List.of(), StatutActualite.BROUILLON);
+                ActualiteJpaEntity actualite = ActualiteJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .categorie(CategorieActualite.PROJET)
+                    .titre("Titre")
+                    .description(null)
+                    .auteurId(UUID.randomUUID())
+                    .auteurNom("Auteur")
+                    .tags(List.of())
+                    .statut(StatutActualite.BROUILLON)
+                    .build();
 
                 media1.setActualite(actualite);
 

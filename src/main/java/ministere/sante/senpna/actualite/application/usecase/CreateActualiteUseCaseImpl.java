@@ -46,8 +46,8 @@ public class CreateActualiteUseCaseImpl implements CreateActualiteUseCase {
         List<ActualiteMedia> medias = commandMapper.versMedias(command.medias());
         String auteurNom = auteur.getPrenom().getValue() + " " + auteur.getNom().getValue();
 
-        Actualite actualite = Actualite.creer(categorie, command.titre(), command.description(), medias,
-                command.auteurId(), auteurNom, command.tags());
+        Actualite actualite = Actualite.creer(new Actualite.CreationCommand(categorie, command.titre(), command.description(), medias,
+                command.auteurId(), auteurNom, command.tags()));
 
         Actualite saved = actualiteRepositoryPort.save(actualite);
 

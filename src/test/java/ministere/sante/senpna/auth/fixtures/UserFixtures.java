@@ -17,7 +17,7 @@ import java.util.UUID;
  *
  * <p>
  * Centralise la construction des fixtures plutôt que de dupliquer
- * {@code User.reconstruct(...)} dans chaque classe de test. Les
+ * {@code User.builder()...build()} dans chaque classe de test. Les
  * méthodes builder permettent de surcharger uniquement les champs
  * pertinents pour chaque scénario.
  * </p>
@@ -48,19 +48,20 @@ public final class UserFixtures {
 
     /** Utilisateur actif avec téléphone (pour les tests canal SMS). */
     public static User actifAvecTelephone() {
-        return User.reconstruct(
-                UserId.of(USER_ID),
-                Nom.of(NOM),
-                Prenom.of(PRENOM),
-                Email.of(EMAIL),
-                Phone.of(TELEPHONE),
-                HashedPassword.of(PASSWORD_HASH),
-                true,
-                Set.of(ROLE_GESTIONNAIRE_PNA_ID),
-                0,
-                null,
-                Instant.now(),
-                Instant.now());
+        return User.builder()
+            .id(UserId.of(USER_ID))
+            .nom(Nom.of(NOM))
+            .prenom(Prenom.of(PRENOM))
+            .email(Email.of(EMAIL))
+            .telephone(Phone.of(TELEPHONE))
+            .hashedPassword(HashedPassword.of(PASSWORD_HASH))
+            .actif(true)
+            .roleIds(Set.of(ROLE_GESTIONNAIRE_PNA_ID))
+            .tentativesEchecConnexion(0)
+            .verrouilleJusqua(null)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     /** Utilisateur désactivé. */
@@ -93,18 +94,19 @@ public final class UserFixtures {
 
     private static User build(boolean actif, int tentatives, Instant verrouilleJusqua,
             Set<UUID> roleIds, Phone telephone) {
-        return User.reconstruct(
-                UserId.of(USER_ID),
-                Nom.of(NOM),
-                Prenom.of(PRENOM),
-                Email.of(EMAIL),
-                telephone,
-                HashedPassword.of(PASSWORD_HASH),
-                actif,
-                roleIds,
-                tentatives,
-                verrouilleJusqua,
-                Instant.now(),
-                Instant.now());
+        return User.builder()
+            .id(UserId.of(USER_ID))
+            .nom(Nom.of(NOM))
+            .prenom(Prenom.of(PRENOM))
+            .email(Email.of(EMAIL))
+            .telephone(telephone)
+            .hashedPassword(HashedPassword.of(PASSWORD_HASH))
+            .actif(actif)
+            .roleIds(roleIds)
+            .tentativesEchecConnexion(tentatives)
+            .verrouilleJusqua(verrouilleJusqua)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 }

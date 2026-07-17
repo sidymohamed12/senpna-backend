@@ -67,14 +67,14 @@ public class EntreeStockUseCaseImpl implements EntreeStockUseCase {
 
         Stock stock = stockRepositoryPort
                 .findByEntrepotIdAndLotIdForUpdate(entrepot.getId(), lot.getId())
-                .orElseGet(() -> Stock.ouvrir(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null));
+                .orElseGet(() -> Stock.ouvrir(new Stock.OuvertureCommand(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null)));
 
         stock.entrer(command.quantite());
         Stock saved = stockRepositoryPort.save(stock);
 
-        MouvementStock mouvement = MouvementStock.creer(type, SensMouvement.ENTREE, null, entrepot.getId(),
+        MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(type, SensMouvement.ENTREE, null, entrepot.getId(),
                 command.commandeId(), lot.getId(), lot.getMedicamentId(), command.quantite(),
-                command.referenceDocument(), command.motif(), command.utilisateurId());
+                command.referenceDocument(), command.motif(), command.utilisateurId()));
         mouvementStockRepositoryPort.save(mouvement);
 
         return stockDetailAssembler.assembler(saved);

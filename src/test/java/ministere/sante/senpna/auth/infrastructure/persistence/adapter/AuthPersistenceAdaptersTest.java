@@ -56,13 +56,13 @@ class AuthPersistenceAdaptersTest {
     @BeforeEach
     void setUp() {
         User actifDiallo = UserFixtures.actif();
-        User inactifAutre = User.creer(
+        User inactifAutre = User.creer(new User.CreationCommand(
                 ministere.sante.senpna.shared.domain.valueobject.Nom.of("Sow"),
                 ministere.sante.senpna.shared.domain.valueobject.Prenom.of("Ousmane"),
                 Email.of("ousmane.sow@sante.gouv.sn"),
                 null,
                 ministere.sante.senpna.shared.domain.valueobject.HashedPassword.of("hash"),
-                java.util.Set.of(UserFixtures.ROLE_GESTIONNAIRE_PNA_ID));
+                java.util.Set.of(UserFixtures.ROLE_GESTIONNAIRE_PNA_ID)));
         inactifAutre.desactiver();
 
         userManagementRepositoryAdapter.save(actifDiallo);

@@ -34,10 +34,28 @@ class ConditionnementSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        uniteBaseA = new ConditionnementJpaEntity(UUID.randomUUID(), medicamentA, "Comprimé", 0, BigDecimal.ONE,
-                true, BigDecimal.TEN, new BigDecimal("15"), true);
-        boiteInactiveB = new ConditionnementJpaEntity(UUID.randomUUID(), medicamentB, "Boîte de 20", 1,
-                BigDecimal.valueOf(20), false, BigDecimal.valueOf(200), BigDecimal.valueOf(300), false);
+        uniteBaseA = ConditionnementJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .medicamentId(medicamentA)
+            .nom("Comprimé")
+            .niveau(0)
+            .quantiteUniteBase(BigDecimal.ONE)
+            .estUniteBase(true)
+            .prixAchat(BigDecimal.TEN)
+            .prixVente(new BigDecimal("15"))
+            .actif(true)
+            .build();
+        boiteInactiveB = ConditionnementJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .medicamentId(medicamentB)
+            .nom("Boîte de 20")
+            .niveau(1)
+            .quantiteUniteBase(BigDecimal.valueOf(20))
+            .estUniteBase(false)
+            .prixAchat(BigDecimal.valueOf(200))
+            .prixVente(BigDecimal.valueOf(300))
+            .actif(false)
+            .build();
 
         conditionnementJpaRepository.saveAll(List.of(uniteBaseA, boiteInactiveB));
     }

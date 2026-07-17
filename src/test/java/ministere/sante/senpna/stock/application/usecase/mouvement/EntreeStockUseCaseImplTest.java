@@ -65,8 +65,8 @@ class EntreeStockUseCaseImplTest {
                 mouvementStockRepositoryPort, stockDetailAssembler, entrepotScopeGuard);
         entrepotUuid = UUID.randomUUID();
         lotUuid = UUID.randomUUID();
-        lot = Lot.creer("LOT-1", MedicamentId.generate(), FournisseurId.generate(), LocalDate.now().minusMonths(1),
-                LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+        lot = Lot.creer(new Lot.CreationCommand("LOT-1", MedicamentId.generate(), FournisseurId.generate(), LocalDate.now().minusMonths(1),
+                LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
     }
 
     private EntreeStockCommand commande(String type) {
@@ -96,7 +96,7 @@ class EntreeStockUseCaseImplTest {
     @Test
     @DisplayName("aucun stock existant pour (entrepôt, lot) → ouvre une nouvelle ligne à zéro")
     void aucunStockExistant_ouvreNouvelleLigne() {
-        Entrepot entrepot = Entrepot.creerPra("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111");
+        Entrepot entrepot = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111"));
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
         when(stockRepositoryPort.findByEntrepotIdAndLotIdForUpdate(any(), any())).thenReturn(Optional.empty());
@@ -112,8 +112,8 @@ class EntreeStockUseCaseImplTest {
     @Test
     @DisplayName("stock existant → augmente la quantité disponible et enregistre le mouvement")
     void stockExistant_augmenteEtEnregistreMovement() {
-        Entrepot entrepot = Entrepot.creerPra("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111");
-        Stock stockExistant = Stock.ouvrir(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null);
+        Entrepot entrepot = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111"));
+        Stock stockExistant = Stock.ouvrir(new Stock.OuvertureCommand(entrepot.getId(), lot.getId(), lot.getMedicamentId(), null));
         stockExistant.entrer(new BigDecimal("10"));
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
@@ -130,7 +130,7 @@ class EntreeStockUseCaseImplTest {
     @Test
     @DisplayName("type de mouvement invalide → SenPnaException (catégorie VALIDATION)")
     void typeMouvementInvalide_leveException() {
-        Entrepot entrepot = Entrepot.creerPra("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111");
+        Entrepot entrepot = Entrepot.creerPra(new Entrepot.CreationCommand("PRA-1", "PRA 1", RegionId.generate(), "Adresse", "771111111"));
         when(lotRepositoryPort.findById(any())).thenReturn(Optional.of(lot));
         when(entrepotRepositoryPort.findById(any())).thenReturn(Optional.of(entrepot));
 

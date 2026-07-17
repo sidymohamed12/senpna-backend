@@ -50,7 +50,7 @@ class ListAppelOffresUseCaseImplTest {
     @DisplayName("transmet la recherche et le statut demandés au critère de recherche, sans les forcer")
     void transmetCritereTelQuel() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         when(appelOffreRepositoryPort.search(any(), any()))
                 .thenReturn(PageResult.of(List.of(appelOffre), 0, 20, 1));
         AppelOffreSummary summary = new AppelOffreSummary(appelOffre.getId().getValue(), "AO-1", "Objet",

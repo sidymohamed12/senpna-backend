@@ -67,23 +67,120 @@ public class CommandeAchatJpaEntity extends BaseJpaEntity {
     @Column(name = "commentaire", length = 1000)
     private String commentaire;
 
-    public CommandeAchatJpaEntity(UUID id, String reference, UUID fournisseurId, UUID entrepotDestinationId,
-            StatutCommandeAchat statut, Instant dateAccuseReceptionFournisseur, Integer delaiLivraisonConfirmeJours,
-            LocalDate dateLivraisonConfirmee, LocalDate avisDateExpedition, String avisTransporteur,
-            String avisNumeroSuivi, LocalDate avisDateLivraisonEstimee, String motifRejet, String commentaire) {
-        super(id);
-        this.reference = reference;
-        this.fournisseurId = fournisseurId;
-        this.entrepotDestinationId = entrepotDestinationId;
-        this.statut = statut;
-        this.dateAccuseReceptionFournisseur = dateAccuseReceptionFournisseur;
-        this.delaiLivraisonConfirmeJours = delaiLivraisonConfirmeJours;
-        this.dateLivraisonConfirmee = dateLivraisonConfirmee;
-        this.avisDateExpedition = avisDateExpedition;
-        this.avisTransporteur = avisTransporteur;
-        this.avisNumeroSuivi = avisNumeroSuivi;
-        this.avisDateLivraisonEstimee = avisDateLivraisonEstimee;
-        this.motifRejet = motifRejet;
-        this.commentaire = commentaire;
+    private CommandeAchatJpaEntity(Builder builder) {
+        super(builder.id);
+        this.reference = builder.reference;
+        this.fournisseurId = builder.fournisseurId;
+        this.entrepotDestinationId = builder.entrepotDestinationId;
+        this.statut = builder.statut;
+        this.dateAccuseReceptionFournisseur = builder.dateAccuseReceptionFournisseur;
+        this.delaiLivraisonConfirmeJours = builder.delaiLivraisonConfirmeJours;
+        this.dateLivraisonConfirmee = builder.dateLivraisonConfirmee;
+        this.avisDateExpedition = builder.avisDateExpedition;
+        this.avisTransporteur = builder.avisTransporteur;
+        this.avisNumeroSuivi = builder.avisNumeroSuivi;
+        this.avisDateLivraisonEstimee = builder.avisDateLivraisonEstimee;
+        this.motifRejet = builder.motifRejet;
+        this.commentaire = builder.commentaire;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String reference;
+        private UUID fournisseurId;
+        private UUID entrepotDestinationId;
+        private StatutCommandeAchat statut;
+        private Instant dateAccuseReceptionFournisseur;
+        private Integer delaiLivraisonConfirmeJours;
+        private LocalDate dateLivraisonConfirmee;
+        private LocalDate avisDateExpedition;
+        private String avisTransporteur;
+        private String avisNumeroSuivi;
+        private LocalDate avisDateLivraisonEstimee;
+        private String motifRejet;
+        private String commentaire;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder reference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder fournisseurId(UUID fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder entrepotDestinationId(UUID entrepotDestinationId) {
+            this.entrepotDestinationId = entrepotDestinationId;
+            return this;
+        }
+
+        public Builder statut(StatutCommandeAchat statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder dateAccuseReceptionFournisseur(Instant dateAccuseReceptionFournisseur) {
+            this.dateAccuseReceptionFournisseur = dateAccuseReceptionFournisseur;
+            return this;
+        }
+
+        public Builder delaiLivraisonConfirmeJours(Integer delaiLivraisonConfirmeJours) {
+            this.delaiLivraisonConfirmeJours = delaiLivraisonConfirmeJours;
+            return this;
+        }
+
+        public Builder dateLivraisonConfirmee(LocalDate dateLivraisonConfirmee) {
+            this.dateLivraisonConfirmee = dateLivraisonConfirmee;
+            return this;
+        }
+
+        public Builder avisDateExpedition(LocalDate avisDateExpedition) {
+            this.avisDateExpedition = avisDateExpedition;
+            return this;
+        }
+
+        public Builder avisTransporteur(String avisTransporteur) {
+            this.avisTransporteur = avisTransporteur;
+            return this;
+        }
+
+        public Builder avisNumeroSuivi(String avisNumeroSuivi) {
+            this.avisNumeroSuivi = avisNumeroSuivi;
+            return this;
+        }
+
+        public Builder avisDateLivraisonEstimee(LocalDate avisDateLivraisonEstimee) {
+            this.avisDateLivraisonEstimee = avisDateLivraisonEstimee;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public Builder commentaire(String commentaire) {
+            this.commentaire = commentaire;
+            return this;
+        }
+
+        public CommandeAchatJpaEntity build() {
+            return new CommandeAchatJpaEntity(this);
+        }
+    }
+
 }

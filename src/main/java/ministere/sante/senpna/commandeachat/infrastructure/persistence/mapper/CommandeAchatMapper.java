@@ -27,41 +27,43 @@ public class CommandeAchatMapper {
                         entity.getAvisNumeroSuivi(), entity.getAvisDateLivraisonEstimee())
                 : null;
 
-        return CommandeAchat.reconstruct(
-                CommandeAchatId.of(entity.getId()),
-                entity.getReference(),
-                FournisseurId.of(entity.getFournisseurId()),
-                EntrepotId.of(entity.getEntrepotDestinationId()),
-                entity.getStatut(),
-                lignes,
-                entity.getDateAccuseReceptionFournisseur(),
-                entity.getDelaiLivraisonConfirmeJours(),
-                entity.getDateLivraisonConfirmee(),
-                avis,
-                entity.getMotifRejet(),
-                entity.getCommentaire(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return CommandeAchat.builder()
+            .id(CommandeAchatId.of(entity.getId()))
+            .reference(entity.getReference())
+            .fournisseurId(FournisseurId.of(entity.getFournisseurId()))
+            .entrepotDestinationId(EntrepotId.of(entity.getEntrepotDestinationId()))
+            .statut(entity.getStatut())
+            .lignes(lignes)
+            .dateAccuseReceptionFournisseur(entity.getDateAccuseReceptionFournisseur())
+            .delaiLivraisonConfirmeJours(entity.getDelaiLivraisonConfirmeJours())
+            .dateLivraisonConfirmee(entity.getDateLivraisonConfirmee())
+            .avisExpedition(avis)
+            .motifRejet(entity.getMotifRejet())
+            .commentaire(entity.getCommentaire())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public CommandeAchatJpaEntity toEntity(CommandeAchat commande) {
         AvisExpedition avis = commande.getAvisExpedition();
 
-        CommandeAchatJpaEntity entity = new CommandeAchatJpaEntity(
-                commande.getId().getValue(),
-                commande.getReference(),
-                commande.getFournisseurId().getValue(),
-                commande.getEntrepotDestinationId().getValue(),
-                commande.getStatut(),
-                commande.getDateAccuseReceptionFournisseur(),
-                commande.getDelaiLivraisonConfirmeJours(),
-                commande.getDateLivraisonConfirmee(),
-                avis != null ? avis.getDateExpedition() : null,
-                avis != null ? avis.getTransporteur() : null,
-                avis != null ? avis.getNumeroSuivi() : null,
-                avis != null ? avis.getDateLivraisonEstimee() : null,
-                commande.getMotifRejet(),
-                commande.getCommentaire());
+        CommandeAchatJpaEntity entity = CommandeAchatJpaEntity.builder()
+            .id(commande.getId().getValue())
+            .reference(commande.getReference())
+            .fournisseurId(commande.getFournisseurId().getValue())
+            .entrepotDestinationId(commande.getEntrepotDestinationId().getValue())
+            .statut(commande.getStatut())
+            .dateAccuseReceptionFournisseur(commande.getDateAccuseReceptionFournisseur())
+            .delaiLivraisonConfirmeJours(commande.getDelaiLivraisonConfirmeJours())
+            .dateLivraisonConfirmee(commande.getDateLivraisonConfirmee())
+            .avisDateExpedition(avis != null ? avis.getDateExpedition() : null)
+            .avisTransporteur(avis != null ? avis.getTransporteur() : null)
+            .avisNumeroSuivi(avis != null ? avis.getNumeroSuivi() : null)
+            .avisDateLivraisonEstimee(avis != null ? avis.getDateLivraisonEstimee() : null)
+            .motifRejet(commande.getMotifRejet())
+            .commentaire(commande.getCommentaire())
+            .build();
         entity.setCreatedAt(commande.getCreatedAt());
         entity.setUpdatedAt(commande.getUpdatedAt());
         return entity;
@@ -69,38 +71,40 @@ public class CommandeAchatMapper {
 
     public List<LigneCommandeAchatJpaEntity> toEntityLignes(CommandeAchat commande) {
         return commande.getLignes().stream()
-                .map(ligne -> new LigneCommandeAchatJpaEntity(
-                        ligne.getId().getValue(),
-                        commande.getId().getValue(),
-                        ligne.getMedicamentId().getValue(),
-                        ligne.getConditionnementId().getValue(),
-                        ligne.getQuantiteCommandee(),
-                        ligne.getPrixUnitaire(),
-                        ligne.getNumeroLot(),
-                        ligne.getDateFabrication(),
-                        ligne.getDateExpiration(),
-                        ligne.getCertificatAnalyseUrl(),
-                        ligne.getQuantiteExpediee(),
-                        ligne.getQuantiteRecue(),
-                        ligne.getQuantiteRefusee(),
-                        ligne.getMotifRefus()))
+                .map(ligne -> LigneCommandeAchatJpaEntity.builder()
+                    .id(ligne.getId().getValue())
+                    .commandeAchatId(commande.getId().getValue())
+                    .medicamentId(ligne.getMedicamentId().getValue())
+                    .conditionnementId(ligne.getConditionnementId().getValue())
+                    .quantiteCommandee(ligne.getQuantiteCommandee())
+                    .prixUnitaire(ligne.getPrixUnitaire())
+                    .numeroLot(ligne.getNumeroLot())
+                    .dateFabrication(ligne.getDateFabrication())
+                    .dateExpiration(ligne.getDateExpiration())
+                    .certificatAnalyseUrl(ligne.getCertificatAnalyseUrl())
+                    .quantiteExpediee(ligne.getQuantiteExpediee())
+                    .quantiteRecue(ligne.getQuantiteRecue())
+                    .quantiteRefusee(ligne.getQuantiteRefusee())
+                    .motifRefus(ligne.getMotifRefus())
+                    .build())
                 .toList();
     }
 
     private LigneCommandeAchat toDomainLigne(LigneCommandeAchatJpaEntity entity) {
-        return LigneCommandeAchat.reconstruct(
-                LigneCommandeAchatId.of(entity.getId()),
-                MedicamentId.of(entity.getMedicamentId()),
-                ConditionnementId.of(entity.getConditionnementId()),
-                entity.getQuantiteCommandee(),
-                entity.getPrixUnitaire(),
-                entity.getNumeroLot(),
-                entity.getDateFabrication(),
-                entity.getDateExpiration(),
-                entity.getCertificatAnalyseUrl(),
-                entity.getQuantiteExpediee(),
-                entity.getQuantiteRecue(),
-                entity.getQuantiteRefusee(),
-                entity.getMotifRefus());
+        return LigneCommandeAchat.builder()
+            .id(LigneCommandeAchatId.of(entity.getId()))
+            .medicamentId(MedicamentId.of(entity.getMedicamentId()))
+            .conditionnementId(ConditionnementId.of(entity.getConditionnementId()))
+            .quantiteCommandee(entity.getQuantiteCommandee())
+            .prixUnitaire(entity.getPrixUnitaire())
+            .numeroLot(entity.getNumeroLot())
+            .dateFabrication(entity.getDateFabrication())
+            .dateExpiration(entity.getDateExpiration())
+            .certificatAnalyseUrl(entity.getCertificatAnalyseUrl())
+            .quantiteExpediee(entity.getQuantiteExpediee())
+            .quantiteRecue(entity.getQuantiteRecue())
+            .quantiteRefusee(entity.getQuantiteRefusee())
+            .motifRefus(entity.getMotifRefus())
+            .build();
     }
 }

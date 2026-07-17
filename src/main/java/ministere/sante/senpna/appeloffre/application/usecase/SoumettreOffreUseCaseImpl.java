@@ -74,8 +74,8 @@ public class SoumettreOffreUseCaseImpl implements SoumettreOffreUseCase {
 
         List<LigneOffre> lignes = command.lignes().stream().map(this::toLigne).toList();
 
-        OffreFournisseur offre = OffreFournisseur.soumettre(appelOffreId, fournisseurId, command.commentaire(),
-                lignes);
+        OffreFournisseur offre = OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(appelOffreId, fournisseurId, command.commentaire(),
+                lignes));
 
         OffreFournisseur saved = offreFournisseurRepositoryPort.save(offre);
         return offreDetailAssembler.assembler(saved);

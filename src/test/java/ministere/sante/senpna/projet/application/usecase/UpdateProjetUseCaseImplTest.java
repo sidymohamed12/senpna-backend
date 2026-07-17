@@ -57,8 +57,8 @@ class UpdateProjetUseCaseImplTest {
     @DisplayName("modification valide → contenu mis à jour et sauvegardé")
     void modificationValide_metAJourEtSauvegarde() {
         UUID id = UUID.randomUUID();
-        Projet projet = Projet.creer(CategorieProjet.SOCIAL, "Ancien nom", "Ancienne desc", List.of(), List.of(),
-                null);
+        Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SOCIAL, "Ancien nom", "Ancienne desc", List.of(), List.of(),
+                null));
         when(projetRepositoryPort.findById(ProjetId.of(id))).thenReturn(Optional.of(projet));
         when(commandMapper.versCategorie("SANTE")).thenReturn(CategorieProjet.SANTE);
         when(projetRepositoryPort.save(projet)).thenReturn(projet);

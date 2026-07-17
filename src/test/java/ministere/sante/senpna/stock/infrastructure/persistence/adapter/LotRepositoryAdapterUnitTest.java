@@ -58,14 +58,30 @@ class LotRepositoryAdapterUnitTest {
         UUID id = UUID.randomUUID();
         UUID medicamentId = UUID.randomUUID();
         UUID fournisseurId = UUID.randomUUID();
-        Lot lot = Lot.reconstruct(LotId.of(id), "LOT-001", MedicamentId.of(medicamentId),
-                        FournisseurId.of(fournisseurId),
-                        LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(6), BigDecimal.TEN,
-                        new BigDecimal("15"),
-                        StatutLot.ACTIF, java.time.Instant.now(), java.time.Instant.now());
-        LotJpaEntity entity = new LotJpaEntity(id, "LOT-001", medicamentId, fournisseurId,
-                        LocalDate.now().minusMonths(1),
-                        LocalDate.now().plusMonths(6), BigDecimal.TEN, new BigDecimal("15"), "ACTIF");
+        Lot lot = Lot.builder()
+            .id(LotId.of(id))
+            .numeroLot("LOT-001")
+            .medicamentId(MedicamentId.of(medicamentId))
+            .fournisseurId(FournisseurId.of(fournisseurId))
+            .dateFabrication(LocalDate.now().minusMonths(1))
+            .dateExpiration(LocalDate.now().plusMonths(6))
+            .prixAchat(BigDecimal.TEN)
+            .prixVente(new BigDecimal("15"))
+            .statut(StatutLot.ACTIF)
+            .createdAt(java.time.Instant.now())
+            .updatedAt(java.time.Instant.now())
+            .build();
+        LotJpaEntity entity = LotJpaEntity.builder()
+            .id(id)
+            .numeroLot("LOT-001")
+            .medicamentId(medicamentId)
+            .fournisseurId(fournisseurId)
+            .dateFabrication(LocalDate.now().minusMonths(1))
+            .dateExpiration(LocalDate.now().plusMonths(6))
+            .prixAchat(BigDecimal.TEN)
+            .prixVente(new BigDecimal("15"))
+            .statut("ACTIF")
+            .build();
 
         @BeforeEach
         void setUp() {
@@ -148,14 +164,28 @@ class LotRepositoryAdapterUnitTest {
         @Test
         @DisplayName("findActifsNonExpiresParMedicamentTriesFefo() exclut les lots déjà expirés")
         void findActifsNonExpiresParMedicamentTriesFefo_excludExpires() {
-                LotJpaEntity actifValide = new LotJpaEntity(UUID.randomUUID(), "LOT-A", medicamentId, fournisseurId,
-                                LocalDate.now().minusMonths(2), LocalDate.now().plusDays(10), BigDecimal.TEN,
-                                BigDecimal.TEN,
-                                "ACTIF");
-                LotJpaEntity actifExpireHier = new LotJpaEntity(UUID.randomUUID(), "LOT-B", medicamentId, fournisseurId,
-                                LocalDate.now().minusMonths(6), LocalDate.now().minusDays(1), BigDecimal.TEN,
-                                BigDecimal.TEN,
-                                "ACTIF");
+                LotJpaEntity actifValide = LotJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .numeroLot("LOT-A")
+                    .medicamentId(medicamentId)
+                    .fournisseurId(fournisseurId)
+                    .dateFabrication(LocalDate.now().minusMonths(2))
+                    .dateExpiration(LocalDate.now().plusDays(10))
+                    .prixAchat(BigDecimal.TEN)
+                    .prixVente(BigDecimal.TEN)
+                    .statut("ACTIF")
+                    .build();
+                LotJpaEntity actifExpireHier = LotJpaEntity.builder()
+                    .id(UUID.randomUUID())
+                    .numeroLot("LOT-B")
+                    .medicamentId(medicamentId)
+                    .fournisseurId(fournisseurId)
+                    .dateFabrication(LocalDate.now().minusMonths(6))
+                    .dateExpiration(LocalDate.now().minusDays(1))
+                    .prixAchat(BigDecimal.TEN)
+                    .prixVente(BigDecimal.TEN)
+                    .statut("ACTIF")
+                    .build();
                 when(lotJpaRepository.findByMedicamentIdAndStatutOrderByDateExpirationAsc(medicamentId, "ACTIF"))
                                 .thenReturn(List.of(actifExpireHier, actifValide));
                 when(lotMapper.toDomain(actifValide)).thenReturn(lot);

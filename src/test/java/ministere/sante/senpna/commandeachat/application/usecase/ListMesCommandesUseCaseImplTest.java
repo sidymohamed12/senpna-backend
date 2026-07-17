@@ -50,12 +50,12 @@ class ListMesCommandesUseCaseImplTest {
         @DisplayName("transmet le fournisseur et le statut au port")
         void transmetFournisseurEtStatut() {
                 FournisseurId fournisseurId = FournisseurId.generate();
-                LigneCommandeAchat ligne = LigneCommandeAchat.creer(MedicamentId.generate(),
+                LigneCommandeAchat ligne = LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(),
                                 ConditionnementId.generate(),
-                                BigDecimal.TEN, BigDecimal.TEN);
-                CommandeAchat commande = CommandeAchat.creer("BC-1", fournisseurId, EntrepotId.generate(),
+                                BigDecimal.TEN, BigDecimal.TEN));
+                CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", fournisseurId, EntrepotId.generate(),
                                 List.of(ligne),
-                                null);
+                                null));
                 when(commandeAchatRepositoryPort.findByFournisseurId(any(), any(), any()))
                                 .thenReturn(PageResult.of(List.of(commande), 0, 20, 1));
                 ministere.sante.senpna.commandeachat.domain.command.CommandeAchatCommands.CommandeAchatSummary summary = new ministere.sante.senpna.commandeachat.domain.command.CommandeAchatCommands.CommandeAchatSummary(

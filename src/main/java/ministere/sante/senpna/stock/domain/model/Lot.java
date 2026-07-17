@@ -49,32 +49,119 @@ public class Lot extends AggregateRoot<LotId> {
     private BigDecimal prixVente;
     private StatutLot statut;
 
-    private Lot(LotId id, String numeroLot, MedicamentId medicamentId, FournisseurId fournisseurId,
-            LocalDate dateFabrication, LocalDate dateExpiration, BigDecimal prixAchat, BigDecimal prixVente,
-            StatutLot statut, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.numeroLot = validerNumeroLot(numeroLot);
-        this.medicamentId = Objects.requireNonNull(medicamentId, "Le médicament est obligatoire");
-        this.fournisseurId = Objects.requireNonNull(fournisseurId, "Le fournisseur est obligatoire");
-        this.dateExpiration = Objects.requireNonNull(dateExpiration, "La date d'expiration est obligatoire");
-        this.dateFabrication = validerDateFabrication(dateFabrication, this.dateExpiration);
-        this.prixAchat = validerPrix(prixAchat, "Le prix d'achat");
-        this.prixVente = validerPrix(prixVente, "Le prix de vente");
-        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
+    private Lot(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.numeroLot = validerNumeroLot(builder.numeroLot);
+        this.medicamentId = Objects.requireNonNull(builder.medicamentId, "Le médicament est obligatoire");
+        this.fournisseurId = Objects.requireNonNull(builder.fournisseurId, "Le fournisseur est obligatoire");
+        this.dateExpiration = Objects.requireNonNull(builder.dateExpiration, "La date d'expiration est obligatoire");
+        this.dateFabrication = validerDateFabrication(builder.dateFabrication, this.dateExpiration);
+        this.prixAchat = validerPrix(builder.prixAchat, "Le prix d'achat");
+        this.prixVente = validerPrix(builder.prixVente, "Le prix de vente");
+        this.statut = Objects.requireNonNull(builder.statut, "Le statut est obligatoire");
     }
 
-    public static Lot reconstruct(LotId id, String numeroLot, MedicamentId medicamentId, FournisseurId fournisseurId,
-            LocalDate dateFabrication, LocalDate dateExpiration, BigDecimal prixAchat, BigDecimal prixVente,
-            StatutLot statut, Instant createdAt, Instant updatedAt) {
-        return new Lot(id, numeroLot, medicamentId, fournisseurId, dateFabrication, dateExpiration, prixAchat,
-                prixVente, statut, createdAt, updatedAt);
-    }
-
-    public static Lot creer(String numeroLot, MedicamentId medicamentId, FournisseurId fournisseurId,
+    /** Données nécessaires à la création d'un nouveau lot. */
+    public record CreationCommand(String numeroLot, MedicamentId medicamentId, FournisseurId fournisseurId,
             LocalDate dateFabrication, LocalDate dateExpiration, BigDecimal prixAchat, BigDecimal prixVente) {
+    }
+
+    public static Lot creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new Lot(LotId.generate(), numeroLot, medicamentId, fournisseurId, dateFabrication, dateExpiration,
-                prixAchat, prixVente, StatutLot.ACTIF, maintenant, maintenant);
+        return builder()
+                .id(LotId.generate())
+                .numeroLot(command.numeroLot())
+                .medicamentId(command.medicamentId())
+                .fournisseurId(command.fournisseurId())
+                .dateFabrication(command.dateFabrication())
+                .dateExpiration(command.dateExpiration())
+                .prixAchat(command.prixAchat())
+                .prixVente(command.prixVente())
+                .statut(StatutLot.ACTIF)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private LotId id;
+        private String numeroLot;
+        private MedicamentId medicamentId;
+        private FournisseurId fournisseurId;
+        private LocalDate dateFabrication;
+        private LocalDate dateExpiration;
+        private BigDecimal prixAchat;
+        private BigDecimal prixVente;
+        private StatutLot statut;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(LotId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder numeroLot(String numeroLot) {
+            this.numeroLot = numeroLot;
+            return this;
+        }
+
+        public Builder medicamentId(MedicamentId medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder fournisseurId(FournisseurId fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder dateFabrication(LocalDate dateFabrication) {
+            this.dateFabrication = dateFabrication;
+            return this;
+        }
+
+        public Builder dateExpiration(LocalDate dateExpiration) {
+            this.dateExpiration = dateExpiration;
+            return this;
+        }
+
+        public Builder prixAchat(BigDecimal prixAchat) {
+            this.prixAchat = prixAchat;
+            return this;
+        }
+
+        public Builder prixVente(BigDecimal prixVente) {
+            this.prixVente = prixVente;
+            return this;
+        }
+
+        public Builder statut(StatutLot statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Lot build() {
+            return new Lot(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

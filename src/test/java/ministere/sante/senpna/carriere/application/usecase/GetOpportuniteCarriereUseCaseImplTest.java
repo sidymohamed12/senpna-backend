@@ -35,9 +35,9 @@ class GetOpportuniteCarriereUseCaseImplTest {
     OpportuniteCarriereDetailAssembler assembler;
 
     private OpportuniteCarriere opportunite(boolean publiee) {
-        OpportuniteCarriere o = OpportuniteCarriere.creer("Titre", "Entreprise", "Desc", null, "Dakar",
+        OpportuniteCarriere o = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Titre", "Entreprise", "Desc", null, "Dakar",
                 TypeContrat.CDI, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                "Auteur", null);
+                "Auteur", null));
         if (publiee) {
             o.publier();
         }

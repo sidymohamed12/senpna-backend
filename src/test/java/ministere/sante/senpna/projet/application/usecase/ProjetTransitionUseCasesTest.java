@@ -44,7 +44,7 @@ class ProjetTransitionUseCasesTest {
 
     @BeforeEach
     void setUp() {
-        projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of("O"), List.of("I"), null);
+        projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of("O"), List.of("I"), null));
         id = projet.getId().getValue();
     }
 

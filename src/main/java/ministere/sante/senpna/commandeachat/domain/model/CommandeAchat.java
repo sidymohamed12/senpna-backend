@@ -50,45 +50,142 @@ public class CommandeAchat extends AggregateRoot<CommandeAchatId> {
     private String motifRejet;
     private String commentaire;
 
-    private CommandeAchat(CommandeAchatId id, String reference, FournisseurId fournisseurId,
-            EntrepotId entrepotDestinationId, StatutCommandeAchat statut, List<LigneCommandeAchat> lignes,
-            Instant dateAccuseReceptionFournisseur, Integer delaiLivraisonConfirmeJours,
-            LocalDate dateLivraisonConfirmee, AvisExpedition avisExpedition, String motifRejet, String commentaire,
-            Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.reference = validerReference(reference);
-        this.fournisseurId = Objects.requireNonNull(fournisseurId, "Le fournisseur est obligatoire");
-        this.entrepotDestinationId = Objects.requireNonNull(entrepotDestinationId,
+    private CommandeAchat(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.reference = validerReference(builder.reference);
+        this.fournisseurId = Objects.requireNonNull(builder.fournisseurId, "Le fournisseur est obligatoire");
+        this.entrepotDestinationId = Objects.requireNonNull(builder.entrepotDestinationId,
                 "L'entrepôt de destination est obligatoire");
-        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
-        this.lignes = new ArrayList<>(Objects.requireNonNull(lignes, "Les lignes ne peuvent pas être null"));
+        this.statut = Objects.requireNonNull(builder.statut, "Le statut est obligatoire");
+        this.lignes = new ArrayList<>(Objects.requireNonNull(builder.lignes, "Les lignes ne peuvent pas être null"));
         if (this.lignes.isEmpty()) {
             throw new IllegalArgumentException("Une commande d'achat doit contenir au moins une ligne");
         }
-        this.dateAccuseReceptionFournisseur = dateAccuseReceptionFournisseur;
-        this.delaiLivraisonConfirmeJours = delaiLivraisonConfirmeJours;
-        this.dateLivraisonConfirmee = dateLivraisonConfirmee;
-        this.avisExpedition = avisExpedition;
-        this.motifRejet = motifRejet;
-        this.commentaire = commentaire;
+        this.dateAccuseReceptionFournisseur = builder.dateAccuseReceptionFournisseur;
+        this.delaiLivraisonConfirmeJours = builder.delaiLivraisonConfirmeJours;
+        this.dateLivraisonConfirmee = builder.dateLivraisonConfirmee;
+        this.avisExpedition = builder.avisExpedition;
+        this.motifRejet = builder.motifRejet;
+        this.commentaire = builder.commentaire;
     }
 
-    public static CommandeAchat reconstruct(CommandeAchatId id, String reference, FournisseurId fournisseurId,
-            EntrepotId entrepotDestinationId, StatutCommandeAchat statut, List<LigneCommandeAchat> lignes,
-            Instant dateAccuseReceptionFournisseur, Integer delaiLivraisonConfirmeJours,
-            LocalDate dateLivraisonConfirmee, AvisExpedition avisExpedition, String motifRejet, String commentaire,
-            Instant createdAt, Instant updatedAt) {
-        return new CommandeAchat(id, reference, fournisseurId, entrepotDestinationId, statut, lignes,
-                dateAccuseReceptionFournisseur, delaiLivraisonConfirmeJours, dateLivraisonConfirmee, avisExpedition,
-                motifRejet, commentaire, createdAt, updatedAt);
-    }
-
-    public static CommandeAchat creer(String reference, FournisseurId fournisseurId, EntrepotId entrepotDestinationId,
+    /** Données nécessaires à la création d'une nouvelle commande d'achat. */
+    public record CreationCommand(String reference, FournisseurId fournisseurId, EntrepotId entrepotDestinationId,
             List<LigneCommandeAchat> lignes, String commentaire) {
+    }
+
+    public static CommandeAchat creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new CommandeAchat(CommandeAchatId.generate(), reference, fournisseurId, entrepotDestinationId,
-                StatutCommandeAchat.EN_ATTENTE_VALIDATION, lignes, null, null, null, null, null, commentaire,
-                maintenant, maintenant);
+        return builder()
+                .id(CommandeAchatId.generate())
+                .reference(command.reference())
+                .fournisseurId(command.fournisseurId())
+                .entrepotDestinationId(command.entrepotDestinationId())
+                .statut(StatutCommandeAchat.EN_ATTENTE_VALIDATION)
+                .lignes(command.lignes())
+                .commentaire(command.commentaire())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private CommandeAchatId id;
+        private String reference;
+        private FournisseurId fournisseurId;
+        private EntrepotId entrepotDestinationId;
+        private StatutCommandeAchat statut;
+        private List<LigneCommandeAchat> lignes;
+        private Instant dateAccuseReceptionFournisseur;
+        private Integer delaiLivraisonConfirmeJours;
+        private LocalDate dateLivraisonConfirmee;
+        private AvisExpedition avisExpedition;
+        private String motifRejet;
+        private String commentaire;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(CommandeAchatId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder reference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder fournisseurId(FournisseurId fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder entrepotDestinationId(EntrepotId entrepotDestinationId) {
+            this.entrepotDestinationId = entrepotDestinationId;
+            return this;
+        }
+
+        public Builder statut(StatutCommandeAchat statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder lignes(List<LigneCommandeAchat> lignes) {
+            this.lignes = lignes;
+            return this;
+        }
+
+        public Builder dateAccuseReceptionFournisseur(Instant dateAccuseReceptionFournisseur) {
+            this.dateAccuseReceptionFournisseur = dateAccuseReceptionFournisseur;
+            return this;
+        }
+
+        public Builder delaiLivraisonConfirmeJours(Integer delaiLivraisonConfirmeJours) {
+            this.delaiLivraisonConfirmeJours = delaiLivraisonConfirmeJours;
+            return this;
+        }
+
+        public Builder dateLivraisonConfirmee(LocalDate dateLivraisonConfirmee) {
+            this.dateLivraisonConfirmee = dateLivraisonConfirmee;
+            return this;
+        }
+
+        public Builder avisExpedition(AvisExpedition avisExpedition) {
+            this.avisExpedition = avisExpedition;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public Builder commentaire(String commentaire) {
+            this.commentaire = commentaire;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public CommandeAchat build() {
+            return new CommandeAchat(this);
+        }
     }
 
     // ── PNA : validation interne ─────────────────────────────────────────

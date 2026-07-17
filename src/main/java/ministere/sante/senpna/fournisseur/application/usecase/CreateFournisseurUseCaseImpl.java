@@ -33,8 +33,8 @@ public class CreateFournisseurUseCaseImpl implements CreateFournisseurUseCase {
             throw new NomFournisseurDejaUtiliseException(command.nom());
         }
 
-        Fournisseur fournisseur = Fournisseur.creer(command.nom(), command.adresse(), command.telephone(),
-                command.email(), command.contactPrincipal());
+        Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand(command.nom(), command.adresse(), command.telephone(),
+                command.email(), command.contactPrincipal()));
 
         Fournisseur saved = fournisseurRepositoryPort.save(fournisseur);
 

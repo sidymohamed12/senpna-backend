@@ -63,11 +63,44 @@ class MedicamentPersistenceAdaptersUnitTest {
     UUID id = UUID.randomUUID();
     UUID familleId = UUID.randomUUID();
     UUID formeId = UUID.randomUUID();
-    Medicament medicament = Medicament.reconstruct(MedicamentId.of(id), "MED-1", "Doliprane", "Paracétamol", "500mg",
-            FormeId.of(formeId), FamilleId.of(familleId), null, null, null, null, false, "Sanofi", null, null, true,
-            java.time.Instant.now(), java.time.Instant.now());
-    MedicamentJpaEntity entity = new MedicamentJpaEntity(id, "MED-1", "Doliprane", "Paracétamol", "500mg", formeId,
-            familleId, null, null, null, null, false, "Sanofi", null, null, true);
+    Medicament medicament = Medicament.builder()
+        .id(MedicamentId.of(id))
+        .code("MED-1")
+        .nomCommercial("Doliprane")
+        .dci("Paracétamol")
+        .dosage("500mg")
+        .formeId(FormeId.of(formeId))
+        .familleId(FamilleId.of(familleId))
+        .voieAdministration(null)
+        .temperatureConservation(null)
+        .programmeSante(null)
+        .delaiApprovisionnementJours(null)
+        .necessiteOrdonnance(false)
+        .fabricant("Sanofi")
+        .stockMinimum(null)
+        .stockMaximum(null)
+        .actif(true)
+        .createdAt(java.time.Instant.now())
+        .updatedAt(java.time.Instant.now())
+        .build();
+    MedicamentJpaEntity entity = MedicamentJpaEntity.builder()
+        .id(id)
+        .code("MED-1")
+        .nomCommercial("Doliprane")
+        .dci("Paracétamol")
+        .dosage("500mg")
+        .formeId(formeId)
+        .familleId(familleId)
+        .voieAdministration(null)
+        .temperatureConservation(null)
+        .programmeSante(null)
+        .delaiApprovisionnementJours(null)
+        .necessiteOrdonnance(false)
+        .fabricant("Sanofi")
+        .stockMinimum(null)
+        .stockMaximum(null)
+        .actif(true)
+        .build();
 
     @BeforeEach
     void setUp() {

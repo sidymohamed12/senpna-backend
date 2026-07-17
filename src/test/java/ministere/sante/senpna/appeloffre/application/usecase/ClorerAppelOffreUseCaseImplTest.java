@@ -45,7 +45,7 @@ class ClorerAppelOffreUseCaseImplTest {
 
     private AppelOffre appelOffre() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         appelOffre.publier();
         return appelOffre;
     }

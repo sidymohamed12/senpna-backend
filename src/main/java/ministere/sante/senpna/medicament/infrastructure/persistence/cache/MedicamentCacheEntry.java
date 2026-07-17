@@ -61,24 +61,25 @@ public record MedicamentCacheEntry(
     }
 
     public Medicament toDomain() {
-        return Medicament.reconstruct(
-                MedicamentId.of(id),
-                code,
-                nomCommercial,
-                dci,
-                dosage,
-                FormeId.of(formeId),
-                FamilleId.of(familleId),
-                voieAdministration,
-                temperatureConservation,
-                programmeSante,
-                delaiApprovisionnementJours,
-                necessiteOrdonnance,
-                fabricant,
-                stockMinimum,
-                stockMaximum,
-                actif,
-                createdAt,
-                updatedAt);
+        return Medicament.builder()
+            .id(MedicamentId.of(id))
+            .code(code)
+            .nomCommercial(nomCommercial)
+            .dci(dci)
+            .dosage(dosage)
+            .formeId(FormeId.of(formeId))
+            .familleId(FamilleId.of(familleId))
+            .voieAdministration(voieAdministration)
+            .temperatureConservation(temperatureConservation)
+            .programmeSante(programmeSante)
+            .delaiApprovisionnementJours(delaiApprovisionnementJours)
+            .necessiteOrdonnance(necessiteOrdonnance)
+            .fabricant(fabricant)
+            .stockMinimum(stockMinimum)
+            .stockMaximum(stockMaximum)
+            .actif(actif)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

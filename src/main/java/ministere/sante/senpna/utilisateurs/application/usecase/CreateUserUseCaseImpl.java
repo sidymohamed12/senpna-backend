@@ -195,13 +195,13 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         String motDePasseTemporaire = temporaryPasswordGenerator.generer();
         HashedPassword hashedPassword = HashedPassword.of(passwordEncoderPort.encoder(motDePasseTemporaire));
 
-        User user = User.creer(
+        User user = User.creer(new User.CreationCommand(
                 Nom.of(command.nom()),
                 Prenom.of(command.prenom()),
                 email,
                 telephone,
                 hashedPassword,
-                command.roleIds());
+                command.roleIds()));
 
         User saved = userManagementRepositoryPort.save(user);
         return new UserCree(saved, motDePasseTemporaire);

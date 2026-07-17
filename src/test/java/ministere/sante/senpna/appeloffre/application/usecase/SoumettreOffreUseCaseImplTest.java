@@ -55,7 +55,7 @@ class SoumettreOffreUseCaseImplTest {
 
     private AppelOffre appelOffrePublie(LocalDate dateCloture) {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", dateCloture, List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", dateCloture, List.of(ligne)));
         appelOffre.publier();
         return appelOffre;
     }
@@ -79,7 +79,7 @@ class SoumettreOffreUseCaseImplTest {
     @DisplayName("appel d'offres non publié (BROUILLON) → AppelOffreNonPublieException")
     void nonPublie_leveException() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
 
         var command = commande(appelOffre.getId().getValue(), ligne.getId().getValue());
@@ -92,9 +92,16 @@ class SoumettreOffreUseCaseImplTest {
         // Publié avec une date de clôture qui, au moment du test, est déjà dépassée :
         // on construit via reconstruct() pour contourner la validation "future" de creer().
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.reconstruct(AppelOffreId.generate(), "AO-1", "Objet",
-                LocalDate.now().minusDays(1), ministere.sante.senpna.appeloffre.domain.valueobject.StatutAppelOffre.PUBLIE,
-                List.of(ligne), java.time.Instant.now(), java.time.Instant.now());
+        AppelOffre appelOffre = AppelOffre.builder()
+            .id(AppelOffreId.generate())
+            .reference("AO-1")
+            .objet("Objet")
+            .dateCloture(LocalDate.now().minusDays(1))
+            .statut(ministere.sante.senpna.appeloffre.domain.valueobject.StatutAppelOffre.PUBLIE)
+            .lignes(List.of(ligne))
+            .createdAt(java.time.Instant.now())
+            .updatedAt(java.time.Instant.now())
+            .build();
         when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
 
         var command = commande(appelOffre.getId().getValue(), ligne.getId().getValue());

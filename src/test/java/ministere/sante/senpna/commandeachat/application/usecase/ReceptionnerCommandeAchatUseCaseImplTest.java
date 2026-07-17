@@ -50,10 +50,10 @@ class ReceptionnerCommandeAchatUseCaseImplTest {
     }
 
     private CommandeAchat commandeExpediee() {
-        LigneCommandeAchat ligne = LigneCommandeAchat.creer(MedicamentId.generate(), ConditionnementId.generate(),
-                BigDecimal.TEN, BigDecimal.TEN);
-        CommandeAchat commande = CommandeAchat.creer("BC-1", FournisseurId.generate(), EntrepotId.generate(),
-                List.of(ligne), null);
+        LigneCommandeAchat ligne = LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(),
+                BigDecimal.TEN, BigDecimal.TEN));
+        CommandeAchat commande = CommandeAchat.creer(new CommandeAchat.CreationCommand("BC-1", FournisseurId.generate(), EntrepotId.generate(),
+                List.of(ligne), null));
         commande.validerInterne();
         commande.confirmerDelaiLivraison(10, LocalDate.now().plusDays(10));
         commande.genererAvisExpedition(AvisExpedition.of(LocalDate.now(), null, null, null),

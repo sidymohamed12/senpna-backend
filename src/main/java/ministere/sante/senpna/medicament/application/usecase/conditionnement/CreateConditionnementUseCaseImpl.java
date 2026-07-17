@@ -50,8 +50,8 @@ public class CreateConditionnementUseCaseImpl implements CreateConditionnementUs
             throw new UniteBaseDejaDefinieException();
         }
 
-        Conditionnement conditionnement = Conditionnement.creer(medicament.getId(), command.nom(), command.niveau(),
-                command.quantiteUniteBase(), command.estUniteBase(), command.prixAchat(), command.prixVente());
+        Conditionnement conditionnement = Conditionnement.creer(new Conditionnement.CreationCommand(medicament.getId(), command.nom(), command.niveau(),
+                command.quantiteUniteBase(), command.estUniteBase(), command.prixAchat(), command.prixVente()));
 
         Conditionnement saved = conditionnementRepositoryPort.save(conditionnement);
         return conditionnementDetailAssembler.assembler(saved);

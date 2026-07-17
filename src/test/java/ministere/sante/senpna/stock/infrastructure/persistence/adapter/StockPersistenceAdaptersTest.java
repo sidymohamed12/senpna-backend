@@ -72,8 +72,8 @@ class StockPersistenceAdaptersTest {
                 @Test
                 @DisplayName("existsByMedicamentIdAndNumeroLotIgnoreCase() insensible à la casse")
                 void existsByMedicamentIdEtNumero_insensibleCasse() {
-                        Lot lot = Lot.creer("LOT-ABC", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+                        Lot lot = Lot.creer(new Lot.CreationCommand("LOT-ABC", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
+                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
                         lotAdapter.save(lot);
                         entityManager.flush();
                         entityManager.clear();
@@ -85,10 +85,10 @@ class StockPersistenceAdaptersTest {
                 @Test
                 @DisplayName("search() filtre par statut et par médicament")
                 void search_filtreParStatutEtMedicament() {
-                        Lot actif = Lot.creer("L1", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
-                        Lot bloque = Lot.creer("L2", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+                        Lot actif = Lot.creer(new Lot.CreationCommand("L1", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
+                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
+                        Lot bloque = Lot.creer(new Lot.CreationCommand("L2", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
+                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
                         bloque.bloquer();
                         lotAdapter.save(actif);
                         lotAdapter.save(bloque);
@@ -106,10 +106,10 @@ class StockPersistenceAdaptersTest {
                 @Test
                 @DisplayName("findActifsExpires() ne renvoie que les lots ACTIF expirés")
                 void findActifsExpires() {
-                        Lot expire = Lot.creer("EXP", medicamentA, fournisseurX, LocalDate.now().minusMonths(6),
-                                        LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN);
-                        Lot valide = Lot.creer("OK", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN);
+                        Lot expire = Lot.creer(new Lot.CreationCommand("EXP", medicamentA, fournisseurX, LocalDate.now().minusMonths(6),
+                                        LocalDate.now().minusDays(1), BigDecimal.TEN, BigDecimal.TEN));
+                        Lot valide = Lot.creer(new Lot.CreationCommand("OK", medicamentA, fournisseurX, LocalDate.now().minusMonths(1),
+                                        LocalDate.now().plusMonths(6), BigDecimal.TEN, BigDecimal.TEN));
                         lotAdapter.save(expire);
                         lotAdapter.save(valide);
                         entityManager.flush();
@@ -123,12 +123,12 @@ class StockPersistenceAdaptersTest {
                 @Test
                 @DisplayName("findActifsNonExpiresParMedicamentTriesFefo() trie par date d'expiration croissante")
                 void findActifsNonExpires_trieFefo() {
-                        Lot expirationLointaine = Lot.creer("L-LOIN", medicamentA, fournisseurX,
+                        Lot expirationLointaine = Lot.creer(new Lot.CreationCommand("L-LOIN", medicamentA, fournisseurX,
                                         LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(12), BigDecimal.TEN, BigDecimal.TEN);
-                        Lot expirationProche = Lot.creer("L-PROCHE", medicamentA, fournisseurX,
+                                        LocalDate.now().plusMonths(12), BigDecimal.TEN, BigDecimal.TEN));
+                        Lot expirationProche = Lot.creer(new Lot.CreationCommand("L-PROCHE", medicamentA, fournisseurX,
                                         LocalDate.now().minusMonths(1),
-                                        LocalDate.now().plusMonths(2), BigDecimal.TEN, BigDecimal.TEN);
+                                        LocalDate.now().plusMonths(2), BigDecimal.TEN, BigDecimal.TEN));
                         lotAdapter.save(expirationLointaine);
                         lotAdapter.save(expirationProche);
                         entityManager.flush();
@@ -148,7 +148,7 @@ class StockPersistenceAdaptersTest {
                 @DisplayName("findByEntrepotIdAndLotId() retrouve la ligne de stock")
                 void findByEntrepotIdAndLotId() {
                         LotId lotId = LotId.generate();
-                        Stock stock = Stock.ouvrir(entrepot1, lotId, medicamentA, null);
+                        Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(entrepot1, lotId, medicamentA, null));
                         stock.entrer(BigDecimal.TEN);
                         stockAdapter.save(stock);
                         entityManager.flush();
@@ -160,8 +160,8 @@ class StockPersistenceAdaptersTest {
                 @Test
                 @DisplayName("search() filtre par rupture")
                 void search_filtreParRupture() {
-                        Stock enRupture = Stock.ouvrir(entrepot1, LotId.generate(), medicamentA, null);
-                        Stock disponible = Stock.ouvrir(entrepot1, LotId.generate(), medicamentA, null);
+                        Stock enRupture = Stock.ouvrir(new Stock.OuvertureCommand(entrepot1, LotId.generate(), medicamentA, null));
+                        Stock disponible = Stock.ouvrir(new Stock.OuvertureCommand(entrepot1, LotId.generate(), medicamentA, null));
                         disponible.entrer(new BigDecimal("50"));
                         stockAdapter.save(enRupture);
                         stockAdapter.save(disponible);
@@ -185,21 +185,21 @@ class StockPersistenceAdaptersTest {
                 @DisplayName("search() filtre par entrepôt (source OU destination)")
                 void search_filtreParEntrepotSourceOuDestination() {
                         EntrepotId autreEntrepot = EntrepotId.generate();
-                        MouvementStock enSource = MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT,
+                        MouvementStock enSource = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.SORTIE_TRANSFERT,
                                         SensMouvement.SORTIE,
                                         entrepot1, autreEntrepot, null, LotId.generate(), medicamentA, BigDecimal.TEN,
                                         "REF1", "M1",
-                                        UUID.randomUUID());
-                        MouvementStock enDestination = MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT,
+                                        UUID.randomUUID()));
+                        MouvementStock enDestination = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.SORTIE_TRANSFERT,
                                         SensMouvement.SORTIE,
                                         autreEntrepot, entrepot1, null, LotId.generate(), medicamentA, BigDecimal.TEN,
                                         "REF2", "M2",
-                                        UUID.randomUUID());
-                        MouvementStock sansLien = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE,
+                                        UUID.randomUUID()));
+                        MouvementStock sansLien = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE,
                                         null,
                                         autreEntrepot, null, LotId.generate(), medicamentA, BigDecimal.TEN, "REF3",
                                         "M3",
-                                        UUID.randomUUID());
+                                        UUID.randomUUID()));
                         mouvementAdapter.save(enSource);
                         mouvementAdapter.save(enDestination);
                         mouvementAdapter.save(sansLien);

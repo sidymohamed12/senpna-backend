@@ -54,8 +54,8 @@ class GetCandidatureUseCaseImplTest {
         @DisplayName("candidature trouvée → renvoie le détail assemblé")
         void trouvee_renvoieDetail() {
             UUID id = UUID.randomUUID();
-            Candidature candidature = Candidature.soumettre(UUID.randomUUID(), Civilite.M, "Ibra Ndiaye",
-                    Email.of("ibra@mail.sn"), Phone.of("+221771234567"), "cv", null, null, true, "T", "E", "e@e.sn");
+            Candidature candidature = Candidature.soumettre(new Candidature.SoumissionCommand(UUID.randomUUID(), Civilite.M, "Ibra Ndiaye",
+                    Email.of("ibra@mail.sn"), Phone.of("+221771234567"), "cv", null, null, true, "T", "E", "e@e.sn"));
             when(candidatureRepositoryPort.findById(any())).thenReturn(Optional.of(candidature));
             CandidatureDetail detail = new CandidatureDetail(id, null, "M", "Ibra Ndiaye", "ibra@mail.sn",
                     "+221771234567", "cv", null, null, true, null);

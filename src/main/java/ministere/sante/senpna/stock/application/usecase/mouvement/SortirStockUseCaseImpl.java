@@ -102,9 +102,9 @@ public class SortirStockUseCaseImpl implements SortirStockUseCase {
         }
         Stock saved = stockRepositoryPort.save(stock);
 
-        MouvementStock mouvement = MouvementStock.creer(type, SensMouvement.SORTIE, entrepotSource.getId(),
+        MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(type, SensMouvement.SORTIE, entrepotSource.getId(),
                 entrepotDestinationId, command.commandeId(), lot.getId(), lot.getMedicamentId(), command.quantite(),
-                command.referenceDocument(), command.motif(), command.utilisateurId());
+                command.referenceDocument(), command.motif(), command.utilisateurId()));
         mouvementStockRepositoryPort.save(mouvement);
 
         return stockDetailAssembler.assembler(saved);

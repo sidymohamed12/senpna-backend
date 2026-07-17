@@ -12,33 +12,35 @@ import org.springframework.stereotype.Component;
 public class FactureMapper {
 
     public Facture toDomain(FactureJpaEntity entity) {
-        return Facture.reconstruct(
-                FactureId.of(entity.getId()),
-                CommandeAchatId.of(entity.getCommandeAchatId()),
-                FournisseurId.of(entity.getFournisseurId()),
-                entity.getNumeroFacture(),
-                entity.getMontant(),
-                entity.getDateEmission(),
-                entity.getDateEcheance(),
-                entity.getPieceJointeMediaId(),
-                entity.getStatut(),
-                entity.getMotifRejet(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+        return Facture.builder()
+            .id(FactureId.of(entity.getId()))
+            .commandeAchatId(CommandeAchatId.of(entity.getCommandeAchatId()))
+            .fournisseurId(FournisseurId.of(entity.getFournisseurId()))
+            .numeroFacture(entity.getNumeroFacture())
+            .montant(entity.getMontant())
+            .dateEmission(entity.getDateEmission())
+            .dateEcheance(entity.getDateEcheance())
+            .pieceJointeMediaId(entity.getPieceJointeMediaId())
+            .statut(entity.getStatut())
+            .motifRejet(entity.getMotifRejet())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 
     public FactureJpaEntity toEntity(Facture facture) {
-        FactureJpaEntity entity = new FactureJpaEntity(
-                facture.getId().getValue(),
-                facture.getCommandeAchatId().getValue(),
-                facture.getFournisseurId().getValue(),
-                facture.getNumeroFacture(),
-                facture.getMontant(),
-                facture.getDateEmission(),
-                facture.getDateEcheance(),
-                facture.getPieceJointeMediaId(),
-                facture.getStatut(),
-                facture.getMotifRejet());
+        FactureJpaEntity entity = FactureJpaEntity.builder()
+            .id(facture.getId().getValue())
+            .commandeAchatId(facture.getCommandeAchatId().getValue())
+            .fournisseurId(facture.getFournisseurId().getValue())
+            .numeroFacture(facture.getNumeroFacture())
+            .montant(facture.getMontant())
+            .dateEmission(facture.getDateEmission())
+            .dateEcheance(facture.getDateEcheance())
+            .pieceJointeMediaId(facture.getPieceJointeMediaId())
+            .statut(facture.getStatut())
+            .motifRejet(facture.getMotifRejet())
+            .build();
         entity.setCreatedAt(facture.getCreatedAt());
         entity.setUpdatedAt(facture.getUpdatedAt());
         return entity;

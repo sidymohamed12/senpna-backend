@@ -23,8 +23,16 @@ class ProjetMapperTest {
     @DisplayName("toDomain() reporte fidèlement chaque champ, y compris les listes")
     void toDomain_reporteChaqueChamp() {
         UUID id = UUID.randomUUID();
-        ProjetJpaEntity entity = new ProjetJpaEntity(id, CategorieProjet.SANTE, "Nom", "Desc",
-                List.of("O1", "O2"), List.of("I1"), "img", StatutProjet.PUBLIE);
+        ProjetJpaEntity entity = ProjetJpaEntity.builder()
+            .id(id)
+            .categorie(CategorieProjet.SANTE)
+            .nom("Nom")
+            .description("Desc")
+            .objectifs(List.of("O1", "O2"))
+            .impacts(List.of("I1"))
+            .imageUrl("img")
+            .statut(StatutProjet.PUBLIE)
+            .build();
         Instant now = Instant.now();
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
@@ -41,7 +49,7 @@ class ProjetMapperTest {
     @Test
     @DisplayName("toEntity() reporte fidèlement chaque champ de l'agrégat")
     void toEntity_reporteChaqueChamp() {
-        Projet projet = Projet.creer(CategorieProjet.INNOVATION, "Nom", "Desc", List.of("O"), List.of("I"), "img");
+        Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.INNOVATION, "Nom", "Desc", List.of("O"), List.of("I"), "img"));
 
         ProjetJpaEntity entity = sut.toEntity(projet);
 
@@ -55,7 +63,7 @@ class ProjetMapperTest {
     @Test
     @DisplayName("aller-retour préserve l'état du projet")
     void allerRetour_preserveEtat() {
-        Projet original = Projet.creer(CategorieProjet.EDUCATION, "Nom", "Desc", List.of("O"), List.of("I"), null);
+        Projet original = Projet.creer(new Projet.CreationCommand(CategorieProjet.EDUCATION, "Nom", "Desc", List.of("O"), List.of("I"), null));
 
         Projet restaure = sut.toDomain(sut.toEntity(original));
 

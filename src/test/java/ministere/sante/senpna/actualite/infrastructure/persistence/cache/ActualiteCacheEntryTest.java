@@ -28,9 +28,19 @@ class ActualiteCacheEntryTest {
     void from_capturesTousLesChamps() {
         Instant maintenant = Instant.now();
         ActualiteMedia media = ActualiteMedia.reconstruct(UUID.randomUUID(), TypeMedia.IMAGE, "https://cdn/1.png", 0);
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.PROJET, "Titre",
-                "Description", List.of(media), AUTEUR_ID, "Awa Diop", List.of("sante"), StatutActualite.PUBLIE,
-                maintenant, maintenant);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.PROJET)
+            .titre("Titre")
+            .description("Description")
+            .medias(List.of(media))
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Awa Diop")
+            .tags(List.of("sante"))
+            .statut(StatutActualite.PUBLIE)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteCacheEntry entry = ActualiteCacheEntry.from(actualite);
 
@@ -55,8 +65,19 @@ class ActualiteCacheEntryTest {
     @DisplayName("from() sans média produit une liste de médias vide")
     void from_sansMedia_listeVide() {
         Instant maintenant = Instant.now();
-        Actualite actualite = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.AUTRE, "Titre",
-                null, List.of(), AUTEUR_ID, "Awa Diop", List.of(), StatutActualite.BROUILLON, maintenant, maintenant);
+        Actualite actualite = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.AUTRE)
+            .titre("Titre")
+            .description(null)
+            .medias(List.of())
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Awa Diop")
+            .tags(List.of())
+            .statut(StatutActualite.BROUILLON)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteCacheEntry entry = ActualiteCacheEntry.from(actualite);
 
@@ -68,9 +89,19 @@ class ActualiteCacheEntryTest {
     void toDomain_reconstruitActualite() {
         Instant maintenant = Instant.now();
         ActualiteMedia media = ActualiteMedia.reconstruct(UUID.randomUUID(), TypeMedia.VIDEO, "https://cdn/2.mp4", 1);
-        Actualite original = Actualite.reconstruct(ActualiteId.of(ACTUALITE_ID), CategorieActualite.EVENEMENT,
-                "Titre", "Description", List.of(media), AUTEUR_ID, "Awa Diop", List.of("evenement"),
-                StatutActualite.DESACTIVE, maintenant, maintenant);
+        Actualite original = Actualite.builder()
+            .id(ActualiteId.of(ACTUALITE_ID))
+            .categorie(CategorieActualite.EVENEMENT)
+            .titre("Titre")
+            .description("Description")
+            .medias(List.of(media))
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Awa Diop")
+            .tags(List.of("evenement"))
+            .statut(StatutActualite.DESACTIVE)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
 
         ActualiteCacheEntry entry = ActualiteCacheEntry.from(original);
         Actualite reconstruit = entry.toDomain();

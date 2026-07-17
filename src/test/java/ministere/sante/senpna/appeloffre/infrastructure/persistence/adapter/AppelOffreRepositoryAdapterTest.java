@@ -44,7 +44,7 @@ class AppelOffreRepositoryAdapterTest {
     }
 
     private AppelOffre nouvelAppelOffre(String reference, String objet) {
-        return AppelOffre.creer(reference, objet, LocalDate.now().plusDays(10), List.of(ligne("Amoxicilline")));
+        return AppelOffre.creer(new AppelOffre.CreationCommand(reference, objet, LocalDate.now().plusDays(10), List.of(ligne("Amoxicilline"))));
     }
 
     @Nested
@@ -80,16 +80,30 @@ class AppelOffreRepositoryAdapterTest {
             AppelOffreId id = AppelOffreId.generate();
             Instant maintenant = Instant.now();
 
-            AppelOffre premiereVersion = AppelOffre.reconstruct(id, "AO-2026-0002", "Objet",
-                    LocalDate.now().plusDays(10), StatutAppelOffre.BROUILLON, List.of(ligne("Paracétamol")),
-                    maintenant, maintenant);
+            AppelOffre premiereVersion = AppelOffre.builder()
+                .id(id)
+                .reference("AO-2026-0002")
+                .objet("Objet")
+                .dateCloture(LocalDate.now().plusDays(10))
+                .statut(StatutAppelOffre.BROUILLON)
+                .lignes(List.of(ligne("Paracétamol")))
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
             sut.save(premiereVersion);
             entityManager.flush();
             entityManager.clear();
 
-            AppelOffre deuxiemeVersion = AppelOffre.reconstruct(id, "AO-2026-0002", "Objet",
-                    LocalDate.now().plusDays(10), StatutAppelOffre.BROUILLON,
-                    List.of(ligne("Amoxicilline"), ligne("Ceftriaxone")), maintenant, maintenant);
+            AppelOffre deuxiemeVersion = AppelOffre.builder()
+                .id(id)
+                .reference("AO-2026-0002")
+                .objet("Objet")
+                .dateCloture(LocalDate.now().plusDays(10))
+                .statut(StatutAppelOffre.BROUILLON)
+                .lignes(List.of(ligne("Amoxicilline"), ligne("Ceftriaxone")))
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
             sut.save(deuxiemeVersion);
             entityManager.flush();
             entityManager.clear();
@@ -207,8 +221,16 @@ class AppelOffreRepositoryAdapterTest {
         void retourneLesAoExpires() {
             LigneAppelOffre ligne = ligne("Amoxicilline");
             Instant maintenant = Instant.now();
-            AppelOffre expire = AppelOffre.reconstruct(AppelOffreId.generate(), "AO-EXPIRE", "Objet",
-                    LocalDate.now().minusDays(1), StatutAppelOffre.PUBLIE, List.of(ligne), maintenant, maintenant);
+            AppelOffre expire = AppelOffre.builder()
+                .id(AppelOffreId.generate())
+                .reference("AO-EXPIRE")
+                .objet("Objet")
+                .dateCloture(LocalDate.now().minusDays(1))
+                .statut(StatutAppelOffre.PUBLIE)
+                .lignes(List.of(ligne))
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
             sut.save(expire);
 
             AppelOffre nonExpire = nouvelAppelOffre("AO-NON-EXPIRE", "Objet");
@@ -228,8 +250,16 @@ class AppelOffreRepositoryAdapterTest {
         void brouillonDatePassee_jamaisRetourne() {
             LigneAppelOffre ligne = ligne("Amoxicilline");
             Instant maintenant = Instant.now();
-            AppelOffre brouillonPasse = AppelOffre.reconstruct(AppelOffreId.generate(), "AO-BROUILLON", "Objet",
-                    LocalDate.now().minusDays(1), StatutAppelOffre.BROUILLON, List.of(ligne), maintenant, maintenant);
+            AppelOffre brouillonPasse = AppelOffre.builder()
+                .id(AppelOffreId.generate())
+                .reference("AO-BROUILLON")
+                .objet("Objet")
+                .dateCloture(LocalDate.now().minusDays(1))
+                .statut(StatutAppelOffre.BROUILLON)
+                .lignes(List.of(ligne))
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
             sut.save(brouillonPasse);
             entityManager.flush();
             entityManager.clear();

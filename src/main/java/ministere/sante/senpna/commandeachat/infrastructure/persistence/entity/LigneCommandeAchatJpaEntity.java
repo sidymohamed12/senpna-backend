@@ -63,23 +63,120 @@ public class LigneCommandeAchatJpaEntity extends BaseJpaEntity {
     @Column(name = "motif_refus", length = 500)
     private String motifRefus;
 
-    public LigneCommandeAchatJpaEntity(UUID id, UUID commandeAchatId, UUID medicamentId, UUID conditionnementId,
-            BigDecimal quantiteCommandee, BigDecimal prixUnitaire, String numeroLot, LocalDate dateFabrication,
-            LocalDate dateExpiration, String certificatAnalyseUrl, BigDecimal quantiteExpediee,
-            BigDecimal quantiteRecue, BigDecimal quantiteRefusee, String motifRefus) {
-        super(id);
-        this.commandeAchatId = commandeAchatId;
-        this.medicamentId = medicamentId;
-        this.conditionnementId = conditionnementId;
-        this.quantiteCommandee = quantiteCommandee;
-        this.prixUnitaire = prixUnitaire;
-        this.numeroLot = numeroLot;
-        this.dateFabrication = dateFabrication;
-        this.dateExpiration = dateExpiration;
-        this.certificatAnalyseUrl = certificatAnalyseUrl;
-        this.quantiteExpediee = quantiteExpediee;
-        this.quantiteRecue = quantiteRecue;
-        this.quantiteRefusee = quantiteRefusee;
-        this.motifRefus = motifRefus;
+    private LigneCommandeAchatJpaEntity(Builder builder) {
+        super(builder.id);
+        this.commandeAchatId = builder.commandeAchatId;
+        this.medicamentId = builder.medicamentId;
+        this.conditionnementId = builder.conditionnementId;
+        this.quantiteCommandee = builder.quantiteCommandee;
+        this.prixUnitaire = builder.prixUnitaire;
+        this.numeroLot = builder.numeroLot;
+        this.dateFabrication = builder.dateFabrication;
+        this.dateExpiration = builder.dateExpiration;
+        this.certificatAnalyseUrl = builder.certificatAnalyseUrl;
+        this.quantiteExpediee = builder.quantiteExpediee;
+        this.quantiteRecue = builder.quantiteRecue;
+        this.quantiteRefusee = builder.quantiteRefusee;
+        this.motifRefus = builder.motifRefus;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private UUID commandeAchatId;
+        private UUID medicamentId;
+        private UUID conditionnementId;
+        private BigDecimal quantiteCommandee;
+        private BigDecimal prixUnitaire;
+        private String numeroLot;
+        private LocalDate dateFabrication;
+        private LocalDate dateExpiration;
+        private String certificatAnalyseUrl;
+        private BigDecimal quantiteExpediee;
+        private BigDecimal quantiteRecue;
+        private BigDecimal quantiteRefusee;
+        private String motifRefus;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder commandeAchatId(UUID commandeAchatId) {
+            this.commandeAchatId = commandeAchatId;
+            return this;
+        }
+
+        public Builder medicamentId(UUID medicamentId) {
+            this.medicamentId = medicamentId;
+            return this;
+        }
+
+        public Builder conditionnementId(UUID conditionnementId) {
+            this.conditionnementId = conditionnementId;
+            return this;
+        }
+
+        public Builder quantiteCommandee(BigDecimal quantiteCommandee) {
+            this.quantiteCommandee = quantiteCommandee;
+            return this;
+        }
+
+        public Builder prixUnitaire(BigDecimal prixUnitaire) {
+            this.prixUnitaire = prixUnitaire;
+            return this;
+        }
+
+        public Builder numeroLot(String numeroLot) {
+            this.numeroLot = numeroLot;
+            return this;
+        }
+
+        public Builder dateFabrication(LocalDate dateFabrication) {
+            this.dateFabrication = dateFabrication;
+            return this;
+        }
+
+        public Builder dateExpiration(LocalDate dateExpiration) {
+            this.dateExpiration = dateExpiration;
+            return this;
+        }
+
+        public Builder certificatAnalyseUrl(String certificatAnalyseUrl) {
+            this.certificatAnalyseUrl = certificatAnalyseUrl;
+            return this;
+        }
+
+        public Builder quantiteExpediee(BigDecimal quantiteExpediee) {
+            this.quantiteExpediee = quantiteExpediee;
+            return this;
+        }
+
+        public Builder quantiteRecue(BigDecimal quantiteRecue) {
+            this.quantiteRecue = quantiteRecue;
+            return this;
+        }
+
+        public Builder quantiteRefusee(BigDecimal quantiteRefusee) {
+            this.quantiteRefusee = quantiteRefusee;
+            return this;
+        }
+
+        public Builder motifRefus(String motifRefus) {
+            this.motifRefus = motifRefus;
+            return this;
+        }
+
+        public LigneCommandeAchatJpaEntity build() {
+            return new LigneCommandeAchatJpaEntity(this);
+        }
+    }
+
 }

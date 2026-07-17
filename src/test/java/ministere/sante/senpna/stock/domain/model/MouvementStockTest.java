@@ -33,9 +33,9 @@ class MouvementStockTest {
         @Test
         @DisplayName("entrée valide avec entrepôt destination")
         void creer_entree_succes() {
-            MouvementStock mouvement = MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+            MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
                     ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("100"), "BC-2026-001", null,
-                    UTILISATEUR_ID);
+                    UTILISATEUR_ID));
 
             assertThat(mouvement.getSens()).isEqualTo(SensMouvement.ENTREE);
             assertThat(mouvement.getEntrepotDestinationId()).isEqualTo(ENTREPOT_ID);
@@ -45,9 +45,9 @@ class MouvementStockTest {
         @Test
         @DisplayName("sortie valide avec entrepôt source")
         void creer_sortie_succes() {
-            MouvementStock mouvement = MouvementStock.creer(TypeMouvement.PERTE, SensMouvement.SORTIE, ENTREPOT_ID,
+            MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.PERTE, SensMouvement.SORTIE, ENTREPOT_ID,
                     null, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("5"), null, "Casse pendant manutention",
-                    UTILISATEUR_ID);
+                    UTILISATEUR_ID));
 
             assertThat(mouvement.getSens()).isEqualTo(SensMouvement.SORTIE);
             assertThat(mouvement.getEntrepotSourceId()).isEqualTo(ENTREPOT_ID);
@@ -56,9 +56,9 @@ class MouvementStockTest {
         @Test
         @DisplayName("transfert valide avec entrepôts source et destination")
         void creer_transfert_succes() {
-            MouvementStock mouvement = MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE,
+            MouvementStock mouvement = MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE,
                     ENTREPOT_ID, AUTRE_ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, new BigDecimal("10"), null, null,
-                    UTILISATEUR_ID);
+                    UTILISATEUR_ID));
 
             assertThat(mouvement.getEntrepotSourceId()).isEqualTo(ENTREPOT_ID);
             assertThat(mouvement.getEntrepotDestinationId()).isEqualTo(AUTRE_ENTREPOT_ID);
@@ -68,7 +68,7 @@ class MouvementStockTest {
         @DisplayName("transfert sans entrepôt destination → MouvementStockInvalideException")
         void creer_transfertSansDestination_leveException() {
             var bigDecimal = new BigDecimal("10");
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE, ENTREPOT_ID, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
+            assertThatThrownBy(() -> MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.SORTIE_TRANSFERT, SensMouvement.SORTIE, ENTREPOT_ID, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID)))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
@@ -76,7 +76,7 @@ class MouvementStockTest {
         @DisplayName("sortie sans entrepôt source → MouvementStockInvalideException")
         void creer_sortieSansSource_leveException() {
             var bigDecimal = new BigDecimal("1");
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.CASSE, SensMouvement.SORTIE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
+            assertThatThrownBy(() -> MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.CASSE, SensMouvement.SORTIE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID)))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
@@ -84,15 +84,15 @@ class MouvementStockTest {
         @DisplayName("entrée sans entrepôt destination → MouvementStockInvalideException")
         void creer_entreeSansDestination_leveException() {
             var bigDecimal = new BigDecimal("1");
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID))
+            assertThatThrownBy(() -> MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, null, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, UTILISATEUR_ID)))
                     .isInstanceOf(MouvementStockInvalideException.class);
         }
 
         @Test
         @DisplayName("quantité négative ou nulle → IllegalArgumentException")
         void creer_quantiteInvalide_leveException() {
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
-                    ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, BigDecimal.ZERO, null, null, UTILISATEUR_ID))
+            assertThatThrownBy(() -> MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null,
+                    ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, BigDecimal.ZERO, null, null, UTILISATEUR_ID)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -100,7 +100,7 @@ class MouvementStockTest {
         @DisplayName("utilisateur null → NullPointerException")
         void creer_utilisateurNull_leveException() {
             var bigDecimal = new BigDecimal("1");
-            assertThatThrownBy(() -> MouvementStock.creer(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, null))
+            assertThatThrownBy(() -> MouvementStock.creer(new MouvementStock.CreationCommand(TypeMouvement.ENTREE_ACHAT, SensMouvement.ENTREE, null, ENTREPOT_ID, null, LOT_ID, MEDICAMENT_ID, bigDecimal, null, null, null)))
                     .isInstanceOf(NullPointerException.class);
         }
     }

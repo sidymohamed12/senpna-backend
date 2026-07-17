@@ -63,11 +63,11 @@ public class SoumettreCandidatureUseCaseImpl implements SoumettreCandidatureUseC
 
         String emailContactRH = resoudreEmailContactRH(opportunite);
 
-        Candidature candidature = Candidature.soumettre(
+        Candidature candidature = Candidature.soumettre(new Candidature.SoumissionCommand(
                 opportunite.getId().getValue(), civilite, command.nomComplet(), email, telephone,
                 command.cvUrl(), command.lettreMotivationUrl(), command.messageComplementaire(),
                 command.consentementRgpd(), opportunite.getTitre(), opportunite.getNomEntreprise(),
-                emailContactRH);
+                emailContactRH));
 
         Candidature saved = candidatureRepositoryPort.save(candidature);
 

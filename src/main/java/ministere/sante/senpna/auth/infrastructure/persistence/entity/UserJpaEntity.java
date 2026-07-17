@@ -56,17 +56,91 @@ public class UserJpaEntity extends BaseJpaEntity {
     @Column(name = "verrouille_jusqua")
     private Instant verrouilleJusqua;
 
-    public UserJpaEntity(UUID id, String nom, String prenom, String email, String telephone, String passwordHash,
-            boolean actif, Set<UUID> roleIds, int tentativesEchecConnexion, Instant verrouilleJusqua) {
-        super(id);
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.telephone = telephone;
-        this.passwordHash = passwordHash;
-        this.actif = actif;
-        this.roleIds = new HashSet<>(roleIds);
-        this.tentativesEchecConnexion = tentativesEchecConnexion;
-        this.verrouilleJusqua = verrouilleJusqua;
+    private UserJpaEntity(Builder builder) {
+        super(builder.id);
+        this.nom = builder.nom;
+        this.prenom = builder.prenom;
+        this.email = builder.email;
+        this.telephone = builder.telephone;
+        this.passwordHash = builder.passwordHash;
+        this.actif = builder.actif;
+        this.roleIds = new HashSet<>(builder.roleIds);
+        this.tentativesEchecConnexion = builder.tentativesEchecConnexion;
+        this.verrouilleJusqua = builder.verrouilleJusqua;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private String nom;
+        private String prenom;
+        private String email;
+        private String telephone;
+        private String passwordHash;
+        private boolean actif;
+        private Set<UUID> roleIds;
+        private int tentativesEchecConnexion;
+        private Instant verrouilleJusqua;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder nom(String nom) {
+            this.nom = nom;
+            return this;
+        }
+
+        public Builder prenom(String prenom) {
+            this.prenom = prenom;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder telephone(String telephone) {
+            this.telephone = telephone;
+            return this;
+        }
+
+        public Builder passwordHash(String passwordHash) {
+            this.passwordHash = passwordHash;
+            return this;
+        }
+
+        public Builder actif(boolean actif) {
+            this.actif = actif;
+            return this;
+        }
+
+        public Builder roleIds(Set<UUID> roleIds) {
+            this.roleIds = roleIds;
+            return this;
+        }
+
+        public Builder tentativesEchecConnexion(int tentativesEchecConnexion) {
+            this.tentativesEchecConnexion = tentativesEchecConnexion;
+            return this;
+        }
+
+        public Builder verrouilleJusqua(Instant verrouilleJusqua) {
+            this.verrouilleJusqua = verrouilleJusqua;
+            return this;
+        }
+
+        public UserJpaEntity build() {
+            return new UserJpaEntity(this);
+        }
     }
 }

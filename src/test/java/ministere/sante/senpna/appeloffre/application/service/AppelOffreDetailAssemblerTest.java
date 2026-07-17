@@ -24,7 +24,7 @@ class AppelOffreDetailAssemblerTest {
     private AppelOffre appelOffre() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Amoxicilline", BigDecimal.TEN,
                 "Comprimé");
-        return AppelOffre.creer("AO-2026-0001", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        return AppelOffre.creer(new AppelOffre.CreationCommand("AO-2026-0001", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
     }
 
     @Test

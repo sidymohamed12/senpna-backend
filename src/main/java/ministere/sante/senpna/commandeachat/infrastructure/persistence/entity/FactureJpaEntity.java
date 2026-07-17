@@ -55,18 +55,92 @@ public class FactureJpaEntity extends BaseJpaEntity {
     @Column(name = "motif_rejet", length = 500)
     private String motifRejet;
 
-    public FactureJpaEntity(UUID id, UUID commandeAchatId, UUID fournisseurId, String numeroFacture,
-            BigDecimal montant, LocalDate dateEmission, LocalDate dateEcheance, String pieceJointeMediaId,
-            StatutFacture statut, String motifRejet) {
-        super(id);
-        this.commandeAchatId = commandeAchatId;
-        this.fournisseurId = fournisseurId;
-        this.numeroFacture = numeroFacture;
-        this.montant = montant;
-        this.dateEmission = dateEmission;
-        this.dateEcheance = dateEcheance;
-        this.pieceJointeMediaId = pieceJointeMediaId;
-        this.statut = statut;
-        this.motifRejet = motifRejet;
+    private FactureJpaEntity(Builder builder) {
+        super(builder.id);
+        this.commandeAchatId = builder.commandeAchatId;
+        this.fournisseurId = builder.fournisseurId;
+        this.numeroFacture = builder.numeroFacture;
+        this.montant = builder.montant;
+        this.dateEmission = builder.dateEmission;
+        this.dateEcheance = builder.dateEcheance;
+        this.pieceJointeMediaId = builder.pieceJointeMediaId;
+        this.statut = builder.statut;
+        this.motifRejet = builder.motifRejet;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private UUID id;
+        private UUID commandeAchatId;
+        private UUID fournisseurId;
+        private String numeroFacture;
+        private BigDecimal montant;
+        private LocalDate dateEmission;
+        private LocalDate dateEcheance;
+        private String pieceJointeMediaId;
+        private StatutFacture statut;
+        private String motifRejet;
+
+        private Builder() {
+        }
+
+        public Builder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder commandeAchatId(UUID commandeAchatId) {
+            this.commandeAchatId = commandeAchatId;
+            return this;
+        }
+
+        public Builder fournisseurId(UUID fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder numeroFacture(String numeroFacture) {
+            this.numeroFacture = numeroFacture;
+            return this;
+        }
+
+        public Builder montant(BigDecimal montant) {
+            this.montant = montant;
+            return this;
+        }
+
+        public Builder dateEmission(LocalDate dateEmission) {
+            this.dateEmission = dateEmission;
+            return this;
+        }
+
+        public Builder dateEcheance(LocalDate dateEcheance) {
+            this.dateEcheance = dateEcheance;
+            return this;
+        }
+
+        public Builder pieceJointeMediaId(String pieceJointeMediaId) {
+            this.pieceJointeMediaId = pieceJointeMediaId;
+            return this;
+        }
+
+        public Builder statut(StatutFacture statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder motifRejet(String motifRejet) {
+            this.motifRejet = motifRejet;
+            return this;
+        }
+
+        public FactureJpaEntity build() {
+            return new FactureJpaEntity(this);
+        }
+    }
+
 }

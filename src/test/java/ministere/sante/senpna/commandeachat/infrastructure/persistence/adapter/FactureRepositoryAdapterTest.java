@@ -39,8 +39,8 @@ class FactureRepositoryAdapterTest {
     TestEntityManager entityManager;
 
     private Facture nouvelleFacture(String numero, FournisseurId fournisseurId) {
-        return Facture.soumettre(CommandeAchatId.generate(), fournisseurId, numero, BigDecimal.valueOf(3_500_000),
-                LocalDate.now(), LocalDate.now().plusDays(30), "media-1");
+        return Facture.soumettre(new Facture.SoumissionCommand(CommandeAchatId.generate(), fournisseurId, numero, BigDecimal.valueOf(3_500_000),
+                LocalDate.now(), LocalDate.now().plusDays(30), "media-1"));
     }
 
     @Nested

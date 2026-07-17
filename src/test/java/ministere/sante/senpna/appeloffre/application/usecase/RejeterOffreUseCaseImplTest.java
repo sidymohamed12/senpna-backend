@@ -48,7 +48,7 @@ class RejeterOffreUseCaseImplTest {
 
     private OffreFournisseur offreSoumise() {
         LigneOffre ligne = LigneOffre.creer(LigneAppelOffreId.generate(), BigDecimal.TEN, 10);
-        return OffreFournisseur.soumettre(AppelOffreId.generate(), FournisseurId.generate(), null, List.of(ligne));
+        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), FournisseurId.generate(), null, List.of(ligne)));
     }
 
     @Test

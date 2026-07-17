@@ -24,9 +24,9 @@ class DetailAssemblersTest {
     @DisplayName("CandidatureDetailAssembler reporte fidèlement chaque champ")
     void candidatureDetailAssembler_reporteChaqueChamp() {
         UUID opportuniteId = UUID.randomUUID();
-        Candidature candidature = Candidature.soumettre(opportuniteId, Civilite.MME, "Awa Fall",
+        Candidature candidature = Candidature.soumettre(new Candidature.SoumissionCommand(opportuniteId, Civilite.MME, "Awa Fall",
                 Email.of("awa.fall@mail.sn"), Phone.of("+221771234567"), "https://cv.pdf", null, "Motive",
-                true, "Developpeur", "Entreprise X", "rh@entreprise.sn");
+                true, "Developpeur", "Entreprise X", "rh@entreprise.sn"));
 
         CandidatureDetail detail = new CandidatureDetailAssembler().assembler(candidature);
 
@@ -41,9 +41,9 @@ class DetailAssemblersTest {
     @Test
     @DisplayName("OpportuniteCarriereDetailAssembler utilise le statut EFFECTIF, pas le statut persisté")
     void opportuniteDetailAssembler_utiliseStatutEffectif() {
-        OpportuniteCarriere opportunite = OpportuniteCarriere.creer("Developpeur", "Entreprise X", "Description",
+        OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Developpeur", "Entreprise X", "Description",
                 null, "Dakar", TypeContrat.CDI, LocalDate.now(), LocalDate.now().minusDays(1), UUID.randomUUID(),
-                "Auteur", "rh@entreprise.sn");
+                "Auteur", "rh@entreprise.sn"));
         // date limite deja depassee des la creation (brouillon) : le statut
         // effectif reste BROUILLON tant que le statut persiste n'est pas OUVERT/EN_COURS
 

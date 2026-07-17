@@ -83,9 +83,9 @@ class SoumettreCandidatureUseCaseImplTest {
         @Test
         @DisplayName("opportunité fermée (statut effectif != OUVERT) → OpportuniteFermeeException")
         void opportuniteFermee_leveException() {
-                OpportuniteCarriere opportunite = OpportuniteCarriere.creer("T", "E", "D", null, "L", TypeContrat.CDI,
+                OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T", "E", "D", null, "L", TypeContrat.CDI,
                                 LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                                "Auteur", "rh@e.sn");
+                                "Auteur", "rh@e.sn"));
                 // Reste en BROUILLON — n'accepte pas les candidatures
                 when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(opportuniteId)))
                                 .thenReturn(Optional.of(opportunite));
@@ -99,9 +99,9 @@ class SoumettreCandidatureUseCaseImplTest {
         @Test
         @DisplayName("email de contact absent sur l'offre → résout l'email de l'auteur")
         void emailContactAbsent_resoutEmailAuteur() {
-                OpportuniteCarriere opportunite = OpportuniteCarriere.creer("T", "E", "D", null, "L", TypeContrat.CDI,
+                OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T", "E", "D", null, "L", TypeContrat.CDI,
                                 LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UserFixtures.USER_ID,
-                                "Auteur", null);
+                                "Auteur", null));
                 opportunite.publier();
                 when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(opportuniteId)))
                                 .thenReturn(Optional.of(opportunite));
@@ -119,9 +119,9 @@ class SoumettreCandidatureUseCaseImplTest {
         @Test
         @DisplayName("email de contact absent et auteur introuvable → UserNotFoundException")
         void emailContactAbsentEtAuteurIntrouvable_leveException() {
-                OpportuniteCarriere opportunite = OpportuniteCarriere.creer("T", "E", "D", null, "L", TypeContrat.CDI,
+                OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T", "E", "D", null, "L", TypeContrat.CDI,
                                 LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                                "Auteur", null);
+                                "Auteur", null));
                 opportunite.publier();
                 when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(opportuniteId)))
                                 .thenReturn(Optional.of(opportunite));
@@ -135,9 +135,9 @@ class SoumettreCandidatureUseCaseImplTest {
         @Test
         @DisplayName("succès → sauvegarde la candidature et publie l'événement associé")
         void succes_sauvegardeEtPublieEvenement() {
-                OpportuniteCarriere opportunite = OpportuniteCarriere.creer("T", "E", "D", null, "L", TypeContrat.CDI,
+                OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("T", "E", "D", null, "L", TypeContrat.CDI,
                                 LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1), UUID.randomUUID(),
-                                "Auteur", "rh@e.sn");
+                                "Auteur", "rh@e.sn"));
                 opportunite.publier();
                 when(opportuniteCarriereRepositoryPort.findById(OpportuniteCarriereId.of(opportuniteId)))
                                 .thenReturn(Optional.of(opportunite));

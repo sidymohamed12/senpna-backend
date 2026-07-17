@@ -28,10 +28,10 @@ class OpportuniteCarriereTest {
         @Test
         @DisplayName("crée une opportunité en BROUILLON par défaut")
         void creer_succes_statutBrouillon() {
-            OpportuniteCarriere opportunite = OpportuniteCarriere.creer("Pharmacien(ne) responsable",
+            OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Pharmacien(ne) responsable",
                     "PNA", "Description du poste", "https://cdn.senpna.sn/fiches-de-poste/test.pdf",
                     "Dakar, Sénégal", TypeContrat.CDI, LocalDate.now().plusDays(60), LocalDate.now().plusDays(30),
-                    AUTEUR_ID, "Cheikh Ba", "recrutement@senpna.sn");
+                    AUTEUR_ID, "Cheikh Ba", "recrutement@senpna.sn"));
 
             assertThat(opportunite.getStatut()).isEqualTo(StatutOpportunite.BROUILLON);
             assertThat(opportunite.getTitre()).isEqualTo("Pharmacien(ne) responsable");
@@ -43,9 +43,9 @@ class OpportuniteCarriereTest {
         @Test
         @DisplayName("champs optionnels absents (fiche de poste, date de début, e-mail de contact)")
         void creer_succes_champsOptionnelsAbsents() {
-            OpportuniteCarriere opportunite = OpportuniteCarriere.creer("Magasinier(ère)", "PRA Thiès",
+            OpportuniteCarriere opportunite = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Magasinier(ère)", "PRA Thiès",
                     "Description minimale", null, "Thiès, Sénégal", TypeContrat.CDD, null,
-                    LocalDate.now().plusDays(15), AUTEUR_ID, "Mamadou Diallo", null);
+                    LocalDate.now().plusDays(15), AUTEUR_ID, "Mamadou Diallo", null));
 
             assertThat(opportunite.getFicheDePosteUrl()).isNull();
             assertThat(opportunite.getDateDebut()).isNull();
@@ -350,10 +350,23 @@ class OpportuniteCarriereTest {
 
     private OpportuniteCarriere opportuniteExistante(StatutOpportunite statut, LocalDate dateLimiteCandidature) {
         Instant maintenant = Instant.now();
-        return OpportuniteCarriere.reconstruct(
-                OpportuniteCarriereId.generate(), "Titre",
-                "Entreprise", "Description", null, "Dakar, Sénégal", TypeContrat.CDI, null, dateLimiteCandidature,
-                AUTEUR_ID, "Cheikh Ba", null, statut, maintenant, maintenant);
+        return OpportuniteCarriere.builder()
+            .id(OpportuniteCarriereId.generate())
+            .titre("Titre")
+            .nomEntreprise("Entreprise")
+            .description("Description")
+            .ficheDePosteUrl(null)
+            .lieu("Dakar, Sénégal")
+            .typeContrat(TypeContrat.CDI)
+            .dateDebut(null)
+            .dateLimiteCandidature(dateLimiteCandidature)
+            .auteurId(AUTEUR_ID)
+            .auteurNom("Cheikh Ba")
+            .emailContact(null)
+            .statut(statut)
+            .createdAt(maintenant)
+            .updatedAt(maintenant)
+            .build();
     }
 
     private OpportuniteCarriere creerOpportunite(java.util.function.Consumer<OpportuniteBuilder> customizer) {
@@ -419,8 +432,8 @@ class OpportuniteCarriereTest {
         }
 
         OpportuniteCarriere build() {
-            return OpportuniteCarriere.creer(titre, nomEntreprise, description, ficheDePosteUrl, lieu, typeContrat,
-                    dateDebut, dateLimiteCandidature, auteurId, auteurNom, emailContact);
+            return OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand(titre, nomEntreprise, description, ficheDePosteUrl, lieu, typeContrat,
+                    dateDebut, dateLimiteCandidature, auteurId, auteurNom, emailContact));
         }
     }
 }

@@ -59,21 +59,22 @@ public record MouvementStockCacheEntry(
     }
 
     public MouvementStock toDomain() {
-        return MouvementStock.reconstruct(
-                MouvementStockId.of(id),
-                typeMouvement,
-                sens,
-                entrepotSourceId != null ? EntrepotId.of(entrepotSourceId) : null,
-                entrepotDestinationId != null ? EntrepotId.of(entrepotDestinationId) : null,
-                commandeId,
-                LotId.of(lotId),
-                MedicamentId.of(medicamentId),
-                quantite,
-                dateMouvement,
-                referenceDocument,
-                motif,
-                utilisateurId,
-                createdAt,
-                updatedAt);
+        return MouvementStock.builder()
+            .id(MouvementStockId.of(id))
+            .typeMouvement(typeMouvement)
+            .sens(sens)
+            .entrepotSourceId(entrepotSourceId != null ? EntrepotId.of(entrepotSourceId) : null)
+            .entrepotDestinationId(entrepotDestinationId != null ? EntrepotId.of(entrepotDestinationId) : null)
+            .commandeId(commandeId)
+            .lotId(LotId.of(lotId))
+            .medicamentId(MedicamentId.of(medicamentId))
+            .quantite(quantite)
+            .dateMouvement(dateMouvement)
+            .referenceDocument(referenceDocument)
+            .motif(motif)
+            .utilisateurId(utilisateurId)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
     }
 }

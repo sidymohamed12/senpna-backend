@@ -49,7 +49,7 @@ class ListProjetsUseCaseImplTest {
     void convertitEtMappeResultats() {
         when(commandMapper.versCategorieOptionnelle("SANTE")).thenReturn(CategorieProjet.SANTE);
         when(commandMapper.versStatutOptionnel("PUBLIE")).thenReturn(StatutProjet.PUBLIE);
-        Projet projet = Projet.creer(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null);
+        Projet projet = Projet.creer(new Projet.CreationCommand(CategorieProjet.SANTE, "Nom", "Desc", List.of(), List.of(), null));
         when(projetRepositoryPort.search(eq(new ProjetSearchCriteria(null, CategorieProjet.SANTE,
                 StatutProjet.PUBLIE)), any())).thenReturn(PageResult.of(List.of(projet), 0, 20, 1));
         ProjetDetail detail = new ProjetDetail(null, "SANTE", "Nom", null, List.of(), List.of(), null, "PUBLIE",

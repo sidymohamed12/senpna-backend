@@ -26,9 +26,9 @@ class CarriereMappersTest {
     @Test
     @DisplayName("CandidatureMapper : aller-retour préserve l'état")
     void candidatureMapper_allerRetourPreserveEtat() {
-        Candidature original = Candidature.soumettre(UUID.randomUUID(), Civilite.MME, "Awa Fall",
+        Candidature original = Candidature.soumettre(new Candidature.SoumissionCommand(UUID.randomUUID(), Civilite.MME, "Awa Fall",
                 Email.of("awa@mail.sn"), Phone.of("+221771234567"), "cv.pdf", "lettre.pdf", "Message", true,
-                "Titre", "Entreprise", "rh@e.sn");
+                "Titre", "Entreprise", "rh@e.sn"));
 
         CandidatureJpaEntity entity = candidatureMapper.toNewEntity(original);
         Candidature restaure = candidatureMapper.toDomain(entity);
@@ -42,9 +42,9 @@ class CarriereMappersTest {
     @Test
     @DisplayName("OpportuniteCarriereMapper : aller-retour préserve l'état")
     void opportuniteCarriereMapper_allerRetourPreserveEtat() {
-        OpportuniteCarriere original = OpportuniteCarriere.creer("Developpeur", "Entreprise X", "Desc", null,
+        OpportuniteCarriere original = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Developpeur", "Entreprise X", "Desc", null,
                 "Dakar", TypeContrat.CDI, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1),
-                UUID.randomUUID(), "Auteur", "rh@e.sn");
+                UUID.randomUUID(), "Auteur", "rh@e.sn"));
 
         OpportuniteCarriereJpaEntity entity = opportuniteCarriereMapper.toNewEntity(original);
         OpportuniteCarriere restaure = opportuniteCarriereMapper.toDomain(entity);
@@ -58,9 +58,9 @@ class CarriereMappersTest {
     @Test
     @DisplayName("OpportuniteCarriereMapper.updateEntity() reporte le nouveau contenu sur l'entité existante")
     void opportuniteCarriereMapper_updateEntity_reporteNouveauContenu() {
-        OpportuniteCarriere original = OpportuniteCarriere.creer("Ancien titre", "Entreprise X", "Desc", null,
+        OpportuniteCarriere original = OpportuniteCarriere.creer(new OpportuniteCarriere.CreationCommand("Ancien titre", "Entreprise X", "Desc", null,
                 "Dakar", TypeContrat.CDD, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(1),
-                UUID.randomUUID(), "Auteur", null);
+                UUID.randomUUID(), "Auteur", null));
         OpportuniteCarriereJpaEntity entity = opportuniteCarriereMapper.toNewEntity(original);
 
         original.modifierContenu("Nouveau titre", "Entreprise Y", "Nouvelle desc", null, "Thies", TypeContrat.CDI,

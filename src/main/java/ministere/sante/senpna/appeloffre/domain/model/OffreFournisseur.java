@@ -40,31 +40,98 @@ public class OffreFournisseur extends AggregateRoot<OffreFournisseurId> {
     private StatutOffre statut;
     private final List<LigneOffre> lignes;
 
-    private OffreFournisseur(OffreFournisseurId id, AppelOffreId appelOffreId, FournisseurId fournisseurId,
-            String commentaire, StatutOffre statut, List<LigneOffre> lignes, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.appelOffreId = Objects.requireNonNull(appelOffreId, "L'appel d'offres référencé est obligatoire");
-        this.fournisseurId = Objects.requireNonNull(fournisseurId, "Le fournisseur est obligatoire");
-        this.commentaire = commentaire;
-        this.statut = Objects.requireNonNull(statut, "Le statut est obligatoire");
-        this.lignes = new ArrayList<>(Objects.requireNonNull(lignes, "Les lignes ne peuvent pas être null"));
+    private OffreFournisseur(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.appelOffreId = Objects.requireNonNull(builder.appelOffreId, "L'appel d'offres référencé est obligatoire");
+        this.fournisseurId = Objects.requireNonNull(builder.fournisseurId, "Le fournisseur est obligatoire");
+        this.commentaire = builder.commentaire;
+        this.statut = Objects.requireNonNull(builder.statut, "Le statut est obligatoire");
+        this.lignes = new ArrayList<>(Objects.requireNonNull(builder.lignes, "Les lignes ne peuvent pas être null"));
         if (this.lignes.isEmpty()) {
             throw new IllegalArgumentException("Une offre doit contenir au moins une ligne de prix");
         }
     }
 
-    public static OffreFournisseur reconstruct(OffreFournisseurId id, AppelOffreId appelOffreId,
-            FournisseurId fournisseurId, String commentaire, StatutOffre statut, List<LigneOffre> lignes,
-            Instant createdAt, Instant updatedAt) {
-        return new OffreFournisseur(id, appelOffreId, fournisseurId, commentaire, statut, lignes, createdAt,
-                updatedAt);
+    /** Données nécessaires à la soumission d'une nouvelle offre fournisseur. */
+    public record SoumissionCommand(AppelOffreId appelOffreId, FournisseurId fournisseurId, String commentaire,
+            List<LigneOffre> lignes) {
     }
 
-    public static OffreFournisseur soumettre(AppelOffreId appelOffreId, FournisseurId fournisseurId,
-            String commentaire, List<LigneOffre> lignes) {
+    public static OffreFournisseur soumettre(SoumissionCommand command) {
         Instant maintenant = Instant.now();
-        return new OffreFournisseur(OffreFournisseurId.generate(), appelOffreId, fournisseurId, commentaire,
-                StatutOffre.SOUMISE, lignes, maintenant, maintenant);
+        return builder()
+                .id(OffreFournisseurId.generate())
+                .appelOffreId(command.appelOffreId())
+                .fournisseurId(command.fournisseurId())
+                .commentaire(command.commentaire())
+                .statut(StatutOffre.SOUMISE)
+                .lignes(command.lignes())
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private OffreFournisseurId id;
+        private AppelOffreId appelOffreId;
+        private FournisseurId fournisseurId;
+        private String commentaire;
+        private StatutOffre statut;
+        private List<LigneOffre> lignes;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(OffreFournisseurId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder appelOffreId(AppelOffreId appelOffreId) {
+            this.appelOffreId = appelOffreId;
+            return this;
+        }
+
+        public Builder fournisseurId(FournisseurId fournisseurId) {
+            this.fournisseurId = fournisseurId;
+            return this;
+        }
+
+        public Builder commentaire(String commentaire) {
+            this.commentaire = commentaire;
+            return this;
+        }
+
+        public Builder statut(StatutOffre statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder lignes(List<LigneOffre> lignes) {
+            this.lignes = lignes;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public OffreFournisseur build() {
+            return new OffreFournisseur(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────

@@ -23,7 +23,7 @@ class StockTest {
     private static final MedicamentId MEDICAMENT_ID = MedicamentId.generate();
 
     private static Stock stockOuvert() {
-        return Stock.ouvrir(ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, new BigDecimal("10"));
+        return Stock.ouvrir(new Stock.OuvertureCommand(ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, new BigDecimal("10")));
     }
 
     @Nested
@@ -229,7 +229,7 @@ class StockTest {
         @Test
         @DisplayName("seuil non défini → jamais considéré comme atteint")
         void seuilAtteint_seuilNonDefini_toujoursFaux() {
-            Stock stock = Stock.ouvrir(ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, null);
+            Stock stock = Stock.ouvrir(new Stock.OuvertureCommand(ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, null));
 
             assertThat(stock.seuilAtteint()).isFalse();
         }
@@ -247,7 +247,18 @@ class StockTest {
             var bigDecimal2 = new BigDecimal("20");
             var now = java.time.Instant.now();
             var now2 = java.time.Instant.now();
-            assertThatThrownBy(() -> Stock.reconstruct( generate, ENTREPOT_ID, LOT_ID, MEDICAMENT_ID, bigDecimal, bigDecimal2, BigDecimal.ZERO, null, now, now2))
+            assertThatThrownBy(() -> Stock.builder()
+                .id(generate)
+                .entrepotId(ENTREPOT_ID)
+                .lotId(LOT_ID)
+                .medicamentId(MEDICAMENT_ID)
+                .quantiteDisponible(bigDecimal)
+                .quantiteReservee(bigDecimal2)
+                .quantiteEnCommande(BigDecimal.ZERO)
+                .seuilAlerte(null)
+                .createdAt(now)
+                .updatedAt(now2)
+                .build())
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

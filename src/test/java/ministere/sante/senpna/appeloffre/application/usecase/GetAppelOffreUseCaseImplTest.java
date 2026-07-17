@@ -57,7 +57,7 @@ class GetAppelOffreUseCaseImplTest {
     @DisplayName("appel d'offres trouvé (même en BROUILLON — vue PNA sans restriction) → assemblé")
     void trouve_assemble() {
         LigneAppelOffre ligne = LigneAppelOffre.creer(MedicamentId.generate(), "Med", BigDecimal.TEN, "u");
-        AppelOffre appelOffre = AppelOffre.creer("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne));
+        AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", LocalDate.now().plusDays(10), List.of(ligne)));
         when(appelOffreRepositoryPort.findById(appelOffre.getId())).thenReturn(Optional.of(appelOffre));
 
         sut.obtenir(new GetAppelOffreQuery(appelOffre.getId().getValue()));

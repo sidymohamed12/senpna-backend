@@ -44,9 +44,9 @@ class FournisseurRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        Fournisseur actif1 = Fournisseur.creer("Pharma Plus", "Dakar", "+221771111111", "a@p.sn", "Awa");
-        Fournisseur actif2 = Fournisseur.creer("MediSupply", "Thiès", "+221772222222", "b@m.sn", "Bo");
-        Fournisseur inactif = Fournisseur.creer("Ancien Fournisseur", "Kaolack", "+221773333333", "c@a.sn", "Ci");
+        Fournisseur actif1 = Fournisseur.creer(new Fournisseur.CreationCommand("Pharma Plus", "Dakar", "+221771111111", "a@p.sn", "Awa"));
+        Fournisseur actif2 = Fournisseur.creer(new Fournisseur.CreationCommand("MediSupply", "Thiès", "+221772222222", "b@m.sn", "Bo"));
+        Fournisseur inactif = Fournisseur.creer(new Fournisseur.CreationCommand("Ancien Fournisseur", "Kaolack", "+221773333333", "c@a.sn", "Ci"));
         inactif.desactiver();
 
         sut.save(actif1);
@@ -64,7 +64,7 @@ class FournisseurRepositoryAdapterTest {
         @Test
         @DisplayName("findById() retrouve un fournisseur persisté")
         void findById_retrouve() {
-            Fournisseur nouveau = Fournisseur.creer("Nouveau", null, null, null, null);
+            Fournisseur nouveau = Fournisseur.creer(new Fournisseur.CreationCommand("Nouveau", null, null, null, null));
             sut.save(nouveau);
 
             Optional<Fournisseur> result = sut.findById(nouveau.getId());

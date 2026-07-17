@@ -58,40 +58,154 @@ public class OpportuniteCarriere extends AggregateRoot<OpportuniteCarriereId> {
     private String emailContact;
     private StatutOpportunite statut;
 
-    private OpportuniteCarriere(OpportuniteCarriereId id, String titre, String nomEntreprise, String description,
-            String ficheDePosteUrl, String lieu, TypeContrat typeContrat, LocalDate dateDebut,
-            LocalDate dateLimiteCandidature, UUID auteurId, String auteurNom, String emailContact,
-            StatutOpportunite statut, Instant createdAt, Instant updatedAt) {
-        super(id, createdAt, updatedAt);
-        this.titre = validerTitre(titre);
-        this.nomEntreprise = validerNomEntreprise(nomEntreprise);
-        this.description = validerDescription(description);
-        this.ficheDePosteUrl = validerUrl(ficheDePosteUrl, "fiche de poste");
-        this.lieu = validerLieu(lieu);
-        this.typeContrat = Objects.requireNonNull(typeContrat, "Le type de contrat est obligatoire");
-        this.dateDebut = dateDebut;
-        this.dateLimiteCandidature = validerDates(dateDebut, dateLimiteCandidature);
-        this.auteurId = Objects.requireNonNull(auteurId, "L'auteur de l'offre est obligatoire");
-        this.auteurNom = validerAuteurNom(auteurNom);
-        this.emailContact = emailContact != null && !emailContact.isBlank() ? emailContact.trim() : null;
-        this.statut = statut != null ? statut : StatutOpportunite.BROUILLON;
+    private OpportuniteCarriere(Builder builder) {
+        super(builder.id, builder.createdAt, builder.updatedAt);
+        this.titre = validerTitre(builder.titre);
+        this.nomEntreprise = validerNomEntreprise(builder.nomEntreprise);
+        this.description = validerDescription(builder.description);
+        this.ficheDePosteUrl = validerUrl(builder.ficheDePosteUrl, "fiche de poste");
+        this.lieu = validerLieu(builder.lieu);
+        this.typeContrat = Objects.requireNonNull(builder.typeContrat, "Le type de contrat est obligatoire");
+        this.dateDebut = builder.dateDebut;
+        this.dateLimiteCandidature = validerDates(builder.dateDebut, builder.dateLimiteCandidature);
+        this.auteurId = Objects.requireNonNull(builder.auteurId, "L'auteur de l'offre est obligatoire");
+        this.auteurNom = validerAuteurNom(builder.auteurNom);
+        this.emailContact = builder.emailContact != null && !builder.emailContact.isBlank()
+                ? builder.emailContact.trim()
+                : null;
+        this.statut = builder.statut != null ? builder.statut : StatutOpportunite.BROUILLON;
     }
 
-    public static OpportuniteCarriere reconstruct(OpportuniteCarriereId id, String titre, String nomEntreprise,
-            String description, String ficheDePosteUrl, String lieu, TypeContrat typeContrat, LocalDate dateDebut,
-            LocalDate dateLimiteCandidature, UUID auteurId, String auteurNom, String emailContact,
-            StatutOpportunite statut, Instant createdAt, Instant updatedAt) {
-        return new OpportuniteCarriere(id, titre, nomEntreprise, description, ficheDePosteUrl, lieu, typeContrat,
-                dateDebut, dateLimiteCandidature, auteurId, auteurNom, emailContact, statut, createdAt, updatedAt);
+    /** Données nécessaires à la création d'une nouvelle offre d'emploi. */
+    public record CreationCommand(String titre, String nomEntreprise, String description, String ficheDePosteUrl,
+            String lieu, TypeContrat typeContrat, LocalDate dateDebut, LocalDate dateLimiteCandidature,
+            UUID auteurId, String auteurNom, String emailContact) {
     }
 
-    public static OpportuniteCarriere creer(String titre, String nomEntreprise, String description,
-            String ficheDePosteUrl, String lieu, TypeContrat typeContrat, LocalDate dateDebut,
-            LocalDate dateLimiteCandidature, UUID auteurId, String auteurNom, String emailContact) {
+    public static OpportuniteCarriere creer(CreationCommand command) {
         Instant maintenant = Instant.now();
-        return new OpportuniteCarriere(OpportuniteCarriereId.generate(), titre, nomEntreprise, description,
-                ficheDePosteUrl, lieu, typeContrat, dateDebut, dateLimiteCandidature, auteurId, auteurNom,
-                emailContact, StatutOpportunite.BROUILLON, maintenant, maintenant);
+        return builder()
+                .id(OpportuniteCarriereId.generate())
+                .titre(command.titre())
+                .nomEntreprise(command.nomEntreprise())
+                .description(command.description())
+                .ficheDePosteUrl(command.ficheDePosteUrl())
+                .lieu(command.lieu())
+                .typeContrat(command.typeContrat())
+                .dateDebut(command.dateDebut())
+                .dateLimiteCandidature(command.dateLimiteCandidature())
+                .auteurId(command.auteurId())
+                .auteurNom(command.auteurNom())
+                .emailContact(command.emailContact())
+                .statut(StatutOpportunite.BROUILLON)
+                .createdAt(maintenant)
+                .updatedAt(maintenant)
+                .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private OpportuniteCarriereId id;
+        private String titre;
+        private String nomEntreprise;
+        private String description;
+        private String ficheDePosteUrl;
+        private String lieu;
+        private TypeContrat typeContrat;
+        private LocalDate dateDebut;
+        private LocalDate dateLimiteCandidature;
+        private UUID auteurId;
+        private String auteurNom;
+        private String emailContact;
+        private StatutOpportunite statut;
+        private Instant createdAt;
+        private Instant updatedAt;
+
+        private Builder() {
+        }
+
+        public Builder id(OpportuniteCarriereId id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder titre(String titre) {
+            this.titre = titre;
+            return this;
+        }
+
+        public Builder nomEntreprise(String nomEntreprise) {
+            this.nomEntreprise = nomEntreprise;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder ficheDePosteUrl(String ficheDePosteUrl) {
+            this.ficheDePosteUrl = ficheDePosteUrl;
+            return this;
+        }
+
+        public Builder lieu(String lieu) {
+            this.lieu = lieu;
+            return this;
+        }
+
+        public Builder typeContrat(TypeContrat typeContrat) {
+            this.typeContrat = typeContrat;
+            return this;
+        }
+
+        public Builder dateDebut(LocalDate dateDebut) {
+            this.dateDebut = dateDebut;
+            return this;
+        }
+
+        public Builder dateLimiteCandidature(LocalDate dateLimiteCandidature) {
+            this.dateLimiteCandidature = dateLimiteCandidature;
+            return this;
+        }
+
+        public Builder auteurId(UUID auteurId) {
+            this.auteurId = auteurId;
+            return this;
+        }
+
+        public Builder auteurNom(String auteurNom) {
+            this.auteurNom = auteurNom;
+            return this;
+        }
+
+        public Builder emailContact(String emailContact) {
+            this.emailContact = emailContact;
+            return this;
+        }
+
+        public Builder statut(StatutOpportunite statut) {
+            this.statut = statut;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public OpportuniteCarriere build() {
+            return new OpportuniteCarriere(this);
+        }
     }
 
     // ── Comportements métier ────────────────────────────────────────────
