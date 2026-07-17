@@ -22,7 +22,8 @@ class LotTest {
     private static final FournisseurId FOURNISSEUR_ID = FournisseurId.generate();
 
     private static Lot lotValide(LocalDate dateExpiration) {
-        return Lot.creer(new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, LocalDate.now().minusMonths(1), dateExpiration,
+        return Lot.creer(new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID,
+                LocalDate.now().minusMonths(1), dateExpiration,
                 new BigDecimal("100"), new BigDecimal("150")));
     }
 
@@ -45,14 +46,18 @@ class LotTest {
         @DisplayName("numéro de lot vide → IllegalArgumentException")
         void creer_numeroLotVide_leveException() {
             var now = LocalDate.now().plusYears(1);
-            assertThatThrownBy(() -> Lot.creer(new Lot.CreationCommand("  ", MEDICAMENT_ID, FOURNISSEUR_ID, null, now, null, null)))
+            var creationCommand = new Lot.CreationCommand("  ", MEDICAMENT_ID, FOURNISSEUR_ID, null, now, null, null);
+            assertThatThrownBy(() -> Lot.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("date d'expiration null → NullPointerException")
         void creer_dateExpirationNull_leveException() {
-            assertThatThrownBy(() -> Lot.creer(new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null, null, null, null)))
+            var creationCommand = new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null, null, null,
+                    null);
+
+            assertThatThrownBy(() -> Lot.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -61,7 +66,10 @@ class LotTest {
         void creer_fabricationApresExpiration_leveException() {
             var now = LocalDate.now().plusDays(10);
             var now2 = LocalDate.now();
-            assertThatThrownBy(() -> Lot.creer(new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, now, now2, null, null)))
+            var creationCommand = new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, now, now2, null,
+                    null);
+
+            assertThatThrownBy(() -> Lot.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -70,7 +78,10 @@ class LotTest {
         void creer_prixNegatif_leveException() {
             var now = LocalDate.now().plusYears(1);
             var bigDecimal = new BigDecimal("-1");
-            assertThatThrownBy(() -> Lot.creer(new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null, now, bigDecimal, null)))
+            var creationCommand = new Lot.CreationCommand("LOT-A001", MEDICAMENT_ID, FOURNISSEUR_ID, null, now,
+                    bigDecimal, null);
+
+            assertThatThrownBy(() -> Lot.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -78,9 +89,11 @@ class LotTest {
         @DisplayName("medicamentId null → NullPointerException")
         void creer_medicamentIdNull_leveException() {
             LocalDate datePeremption = LocalDate.now().plusYears(1);
+            var creationCommand = new Lot.CreationCommand("LOT-A001", null, FOURNISSEUR_ID, null, datePeremption, null,
+                    null);
 
             assertThatThrownBy(
-                    () -> Lot.creer(new Lot.CreationCommand("LOT-A001", null, FOURNISSEUR_ID, null, datePeremption, null, null)))
+                    () -> Lot.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
     }

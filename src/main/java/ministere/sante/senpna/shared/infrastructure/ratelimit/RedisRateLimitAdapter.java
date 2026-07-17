@@ -67,11 +67,13 @@ public class RedisRateLimitAdapter implements RateLimitPort {
             """;
 
     private final StringRedisTemplate redisTemplate;
-    private final DefaultRedisScript<List> rateLimitScript;
+    private final DefaultRedisScript<List<Long>> rateLimitScript;
 
+    @SuppressWarnings("unchecked")
     public RedisRateLimitAdapter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.rateLimitScript = new DefaultRedisScript<>(SLIDING_WINDOW_LUA, List.class);
+        this.rateLimitScript = (DefaultRedisScript<List<Long>>) (DefaultRedisScript<?>) new DefaultRedisScript<>(
+                SLIDING_WINDOW_LUA, List.class);
     }
 
     /**
@@ -84,7 +86,6 @@ public class RedisRateLimitAdapter implements RateLimitPort {
      * </p>
      */
     @Override
-    @SuppressWarnings("unchecked")
     public RateLimitResult tryConsume(String key, int limit, long windowMs) {
         try {
             List<Long> result = redisTemplate.execute(

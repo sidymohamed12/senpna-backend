@@ -5,6 +5,7 @@ import ministere.sante.senpna.organisation.domain.valueobject.EntrepotId;
 import ministere.sante.senpna.stock.domain.exception.ReservationInsuffisanteException;
 import ministere.sante.senpna.stock.domain.exception.stock.StockInsuffisantException;
 import ministere.sante.senpna.stock.domain.valueobject.LotId;
+import ministere.sante.senpna.stock.domain.valueobject.StockId;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -242,23 +243,19 @@ class StockTest {
         @Test
         @DisplayName("reconstruction avec réservée > disponible → IllegalArgumentException")
         void reconstruct_reserveeSuperieureADisponible_leveException() {
-            var generate = ministere.sante.senpna.stock.domain.valueobject.StockId.generate();
-            var bigDecimal = new BigDecimal("10");
-            var bigDecimal2 = new BigDecimal("20");
-            var now = java.time.Instant.now();
-            var now2 = java.time.Instant.now();
-            assertThatThrownBy(() -> Stock.builder()
-                .id(generate)
-                .entrepotId(ENTREPOT_ID)
-                .lotId(LOT_ID)
-                .medicamentId(MEDICAMENT_ID)
-                .quantiteDisponible(bigDecimal)
-                .quantiteReservee(bigDecimal2)
-                .quantiteEnCommande(BigDecimal.ZERO)
-                .seuilAlerte(null)
-                .createdAt(now)
-                .updatedAt(now2)
-                .build())
+            var stockBuilder = Stock.builder()
+                    .id(StockId.generate())
+                    .entrepotId(ENTREPOT_ID)
+                    .lotId(LOT_ID)
+                    .medicamentId(MEDICAMENT_ID)
+                    .quantiteDisponible(new BigDecimal("10"))
+                    .quantiteReservee(new BigDecimal("20"))
+                    .quantiteEnCommande(BigDecimal.ZERO)
+                    .seuilAlerte(null)
+                    .createdAt(java.time.Instant.now())
+                    .updatedAt(java.time.Instant.now());
+
+            assertThatThrownBy(stockBuilder::build)
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

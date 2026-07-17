@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import ministere.sante.senpna.shared.infrastructure.event.SpringDomainEventPublisher;
 
 import java.time.Instant;
 import java.util.List;

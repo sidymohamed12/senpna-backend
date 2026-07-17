@@ -47,11 +47,14 @@ public abstract class BaseEntity<I extends EntityId> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        BaseEntity<I> that = (BaseEntity<I>) o;
+        }
+
+        BaseEntity<?> that = (BaseEntity<?>) o;
         return Objects.equals(id, that.id);
     }
 

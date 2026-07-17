@@ -11,9 +11,11 @@ public interface EventPublisherPort {
 
     void publishAll(List<DomainEvent> events);
 
-    default void publishAndClear(AggregateRoot aggregate) {
-        if (!aggregate.getDomainEvents().isEmpty()) {
-            publishAll(aggregate.getDomainEvents());
+    default void publishAndClear(AggregateRoot<?> aggregate) {
+        List<DomainEvent> events = aggregate.getDomainEvents();
+
+        if (!events.isEmpty()) {
+            publishAll(events);
             aggregate.clearDomainEvents();
         }
     }

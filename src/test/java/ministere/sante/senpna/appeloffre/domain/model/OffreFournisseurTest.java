@@ -26,8 +26,9 @@ class OffreFournisseurTest {
     }
 
     private OffreFournisseur offreSoumise(FournisseurId fournisseurId) {
-        return OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), fournisseurId, "Commentaire",
-                List.of(ligneOffre())));
+        return OffreFournisseur
+                .soumettre(new OffreFournisseur.SoumissionCommand(AppelOffreId.generate(), fournisseurId, "Commentaire",
+                        List.of(ligneOffre())));
     }
 
     @Nested
@@ -49,8 +50,10 @@ class OffreFournisseurTest {
 
             var appelOffreId = AppelOffreId.generate();
             var fournisseurId = FournisseurId.generate();
-            assertThatThrownBy(() -> OffreFournisseur.soumettre(new OffreFournisseur.SoumissionCommand(appelOffreId, fournisseurId,
-                    null, List.of()))).isInstanceOf(IllegalArgumentException.class);
+            var soumissionCommand = new OffreFournisseur.SoumissionCommand(appelOffreId, fournisseurId, null,
+                    List.of());
+            assertThatThrownBy(() -> OffreFournisseur.soumettre(soumissionCommand))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -156,15 +159,15 @@ class OffreFournisseurTest {
             FournisseurId fournisseurId = FournisseurId.generate();
 
             OffreFournisseur offre = OffreFournisseur.builder()
-                .id(id)
-                .appelOffreId(appelOffreId)
-                .fournisseurId(fournisseurId)
-                .commentaire("Com")
-                .statut(StatutOffre.RETENUE)
-                .lignes(List.of(ligneOffre()))
-                .createdAt(maintenant)
-                .updatedAt(maintenant)
-                .build();
+                    .id(id)
+                    .appelOffreId(appelOffreId)
+                    .fournisseurId(fournisseurId)
+                    .commentaire("Com")
+                    .statut(StatutOffre.RETENUE)
+                    .lignes(List.of(ligneOffre()))
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
 
             assertThat(offre.getId()).isEqualTo(id);
             assertThat(offre.getAppelOffreId()).isEqualTo(appelOffreId);

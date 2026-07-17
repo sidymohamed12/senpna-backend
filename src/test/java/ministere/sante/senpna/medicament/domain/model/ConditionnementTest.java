@@ -25,8 +25,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("crée un conditionnement unité de base actif, sans prix")
         void creer_uniteBase_succes() {
-            Conditionnement conditionnement = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE,
-                    true, null, null));
+            Conditionnement conditionnement = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 1, BigDecimal.ONE,
+                            true, null, null));
 
             assertThat(conditionnement.isActif()).isTrue();
             assertThat(conditionnement.isEstUniteBase()).isTrue();
@@ -38,8 +39,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("crée un conditionnement de niveau supérieur avec un prix (ex: carton)")
         void creer_niveauSuperieur_avecPrix_succes() {
-            Conditionnement carton = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
-                    false, new BigDecimal("15000"), new BigDecimal("18000")));
+            Conditionnement carton = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
+                            false, new BigDecimal("15000"), new BigDecimal("18000")));
 
             assertThat(carton.isEstUniteBase()).isFalse();
             assertThat(carton.getQuantiteUniteBase()).isEqualByComparingTo(new BigDecimal("10000"));
@@ -52,38 +54,52 @@ class ConditionnementTest {
         @DisplayName("unité de base avec quantité ≠ 1 → IllegalArgumentException")
         void creer_uniteBaseQuantiteInvalide_leveException() {
             var bigDecimal = new BigDecimal("2");
-            assertThatThrownBy(() -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 1, bigDecimal, true, null, null)))
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 1, bigDecimal, true,
+                    null, null);
+            assertThatThrownBy(() -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("niveau inférieur à 1 → IllegalArgumentException")
         void creer_niveauInvalide_leveException() {
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 0, BigDecimal.ONE,
+                    true, null, null);
+
             assertThatThrownBy(
-                    () -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Comprimé", 0, BigDecimal.ONE, true, null, null)))
+                    () -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("quantité nulle ou négative → IllegalArgumentException")
         void creer_quantiteNegative_leveException() {
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, BigDecimal.ZERO, false,
+                    null, null);
+
             assertThatThrownBy(
-                    () -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, BigDecimal.ZERO, false, null, null)))
+                    () -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("nom vide → IllegalArgumentException")
         void creer_nomVide_leveException() {
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "  ", 1, BigDecimal.ONE, true,
+                    null, null);
+
             assertThatThrownBy(
-                    () -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "  ", 1, BigDecimal.ONE, true, null, null)))
+                    () -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("medicamentId null → NullPointerException")
         void creer_medicamentIdNull_leveException() {
-            assertThatThrownBy(() -> Conditionnement.creer(new Conditionnement.CreationCommand(null, "Comprimé", 1, BigDecimal.ONE, true, null, null)))
+            var creationCommand = new Conditionnement.CreationCommand(null, "Comprimé", 1, BigDecimal.ONE, true, null,
+                    null);
+
+            assertThatThrownBy(() -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -92,7 +108,10 @@ class ConditionnementTest {
         void creer_prixIncomplet_leveException() {
             var bigDecimal = new BigDecimal("20");
             var bigDecimal2 = new BigDecimal("1000");
-            assertThatThrownBy(() -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, null, bigDecimal2)))
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false,
+                    null, bigDecimal2);
+
+            assertThatThrownBy(() -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -102,7 +121,10 @@ class ConditionnementTest {
             var bigDecimal = new BigDecimal("20");
             var bigDecimal2 = new BigDecimal("1000");
             var bigDecimal3 = new BigDecimal("500");
-            assertThatThrownBy(() -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, bigDecimal2, bigDecimal3)))
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false,
+                    bigDecimal2, bigDecimal3);
+
+            assertThatThrownBy(() -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -112,7 +134,10 @@ class ConditionnementTest {
             var bigDecimal = new BigDecimal("20");
             var bigDecimal2 = new BigDecimal("-1");
             var bigDecimal3 = new BigDecimal("500");
-            assertThatThrownBy(() -> Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false, bigDecimal2, bigDecimal3)))
+            var creationCommand = new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, bigDecimal, false,
+                    bigDecimal2, bigDecimal3);
+
+            assertThatThrownBy(() -> Conditionnement.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -124,8 +149,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("convertit correctement une quantité de carton en comprimés")
         void convertir_carton_versComprimes() {
-            Conditionnement carton = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
-                    false, null, null));
+            Conditionnement carton = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
+                            false, null, null));
 
             BigDecimal resultat = carton.convertirVersUniteBase(new BigDecimal("20"));
 
@@ -135,8 +161,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("quantité négative → IllegalArgumentException")
         void convertir_quantiteNegative_leveException() {
-            Conditionnement carton = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
-                    false, null, null));
+            Conditionnement carton = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Carton", 4, new BigDecimal("10000"),
+                            false, null, null));
 
             var bigDecimal = new BigDecimal("-1");
             assertThatThrownBy(() -> carton.convertirVersUniteBase(bigDecimal))
@@ -151,8 +178,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("archiver() puis desarchiver() → conditionnement de nouveau actif")
         void archiverPuisDesarchiver_redevientActif() {
-            Conditionnement conditionnement = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
-                    false, null, null));
+            Conditionnement conditionnement = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
+                            false, null, null));
 
             conditionnement.archiver();
             assertThat(conditionnement.isActif()).isFalse();
@@ -169,8 +197,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("met à jour les informations du conditionnement, y compris le prix")
         void modifierInformations_succes() {
-            Conditionnement conditionnement = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
-                    false, null, null));
+            Conditionnement conditionnement = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
+                            false, null, null));
 
             conditionnement.modifierInformations("Boîte de 30", 2, new BigDecimal("30"), false,
                     new BigDecimal("1000"), new BigDecimal("1200"));
@@ -184,8 +213,9 @@ class ConditionnementTest {
         @Test
         @DisplayName("peut retirer le prix en repassant les deux champs à null")
         void modifierInformations_retirePrix_succes() {
-            Conditionnement conditionnement = Conditionnement.creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
-                    false, new BigDecimal("1000"), new BigDecimal("1200")));
+            Conditionnement conditionnement = Conditionnement
+                    .creer(new Conditionnement.CreationCommand(MEDICAMENT_ID, "Boîte", 2, new BigDecimal("20"),
+                            false, new BigDecimal("1000"), new BigDecimal("1200")));
 
             conditionnement.modifierInformations("Boîte", 2, new BigDecimal("20"), false, null, null);
 
@@ -205,18 +235,18 @@ class ConditionnementTest {
             Instant updatedAt = Instant.parse("2026-01-02T00:00:00Z");
 
             Conditionnement conditionnement = Conditionnement.builder()
-                .id(id)
-                .medicamentId(MEDICAMENT_ID)
-                .nom("Plaquette")
-                .niveau(2)
-                .quantiteUniteBase(new BigDecimal("10"))
-                .estUniteBase(false)
-                .prixAchat(new BigDecimal("500"))
-                .prixVente(new BigDecimal("600"))
-                .actif(false)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .build();
+                    .id(id)
+                    .medicamentId(MEDICAMENT_ID)
+                    .nom("Plaquette")
+                    .niveau(2)
+                    .quantiteUniteBase(new BigDecimal("10"))
+                    .estUniteBase(false)
+                    .prixAchat(new BigDecimal("500"))
+                    .prixVente(new BigDecimal("600"))
+                    .actif(false)
+                    .createdAt(createdAt)
+                    .updatedAt(updatedAt)
+                    .build();
 
             assertThat(conditionnement.getId()).isEqualTo(id);
             assertThat(conditionnement.isActif()).isFalse();

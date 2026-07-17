@@ -25,8 +25,9 @@ class AppelOffreTest {
     }
 
     private AppelOffre appelOffreBrouillon() {
-        return AppelOffre.creer(new AppelOffre.CreationCommand("AO-2026-0001", "Achat Amoxicilline", LocalDate.now().plusDays(30),
-                List.of(ligne())));
+        return AppelOffre.creer(
+                new AppelOffre.CreationCommand("AO-2026-0001", "Achat Amoxicilline", LocalDate.now().plusDays(30),
+                        List.of(ligne())));
     }
 
     @Nested
@@ -36,8 +37,9 @@ class AppelOffreTest {
         @Test
         @DisplayName("crée un appel d'offres BROUILLON avec la référence nettoyée")
         void creer_succes() {
-            AppelOffre appelOffre = AppelOffre.creer(new AppelOffre.CreationCommand("  AO-2026-0001  ", "Objet", LocalDate.now().plusDays(10),
-                    List.of(ligne())));
+            AppelOffre appelOffre = AppelOffre
+                    .creer(new AppelOffre.CreationCommand("  AO-2026-0001  ", "Objet", LocalDate.now().plusDays(10),
+                            List.of(ligne())));
 
             assertThat(appelOffre.getStatut()).isEqualTo(StatutAppelOffre.BROUILLON);
             assertThat(appelOffre.getReference()).isEqualTo("AO-2026-0001");
@@ -48,7 +50,9 @@ class AppelOffreTest {
         @DisplayName("sans ligne → IllegalArgumentException")
         void sansLigne_leveException() {
             var date = LocalDate.now().plusDays(10);
-            assertThatThrownBy(() -> AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", date, List.of())))
+            var creationCommand = new AppelOffre.CreationCommand("AO-1", "Objet", date, List.of());
+
+            assertThatThrownBy(() -> AppelOffre.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -57,8 +61,10 @@ class AppelOffreTest {
         void dateClotureNonFuture_leveException() {
             var now = LocalDate.now();
             var listeLigne = List.of(ligne());
+            var creationCommand = new AppelOffre.CreationCommand("AO-1", "Objet", now, listeLigne);
+
             assertThatThrownBy(
-                    () -> AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "Objet", now, listeLigne)))
+                    () -> AppelOffre.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -67,8 +73,10 @@ class AppelOffreTest {
         void referenceVide_leveException() {
             var date = LocalDate.now().plusDays(5);
             var listeLigne = List.of(ligne());
+            var creationCommand = new AppelOffre.CreationCommand("   ", "Objet", date, listeLigne);
+
             assertThatThrownBy(
-                    () -> AppelOffre.creer(new AppelOffre.CreationCommand("   ", "Objet", date, listeLigne)))
+                    () -> AppelOffre.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -77,8 +85,10 @@ class AppelOffreTest {
         void objetVide_leveException() {
             var date = LocalDate.now().plusDays(5);
             var listeLigne = List.of(ligne());
+            var creationCommand = new AppelOffre.CreationCommand("AO-1", "   ", date, listeLigne);
+
             assertThatThrownBy(
-                    () -> AppelOffre.creer(new AppelOffre.CreationCommand("AO-1", "   ", date, listeLigne)))
+                    () -> AppelOffre.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -252,15 +262,15 @@ class AppelOffreTest {
             LigneAppelOffre ligne = ligne();
             Instant maintenant = Instant.now();
             AppelOffre expire = AppelOffre.builder()
-                .id(AppelOffreId.generate())
-                .reference("AO-1")
-                .objet("Objet")
-                .dateCloture(LocalDate.now().minusDays(1))
-                .statut(StatutAppelOffre.PUBLIE)
-                .lignes(List.of(ligne))
-                .createdAt(maintenant)
-                .updatedAt(maintenant)
-                .build();
+                    .id(AppelOffreId.generate())
+                    .reference("AO-1")
+                    .objet("Objet")
+                    .dateCloture(LocalDate.now().minusDays(1))
+                    .statut(StatutAppelOffre.PUBLIE)
+                    .lignes(List.of(ligne))
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
 
             assertThat(expire.dateClotureDepassee()).isTrue();
             assertThat(expire.estOuvertALaSoumission()).isFalse();
@@ -299,15 +309,15 @@ class AppelOffreTest {
             AppelOffreId id = AppelOffreId.generate();
 
             AppelOffre appelOffre = AppelOffre.builder()
-                .id(id)
-                .reference("AO-2026-0099")
-                .objet("Objet")
-                .dateCloture(LocalDate.now().plusDays(5))
-                .statut(StatutAppelOffre.PUBLIE)
-                .lignes(List.of(ligne()))
-                .createdAt(maintenant)
-                .updatedAt(maintenant)
-                .build();
+                    .id(id)
+                    .reference("AO-2026-0099")
+                    .objet("Objet")
+                    .dateCloture(LocalDate.now().plusDays(5))
+                    .statut(StatutAppelOffre.PUBLIE)
+                    .lignes(List.of(ligne()))
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
 
             assertThat(appelOffre.getId()).isEqualTo(id);
             assertThat(appelOffre.getStatut()).isEqualTo(StatutAppelOffre.PUBLIE);

@@ -24,7 +24,8 @@ class StructureSanitaireTest {
     private static final RegionId REGION_ID = RegionId.generate();
 
     private StructureSanitaire structureValide() {
-        return StructureSanitaire.creer(new StructureSanitaire.CreationCommand("hop-thies", "Hôpital de Thiès", TypeStructureSanitaire.HOPITAL, REGION_ID,
+        return StructureSanitaire.creer(new StructureSanitaire.CreationCommand("hop-thies", "Hôpital de Thiès",
+                TypeStructureSanitaire.HOPITAL, REGION_ID,
                 "Thiès", "Route de Dakar", "+221771234567", "hopital.thies@sante.gouv.sn", "Ndiaye", "Fatou"));
     }
 
@@ -49,23 +50,31 @@ class StructureSanitaireTest {
         @Test
         @DisplayName("région null → IllegalArgumentException (la région est obligatoire dès la création)")
         void creer_sansRegion_leveException() {
-            assertThatThrownBy(() -> StructureSanitaire.creer(new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X", TypeStructureSanitaire.HOPITAL,
-                    null, null, null, null, null, "Ndiaye", "Fatou")))
+            var creationCommand = new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X",
+                    TypeStructureSanitaire.HOPITAL,
+                    null, null, null, null, null, "Ndiaye", "Fatou");
+            assertThatThrownBy(() -> StructureSanitaire.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("responsableNom null → NullPointerException")
         void creer_sansResponsableNom_leveException() {
-            assertThatThrownBy(() -> StructureSanitaire.creer(new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X", TypeStructureSanitaire.HOPITAL,
-                    REGION_ID, null, null, null, null, null, "Fatou"))).isInstanceOf(NullPointerException.class);
+            var creationCommand = new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X",
+                    TypeStructureSanitaire.HOPITAL,
+                    REGION_ID, null, null, null, null, null, "Fatou");
+            assertThatThrownBy(() -> StructureSanitaire.creer(creationCommand))
+                    .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("responsablePrenom null → NullPointerException")
         void creer_sansResponsablePrenom_leveException() {
-            assertThatThrownBy(() -> StructureSanitaire.creer(new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X", TypeStructureSanitaire.HOPITAL,
-                    REGION_ID, null, null, null, null, "Ndiaye", null))).isInstanceOf(NullPointerException.class);
+            var creationCommand = new StructureSanitaire.CreationCommand("HOP-X", "Hôpital X",
+                    TypeStructureSanitaire.HOPITAL,
+                    REGION_ID, null, null, null, null, "Ndiaye", null);
+            assertThatThrownBy(() -> StructureSanitaire.creer(creationCommand))
+                    .isInstanceOf(NullPointerException.class);
         }
     }
 

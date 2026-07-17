@@ -17,8 +17,9 @@ class FournisseurTest {
         @Test
         @DisplayName("crée un fournisseur actif, avec le nom nettoyé des espaces")
         void creer_succes() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("  Pharma Plus  ", "Dakar", "+221771234567",
-                    "contact@pharmaplus.sn", "Awa Fall"));
+            Fournisseur fournisseur = Fournisseur
+                    .creer(new Fournisseur.CreationCommand("  Pharma Plus  ", "Dakar", "+221771234567",
+                            "contact@pharmaplus.sn", "Awa Fall"));
 
             assertThat(fournisseur.isActif()).isTrue();
             assertThat(fournisseur.getNom()).isEqualTo("Pharma Plus");
@@ -28,14 +29,16 @@ class FournisseurTest {
         @Test
         @DisplayName("nom null → NullPointerException")
         void nomNull_leveException() {
-            assertThatThrownBy(() -> Fournisseur.creer(new Fournisseur.CreationCommand(null, "Dakar", null, null, null)))
+            var creationCommand = new Fournisseur.CreationCommand(null, "Dakar", null, null, null);
+            assertThatThrownBy(() -> Fournisseur.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("nom vide ou blanc → IllegalArgumentException")
         void nomVide_leveException() {
-            assertThatThrownBy(() -> Fournisseur.creer(new Fournisseur.CreationCommand("   ", "Dakar", null, null, null)))
+            var creationCommand = new Fournisseur.CreationCommand("   ", "Dakar", null, null, null);
+            assertThatThrownBy(() -> Fournisseur.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -43,8 +46,8 @@ class FournisseurTest {
         @DisplayName("nom de plus de 150 caractères → IllegalArgumentException")
         void nomTropLong_leveException() {
             String nomTropLong = "A".repeat(151);
-
-            assertThatThrownBy(() -> Fournisseur.creer(new Fournisseur.CreationCommand(nomTropLong, null, null, null, null)))
+            var creationCommand = new Fournisseur.CreationCommand(nomTropLong, null, null, null, null);
+            assertThatThrownBy(() -> Fournisseur.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -52,8 +55,8 @@ class FournisseurTest {
         @DisplayName("nom de exactement 150 caractères → accepté")
         void nomExactement150_accepte() {
             String nom = "A".repeat(150);
-
-            assertThat(Fournisseur.creer(new Fournisseur.CreationCommand(nom, null, null, null, null)).getNom()).hasSize(150);
+            var creationCommand = new Fournisseur.CreationCommand(nom, null, null, null, null);
+            assertThat(Fournisseur.creer(creationCommand).getNom()).hasSize(150);
         }
     }
 
@@ -64,7 +67,9 @@ class FournisseurTest {
         @Test
         @DisplayName("met à jour tous les champs et l'horodatage de mise à jour")
         void metAJourChampsEtHorodatage() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Ancien nom", "Ancienne adresse", "111", "a@a.sn", "X"));
+            var creationCommand = new Fournisseur.CreationCommand("Ancien nom", "Ancienne adresse", "111", "a@a.sn",
+                    "X");
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
             var updatedAtAvant = fournisseur.getUpdatedAt();
 
             fournisseur.modifierInformations("Nouveau nom", "Nouvelle adresse", "222", "b@b.sn", "Y");
@@ -80,7 +85,8 @@ class FournisseurTest {
         @Test
         @DisplayName("nom invalide → IllegalArgumentException, aucun champ modifié")
         void nomInvalide_leveExceptionSansModifier() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom initial", "Adresse", null, null, null));
+            var creationCommand = new Fournisseur.CreationCommand("Nom initial", "Adresse", null, null, null);
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
 
             assertThatThrownBy(() -> fournisseur.modifierInformations("   ", "X", null, null, null))
                     .isInstanceOf(IllegalArgumentException.class);
@@ -95,7 +101,8 @@ class FournisseurTest {
         @Test
         @DisplayName("désactiver un fournisseur actif → passe à inactif")
         void desactiver_passeInactif() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
+            var creationCommand = new Fournisseur.CreationCommand("Nom", null, null, null, null);
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
 
             fournisseur.desactiver();
 
@@ -105,7 +112,8 @@ class FournisseurTest {
         @Test
         @DisplayName("activer un fournisseur déjà actif → idempotent, ne lève pas d'erreur")
         void activerDejaActif_idempotent() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
+            var creationCommand = new Fournisseur.CreationCommand("Nom", null, null, null, null);
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
 
             fournisseur.activer();
 
@@ -115,7 +123,8 @@ class FournisseurTest {
         @Test
         @DisplayName("désactiver un fournisseur déjà inactif → idempotent")
         void desactiverDejaInactif_idempotent() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
+            var creationCommand = new Fournisseur.CreationCommand("Nom", null, null, null, null);
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
             fournisseur.desactiver();
 
             fournisseur.desactiver();
@@ -126,7 +135,8 @@ class FournisseurTest {
         @Test
         @DisplayName("activer un fournisseur inactif → repasse actif")
         void activerInactif_repasseActif() {
-            Fournisseur fournisseur = Fournisseur.creer(new Fournisseur.CreationCommand("Nom", null, null, null, null));
+            var creationCommand = new Fournisseur.CreationCommand("Nom", null, null, null, null);
+            Fournisseur fournisseur = Fournisseur.creer(creationCommand);
             fournisseur.desactiver();
 
             fournisseur.activer();
@@ -144,16 +154,16 @@ class FournisseurTest {
         void reconstruit_etatFidele() {
             java.time.Instant maintenant = java.time.Instant.now();
             Fournisseur fournisseur = Fournisseur.builder()
-                .id(ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId.generate())
-                .nom("Nom")
-                .adresse("Adresse")
-                .telephone("Tel")
-                .email("Email")
-                .contactPrincipal("Contact")
-                .actif(false)
-                .createdAt(maintenant)
-                .updatedAt(maintenant)
-                .build();
+                    .id(ministere.sante.senpna.fournisseur.domain.valueobject.FournisseurId.generate())
+                    .nom("Nom")
+                    .adresse("Adresse")
+                    .telephone("Tel")
+                    .email("Email")
+                    .contactPrincipal("Contact")
+                    .actif(false)
+                    .createdAt(maintenant)
+                    .updatedAt(maintenant)
+                    .build();
 
             assertThat(fournisseur.getNom()).isEqualTo("Nom");
             assertThat(fournisseur.isActif()).isFalse();

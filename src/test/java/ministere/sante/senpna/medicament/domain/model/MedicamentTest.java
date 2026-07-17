@@ -22,9 +22,10 @@ class MedicamentTest {
     private static final FamilleId FAMILLE_ID = FamilleId.generate();
 
     private static Medicament creerParacetamol() {
-        return Medicament.creer(new Medicament.CreationCommand("para500", "Doliprane", "Paracétamol", "500 mg", FORME_ID, FAMILLE_ID,
-                VoieAdministration.ORALE, TemperatureConservation.AMBIANTE, null, 30, false, "Sanofi", 20000,
-                200000));
+        return Medicament.creer(
+                new Medicament.CreationCommand("para500", "Doliprane", "Paracétamol", "500 mg", FORME_ID, FAMILLE_ID,
+                        VoieAdministration.ORALE, TemperatureConservation.AMBIANTE, null, 30, false, "Sanofi", 20000,
+                        200000));
     }
 
     @Nested
@@ -49,8 +50,9 @@ class MedicamentTest {
         @Test
         @DisplayName("température de conservation absente → défaut AMBIANTE")
         void creer_sansTemperature_defautAmbiante() {
-            Medicament medicament = Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID, null,
-                    null, null, null, false, null, null, null));
+            Medicament medicament = Medicament
+                    .creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID, null,
+                            null, null, null, false, null, null, null));
 
             assertThat(medicament.getTemperatureConservation()).isEqualTo(TemperatureConservation.AMBIANTE);
         }
@@ -58,40 +60,49 @@ class MedicamentTest {
         @Test
         @DisplayName("code invalide → IllegalArgumentException")
         void creer_codeInvalide_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("code invalide !", "Nom", "DCI", "10 mg", FORME_ID,
-                    FAMILLE_ID, null, null, null, null, false, null, null, null)))
+            var creationCommand = new Medicament.CreationCommand("code invalide !", "Nom", "DCI", "10 mg", FORME_ID,
+                    FAMILLE_ID, null, null, null, null, false, null, null, null);
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("formeId null → NullPointerException")
         void creer_formeIdNull_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", null, FAMILLE_ID, null, null,
-                    null, null, false, null, null, null)))
+            var creationCommand = new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", null, FAMILLE_ID, null,
+                    null,
+                    null, null, false, null, null, null);
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("familleId null → NullPointerException")
         void creer_familleIdNull_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, null, null, null,
-                    null, null, false, null, null, null)))
+            var creationCommand = new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, null, null,
+                    null,
+                    null, null, false, null, null, null);
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(NullPointerException.class);
         }
 
         @Test
         @DisplayName("délai d'approvisionnement négatif → IllegalArgumentException")
         void creer_delaiNegatif_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID, null,
-                    null, null, -1, false, null, null, null)))
+            var creationCommand = new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID,
+                    null,
+                    null, null, -1, false, null, null, null);
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         @DisplayName("stock minimum supérieur au stock maximum → IllegalArgumentException")
         void creer_seuilsIncoherents_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID, null,
-                    null, null, null, false, null, 100, 50)))
+            var creationCommand = new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID,
+                    null,
+                    null, null, null, false, null, 100, 50);
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("seuil minimum");
         }
@@ -99,8 +110,11 @@ class MedicamentTest {
         @Test
         @DisplayName("stock minimum négatif → IllegalArgumentException")
         void creer_stockMinimumNegatif_leveException() {
-            assertThatThrownBy(() -> Medicament.creer(new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID, null,
-                    null, null, null, false, null, -5, 100)))
+            var creationCommand = new Medicament.CreationCommand("CODE1", "Nom", "DCI", "10 mg", FORME_ID, FAMILLE_ID,
+                    null,
+                    null, null, null, false, null, -5, 100);
+
+            assertThatThrownBy(() -> Medicament.creer(creationCommand))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -180,25 +194,25 @@ class MedicamentTest {
             Instant updatedAt = Instant.parse("2026-01-02T00:00:00Z");
 
             Medicament medicament = Medicament.builder()
-                .id(id)
-                .code("AMOX500")
-                .nomCommercial("Amoxicilline Sandoz")
-                .dci("Amoxicilline")
-                .dosage("500 mg")
-                .formeId(FORME_ID)
-                .familleId(FAMILLE_ID)
-                .voieAdministration(VoieAdministration.ORALE)
-                .temperatureConservation(TemperatureConservation.AMBIANTE)
-                .programmeSante(null)
-                .delaiApprovisionnementJours(45)
-                .necessiteOrdonnance(true)
-                .fabricant("Sandoz")
-                .stockMinimum(5000)
-                .stockMaximum(80000)
-                .actif(false)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .build();
+                    .id(id)
+                    .code("AMOX500")
+                    .nomCommercial("Amoxicilline Sandoz")
+                    .dci("Amoxicilline")
+                    .dosage("500 mg")
+                    .formeId(FORME_ID)
+                    .familleId(FAMILLE_ID)
+                    .voieAdministration(VoieAdministration.ORALE)
+                    .temperatureConservation(TemperatureConservation.AMBIANTE)
+                    .programmeSante(null)
+                    .delaiApprovisionnementJours(45)
+                    .necessiteOrdonnance(true)
+                    .fabricant("Sandoz")
+                    .stockMinimum(5000)
+                    .stockMaximum(80000)
+                    .actif(false)
+                    .createdAt(createdAt)
+                    .updatedAt(updatedAt)
+                    .build();
 
             assertThat(medicament.getId()).isEqualTo(id);
             assertThat(medicament.isActif()).isFalse();

@@ -17,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LigneCommandeAchatTest {
 
     private LigneCommandeAchat ligne() {
-        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(), ConditionnementId.generate(), BigDecimal.TEN,
+        return LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(MedicamentId.generate(),
+                ConditionnementId.generate(), BigDecimal.TEN,
                 BigDecimal.valueOf(200_000)));
     }
 
@@ -42,9 +43,10 @@ class LigneCommandeAchatTest {
 
             var medicamentId = MedicamentId.generate();
             var conditionnementId = ConditionnementId.generate();
-
-            assertThatThrownBy(() -> LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
-                    BigDecimal.ZERO, BigDecimal.TEN))).isInstanceOf(IllegalArgumentException.class);
+            var creationCommand = new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
+                    BigDecimal.ZERO, BigDecimal.TEN);
+            assertThatThrownBy(() -> LigneCommandeAchat.creer(creationCommand))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
@@ -53,9 +55,11 @@ class LigneCommandeAchatTest {
 
             var medicamentId = MedicamentId.generate();
             var conditionnementId = ConditionnementId.generate();
-
-            assertThatThrownBy(() -> LigneCommandeAchat.creer(new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
-                    BigDecimal.TEN, BigDecimal.ZERO))).isInstanceOf(IllegalArgumentException.class);
+            var creationCommand = new LigneCommandeAchat.CreationCommand(medicamentId, conditionnementId,
+                    BigDecimal.TEN, BigDecimal.ZERO);
+            assertThatThrownBy(() -> LigneCommandeAchat
+                    .creer(creationCommand))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
 
