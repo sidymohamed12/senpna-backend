@@ -3,6 +3,7 @@ package ministere.sante.senpna.appeloffre.domain.model;
 import ministere.sante.senpna.appeloffre.domain.exception.TransitionStatutAppelOffreInvalideException;
 import ministere.sante.senpna.appeloffre.domain.valueobject.AppelOffreId;
 import ministere.sante.senpna.appeloffre.domain.valueobject.StatutAppelOffre;
+import ministere.sante.senpna.config.AppClock;
 import ministere.sante.senpna.shared.domain.model.AggregateRoot;
 
 import java.time.Instant;
@@ -63,7 +64,7 @@ public class AppelOffre extends AggregateRoot<AppelOffreId> {
         if (command.lignes() == null || command.lignes().isEmpty()) {
             throw new IllegalArgumentException("Un appel d'offres doit contenir au moins une ligne");
         }
-        if (!command.dateCloture().isAfter(LocalDate.now())) {
+        if (!command.dateCloture().isAfter(LocalDate.now(AppClock.APP_ZONE))) {
             throw new IllegalArgumentException("La date de clôture doit être future");
         }
         Instant maintenant = Instant.now();
@@ -149,7 +150,7 @@ public class AppelOffre extends AggregateRoot<AppelOffreId> {
         if (lignes.isEmpty()) {
             throw new IllegalStateException("Un appel d'offres sans ligne ne peut pas être publié");
         }
-        if (!dateCloture.isAfter(LocalDate.now())) {
+        if (!dateCloture.isAfter(LocalDate.now(AppClock.APP_ZONE))) {
             throw new IllegalStateException("La date de clôture doit être future pour publier l'appel d'offres");
         }
         this.statut = StatutAppelOffre.PUBLIE;
@@ -182,11 +183,12 @@ public class AppelOffre extends AggregateRoot<AppelOffreId> {
     }
 
     public boolean estOuvertALaSoumission() {
-        return statut == StatutAppelOffre.PUBLIE && dateCloture.isAfter(LocalDate.now().minusDays(1));
+        return statut == StatutAppelOffre.PUBLIE
+                && dateCloture.isAfter(LocalDate.now(AppClock.APP_ZONE).minusDays(1));
     }
 
     public boolean dateClotureDepassee() {
-        return !dateCloture.isAfter(LocalDate.now());
+        return !dateCloture.isAfter(LocalDate.now(AppClock.APP_ZONE));
     }
 
     private void exigerStatut(StatutAppelOffre attendu, String action) {

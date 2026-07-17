@@ -167,6 +167,8 @@ app:
     catalogue-ttl: PT1M
     projet-ttl: PT24H
     actualite-ttl: PT24H
+  clock:
+    timezone: Africa/Dakar
 
 application:
   title: SEN PharmaFlow

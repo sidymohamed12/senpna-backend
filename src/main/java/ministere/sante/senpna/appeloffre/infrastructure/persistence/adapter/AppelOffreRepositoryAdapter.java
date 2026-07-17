@@ -11,6 +11,7 @@ import ministere.sante.senpna.appeloffre.infrastructure.persistence.mapper.Appel
 import ministere.sante.senpna.appeloffre.infrastructure.persistence.repository.AppelOffreJpaRepository;
 import ministere.sante.senpna.appeloffre.infrastructure.persistence.repository.LigneAppelOffreJpaRepository;
 import ministere.sante.senpna.appeloffre.infrastructure.persistence.specification.AppelOffreSpecifications;
+import ministere.sante.senpna.config.AppClock;
 import ministere.sante.senpna.shared.domain.valueobject.PageRequest;
 import ministere.sante.senpna.shared.domain.valueobject.PageResult;
 
@@ -99,7 +100,8 @@ public class AppelOffreRepositoryAdapter implements AppelOffreRepositoryPort {
     @Transactional(readOnly = true)
     public List<AppelOffre> findPubliesAvecClotureDepassee() {
         return appelOffreJpaRepository
-                .findByStatutAndDateClotureLessThan(StatutAppelOffre.PUBLIE, LocalDate.now().plusDays(1))
+                .findByStatutAndDateClotureLessThan(StatutAppelOffre.PUBLIE,
+                        LocalDate.now(AppClock.APP_ZONE).plusDays(1))
                 .stream()
                 .map(this::toDomainAvecLignes)
                 .toList();

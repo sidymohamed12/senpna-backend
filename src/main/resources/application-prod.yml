@@ -166,6 +166,8 @@ app:
     catalogue-ttl: ${CACHE_CATALOGUE_TTL:PT1M}
     projet-ttl: ${CACHE_PROJET_TTL:PT24H}
     actualite-ttl: ${CACHE_ACTUALITE_TTL:PT24H}
+  clock:
+    timezone: Africa/Dakar
 
 application:
   title: SEN PharmaFlow
