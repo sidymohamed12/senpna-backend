@@ -1,5 +1,6 @@
 package ministere.sante.senpna.appeloffre.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.appeloffre.domain.valueobject.StatutAppelOffre;
 import ministere.sante.senpna.appeloffre.infrastructure.persistence.entity.AppelOffreJpaEntity;
 
@@ -14,10 +15,10 @@ public final class AppelOffreSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("reference")), motif),
-                cb.like(cb.lower(root.get("objet")), motif));
+                cb.like(cb.lower(root.get("reference")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("objet")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<AppelOffreJpaEntity> statut(StatutAppelOffre statut) {

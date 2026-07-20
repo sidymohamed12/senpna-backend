@@ -1,5 +1,6 @@
 package ministere.sante.senpna.fournisseur.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.fournisseur.infrastructure.persistence.entity.FournisseurJpaEntity;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -13,11 +14,11 @@ public final class FournisseurSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("nom")), motif),
-                cb.like(cb.lower(root.get("email")), motif),
-                cb.like(cb.lower(root.get("telephone")), motif));
+                cb.like(cb.lower(root.get("nom")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("email")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("telephone")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<FournisseurJpaEntity> actif(Boolean actif) {

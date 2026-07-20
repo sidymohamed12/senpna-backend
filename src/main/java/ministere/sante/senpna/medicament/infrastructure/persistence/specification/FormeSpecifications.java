@@ -1,5 +1,6 @@
 package ministere.sante.senpna.medicament.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.medicament.infrastructure.persistence.entity.FormeJpaEntity;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -13,10 +14,10 @@ public final class FormeSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("code")), motif),
-                cb.like(cb.lower(root.get("libelle")), motif));
+                cb.like(cb.lower(root.get("code")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("libelle")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<FormeJpaEntity> actif(Boolean actif) {

@@ -1,5 +1,6 @@
 package ministere.sante.senpna.carriere.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.carriere.domain.valueobject.StatutOpportunite;
 import ministere.sante.senpna.carriere.domain.valueobject.TypeContrat;
 import ministere.sante.senpna.carriere.infrastructure.persistence.entity.OpportuniteCarriereJpaEntity;
@@ -18,11 +19,11 @@ public final class OpportuniteCarriereSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("titre")), motif),
-                cb.like(cb.lower(root.get("nomEntreprise")), motif),
-                cb.like(cb.lower(root.get("lieu")), motif));
+                cb.like(cb.lower(root.get("titre")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("nomEntreprise")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("lieu")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<OpportuniteCarriereJpaEntity> typeContrat(TypeContrat typeContrat) {

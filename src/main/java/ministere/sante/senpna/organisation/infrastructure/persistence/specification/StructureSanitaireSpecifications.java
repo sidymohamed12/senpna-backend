@@ -1,5 +1,6 @@
 package ministere.sante.senpna.organisation.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.organisation.domain.valueobject.StatutAdhesion;
 import ministere.sante.senpna.organisation.domain.valueobject.TypeStructureSanitaire;
 import ministere.sante.senpna.organisation.infrastructure.persistence.entity.StructureSanitaireJpaEntity;
@@ -17,10 +18,10 @@ public final class StructureSanitaireSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("nom")), motif),
-                cb.like(cb.lower(root.get("code")), motif));
+                cb.like(cb.lower(root.get("nom")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("code")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<StructureSanitaireJpaEntity> type(TypeStructureSanitaire type) {

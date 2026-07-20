@@ -1,5 +1,6 @@
 package ministere.sante.senpna.auth.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity;
 import ministere.sante.senpna.auth.infrastructure.persistence.entity.UserJpaEntity_;
 
@@ -16,11 +17,11 @@ public final class UserSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get(UserJpaEntity_.nom)), motif),
-                cb.like(cb.lower(root.get(UserJpaEntity_.prenom)), motif),
-                cb.like(cb.lower(root.get(UserJpaEntity_.email)), motif));
+                cb.like(cb.lower(root.get(UserJpaEntity_.nom)), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get(UserJpaEntity_.prenom)), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get(UserJpaEntity_.email)), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<UserJpaEntity> actif(Boolean actif) {

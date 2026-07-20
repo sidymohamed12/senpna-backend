@@ -17,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 import java.util.Arrays;
 
@@ -67,6 +69,37 @@ public class SecurityConfig {
                  */
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                /*
+                 * En-têtes de sécurité HTTP — OWASP Secure Headers Project.
+                 * API JSON pure (aucune vue HTML servie par le backend en prod),
+                 * d'où une CSP restrictive par défaut : default-src 'none'.
+                 */
+                .headers(headers -> headers
+                        .contentTypeOptions(withDefaults -> {
+                        })
+                        .frameOptions(frame -> frame.deny())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .preload(true)
+                                .maxAgeInSeconds(31536000))
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .addHeaderWriter(new StaticHeadersWriter(
+                                "Content-Security-Policy",
+                                isDevProfile
+                                        // Swagger UI (dev uniquement) a besoin de charger ses propres assets.
+                                        ? "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                                                + "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+                                                + "frame-ancestors 'none'; base-uri 'none'"
+                                        // Prod/test : API JSON pure, aucune vue HTML servie.
+                                        : "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"))
+                        .addHeaderWriter(new StaticHeadersWriter(
+                                "Permissions-Policy",
+                                "geolocation=(), camera=(), microphone=(), payment=()"))
+                        .addHeaderWriter(new StaticHeadersWriter(
+                                "X-Permitted-Cross-Domain-Policies", "none"))
+                        .cacheControl(withDefaults -> {
+                        }))
                 .authorizeHttpRequests(auth -> {
 
                     // Routes d'authentification publiques

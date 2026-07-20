@@ -1,5 +1,6 @@
 package ministere.sante.senpna.commandeachat.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.commandeachat.domain.valueobject.StatutCommandeAchat;
 import ministere.sante.senpna.commandeachat.infrastructure.persistence.entity.CommandeAchatJpaEntity;
 
@@ -14,8 +15,8 @@ public final class CommandeAchatSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
-        return (root, query, cb) -> cb.like(cb.lower(root.get("reference")), motif);
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
+        return (root, query, cb) -> cb.like(cb.lower(root.get("reference")), motif, LikePatternEscaper.escapeChar());
     }
 
     public static Specification<CommandeAchatJpaEntity> statut(StatutCommandeAchat statut) {

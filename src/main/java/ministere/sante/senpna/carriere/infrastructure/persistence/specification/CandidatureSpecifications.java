@@ -1,5 +1,6 @@
 package ministere.sante.senpna.carriere.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.carriere.infrastructure.persistence.entity.CandidatureJpaEntity;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -22,10 +23,10 @@ public final class CandidatureSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("nomComplet")), motif),
-                cb.like(cb.lower(root.get("email")), motif));
+                cb.like(cb.lower(root.get("nomComplet")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("email")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<CandidatureJpaEntity> combiner(UUID opportuniteId, String texte) {

@@ -1,5 +1,6 @@
 package ministere.sante.senpna.actualite.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.actualite.domain.valueobject.CategorieActualite;
 import ministere.sante.senpna.actualite.domain.valueobject.StatutActualite;
 import ministere.sante.senpna.actualite.infrastructure.persistence.entity.ActualiteJpaEntity;
@@ -15,14 +16,14 @@ public final class ActualiteSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> {
             if (query != null) {
                 query.distinct(true);
             }
             return cb.or(
-                    cb.like(cb.lower(root.get("titre")), motif),
-                    cb.like(cb.lower(root.get("description")), motif));
+                    cb.like(cb.lower(root.get("titre")), motif, LikePatternEscaper.escapeChar()),
+                    cb.like(cb.lower(root.get("description")), motif, LikePatternEscaper.escapeChar()));
         };
     }
 

@@ -1,5 +1,6 @@
 package ministere.sante.senpna.projet.infrastructure.web.dto.request;
 
+import ministere.sante.senpna.shared.infrastructure.validation.NoHtml;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -9,9 +10,9 @@ public record CreateProjetRequest(
 
                 @NotBlank(message = "La catégorie est obligatoire") String categorie,
 
-                @NotBlank(message = "Le nom du projet est obligatoire") @Size(max = 200, message = "Le nom ne peut pas dépasser 200 caractères") String nom,
+                @NotBlank(message = "Le nom du projet est obligatoire") @Size(max = 200, message = "Le nom ne peut pas dépasser 200 caractères") @NoHtml String nom,
 
-                @Size(max = 500, message = "La description ne peut pas dépasser 500 caractères") String description,
+                @Size(max = 500, message = "La description ne peut pas dépasser 500 caractères") @NoHtml String description,
 
                 @Size(max = 10, message = "Un projet ne peut pas avoir plus de 10 objectifs") List<@Size(max = 200, message = "Un objectif ne peut pas dépasser 200 caractères") String> objectifs,
 

@@ -1,5 +1,6 @@
 package ministere.sante.senpna.stock.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.stock.domain.valueobject.StatutLot;
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.LotJpaEntity;
 import ministere.sante.senpna.stock.infrastructure.persistence.entity.LotJpaEntity_;
@@ -24,8 +25,8 @@ public final class LotSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
-        return (root, query, cb) -> cb.like(cb.lower(root.get(LotJpaEntity_.numeroLot)), motif);
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
+        return (root, query, cb) -> cb.like(cb.lower(root.get(LotJpaEntity_.numeroLot)), motif, LikePatternEscaper.escapeChar());
     }
 
     public static Specification<LotJpaEntity> medicamentId(UUID medicamentId) {

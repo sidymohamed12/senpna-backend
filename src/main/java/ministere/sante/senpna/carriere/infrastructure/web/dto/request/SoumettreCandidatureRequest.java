@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import ministere.sante.senpna.shared.infrastructure.validation.NoHtml;
 
 import java.util.UUID;
 
@@ -23,19 +24,19 @@ public record SoumettreCandidatureRequest(
 
                 @NotNull(message = "L'opportunité ciblée est obligatoire") UUID opportuniteId,
 
-                @NotBlank(message = "La civilité est obligatoire") String civilite,
+                @NotBlank(message = "La civilité est obligatoire") @NoHtml String civilite,
 
-                @NotBlank(message = "Le nom complet est obligatoire") @Size(max = 200, message = "Le nom complet ne peut pas dépasser 200 caractères") String nomComplet,
+                @NotBlank(message = "Le nom complet est obligatoire") @Size(max = 200, message = "Le nom complet ne peut pas dépasser 200 caractères") @NoHtml String nomComplet,
 
                 @NotBlank(message = "L'e-mail est obligatoire") @Email(message = "L'adresse e-mail est invalide") String email,
 
-                @NotBlank(message = "Le téléphone est obligatoire") String telephone,
+                @NotBlank(message = "Le téléphone est obligatoire") @NoHtml String telephone,
 
                 @NotBlank(message = "Le CV est obligatoire") @Size(max = 1000) String cvUrl,
 
                 @Size(max = 1000) String lettreMotivationUrl,
 
-                @Size(max = 2000, message = "Le message ne peut pas dépasser 2000 caractères") String messageComplementaire,
+                @Size(max = 2000, message = "Le message ne peut pas dépasser 2000 caractères") @NoHtml String messageComplementaire,
 
                 @AssertTrue(message = "Le consentement RGPD est obligatoire pour postuler") boolean consentementRgpd) {
 }

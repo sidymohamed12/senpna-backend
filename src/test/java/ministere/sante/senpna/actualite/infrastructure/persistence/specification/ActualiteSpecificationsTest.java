@@ -3,6 +3,7 @@ package ministere.sante.senpna.actualite.infrastructure.persistence.specificatio
 import ministere.sante.senpna.actualite.domain.valueobject.CategorieActualite;
 import ministere.sante.senpna.actualite.domain.valueobject.StatutActualite;
 import ministere.sante.senpna.actualite.infrastructure.persistence.entity.ActualiteJpaEntity;
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -52,16 +53,16 @@ class ActualiteSpecificationsTest {
         when(root.<String>get("description")).thenReturn(descriptionPath);
         when(cb.lower(titrePath)).thenReturn(titrePath);
         when(cb.lower(descriptionPath)).thenReturn(descriptionPath);
-        when(cb.like(titrePath, "%centre%")).thenReturn(likeTitre);
-        when(cb.like(descriptionPath, "%centre%")).thenReturn(likeDescription);
+        when(cb.like(titrePath, "%centre%", LikePatternEscaper.escapeChar())).thenReturn(likeTitre);
+        when(cb.like(descriptionPath, "%centre%", LikePatternEscaper.escapeChar())).thenReturn(likeDescription);
         when(cb.or(likeTitre, likeDescription)).thenReturn(orPredicate);
 
         Predicate result = specification.toPredicate(root, query, cb);
 
         assertThat(result).isEqualTo(orPredicate);
         verify(query).distinct(true);
-        verify(cb).like(titrePath, "%centre%");
-        verify(cb).like(descriptionPath, "%centre%");
+        verify(cb).like(titrePath, "%centre%", LikePatternEscaper.escapeChar());
+        verify(cb).like(descriptionPath, "%centre%", LikePatternEscaper.escapeChar());
     }
 
     @Test
@@ -78,7 +79,7 @@ class ActualiteSpecificationsTest {
 
         when(root.<String>get(anyString())).thenReturn(path);
         when(cb.lower(path)).thenReturn(path);
-        when(cb.like(path, "%abc%")).thenReturn(predicate);
+        when(cb.like(path, "%abc%", LikePatternEscaper.escapeChar())).thenReturn(predicate);
         when(cb.or(predicate, predicate)).thenReturn(predicate);
 
         Predicate result = specification.toPredicate(root, null, cb);

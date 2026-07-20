@@ -1,5 +1,6 @@
 package ministere.sante.senpna.projet.infrastructure.persistence.specification;
 
+import ministere.sante.senpna.shared.infrastructure.util.LikePatternEscaper;
 import ministere.sante.senpna.projet.domain.valueobject.CategorieProjet;
 import ministere.sante.senpna.projet.domain.valueobject.StatutProjet;
 import ministere.sante.senpna.projet.infrastructure.persistence.entity.ProjetJpaEntity;
@@ -15,10 +16,10 @@ public final class ProjetSpecifications {
         if (texte == null || texte.isBlank()) {
             return null;
         }
-        String motif = "%" + texte.trim().toLowerCase() + "%";
+        String motif = "%" + LikePatternEscaper.escape(texte.trim().toLowerCase()) + "%";
         return (root, query, cb) -> cb.or(
-                cb.like(cb.lower(root.get("nom")), motif),
-                cb.like(cb.lower(root.get("description")), motif));
+                cb.like(cb.lower(root.get("nom")), motif, LikePatternEscaper.escapeChar()),
+                cb.like(cb.lower(root.get("description")), motif, LikePatternEscaper.escapeChar()));
     }
 
     public static Specification<ProjetJpaEntity> categorie(CategorieProjet categorie) {
