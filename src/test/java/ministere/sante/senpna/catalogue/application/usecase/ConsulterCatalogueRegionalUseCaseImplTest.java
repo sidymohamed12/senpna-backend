@@ -59,7 +59,7 @@ class ConsulterCatalogueRegionalUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        AppProperties appProperties = new AppProperties(null, null, null, null, null,
+        AppProperties appProperties = new AppProperties(null, null, null, null,
                 new CacheProperties(null, null, null, null, null, Duration.ofMinutes(1), null, null));
 
         sut = new ConsulterCatalogueRegionalUseCaseImpl(catalogueAccessGuard, entrepotQueryPort,

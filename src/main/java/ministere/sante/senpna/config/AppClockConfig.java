@@ -74,6 +74,7 @@ public class AppClockConfig {
      * </p>
      */
     @Bean
+    @Profile("test")
     Clock testClock() {
         return Clock.fixed(
                 LocalDateTime.of(2026, Month.JANUARY, 15, 12, 0)

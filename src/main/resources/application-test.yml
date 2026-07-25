@@ -65,11 +65,13 @@ springdoc:
     enabled: false
 
 # ── Configuration applicative ──────────────────────────────────────
+jwt:
+  algorithm: HS256
+  secret: "test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-test!!"
+  access-token-ttl: PT15M
+  refresh-token-ttl: P7D
+
 app:
-  jwt:
-    secret: "test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-test!!"
-    access-token-ttl: PT15M
-    refresh-token-ttl: P7D
   security:
     cors-allowed-origins:
       - "http://localhost:3000"

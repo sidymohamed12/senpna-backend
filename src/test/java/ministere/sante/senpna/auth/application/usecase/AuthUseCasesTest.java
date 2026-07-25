@@ -12,7 +12,7 @@ import ministere.sante.senpna.shared.domain.exception.UserNotFoundException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
-import io.jsonwebtoken.JwtException;
+import com.sidymohamed12.jwt.core.exception.JwtValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -166,7 +166,7 @@ class AuthUseCasesTest {
         @Test
         @DisplayName("access token malformé — n'échoue pas, révoque quand même le refresh token")
         void logout_access_token_invalide_ne_leve_pas() {
-            doThrow(new JwtException("token malformé")).when(tokenPort).invalider(ACCESS);
+            doThrow(new JwtValidationException("token malformé")).when(tokenPort).invalider(ACCESS);
 
             sut.logout(new LogoutCommand(ACCESS, REFRESH));
 

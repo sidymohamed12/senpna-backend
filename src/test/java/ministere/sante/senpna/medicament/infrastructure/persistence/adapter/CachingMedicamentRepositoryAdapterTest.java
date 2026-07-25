@@ -41,7 +41,7 @@ class CachingMedicamentRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        AppProperties appProperties = new AppProperties(null, null, null, null, null,
+        AppProperties appProperties = new AppProperties(null, null, null, null,
                 new CacheProperties(Duration.ofHours(12), null, null, null, null, null, null, null));
         sut = new CachingMedicamentRepositoryAdapter(delegate, cache, appProperties);
     }

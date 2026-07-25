@@ -1,10 +1,11 @@
 package ministere.sante.senpna.auth.application.service;
 
+import com.sidymohamed12.jwt.core.algorithm.JwtAlgorithm;
+import com.sidymohamed12.jwt.spring.autoconfigure.JwtProperties;
+
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.config.AppProperties;
-import ministere.sante.senpna.config.AppProperties.JwtProperties;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 
@@ -38,10 +39,10 @@ class AuthTokenFactoryTest {
 
     @BeforeEach
     void setUp() {
-        AppProperties appProperties = new AppProperties(
-                new JwtProperties("secret", Duration.ofMinutes(15), Duration.ofDays(7)),
-                null, null, null, null, null);
-        sut = new AuthTokenFactory(tokenPort, appProperties, userAffectationResolver);
+        JwtProperties jwtProperties = new JwtProperties(
+                JwtAlgorithm.HS256, "secret", null, null,
+                Duration.ofMinutes(15), Duration.ofDays(7));
+        sut = new AuthTokenFactory(tokenPort, jwtProperties, userAffectationResolver);
     }
 
     @Test

@@ -7,20 +7,14 @@ import java.time.Duration;
 
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
-                JwtProperties jwt,
                 SecurityProperties security,
                 OtpProperties otp,
                 RateLimitProperties rateLimit,
                 MailProperties mail,
                 CacheProperties cache) {
 
-        // ── JWT ───────────────────────────────────────────────────────────────
-
-        public record JwtProperties(
-                        String secret,
-                        @DefaultValue("PT15M") Duration accessTokenTtl,
-                        @DefaultValue("P7D") Duration refreshTokenTtl) {
-        }
+        // ── JWT : voir com.sidymohamed12.jwt.spring.autoconfigure.JwtProperties
+        // (préfixe jwt.*, fourni par jwt-spring-boot-starter) ──────────────
 
         // ── Sécurité ─────────────────────────────────────────────────────────
 

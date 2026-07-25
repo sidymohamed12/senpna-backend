@@ -42,7 +42,7 @@
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<querydsl.version>5.1.0</querydsl.version>
-		<jjwt.version>0.12.6</jjwt.version>
+		<!-- jjwt.version retiré : plus de dépendance directe à jjwt, ramené en transitif par jwt-spring-boot-starter -->
 		<jacoco.version>0.8.12</jacoco.version>
 		<dependency-check-maven.version>12.1.3</dependency-check-maven.version>
 
@@ -157,31 +157,17 @@
 		</dependency>
 
 		<!-- ══════════════════════════════════════
-		     JWT — JJWT (io.jsonwebtoken)
-		     ✅ AJOUTÉ : était utilisé dans JwtService mais absent du POM.
-		     - jjwt-api   : compile (interfaces publiques)
-		     - jjwt-impl  : runtime (implémentation — ne pas compiler dessus)
-		     - jjwt-jackson : runtime (sérialisation claims via Jackson)
+		     JWT — jwt-toolkit (io.github.sidymohamed12)
+		     ✅ REMPLACE : jjwt-api/impl/jackson + JwtService/JwtTokenAdapter
+		     maison. La génération/validation JWT est désormais fournie par la
+		     librairie, en amont réutilisable sur tous les projets futurs.
+		     Zéro config manuelle : voir jwt.* dans application-*.yml.
 		══════════════════════════════════════ -->
 
 		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-api</artifactId>
-			<version>${jjwt.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-impl</artifactId>
-			<version>${jjwt.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-jackson</artifactId>
-			<version>${jjwt.version}</version>
-			<scope>runtime</scope>
+			<groupId>io.github.sidymohamed12</groupId>
+			<artifactId>jwt-spring-boot-starter</artifactId>
+			<version>1.0.3</version>
 		</dependency>
 
 		<!-- ══════════════════════════════════════

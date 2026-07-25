@@ -68,7 +68,7 @@ class ConsulterCatalogueNationalUseCaseImplTest {
                 catalogueEntryAssembler = new CatalogueEntryAssembler(fournisseurCachePort, conditionnementQueryPort);
                 JsonCacheSupport cache = new JsonCacheSupport(cachePort,
                                 new com.fasterxml.jackson.databind.ObjectMapper());
-                AppProperties appProperties = new AppProperties(null, null, null, null, null,
+                AppProperties appProperties = new AppProperties(null, null, null, null,
                                 new AppProperties.CacheProperties(null, null, null, null, null,
                                                 java.time.Duration.ofMinutes(1), null, null));
                 sut = new ConsulterCatalogueNationalUseCaseImpl(catalogueAccessGuard, entrepotQueryPort,

@@ -48,7 +48,7 @@ class StockCachingAdaptersTest {
 
     private AppProperties appProperties(Duration medicamentTtl, Duration lotTtl, Duration stockTtl,
             Duration mouvementTtl) {
-        return new AppProperties(null, null, null, null, null,
+        return new AppProperties(null, null, null, null,
                 new CacheProperties(medicamentTtl, lotTtl, stockTtl, mouvementTtl, null, null, null, null));
     }
 

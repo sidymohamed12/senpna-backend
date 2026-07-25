@@ -130,9 +130,10 @@ class RefreshTokenUseCaseImplTest {
     }
 
     @Test
-    @DisplayName("JwtException levée en cours de traitement → InvalidRefreshTokenException")
+    @DisplayName("JwtValidationException levée en cours de traitement → InvalidRefreshTokenException")
     void jwtException_convertieEnInvalidRefreshToken() {
-        when(tokenPort.estInvalide("token")).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "expiré"));
+        when(tokenPort.estInvalide("token"))
+                .thenThrow(new com.sidymohamed12.jwt.core.exception.JwtValidationException("expiré"));
 
         var refreshTokenCommand = new RefreshTokenCommand("token");
         assertThatThrownBy(() -> sut.rafraichir(refreshTokenCommand))

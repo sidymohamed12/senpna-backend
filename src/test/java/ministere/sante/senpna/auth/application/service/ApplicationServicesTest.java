@@ -1,10 +1,11 @@
 package ministere.sante.senpna.auth.application.service;
 
+import com.sidymohamed12.jwt.spring.autoconfigure.JwtProperties;
+
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.auth.domain.valueobject.OtpChannel;
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.config.AppProperties;
 import ministere.sante.senpna.shared.domain.exception.SenPnaException;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.shared.domain.projection.RoleProjection;
@@ -81,25 +82,23 @@ class ApplicationServicesTest {
         @Mock
         TokenPort tokenPort;
         @Mock
-        AppProperties appProperties;
+        JwtProperties jwtProperties;
         @Mock
         UserAffectationResolver userAffectationResolver;
         @InjectMocks
         AuthTokenFactory sut;
 
         @Test
-        @DisplayName("build() génère access + refresh et utilise le TTL de AppProperties")
+        @DisplayName("build() génère access + refresh et utilise le TTL de JwtProperties")
         void build_retourne_auth_tokens_corrects() {
             User user = UserFixtures.actif();
             Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
-            AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
             UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), null, null, null);
 
             when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
             when(tokenPort.genererAccess(eq(user), eq(roleCodes), any(), any(), any())).thenReturn("access.jwt");
             when(tokenPort.genererRefresh(user)).thenReturn("refresh.jwt");
-            when(appProperties.jwt()).thenReturn(jwt);
-            when(jwt.accessTokenTtl()).thenReturn(Duration.ofHours(1));
+            when(jwtProperties.accessTokenTtl()).thenReturn(Duration.ofHours(1));
 
             AuthTokens tokens = sut.build(user, roleCodes);
 
@@ -113,7 +112,6 @@ class ApplicationServicesTest {
         void build_appelle_genererAccess_avec_bons_args() {
             User user = UserFixtures.actif();
             Set<String> roleCodes = Set.of("ADMIN_PNA");
-            AppProperties.JwtProperties jwt = mock(AppProperties.JwtProperties.class);
             UUID entrepotId = UUID.randomUUID();
             UserAffectationView affectation = new UserAffectationView(user.getId().getValue(), entrepotId, null,
                     null);
@@ -121,8 +119,7 @@ class ApplicationServicesTest {
             when(userAffectationResolver.resoudre(user.getId().getValue())).thenReturn(affectation);
             when(tokenPort.genererAccess(any(), any(), any(), any(), any())).thenReturn("tok");
             when(tokenPort.genererRefresh(any())).thenReturn("ref");
-            when(appProperties.jwt()).thenReturn(jwt);
-            when(jwt.accessTokenTtl()).thenReturn(Duration.ofMinutes(30));
+            when(jwtProperties.accessTokenTtl()).thenReturn(Duration.ofMinutes(30));
 
             sut.build(user, roleCodes);
 

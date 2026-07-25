@@ -45,7 +45,7 @@ class CachingUserManagementRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        AppProperties appProperties = new AppProperties(null, null, null, null, null,
+        AppProperties appProperties = new AppProperties(null, null, null, null,
                 new CacheProperties(null, null, null, null, Duration.ofHours(5), null, null, null));
         sut = new CachingUserManagementRepositoryAdapter(delegate, cache, appProperties);
     }

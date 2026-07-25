@@ -43,7 +43,7 @@ class CachingProjetRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        AppProperties appProperties = new AppProperties(null, null, null, null, null,
+        AppProperties appProperties = new AppProperties(null, null, null, null,
                 new CacheProperties(null, null, null, null, null, null, Duration.ofHours(24), null));
         sut = new CachingProjetRepositoryAdapter(delegate, cache, appProperties);
     }

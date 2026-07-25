@@ -1,10 +1,14 @@
 package ministere.sante.senpna.auth.infrastructure.security;
 
-import io.jsonwebtoken.JwtException;
+import com.sidymohamed12.jwt.core.algorithm.JwtAlgorithm;
+import com.sidymohamed12.jwt.core.claims.JwtClaims;
+import com.sidymohamed12.jwt.core.exception.JwtValidationException;
+import com.sidymohamed12.jwt.core.token.JwtTokenService;
+import com.sidymohamed12.jwt.core.token.JwtTokenSpec;
+import com.sidymohamed12.jwt.spring.autoconfigure.JwtProperties;
+
 import ministere.sante.senpna.auth.fixtures.UserFixtures;
-import ministere.sante.senpna.config.JwtService;
 import ministere.sante.senpna.shared.domain.model.User;
-import ministere.sante.senpna.shared.domain.port.out.CachePort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,42 +16,49 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HexFormat;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+/**
+ * Migré vers jwt-toolkit : {@code JwtTokenAdapter} délègue maintenant à
+ * {@link JwtTokenService} (génération/validation) et à
+ * {@link RedisTokenRevocationPort} (révocation — dont la logique
+ * SHA-256/Redis est testée séparément dans {@code RedisTokenRevocationPortTest},
+ * plus dans cette classe).
+ */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JwtTokenAdapter")
 class JwtTokenAdapterTest {
 
     @Mock
-    private JwtService jwtService;
+    private JwtTokenService jwtTokenService;
     @Mock
-    private CachePort cachePort;
+    private RedisTokenRevocationPort revocationPort;
 
-    @InjectMocks
     private JwtTokenAdapter sut;
-
     private User user;
 
     @BeforeEach
     void setup() {
         user = UserFixtures.actif();
+        JwtProperties jwtProperties = new JwtProperties(
+                JwtAlgorithm.HS256, "peu-importe-ici", null, null,
+                Duration.ofMinutes(15), Duration.ofDays(7));
+        sut = new JwtTokenAdapter(jwtTokenService, revocationPort, jwtProperties);
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -59,70 +70,68 @@ class JwtTokenAdapterTest {
     class GenererAccess {
 
         @Test
-        @DisplayName("délègue à JwtService avec l'email et le claim 'roles', sans affectation")
-        void genererAccess_sans_affectation_delegue_jwt_service() {
+        @DisplayName("délègue à JwtTokenService avec l'email en subject, le TTL configuré et le claim 'roles'")
+        void genererAccess_sans_affectation_delegue() {
             Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA", "PHARMACIEN_PRA");
-            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+            ArgumentCaptor<JwtTokenSpec> specCaptor = ArgumentCaptor.forClass(JwtTokenSpec.class);
+            when(jwtTokenService.generate(any())).thenReturn("access.jwt");
 
             String token = sut.genererAccess(user, roleCodes, null, null, null);
 
             assertThat(token).isEqualTo("access.jwt");
-            verify(jwtService).generateAccessToken(
-                    eq(UserFixtures.EMAIL),
-                    argThat(claims -> claims.containsKey("roles")
-                            && !claims.containsKey("entrepotId")
-                            && !claims.containsKey("structureSanitaireId")
-                            && !claims.containsKey("fournisseurId")));
+            verify(jwtTokenService).generate(specCaptor.capture());
+            JwtTokenSpec spec = specCaptor.getValue();
+            assertThat(spec.subject()).isEqualTo(UserFixtures.EMAIL);
+            assertThat(spec.ttl()).isEqualTo(Duration.ofMinutes(15));
+            assertThat(spec.claims()).containsEntry("roles", roleCodes);
+            assertThat(spec.claims()).doesNotContainKeys("entrepotId", "structureSanitaireId", "fournisseurId");
         }
 
         @Test
         @DisplayName("inclut entrepotId et structureSanitaireId dans les claims quand fournis")
         void genererAccess_avec_affectation_inclut_les_claims() {
-            Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
             UUID entrepotId = UUID.randomUUID();
             UUID structureSanitaireId = UUID.randomUUID();
-            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+            ArgumentCaptor<JwtTokenSpec> specCaptor = ArgumentCaptor.forClass(JwtTokenSpec.class);
+            when(jwtTokenService.generate(any())).thenReturn("access.jwt");
 
-            String token = sut.genererAccess(user, roleCodes, entrepotId, structureSanitaireId, null);
+            sut.genererAccess(user, Set.of("GESTIONNAIRE_PNA"), entrepotId, structureSanitaireId, null);
 
-            assertThat(token).isEqualTo("access.jwt");
-            verify(jwtService).generateAccessToken(
-                    eq(UserFixtures.EMAIL),
-                    argThat(claims -> entrepotId.toString().equals(claims.get("entrepotId"))
-                            && structureSanitaireId.toString().equals(claims.get("structureSanitaireId"))
-                            && !claims.containsKey("fournisseurId")));
+            verify(jwtTokenService).generate(specCaptor.capture());
+            Map<String, Object> claims = specCaptor.getValue().claims();
+            assertThat(claims).containsEntry("entrepotId", entrepotId.toString());
+            assertThat(claims).containsEntry("structureSanitaireId", structureSanitaireId.toString());
+            assertThat(claims).doesNotContainKey("fournisseurId");
         }
 
         @Test
         @DisplayName("entrepotId fourni seul → structureSanitaireId et fournisseurId absents des claims")
         void genererAccess_avec_entrepot_seul() {
-            Set<String> roleCodes = Set.of("GESTIONNAIRE_PNA");
             UUID entrepotId = UUID.randomUUID();
-            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+            ArgumentCaptor<JwtTokenSpec> specCaptor = ArgumentCaptor.forClass(JwtTokenSpec.class);
+            when(jwtTokenService.generate(any())).thenReturn("access.jwt");
 
-            sut.genererAccess(user, roleCodes, entrepotId, null, null);
+            sut.genererAccess(user, Set.of("GESTIONNAIRE_PNA"), entrepotId, null, null);
 
-            verify(jwtService).generateAccessToken(
-                    eq(UserFixtures.EMAIL),
-                    argThat(claims -> entrepotId.toString().equals(claims.get("entrepotId"))
-                            && !claims.containsKey("structureSanitaireId")
-                            && !claims.containsKey("fournisseurId")));
+            verify(jwtTokenService).generate(specCaptor.capture());
+            Map<String, Object> claims = specCaptor.getValue().claims();
+            assertThat(claims).containsEntry("entrepotId", entrepotId.toString());
+            assertThat(claims).doesNotContainKeys("structureSanitaireId", "fournisseurId");
         }
 
         @Test
         @DisplayName("fournisseurId fourni seul → inclus dans les claims, entrepotId/structureSanitaireId absents")
         void genererAccess_avec_fournisseur_seul() {
-            Set<String> roleCodes = Set.of("FOURNISSEUR");
             UUID fournisseurId = UUID.randomUUID();
-            when(jwtService.generateAccessToken(anyString(), any())).thenReturn("access.jwt");
+            ArgumentCaptor<JwtTokenSpec> specCaptor = ArgumentCaptor.forClass(JwtTokenSpec.class);
+            when(jwtTokenService.generate(any())).thenReturn("access.jwt");
 
-            sut.genererAccess(user, roleCodes, null, null, fournisseurId);
+            sut.genererAccess(user, Set.of("FOURNISSEUR"), null, null, fournisseurId);
 
-            verify(jwtService).generateAccessToken(
-                    eq(UserFixtures.EMAIL),
-                    argThat(claims -> fournisseurId.toString().equals(claims.get("fournisseurId"))
-                            && !claims.containsKey("entrepotId")
-                            && !claims.containsKey("structureSanitaireId")));
+            verify(jwtTokenService).generate(specCaptor.capture());
+            Map<String, Object> claims = specCaptor.getValue().claims();
+            assertThat(claims).containsEntry("fournisseurId", fournisseurId.toString());
+            assertThat(claims).doesNotContainKeys("entrepotId", "structureSanitaireId");
         }
     }
 
@@ -131,14 +140,19 @@ class JwtTokenAdapterTest {
     class GenererRefresh {
 
         @Test
-        @DisplayName("délègue à JwtService avec l'email de l'utilisateur")
-        void genererRefresh_delegue_jwt_service() {
-            when(jwtService.generateRefreshToken(UserFixtures.EMAIL)).thenReturn("refresh.jwt");
+        @DisplayName("délègue à JwtTokenService avec l'email en subject, le TTL refresh et le claim type=refresh")
+        void genererRefresh_delegue() {
+            ArgumentCaptor<JwtTokenSpec> specCaptor = ArgumentCaptor.forClass(JwtTokenSpec.class);
+            when(jwtTokenService.generate(any())).thenReturn("refresh.jwt");
 
             String token = sut.genererRefresh(user);
 
             assertThat(token).isEqualTo("refresh.jwt");
-            verify(jwtService).generateRefreshToken(UserFixtures.EMAIL);
+            verify(jwtTokenService).generate(specCaptor.capture());
+            JwtTokenSpec spec = specCaptor.getValue();
+            assertThat(spec.subject()).isEqualTo(UserFixtures.EMAIL);
+            assertThat(spec.ttl()).isEqualTo(Duration.ofDays(7));
+            assertThat(spec.claims()).containsEntry("type", "refresh");
         }
     }
 
@@ -151,44 +165,28 @@ class JwtTokenAdapterTest {
     class Invalider {
 
         @Test
-        @DisplayName("stocke le SHA-256 du token en Redis avec la TTL résiduelle")
-        void invalider_stocke_fingerprint_avec_ttl_residuelle() {
+        @DisplayName("révoque via RedisTokenRevocationPort avec la TTL résiduelle jusqu'à expiration")
+        void invalider_delegue_avec_ttl_residuelle() {
             String token = "header.payload.signature";
-            Date expiration = Date.from(Instant.now().plusSeconds(300));
-            when(jwtService.extractExpiration(token)).thenReturn(expiration);
+            Instant expiration = Instant.now().plusSeconds(300);
+            when(jwtTokenService.parse(token))
+                    .thenReturn(new JwtClaims("user@example.com", null, Instant.now(), expiration, Map.of()));
 
             sut.invalider(token);
 
-            ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
-            verify(cachePort).put(keyCaptor.capture(), eq("1"), ttlCaptor.capture());
-
-            String expectedKey = "auth:revoked:" + sha256(token);
-            assertThat(keyCaptor.getValue()).isEqualTo(expectedKey);
-            // TTL doit être positive et proche de 300s
+            verify(revocationPort).revoke(eq(token), ttlCaptor.capture());
             assertThat(ttlCaptor.getValue().toSeconds()).isBetween(290L, 300L);
         }
 
         @Test
-        @DisplayName("token déjà expiré — ignore l'insertion Redis (inutile)")
-        void invalider_token_expire_skip() {
-            String token = "expired.token";
-            when(jwtService.extractExpiration(token))
-                    .thenReturn(Date.from(Instant.now().minusSeconds(10)));
-
-            sut.invalider(token);
-
-            verifyNoInteractions(cachePort);
-        }
-
-        @Test
-        @DisplayName("token malformé (JwtException) — ignore sans lever d'exception")
-        void invalider_token_malformed_silencieux() {
+        @DisplayName("token invalide/malformé — ignore silencieusement, n'appelle jamais revoke()")
+        void invalider_token_invalide_silencieux() {
             String token = "not.a.jwt";
-            when(jwtService.extractExpiration(token)).thenThrow(new JwtException("malformé"));
+            when(jwtTokenService.parse(token)).thenThrow(new JwtValidationException("malformé"));
 
             assertThatNoException().isThrownBy(() -> sut.invalider(token));
-            verifyNoInteractions(cachePort);
+            verifyNoInteractions(revocationPort);
         }
     }
 
@@ -197,32 +195,17 @@ class JwtTokenAdapterTest {
     class EstInvalide {
 
         @Test
-        @DisplayName("token présent en cache (révoqué) → true")
-        void estInvalide_revoque_retourne_true() {
-            String token = "revoked.token";
-            when(cachePort.get("auth:revoked:" + sha256(token)))
-                    .thenReturn(Optional.of("1"));
-
-            assertThat(sut.estInvalide(token)).isTrue();
+        @DisplayName("jwtTokenService.isValid() = false → true (signature, expiration ou révocation)")
+        void estInvalide_quand_service_dit_invalide() {
+            when(jwtTokenService.isValid("token")).thenReturn(false);
+            assertThat(sut.estInvalide("token")).isTrue();
         }
 
         @Test
-        @DisplayName("token absent du cache → false")
-        void estInvalide_non_revoque_retourne_false() {
-            String token = "valid.token";
-            when(cachePort.get("auth:revoked:" + sha256(token)))
-                    .thenReturn(Optional.empty());
-
-            assertThat(sut.estInvalide(token)).isFalse();
-        }
-
-        @Test
-        @DisplayName("erreur Redis (exception) → fail-open : retourne false")
-        void estInvalide_erreur_redis_fail_open() {
-            String token = "any.token";
-            when(cachePort.get(anyString())).thenThrow(new RuntimeException("Redis down"));
-
-            assertThat(sut.estInvalide(token)).isFalse();
+        @DisplayName("jwtTokenService.isValid() = true → false")
+        void estInvalide_quand_service_dit_valide() {
+            when(jwtTokenService.isValid("token")).thenReturn(true);
+            assertThat(sut.estInvalide("token")).isFalse();
         }
     }
 
@@ -235,59 +218,49 @@ class JwtTokenAdapterTest {
     class Extraction {
 
         @Test
-        @DisplayName("extraireEmail() délègue à jwtService.extractUsername()")
+        @DisplayName("extraireEmail() renvoie le subject du token parsé")
         void extraireEmail_delegue() {
-            when(jwtService.extractUsername("some.jwt")).thenReturn("user@example.com");
+            when(jwtTokenService.parse("some.jwt")).thenReturn(new JwtClaims(
+                    "user@example.com", null, Instant.now(), Instant.now().plusSeconds(300), Map.of()));
+
             assertThat(sut.extraireEmail("some.jwt")).isEqualTo("user@example.com");
         }
 
         @Test
-        @DisplayName("estRefreshToken() délègue à jwtService.isRefreshToken()")
-        void estRefreshToken_delegue() {
-            when(jwtService.isRefreshToken("refresh.jwt")).thenReturn(true);
-            when(jwtService.isRefreshToken("access.jwt")).thenReturn(false);
+        @DisplayName("estRefreshToken() → true si le claim 'type' vaut 'refresh'")
+        void estRefreshToken_true_si_claim_refresh() {
+            when(jwtTokenService.parse("refresh.jwt")).thenReturn(new JwtClaims(
+                    "user@example.com", null, Instant.now(), Instant.now().plusSeconds(300),
+                    Map.of("type", "refresh")));
 
             assertThat(sut.estRefreshToken("refresh.jwt")).isTrue();
+        }
+
+        @Test
+        @DisplayName("estRefreshToken() → false si le claim 'type' est absent")
+        void estRefreshToken_false_si_claim_absent() {
+            when(jwtTokenService.parse("access.jwt")).thenReturn(new JwtClaims(
+                    "user@example.com", null, Instant.now(), Instant.now().plusSeconds(300), Map.of()));
+
             assertThat(sut.estRefreshToken("access.jwt")).isFalse();
         }
 
         @Test
-        @DisplayName("estExpire() → false si expiration dans le futur")
-        void estExpire_futur_retourne_false() {
-            when(jwtService.extractExpiration("token"))
-                    .thenReturn(Date.from(Instant.now().plusSeconds(300)));
+        @DisplayName("estRefreshToken() → false si le token est invalide (n'écarte pas l'exception)")
+        void estRefreshToken_false_si_invalide() {
+            when(jwtTokenService.parse("malformed")).thenThrow(new JwtValidationException("invalide"));
 
-            assertThat(sut.estExpire("token")).isFalse();
+            assertThat(sut.estRefreshToken("malformed")).isFalse();
         }
 
         @Test
-        @DisplayName("estExpire() → true si expiration dans le passé")
-        void estExpire_passe_retourne_true() {
-            when(jwtService.extractExpiration("token"))
-                    .thenReturn(Date.from(Instant.now().minusSeconds(1)));
-
+        @DisplayName("estExpire() délègue à jwtTokenService.isExpired()")
+        void estExpire_delegue() {
+            when(jwtTokenService.isExpired("token")).thenReturn(true);
             assertThat(sut.estExpire("token")).isTrue();
-        }
 
-        @Test
-        @DisplayName("estExpire() → true si JwtException (token malformé ou invalide)")
-        void estExpire_jwt_exception_retourne_true() {
-            when(jwtService.extractExpiration("malformed"))
-                    .thenThrow(new JwtException("invalid"));
-
-            assertThat(sut.estExpire("malformed")).isTrue();
-        }
-    }
-
-    // ── Helper identique à l'implémentation ─────────────────────────────
-
-    private String sha256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            when(jwtTokenService.isExpired("autre")).thenReturn(false);
+            assertThat(sut.estExpire("autre")).isFalse();
         }
     }
 }

@@ -1,9 +1,10 @@
 package ministere.sante.senpna.auth.application.service;
 
+import com.sidymohamed12.jwt.spring.autoconfigure.JwtProperties;
+
 import ministere.sante.senpna.auth.domain.command.AuthCommands.AuthTokens;
 import ministere.sante.senpna.shared.domain.model.User;
 import ministere.sante.senpna.auth.domain.port.out.TokenPort;
-import ministere.sante.senpna.config.AppProperties;
 import ministere.sante.senpna.shared.domain.projection.UserAffectationView;
 
 import org.springframework.stereotype.Component;
@@ -12,8 +13,9 @@ import java.util.Set;
 
 /**
  * Construit une paire (access + refresh) et encapsule le TTL configuré.
- * Le TTL en secondes est lu depuis {@code AppProperties} — {@link TokenPort}
- * ne l'expose pas (il n'a pas à connaître la configuration).
+ * Le TTL en secondes est lu depuis {@link JwtProperties} (jwt-toolkit) —
+ * {@link TokenPort} ne l'expose pas (il n'a pas à connaître la
+ * configuration).
  *
  * <p>
  * L'affectation organisationnelle de l'utilisateur ({@code entrepotId} /
@@ -26,13 +28,13 @@ import java.util.Set;
 public class AuthTokenFactory {
 
     private final TokenPort tokenPort;
-    private final AppProperties appProperties;
+    private final JwtProperties jwtProperties;
     private final UserAffectationResolver userAffectationResolver;
 
-    public AuthTokenFactory(TokenPort tokenPort, AppProperties appProperties,
+    public AuthTokenFactory(TokenPort tokenPort, JwtProperties jwtProperties,
             UserAffectationResolver userAffectationResolver) {
         this.tokenPort = tokenPort;
-        this.appProperties = appProperties;
+        this.jwtProperties = jwtProperties;
         this.userAffectationResolver = userAffectationResolver;
     }
 
@@ -42,7 +44,7 @@ public class AuthTokenFactory {
         String accessToken = tokenPort.genererAccess(user, roleCodes,
                 affectation.entrepotId(), affectation.structureSanitaireId(), affectation.fournisseurId());
         String refreshToken = tokenPort.genererRefresh(user);
-        long expiresInSeconds = appProperties.jwt().accessTokenTtl().toSeconds();
+        long expiresInSeconds = jwtProperties.accessTokenTtl().toSeconds();
         return new AuthTokens(accessToken, refreshToken, expiresInSeconds);
     }
 }

@@ -12,7 +12,7 @@ import ministere.sante.senpna.auth.domain.port.out.TokenPort;
 import ministere.sante.senpna.auth.domain.port.out.UserRepositoryPort;
 import ministere.sante.senpna.shared.domain.valueobject.Email;
 
-import io.jsonwebtoken.JwtException;
+import com.sidymohamed12.jwt.core.exception.JwtValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +88,7 @@ public class RefreshTokenUseCaseImpl implements RefreshTokenUseCase {
             Set<String> roleCodes = userRoleResolver.resoudreCodes(user.getRoleIds());
             return authTokenFactory.build(user, roleCodes);
 
-        } catch (JwtException e) {
+        } catch (JwtValidationException e) {
             throw new InvalidRefreshTokenException();
         }
     }
