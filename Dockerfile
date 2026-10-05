@@ -2,7 +2,7 @@
 # STAGE 1 : BUILD (compilation de l’application)
 # =========================
 
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM eclipse-temurin:25-jdk-alpine AS builder
 WORKDIR /build
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
@@ -15,7 +15,7 @@ RUN ./mvnw clean package -DskipTests -B -q
 # STAGE 2 : EXTRACT (Spring Boot layered JAR)
 # =========================
 
-FROM eclipse-temurin:21-jdk-alpine AS extractor
+FROM eclipse-temurin:25-jdk-alpine AS extractor
 WORKDIR /extractor
 COPY --from=builder /build/target/*.jar app.jar
 RUN java -Djarmode=tools -jar app.jar extract --layers --destination /extracted
@@ -25,7 +25,7 @@ RUN java -Djarmode=tools -jar app.jar extract --layers --destination /extracted
 # STAGE 3 : RUNTIME (image finale production)
 # =========================
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Utilisateur non-root — bonne pratique de sécurité
