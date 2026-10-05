@@ -10,7 +10,7 @@
 # générez-le une fois avec : mvn -N wrapper:wrapper
 # ═══════════════════════════════════════════════════════════════════
 
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:25-jdk-alpine
 
 RUN apk add --no-cache bash
 
