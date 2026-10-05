@@ -103,7 +103,7 @@ jobs:
           -Dsonar.qualitygate.wait=true
 
       - name: Upload du rapport de couverture JaCoCo
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: jacoco-report
@@ -111,7 +111,7 @@ jobs:
           retention-days: 7
 
       - name: Upload du jar buildé
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: senpna-jar
           path: target/*.jar
