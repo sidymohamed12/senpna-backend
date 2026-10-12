@@ -401,7 +401,7 @@
 						<path>
 							<groupId>org.hibernate.orm</groupId>
 							<artifactId>hibernate-jpamodelgen</artifactId>
-							<version>7.0.9.Final</version>
+							<version>7.4.12.Final</version>
 						</path>
 					</annotationProcessorPaths>
 					<compilerArgs>
